@@ -1,10 +1,29 @@
+import { Nav } from "@/components/Nav";
+import { Hero } from "@/components/Hero";
+import { Marquee } from "@/components/Marquee";
+import { Manifesto } from "@/components/Manifesto";
+import { Steps } from "@/components/Steps";
+import { Measure } from "@/components/Measure";
+import { Sizes } from "@/components/Sizes";
+import { Features } from "@/components/Features";
+import { Cta } from "@/components/Cta";
+import { Footer } from "@/components/Footer";
+
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 text-center">
-      <p className="text-sm uppercase tracking-[0.3em]">Venty</p>
-      <h1 className="max-w-2xl text-4xl font-medium leading-tight md:text-6xl">
-        Sewing patterns drafted to your body, not an average one.
-      </h1>
-    </main>
+    <>
+      <Nav />
+      <main>
+        <Hero />
+        <Marquee />
+        <Manifesto />
+        <Steps />
+        <Measure />
+        <Sizes />
+        <Features />
+        <Cta />
+      </main>
+      <Footer />
+    </>
   );
 }
