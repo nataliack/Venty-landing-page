@@ -211,16 +211,8 @@ body {
 }
 
 /* Primary pill button, from the Figma Button/Pill component.
-   Markup and the dot canvas come from src/components/PrimaryButton.tsx. */
-@property --ring-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-
+   Markup, dot canvas and edge stroke come from src/components/PrimaryButton.tsx. */
 .btn-primary {
-  --stroke: 0.4;
-  --ring-angle: 0deg;
   position: relative;
   isolation: isolate;
   display: inline-flex;
@@ -249,7 +241,7 @@ body {
   line-height: 18px;
 }
 
-/* Dots canvas sits under everything */
+/* Dots canvas under everything */
 .btn-primary__dots {
   position: absolute;
   inset: 0;
@@ -257,55 +249,46 @@ body {
   pointer-events: none;
 }
 
-/* Outline ring, 1.6px, inset 2px like the Figma vector. A conic gradient
-   gives two steel highlights, top-left and bottom-right, that fade out
-   along the rest of the outline. The gradient is masked to a ring. */
-.btn-primary__ring {
+/* Edge stroke, an SVG rect sized in pixels by the component */
+.btn-primary__edge {
   position: absolute;
-  inset: 2px;
-  border-radius: inherit;
-  padding: 1.6px;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  background: conic-gradient(
-    from var(--ring-angle) at 50% 50%,
-    color-mix(in srgb, var(--color-steel) calc(var(--stroke) * 100%), transparent) 0deg,
-    transparent 70deg,
-    transparent 110deg,
-    color-mix(in srgb, var(--color-steel) calc(var(--stroke) * 100%), transparent) 180deg,
-    transparent 250deg,
-    transparent 290deg,
-    color-mix(in srgb, var(--color-steel) calc(var(--stroke) * 100%), transparent) 360deg
-  );
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  transition: --ring-angle 1s var(--ease-in-out-quart), background-color 0.5s;
+  overflow: visible;
 }
 
+/* Label: one span per letter so the hover ripple can stagger */
 .btn-primary__label {
   position: relative;
-  display: block;
+  display: inline-flex;
+  white-space: nowrap;
+}
+.btn-primary__ch {
+  display: inline-block;
+  will-change: transform;
 }
 
 .btn-primary:hover,
 .btn-primary:focus-visible {
-  --stroke: 0.71;
   transform: scale(0.96);
 }
-.btn-primary:hover .btn-primary__ring,
-.btn-primary:focus-visible .btn-primary__ring {
-  /* half a turn: the top-left highlight ends bottom-right and vice versa */
-  --ring-angle: -180deg;
+.btn-primary:hover .btn-primary__ch,
+.btn-primary:focus-visible .btn-primary__ch {
+  animation: btn-ripple 0.7s var(--ease-out-expo) calc(var(--i) * 28ms) both;
+}
+@keyframes btn-ripple {
+  0% { transform: translateY(0) scaleY(1); }
+  35% { transform: translateY(-3px) scaleY(1.06); }
+  100% { transform: translateY(0) scaleY(1); }
 }
 .btn-primary:active {
   transform: scale(0.93);
 }
 @media (prefers-reduced-motion: reduce) {
-  .btn-primary,
-  .btn-primary__ring {
-    transition: none;
-  }
+  .btn-primary { transition: none; }
+  .btn-primary:hover .btn-primary__ch { animation: none; }
 }
 
 /* Hairline stroke box */
