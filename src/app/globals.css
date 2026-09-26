@@ -1,77 +1,16 @@
 @import "tailwindcss";
 
-/* ------------------------------------------------------------------
-   Venty palette
-   Plain names for the raw colours. Use these when you mean a
-   specific colour, e.g. bg-ink, text-violet, border-mist.
-   ------------------------------------------------------------------ */
+/* Venty colours */
 @theme {
-  --color-ink: #121524;        /* darkest. hero backgrounds, headline text on light */
-  --color-navy: #384c65;       /* deep blue. secondary text on light, panels on dark */
-  --color-steel: #485f88;      /* mid blue. captions, icons, quiet UI */
-  --color-periwinkle: #9daccd; /* soft blue. muted text on dark, dividers on light */
-  --color-mist: #c0c8db;       /* pale blue-grey. borders, subtle fills */
-  --color-violet: #815aff;     /* the accent. buttons, links, highlights. large text only */
-  --color-cloud: #eff4ff;      /* lightest. page background, text on dark */
-
-  /* Keep bg-white / text-black on palette */
-  --color-white: #eff4ff;
-  --color-black: #121524;
-}
-
-/* ------------------------------------------------------------------
-   Semantic roles
-   Use these when you mean a job, not a colour, e.g. bg-background,
-   text-foreground, text-muted, border-line, bg-accent.
-   Light is the default. Add data-theme="dark" to any wrapper to flip
-   a section (or the whole page) to the dark set.
-   ------------------------------------------------------------------ */
-:root {
-  --background: var(--color-cloud);
-  --foreground: var(--color-ink);
-  --muted: var(--color-navy);
-  --subtle: var(--color-steel);
-  --line: var(--color-mist);
-  --surface: #ffffff;
-  --surface-2: var(--color-mist);
-  --accent: var(--color-violet);
-  --accent-foreground: var(--color-cloud);
-  --ring: var(--color-violet);
-}
-
-[data-theme="dark"] {
-  --background: var(--color-ink);
-  --foreground: var(--color-cloud);
-  --muted: var(--color-periwinkle);
-  --subtle: var(--color-steel);
-  --line: var(--color-navy);
-  --surface: var(--color-navy);
-  --surface-2: var(--color-steel);
-  --accent: var(--color-violet);
-  --accent-foreground: var(--color-cloud);
-  --ring: var(--color-periwinkle);
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-subtle: var(--subtle);
-  --color-line: var(--line);
-  --color-surface: var(--surface);
-  --color-surface-2: var(--surface-2);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-ring: var(--ring);
+  --color-ink: #121524;
+  --color-navy: #384c65;
+  --color-steel: #485f88;
+  --color-periwinkle: #9daccd;
+  --color-mist: #c0c8db;
+  --color-violet: #815aff;
+  --color-cloud: #eff4ff;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-}
-
-::selection {
-  background: var(--accent);
-  color: var(--accent-foreground);
 }
