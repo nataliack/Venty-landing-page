@@ -4,7 +4,7 @@ const colours = [
   { name: "steel", hex: "#485F88" },
   { name: "periwinkle", hex: "#9DACCD" },
   { name: "mist", hex: "#C0C8DB" },
-  { name: "violet", hex: "#815AFF" },
+  { name: "cornflower", hex: "#687EF5" },
   { name: "cloud", hex: "#EFF4FF" },
 ];
 
