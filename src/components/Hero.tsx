@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { Orbs } from "./Orbs";
 import { LogoMark } from "./Logo";
+import { PrimaryButton } from "./PrimaryButton";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -23,7 +24,7 @@ export function Hero() {
       tl.from(split.words, { yPercent: 110, rotate: 3, duration: 1.4, stagger: 0.04 }, 0.2)
         .from("[data-eyebrow]", { y: 12, opacity: 0, duration: 1 }, 0.3)
         .from("[data-sub]", { y: 20, opacity: 0, duration: 1.2 }, 0.7)
-        .from("[data-cta] > *", { y: 20, opacity: 0, duration: 1, stagger: 0.08 }, 0.9)
+        .from("[data-cta] > *", { y: 20, opacity: 0, duration: 1, stagger: 0.08, clearProps: "transform,opacity" }, 0.9)
         .from("[data-mark]", { scale: 0.85, opacity: 0, duration: 2, ease: "expo.out" }, 0.1)
         .from("[data-readout]", { opacity: 0, duration: 1 }, 1.1);
 
@@ -77,12 +78,7 @@ export function Hero() {
             and prints it ready to cut.
           </p>
           <div data-cta className="reveal flex items-center gap-3">
-            <a
-              href="#cta"
-              className="btn-primary"
-            >
-              Get started
-            </a>
+            <PrimaryButton href="#cta">Get started</PrimaryButton>
             <a
               href="#how"
               className="glass rounded-full px-7 py-4 text-base font-normal text-fg transition-colors hover:text-cornflower"

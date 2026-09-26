@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { LogoMark, Wordmark } from "./Logo";
+import { PrimaryButton } from "./PrimaryButton";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -56,12 +57,9 @@ export function Nav() {
             </li>
           ))}
         </ul>
-        <a
-          href="#cta"
-          className="btn-primary is-small"
-        >
+        <PrimaryButton href="#cta" size="sm">
           Get the app
-        </a>
+        </PrimaryButton>
       </nav>
     </header>
   );

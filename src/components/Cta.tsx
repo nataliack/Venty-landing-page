@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Orbs } from "./Orbs";
 import { Wordmark } from "./Logo";
+import { PrimaryButton } from "./PrimaryButton";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -35,6 +36,7 @@ export function Cta() {
         stagger: 0.1,
         duration: 1.2,
         ease: "expo.out",
+        clearProps: "transform,opacity",
         scrollTrigger: { trigger: el, start: "top 50%" },
       });
     }, el);
@@ -52,13 +54,13 @@ export function Cta() {
           </h2>
         </div>
         <div data-in className="flex flex-col gap-4 md:col-span-5 md:items-end">
-          <a
+          <PrimaryButton
             href="#"
-            className="btn-primary gap-4 pr-6"
+            className="gap-4 pr-6"
+            trailing={<span className="grid h-8 w-8 place-items-center rounded-full bg-cloud/20 text-base">→</span>}
           >
             Get started
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-cloud/20 text-base">→</span>
-          </a>
+          </PrimaryButton>
           <p className="max-w-xs text-sm text-muted md:text-right">
             Works in your browser. Add it to your home screen and it opens like an app.
           </p>

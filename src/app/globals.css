@@ -211,69 +211,137 @@ body {
 }
 
 /* Primary pill button, from the Figma Button/Pill component.
-   Cornflower fill, inset cloud glow, inner steel stroke, dot texture that
-   fades toward the edges. Hover brightens the dots and stroke and shrinks
-   the pill a touch. Size comes from the padding on the element itself. */
+   Markup comes from src/components/PrimaryButton.tsx. */
 .btn-primary {
   --dots: 0.28;
   --stroke: 0.4;
+  --mx: -100px;
+  --my: -100px;
+  --dx: 0px;
+  --dy: 0px;
   position: relative;
   isolation: isolate;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 8px;
   min-height: 56px;
   padding: 0 32px;
-  border-radius: 999px;
+  border-radius: 34px;
   background: var(--color-cornflower);
   color: var(--color-cloud);
+  font-family: var(--font-sans);
   font-weight: 400;
   font-size: 18px;
+  line-height: 22px;
   letter-spacing: -0.04em;
-  line-height: 1;
-  box-shadow: inset 0 0 19.5px color-mix(in srgb, var(--color-cloud) 70%, transparent);
-  transition: transform 0.5s var(--ease-out-expo), box-shadow 0.5s var(--ease-out-expo);
+  box-shadow: inset 0 0 19.5px var(--color-cloud);
+  overflow: hidden;
+  transition: transform 0.55s var(--ease-out-expo);
   will-change: transform;
-}
-.btn-primary::before {
-  /* dots, masked so they sit in the middle and fade out at the rim */
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  background-image: radial-gradient(var(--color-cloud) 0.9px, transparent 1.1px);
-  background-size: 5px 5px;
-  opacity: var(--dots);
-  -webkit-mask-image: radial-gradient(50% 50% at 50% 50%, #000 0%, transparent 100%);
-  mask-image: radial-gradient(50% 50% at 50% 50%, #000 0%, transparent 100%);
-  transition: opacity 0.5s var(--ease-out-expo);
-}
-.btn-primary::after {
-  /* inner stroke, inset like the Figma vector */
-  content: "";
-  position: absolute;
-  inset: 2.5px 2px 3.5px 2px;
-  border-radius: inherit;
-  border: 1.6px solid color-mix(in srgb, var(--color-steel) calc(var(--stroke) * 100%), transparent);
-  pointer-events: none;
-  transition: border-color 0.5s var(--ease-out-expo);
-}
-.btn-primary:hover,
-.btn-primary:focus-visible {
-  --dots: 0.75;
-  --stroke: 0.71;
-  transform: scale(0.96);
-  box-shadow: inset 0 0 24px color-mix(in srgb, var(--color-cloud) 85%, transparent);
-}
-.btn-primary:active {
-  transform: scale(0.93);
 }
 .btn-primary.is-small {
   min-height: 44px;
   padding: 0 22px;
   font-size: 15px;
+  line-height: 18px;
+}
+
+/* Dots: cloud dots on a 5px grid, faded at the rim by a radial mask and
+   with a hole that follows the pointer so they appear to move away. */
+.btn-primary__dots {
+  position: absolute;
+  inset: -8px;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(var(--color-cloud) 0.9px, transparent 1.1px);
+  background-size: 5px 5px;
+  background-position: calc(50% + var(--dx)) calc(50% + var(--dy));
+  opacity: var(--dots);
+  -webkit-mask-image:
+    radial-gradient(circle at calc(var(--mx) + 8px) calc(var(--my) + 8px), transparent 0 18px, #000 44px),
+    radial-gradient(50% 50% at 50% 50%, #000 0%, transparent 100%);
+  mask-image:
+    radial-gradient(circle at calc(var(--mx) + 8px) calc(var(--my) + 8px), transparent 0 18px, #000 44px),
+    radial-gradient(50% 50% at 50% 50%, #000 0%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  transition: opacity 0.5s var(--ease-out-expo), background-position 0.35s var(--ease-out-expo);
+}
+
+/* Arcs: one pill outline path, dashed into two arcs. pathLength is 100,
+   so the path runs 0..100 clockwise from the top-left of the rect. A dash
+   of 22 with a gap of 28 gives two arcs opposite each other. The offset
+   parks them at top-left and bottom-right; on hover the offset travels 50,
+   half a lap, so each arc arrives where the other was. */
+.btn-primary__arcs {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+.btn-primary__arcs rect {
+  fill: none;
+  stroke: var(--color-steel);
+  stroke-opacity: var(--stroke);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-dasharray: 22 28;
+  stroke-dashoffset: 11;
+  transition: stroke-dashoffset 0.9s var(--ease-in-out-quart), stroke-opacity 0.5s var(--ease-out-expo);
+}
+
+/* Label: two copies stacked, the second sits below. On hover both move up
+   one line so the copy slides in from underneath. */
+.btn-primary__label {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  height: 22px;
+}
+.btn-primary.is-small .btn-primary__label {
+  height: 18px;
+}
+.btn-primary__text {
+  display: block;
+  transition: transform 0.6s var(--ease-out-expo);
+}
+.btn-primary__text + .btn-primary__text {
+  position: absolute;
+  inset: 0;
+  transform: translateY(110%);
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  --dots: 0.75;
+  --stroke: 0.71;
+  transform: scale(0.96);
+}
+.btn-primary:hover .btn-primary__arcs rect,
+.btn-primary:focus-visible .btn-primary__arcs rect {
+  stroke-dashoffset: -39;
+}
+.btn-primary:hover .btn-primary__text,
+.btn-primary:focus-visible .btn-primary__text {
+  transform: translateY(-110%);
+}
+.btn-primary:hover .btn-primary__text + .btn-primary__text,
+.btn-primary:focus-visible .btn-primary__text + .btn-primary__text {
+  transform: translateY(0);
+}
+.btn-primary:active {
+  transform: scale(0.93);
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary,
+  .btn-primary__dots,
+  .btn-primary__arcs rect,
+  .btn-primary__text {
+    transition: none;
+  }
 }
 
 /* Hairline stroke box */
