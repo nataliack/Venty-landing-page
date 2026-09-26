@@ -211,14 +211,16 @@ body {
 }
 
 /* Primary pill button, from the Figma Button/Pill component.
-   Markup comes from src/components/PrimaryButton.tsx. */
+   Markup and the dot canvas come from src/components/PrimaryButton.tsx. */
+@property --ring-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
 .btn-primary {
-  --dots: 0.28;
   --stroke: 0.4;
-  --mx: -100px;
-  --my: -100px;
-  --dx: 0px;
-  --dy: 0px;
+  --ring-angle: 0deg;
   position: relative;
   isolation: isolate;
   display: inline-flex;
@@ -247,99 +249,61 @@ body {
   line-height: 18px;
 }
 
-/* Dots: cloud dots on a 5px grid, faded at the rim by a radial mask and
-   with a hole that follows the pointer so they appear to move away. */
+/* Dots canvas sits under everything */
 .btn-primary__dots {
   position: absolute;
-  inset: -8px;
+  inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-image: radial-gradient(var(--color-cloud) 0.9px, transparent 1.1px);
-  background-size: 5px 5px;
-  background-position: calc(50% + var(--dx)) calc(50% + var(--dy));
-  opacity: var(--dots);
-  -webkit-mask-image:
-    radial-gradient(circle at calc(var(--mx) + 8px) calc(var(--my) + 8px), transparent 0 18px, #000 44px),
-    radial-gradient(50% 50% at 50% 50%, #000 0%, transparent 100%);
-  mask-image:
-    radial-gradient(circle at calc(var(--mx) + 8px) calc(var(--my) + 8px), transparent 0 18px, #000 44px),
-    radial-gradient(50% 50% at 50% 50%, #000 0%, transparent 100%);
-  -webkit-mask-composite: source-in;
-  mask-composite: intersect;
-  transition: opacity 0.5s var(--ease-out-expo), background-position 0.35s var(--ease-out-expo);
 }
 
-/* Arcs: one pill outline path, dashed into two arcs. pathLength is 100,
-   so the path runs 0..100 clockwise from the top-left of the rect. A dash
-   of 22 with a gap of 28 gives two arcs opposite each other. The offset
-   parks them at top-left and bottom-right; on hover the offset travels 50,
-   half a lap, so each arc arrives where the other was. */
-.btn-primary__arcs {
+/* Outline ring, 1.6px, inset 2px like the Figma vector. A conic gradient
+   gives two steel highlights, top-left and bottom-right, that fade out
+   along the rest of the outline. The gradient is masked to a ring. */
+.btn-primary__ring {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inset: 2px;
+  border-radius: inherit;
+  padding: 1.6px;
   pointer-events: none;
-  overflow: visible;
-}
-.btn-primary__arcs rect {
-  fill: none;
-  stroke: var(--color-steel);
-  stroke-opacity: var(--stroke);
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-dasharray: 22 28;
-  stroke-dashoffset: 11;
-  transition: stroke-dashoffset 0.9s var(--ease-in-out-quart), stroke-opacity 0.5s var(--ease-out-expo);
+  background: conic-gradient(
+    from var(--ring-angle) at 50% 50%,
+    color-mix(in srgb, var(--color-steel) calc(var(--stroke) * 100%), transparent) 0deg,
+    transparent 70deg,
+    transparent 110deg,
+    color-mix(in srgb, var(--color-steel) calc(var(--stroke) * 100%), transparent) 180deg,
+    transparent 250deg,
+    transparent 290deg,
+    color-mix(in srgb, var(--color-steel) calc(var(--stroke) * 100%), transparent) 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  transition: --ring-angle 1s var(--ease-in-out-quart), background-color 0.5s;
 }
 
-/* Label: two copies stacked, the second sits below. On hover both move up
-   one line so the copy slides in from underneath. */
 .btn-primary__label {
   position: relative;
   display: block;
-  overflow: hidden;
-  height: 22px;
-}
-.btn-primary.is-small .btn-primary__label {
-  height: 18px;
-}
-.btn-primary__text {
-  display: block;
-  transition: transform 0.6s var(--ease-out-expo);
-}
-.btn-primary__text + .btn-primary__text {
-  position: absolute;
-  inset: 0;
-  transform: translateY(110%);
 }
 
 .btn-primary:hover,
 .btn-primary:focus-visible {
-  --dots: 0.75;
   --stroke: 0.71;
   transform: scale(0.96);
 }
-.btn-primary:hover .btn-primary__arcs rect,
-.btn-primary:focus-visible .btn-primary__arcs rect {
-  stroke-dashoffset: -39;
-}
-.btn-primary:hover .btn-primary__text,
-.btn-primary:focus-visible .btn-primary__text {
-  transform: translateY(-110%);
-}
-.btn-primary:hover .btn-primary__text + .btn-primary__text,
-.btn-primary:focus-visible .btn-primary__text + .btn-primary__text {
-  transform: translateY(0);
+.btn-primary:hover .btn-primary__ring,
+.btn-primary:focus-visible .btn-primary__ring {
+  /* half a turn: the top-left highlight ends bottom-right and vice versa */
+  --ring-angle: -180deg;
 }
 .btn-primary:active {
   transform: scale(0.93);
 }
 @media (prefers-reduced-motion: reduce) {
   .btn-primary,
-  .btn-primary__dots,
-  .btn-primary__arcs rect,
-  .btn-primary__text {
+  .btn-primary__ring {
     transition: none;
   }
 }
