@@ -56,8 +56,8 @@ export function Hero() {
   }, []);
 
   return (
-    <section ref={ref} id="top" className="relative flex min-h-[100svh] flex-col overflow-hidden">
-      <Orbs />
+    <section ref={ref} id="top" data-wing="hero" className="relative flex min-h-[100svh] flex-col overflow-hidden">
+      <Orbs intensity={0.5} className="opacity-60" />
       <LogoMark
         data-mark
         className="pointer-events-none absolute left-1/2 top-[8%] w-[120vw] max-w-none -translate-x-1/2 text-cloud opacity-[0.045] md:w-[70vw]"
@@ -79,7 +79,7 @@ export function Hero() {
           <div data-cta className="reveal flex items-center gap-3">
             <a
               href="#cta"
-              className="rounded-full bg-cornflower px-7 py-4 text-base font-medium text-cloud transition-transform duration-500 ease-[var(--ease-out-expo)] hover:scale-[1.04]"
+              className="btn-dots rounded-full bg-cornflower px-7 py-4 text-base font-medium text-cloud transition-transform duration-500 ease-[var(--ease-out-expo)] hover:scale-[1.04]"
             >
               Get started
             </a>

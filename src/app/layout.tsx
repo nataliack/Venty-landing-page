@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { SmoothScroll } from "@/components/SmoothScroll";
+import { Wings } from "@/components/Wings";
 
 const familjen = localFont({
   src: [
@@ -33,7 +34,11 @@ export default function RootLayout({
   return (
     <html lang="en-AU" className={`${familjen.variable} ${bigilla.variable}`}>
       <body className="grain">
-        <SmoothScroll>{children}</SmoothScroll>
+        <div className="dotgrid" aria-hidden="true" />
+        <Wings />
+        <SmoothScroll>
+          <div className="relative z-[1]">{children}</div>
+        </SmoothScroll>
       </body>
     </html>
   );

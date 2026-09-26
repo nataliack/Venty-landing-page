@@ -167,7 +167,7 @@ export function Steps() {
   }, []);
 
   return (
-    <section ref={ref} id="how" className="relative overflow-hidden">
+    <section ref={ref} id="how" data-wing="frame" className="relative overflow-hidden">
       <div className="px-5 pt-[14vh] md:px-10">
         <p className="eyebrow text-faint">How it works</p>
         <h2 className="headline mt-4 text-[clamp(2.2rem,4.5vw,4.5rem)]">Three steps. Then scissors.</h2>

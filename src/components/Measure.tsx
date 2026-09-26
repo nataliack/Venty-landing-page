@@ -46,7 +46,7 @@ export function Measure() {
   const offset = -(cm - 60) * 10; // 10px per cm, track origin sits at the centre line
 
   return (
-    <section ref={ref} id="measure" className="relative overflow-hidden px-5 py-[16vh] md:px-10">
+    <section ref={ref} id="measure" data-wing="drift" className="relative overflow-hidden px-5 py-[16vh] md:px-10">
       <div className="grid gap-10 md:grid-cols-12 md:items-end">
         <div className="md:col-span-7">
           <p data-in className="eyebrow text-faint">Try the tape</p>

@@ -40,7 +40,7 @@ export function Manifesto() {
   }, []);
 
   return (
-    <section ref={ref} className="relative px-5 py-[18vh] md:px-10">
+    <section ref={ref} data-wing="fold" className="relative px-5 py-[18vh] md:px-10">
       <p className="eyebrow text-faint">Why Venty</p>
       <p
         data-statement

@@ -6,6 +6,7 @@ const colours = [
   { name: "mist", hex: "#C0C8DB" },
   { name: "cornflower", hex: "#687EF5" },
   { name: "cloud", hex: "#EFF4FF" },
+  { name: "night", hex: "#0B0C15" },
 ];
 
 export default function Styleguide() {

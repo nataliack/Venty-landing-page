@@ -42,7 +42,7 @@ export function Cta() {
   }, []);
 
   return (
-    <section ref={ref} id="cta" className="relative overflow-hidden px-5 pb-10 pt-[20vh] md:px-10">
+    <section ref={ref} id="cta" data-wing="close" className="relative overflow-hidden px-5 pb-10 pt-[20vh] md:px-10">
       <Orbs intensity={0.6} />
       <div className="relative z-10 grid gap-10 md:grid-cols-12 md:items-end">
         <div className="md:col-span-7">
@@ -54,7 +54,7 @@ export function Cta() {
         <div data-in className="flex flex-col gap-4 md:col-span-5 md:items-end">
           <a
             href="#"
-            className="inline-flex items-center gap-4 rounded-full bg-cornflower py-5 pl-8 pr-6 text-lg font-medium text-cloud transition-transform duration-500 ease-[var(--ease-out-expo)] hover:scale-[1.04]"
+            className="btn-dots inline-flex items-center gap-4 rounded-full bg-cornflower py-5 pl-8 pr-6 text-lg font-medium text-cloud transition-transform duration-500 ease-[var(--ease-out-expo)] hover:scale-[1.04]"
           >
             Get started
             <span className="grid h-8 w-8 place-items-center rounded-full bg-cloud/20 text-base">→</span>
