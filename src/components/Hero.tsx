@@ -79,7 +79,7 @@ export function Hero() {
           <div data-cta className="reveal flex items-center gap-3">
             <a
               href="#cta"
-              className="btn-dots rounded-full bg-cornflower px-7 py-4 text-base font-medium text-cloud transition-transform duration-500 ease-[var(--ease-out-expo)] hover:scale-[1.04]"
+              className="btn-primary"
             >
               Get started
             </a>

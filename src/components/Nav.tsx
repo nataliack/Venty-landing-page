@@ -58,7 +58,7 @@ export function Nav() {
         </ul>
         <a
           href="#cta"
-          className="btn-dots rounded-full bg-cornflower px-5 py-2.5 text-[0.95rem] font-medium text-cloud transition-transform duration-500 ease-[var(--ease-out-expo)] hover:scale-[1.04]"
+          className="btn-primary is-small"
         >
           Get the app
         </a>
