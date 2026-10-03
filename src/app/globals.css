@@ -509,18 +509,18 @@ body {
 }
 .sky-loader::before {
   background:
-    radial-gradient(45% 45% at 0% 100%, rgb(104 126 245 / 0.14) 0%, transparent 70%),
-    radial-gradient(45% 45% at 100% 100%, rgb(104 126 245 / 0.14) 0%, transparent 70%);
+    radial-gradient(26% 40% at -4% 104%, rgb(104 126 245 / 0.16) 0%, transparent 70%),
+    radial-gradient(26% 40% at 104% 104%, rgb(104 126 245 / 0.16) 0%, transparent 70%);
   animation: v-beam 14s ease-in-out infinite alternate;
 }
 .sky-loader .drift { filter: blur(140px); }
-.sky-loader .d1 { width: 90%; aspect-ratio: 1; left: -55%; bottom: -60%; background: rgb(104 126 245 / 0.26); animation: v-l1 13s ease-in-out infinite alternate; }
-.sky-loader .d2 { width: 90%; aspect-ratio: 1; right: -55%; bottom: -60%; background: rgb(79 99 224 / 0.26); animation: v-l2 15s ease-in-out infinite alternate; }
-.sky-loader .d3 { width: 70%; aspect-ratio: 1; left: -45%; top: 10%; background: rgb(56 76 101 / 0.14); animation: v-l3 12s ease-in-out infinite alternate; }
-.sky-loader .d4 { width: 70%; aspect-ratio: 1; right: -45%; top: 10%; background: rgb(72 95 136 / 0.12); animation: v-l4 14s ease-in-out infinite alternate; }
+.sky-loader .d1 { width: 60%; aspect-ratio: 1; left: -42%; bottom: -42%; background: rgb(104 126 245 / 0.26); animation: v-l1 13s ease-in-out infinite alternate; }
+.sky-loader .d2 { width: 60%; aspect-ratio: 1; right: -42%; bottom: -42%; background: rgb(79 99 224 / 0.26); animation: v-l2 15s ease-in-out infinite alternate; }
+.sky-loader .d3 { width: 50%; aspect-ratio: 1; left: -40%; top: 20%; background: rgb(56 76 101 / 0.12); animation: v-l3 12s ease-in-out infinite alternate; }
+.sky-loader .d4 { width: 50%; aspect-ratio: 1; right: -40%; top: 20%; background: rgb(72 95 136 / 0.1); animation: v-l4 14s ease-in-out infinite alternate; }
 /* edge drifts: move up and down their own side, never inward past the edge */
-@keyframes v-l1 { 0% { translate: 0 6%; } 50% { translate: 10% -12%; scale: 1.1; } 100% { translate: -4% 4%; scale: 0.95; } }
-@keyframes v-l2 { 0% { translate: 0 -4%; } 50% { translate: -10% 10%; scale: 1.08; } 100% { translate: 4% -10%; scale: 0.95; } }
+@keyframes v-l1 { 0% { translate: 0 6%; } 50% { translate: -4% -14%; scale: 1.1; } 100% { translate: -8% 4%; scale: 0.95; } }
+@keyframes v-l2 { 0% { translate: 0 -4%; } 50% { translate: 4% 12%; scale: 1.08; } 100% { translate: 8% -10%; scale: 0.95; } }
 @keyframes v-l3 { 0% { translate: 0 0; } 50% { translate: -5% 25%; } 100% { translate: 3% 8%; } }
 @keyframes v-l4 { 0% { translate: 0 10%; } 50% { translate: 5% -15%; } 100% { translate: -3% 20%; } }
 
