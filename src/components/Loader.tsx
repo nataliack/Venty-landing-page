@@ -29,7 +29,7 @@ export function Loader({ demo = true }: { demo?: boolean }) {
 
   return (
     <div ref={ref} className="loader fixed inset-0 z-[100] overflow-hidden">
-      <Sky variant="light" />
+      <Sky variant="dark" />
 
       <div className="relative flex h-full flex-col items-center justify-center px-6">
         {/* eslint-disable-next-line @next/next/no-img-element */}

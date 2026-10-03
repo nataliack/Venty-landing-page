@@ -435,7 +435,7 @@ body {
   position: relative;
   height: 2px;
   width: 100%;
-  background: color-mix(in srgb, var(--color-cloud) 14%, transparent);
+  background: color-mix(in srgb, var(--color-cloud) 8%, transparent);
   border-radius: 2px;
 }
 .loader__fill {
@@ -444,11 +444,12 @@ body {
   top: 0;
   height: 100%;
   border-radius: 2px;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--color-cornflower) 60%, var(--color-cloud)), var(--color-cloud));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--color-cornflower) 70%, transparent), var(--color-cornflower) 70%, color-mix(in srgb, var(--color-cornflower) 60%, var(--color-cloud)));
   box-shadow:
-    0 0 6px var(--color-cloud),
-    0 0 18px var(--color-cornflower),
-    0 0 42px color-mix(in srgb, var(--color-cornflower) 70%, transparent);
+    0 0 8px var(--color-cornflower),
+    0 0 22px var(--color-cornflower),
+    0 0 56px color-mix(in srgb, var(--color-cornflower) 70%, transparent),
+    0 0 110px color-mix(in srgb, var(--color-cornflower) 35%, transparent);
   transition: width 0.12s linear;
 }
 .loader__fill::after {
@@ -461,8 +462,8 @@ body {
   height: 6px;
   border-radius: 50%;
   translate: 0 -50%;
-  background: var(--color-cloud);
-  box-shadow: 0 0 10px var(--color-cloud), 0 0 24px var(--color-cornflower);
+  background: color-mix(in srgb, var(--color-cornflower) 40%, var(--color-cloud));
+  box-shadow: 0 0 10px var(--color-cornflower), 0 0 28px var(--color-cornflower);
 }
 .loader__pct {
   font-size: clamp(2.4rem, 5vw, 4rem);
@@ -535,51 +536,21 @@ body {
    Dark sky: Edge, three intensities. Night dominates, a soft cornflower
    glow rises from the bottom. Lights are huge and heavily blurred.
    ------------------------------------------------------------------ */
-[class*="sky-k"] .drift { filter: blur(140px); }
-[class*="sky-k"]::before { opacity: 0.8; }
+.sky-dark .drift { filter: blur(140px); }
+.sky-dark::before { opacity: 0.8; }
 
-/* 01 Edge, as shown: the version Jose liked */
-.sky-k1 {
-  background:
-    radial-gradient(160% 45% at 50% 118%, rgb(104 126 245 / 0.42) 0%, rgb(104 126 245 / 0.16) 35%, rgb(79 99 224 / 0.05) 60%, transparent 80%),
-    linear-gradient(180deg, #0b0c15 0%, #0b0c15 60%, #0d0f1d 100%);
-}
-.sky-k1::before { background: radial-gradient(120% 30% at 50% 105%, rgb(192 200 219 / 0.12) 0%, transparent 70%); }
-.sky-k1 .d1 { width: 150%; aspect-ratio: 1; left: -65%; bottom: -120%; background: rgb(104 126 245 / 0.22); animation: v-s1 11s ease-in-out infinite alternate; }
-.sky-k1 .d2 { width: 150%; aspect-ratio: 1; right: -65%; bottom: -120%; background: rgb(79 99 224 / 0.22); animation: v-s2 14s ease-in-out infinite alternate; }
-.sky-k1 .d3 { width: 120%; aspect-ratio: 1; left: -10%; bottom: -100%; background: rgb(140 156 248 / 0.1); animation: v-s3 15s ease-in-out infinite alternate; }
-.sky-k1 .d4 { display: none; }
-
-/* 02 Edge, smaller: identical softness to 01 (same 140px blur, same
-   long three-stop falloff), the whole glow scaled to about 60%. The lit
-   area shrinks, the feathered edge stays. Drifts so dark shows around it. */
-.sky-k2 {
-  background:
-    radial-gradient(95% 28% at 50% 112%, rgb(104 126 245 / 0.42) 0%, rgb(104 126 245 / 0.16) 35%, rgb(79 99 224 / 0.05) 60%, transparent 80%),
-    linear-gradient(180deg, #0b0c15 0%, #0b0c15 100%);
-}
-.sky-k2::before { background: radial-gradient(70% 18% at 50% 104%, rgb(192 200 219 / 0.12) 0%, transparent 70%); }
-.sky-k2 .d1 { width: 95%; aspect-ratio: 1; left: -30%; bottom: -75%; background: rgb(104 126 245 / 0.22); animation: v-f1 13s ease-in-out infinite alternate; }
-.sky-k2 .d2 { width: 95%; aspect-ratio: 1; right: -30%; bottom: -75%; background: rgb(79 99 224 / 0.22); animation: v-f2 15s ease-in-out infinite alternate; }
-.sky-k2 .d3 { width: 75%; aspect-ratio: 1; left: 12%; bottom: -60%; background: rgb(140 156 248 / 0.1); animation: v-f3 12s ease-in-out infinite alternate; }
-.sky-k2 .d4 { display: none; }
-
-/* 03 Edge, smaller and roaming: the same soft small glow, but it is not
-   tied to the bottom. It wanders the lower two thirds so the dark shows
+/* Dark sky, LOCKED (Edge, smaller, roaming): a soft small cornflower glow
+   that is not tied to the bottom. It wanders the lower two thirds so the dark shows
    at the bottom and the sides in turn. No static base glow. */
-.sky-k3 {
+.sky-dark {
   background: linear-gradient(180deg, #0b0c15 0%, #0b0c15 100%);
 }
-.sky-k3::before { background: none; }
-.sky-k3 .d1 { width: 95%; aspect-ratio: 1; left: 2%; top: 45%; background: rgb(104 126 245 / 0.24); animation: v-g1 15s ease-in-out infinite alternate; }
-.sky-k3 .d2 { width: 80%; aspect-ratio: 1; left: 10%; top: 55%; background: rgb(79 99 224 / 0.2); animation: v-g2 13s ease-in-out infinite alternate; }
-.sky-k3 .d3 { width: 60%; aspect-ratio: 1; left: 20%; top: 60%; background: rgb(140 156 248 / 0.1); animation: v-g3 11s ease-in-out infinite alternate; }
-.sky-k3 .d4 { display: none; }
+.sky-dark::before { background: none; }
+.sky-dark .d1 { width: 95%; aspect-ratio: 1; left: 2%; top: 45%; background: rgb(104 126 245 / 0.24); animation: v-g1 15s ease-in-out infinite alternate; }
+.sky-dark .d2 { width: 80%; aspect-ratio: 1; left: 10%; top: 55%; background: rgb(79 99 224 / 0.2); animation: v-g2 13s ease-in-out infinite alternate; }
+.sky-dark .d3 { width: 60%; aspect-ratio: 1; left: 20%; top: 60%; background: rgb(140 156 248 / 0.1); animation: v-g3 11s ease-in-out infinite alternate; }
+.sky-dark .d4 { display: none; }
 
-/* small-glow drifts: along the bottom, wide enough to clear each side */
-@keyframes v-f1 { 0% { translate: -12% 6%; } 50% { translate: 26% -4%; } 100% { translate: 4% 12%; } }
-@keyframes v-f2 { 0% { translate: 12% 2%; } 50% { translate: -28% -6%; } 100% { translate: -6% 10%; } }
-@keyframes v-f3 { 0% { translate: 0 0; scale: 1; } 50% { translate: -18% -10%; scale: 1.15; } 100% { translate: 16% 6%; scale: 0.9; } }
 /* roaming: lower two thirds of the frame */
 @keyframes v-g1 { 0% { translate: -40% 20%; scale: 0.95; } 33% { translate: 35% 5%; scale: 1.1; } 66% { translate: -15% -25%; scale: 1; } 100% { translate: 30% 30%; scale: 0.9; } }
 @keyframes v-g2 { 0% { translate: 30% 0%; } 50% { translate: -35% 15%; } 100% { translate: 15% -20%; } }

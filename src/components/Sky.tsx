@@ -2,12 +2,12 @@
    light: LOCKED. The Crown, light from the top centre with a blue halo
           rising from below. Also the app Welcome gradient.
    purple: LOCKED. Haze, periwinkle washing in over cornflower.
-   k1-k3: dark, Edge at three intensities. Night dominates.
+   dark: LOCKED. Edge, a soft small cornflower glow roaming over night.
    All share the four-light drift structure and the 11-15s timing. */
 export type SkyVariant =
   | "light"
   | "purple"
-  | "k1" | "k2" | "k3";
+  | "dark";
 
 export type SkyConcept = { v: SkyVariant; name: string; note: string };
 
@@ -20,9 +20,7 @@ export const PURPLE: SkyConcept[] = [
 ];
 
 export const DARK: SkyConcept[] = [
-  { v: "k1", name: "Edge", note: "As shown before. Soft cornflower glow rising from the bottom." },
-  { v: "k2", name: "Edge, smaller", note: "Same softness and fade as 01, the whole glow at about 60%. Drifts along the bottom." },
-  { v: "k3", name: "Edge, smaller, roaming", note: "The same soft small glow, wandering the lower two thirds." },
+  { v: "dark", name: "Edge", note: "A soft small cornflower glow roaming the lower two thirds of night. Locked." },
 ];
 
 export function Sky({ variant = "light", className = "" }: { variant?: SkyVariant; className?: string }) {
