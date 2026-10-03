@@ -28,8 +28,8 @@ OUT = arg("--out", os.path.join(os.path.dirname(os.path.abspath(__file__)), "ren
 os.makedirs(OUT, exist_ok=True)
 
 N_FRAMES = 100
-Z_TOP, Z_BOT = 75.0, -75.0            # long zipper: more of it to play with, fills tall phones
-Z_START, Z_END = 66.0, -70.0          # slider travel
+Z_TOP, Z_BOT = 95.0, -95.0            # long zipper, runs past the frame top and bottom on every camera
+Z_START, Z_END = 70.0, -74.0          # slider travel
 PITCH = 1.25                          # tooth spacing per side
 TOOTH_W, TOOTH_H, TOOTH_D = 1.35, 1.0, 0.7
 TAPE_W = 2.3
@@ -86,11 +86,11 @@ def mat_fabric():
     """Mist canvas: two crossed wave textures make a regular weave, a light
     noise breaks the regularity, both feed a bump. No large-scale noise, so
     nothing swims between frames."""
-    m = mat_principled("Fabric", (0.009, 0.011, 0.03, 1), 0.48, 0.0, 0.55)  # ink lifted a touch, cloth sheen
+    m = mat_principled("Fabric", (0.0032, 0.0038, 0.0095, 1), 0.55, 0.0, 0.4)  # night-dark cloth, texture as shadow not light
     nt = m.node_tree
     bsdf = nt.nodes["Principled BSDF"]
     if "Sheen Weight" in bsdf.inputs:
-        bsdf.inputs["Sheen Weight"].default_value = 0.25
+        bsdf.inputs["Sheen Weight"].default_value = 0.12
     coord = nt.nodes.new("ShaderNodeTexCoord")
     mapping = nt.nodes.new("ShaderNodeMapping")
     mapping.inputs["Scale"].default_value = (1.0, 1.0, 1.0)
@@ -123,7 +123,7 @@ def mat_fabric():
     tone = nt.nodes.new("ShaderNodeMixRGB")
     tone.blend_type = "MULTIPLY"
     tone.inputs["Fac"].default_value = 0.55
-    tone.inputs["Color1"].default_value = (0.009, 0.011, 0.03, 1)
+    tone.inputs["Color1"].default_value = (0.0032, 0.0038, 0.0095, 1)
     l = nt.links
     l.new(coord.outputs["Object"], mapping.inputs["Vector"])
     l.new(mapping.outputs["Vector"], warp.inputs["Vector"])
@@ -210,7 +210,7 @@ _tw.wave_type = "BANDS"; _tw.bands_direction = "Z"; _tw.inputs["Scale"].default_
 _tb = _tn.nodes.new("ShaderNodeBump"); _tb.inputs["Strength"].default_value = 0.6; _tb.inputs["Distance"].default_value = 0.06
 _tn.links.new(_tc.outputs["Object"], _tw.inputs["Vector"]); _tn.links.new(_tw.outputs["Fac"], _tb.inputs["Height"])
 _tn.links.new(_tb.outputs["Normal"], _tn.nodes["Principled BSDF"].inputs["Normal"])
-thread_m = mat_principled("Thread", (0.03, 0.036, 0.07, 1), 0.62, 0.0, 0.35)   # dark cotton topstitch, a shade lighter than the cloth
+thread_m = mat_principled("Thread", (0.014, 0.017, 0.035, 1), 0.65, 0.0, 0.3)   # dark cotton topstitch, a shade lighter than the cloth
 metal_m = mat_principled("Metal", GUNMETAL, 0.14, 1.0, 0.5)
 slider_m = mat_principled("Slider", (0.06, 0.065, 0.085, 1), 0.12, 1.0, 0.5)
 
@@ -292,10 +292,10 @@ def area(name, loc, target, power, color, size):
     ob.rotation_euler = d.to_track_quat("-Z", "Y").to_euler()
     return ob
 
-area("Key", (-18, -70, 45), (0, 0, 0), 16000, (0.6, 0.66, 0.8, 1), 45)     # cool key
-area("Top", (0, -25, 80), (0, 0, 0), 20000, CLOUD, 70)                      # big soft light above for the glossy sheen
+area("Key", (-18, -70, 45), (0, 0, 0), 4500, (0.6, 0.66, 0.8, 1), 45)      # dim cool key
+area("Top", (0, -25, 80), (0, 0, 0), 3500, CLOUD, 70)                       # faint overhead, just enough for weave relief
 area("Rim", (14, 40, 40), (0, 0, 5), 22000, CORNFLOWER, 30)                 # cornflower edge light from behind
-area("Blue", (55, -45, -15), (0, 0, 0), 14000, CORNFLOWER, 35)              # cornflower from front right, tints the highlights
+area("Blue", (55, -45, -15), (0, 0, 0), 9000, CORNFLOWER, 35)              # cornflower from front right, tints the highlights
 area("Spec", (0, -30, 60), (0, 0, 0), 8000, CLOUD, 6)                       # small hard light, thin highlights
 
 world = bpy.data.worlds.new("World")
@@ -303,7 +303,7 @@ scene.world = world
 world.use_nodes = True
 world.node_tree.nodes["Background"].inputs["Color"].default_value = (0, 0, 0, 1)
 world.node_tree.nodes["Background"].inputs["Color"].default_value = (0.35, 0.42, 0.6, 1)
-world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.22
+world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.1
 
 # camera
 cam_data = bpy.data.cameras.new("Camera")
@@ -374,7 +374,7 @@ scene.render.image_settings.file_format = "WEBP"
 scene.render.image_settings.color_mode = "RGBA"
 scene.render.image_settings.quality = 90
 scene.view_settings.view_transform = "AgX"
-scene.view_settings.exposure = 0.55
+scene.view_settings.exposure = 0.35
 if MODE == "preview":
     scene.render.resolution_percentage = 45
     scene.cycles.samples = 24

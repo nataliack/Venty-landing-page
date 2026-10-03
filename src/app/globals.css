@@ -539,7 +539,6 @@ body {
   width: auto;
   translate: -50% 0;
   z-index: 1;
-  filter: drop-shadow(0 0 40px rgb(11 12 21 / 0.8));
 }
 /* a wide soft band of night behind the line, so the zipper fades out
    above and below it instead of touching it */
