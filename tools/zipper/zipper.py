@@ -86,7 +86,7 @@ def mat_fabric():
     """Mist canvas: two crossed wave textures make a regular weave, a light
     noise breaks the regularity, both feed a bump. No large-scale noise, so
     nothing swims between frames."""
-    m = mat_principled("Fabric", (0.0046, 0.0056, 0.0176, 1), 0.34, 0.0, 0.7)  # ink, glossy
+    m = mat_principled("Fabric", (0.009, 0.011, 0.03, 1), 0.48, 0.0, 0.55)  # ink lifted a touch, cloth sheen
     nt = m.node_tree
     bsdf = nt.nodes["Principled BSDF"]
     if "Sheen Weight" in bsdf.inputs:
@@ -94,18 +94,20 @@ def mat_fabric():
     coord = nt.nodes.new("ShaderNodeTexCoord")
     mapping = nt.nodes.new("ShaderNodeMapping")
     mapping.inputs["Scale"].default_value = (1.0, 1.0, 1.0)
+    mapping.inputs["Rotation"].default_value = (0.0, math.radians(45.0), 0.0)  # twill runs diagonally
     warp = nt.nodes.new("ShaderNodeTexWave")
     warp.wave_type = "BANDS"
     warp.bands_direction = "X"
     warp.wave_profile = "SIN"
-    warp.inputs["Scale"].default_value = 7.0
+    warp.inputs["Scale"].default_value = 11.0
     weft = nt.nodes.new("ShaderNodeTexWave")
     weft.wave_type = "BANDS"
     weft.bands_direction = "Z"
     weft.wave_profile = "SIN"
-    weft.inputs["Scale"].default_value = 7.0
+    weft.inputs["Scale"].default_value = 11.0
     weave = nt.nodes.new("ShaderNodeMath")
-    weave.operation = "MULTIPLY"
+    weave.operation = "MULTIPLY_ADD"   # warp dominant, weft adds: reads as twill ribs
+    weave.inputs[2].default_value = 0.0
     grain = nt.nodes.new("ShaderNodeTexNoise")
     grain.inputs["Scale"].default_value = 90.0
     grain.inputs["Detail"].default_value = 2.0
@@ -116,12 +118,12 @@ def mat_fabric():
     scale.operation = "MULTIPLY"
     scale.inputs[1].default_value = 0.35
     bump = nt.nodes.new("ShaderNodeBump")
-    bump.inputs["Strength"].default_value = 0.3
-    bump.inputs["Distance"].default_value = 0.05
+    bump.inputs["Strength"].default_value = 1.0
+    bump.inputs["Distance"].default_value = 0.09
     tone = nt.nodes.new("ShaderNodeMixRGB")
     tone.blend_type = "MULTIPLY"
-    tone.inputs["Fac"].default_value = 0.18
-    tone.inputs["Color1"].default_value = (0.0046, 0.0056, 0.0176, 1)
+    tone.inputs["Fac"].default_value = 0.55
+    tone.inputs["Color1"].default_value = (0.009, 0.011, 0.03, 1)
     l = nt.links
     l.new(coord.outputs["Object"], mapping.inputs["Vector"])
     l.new(mapping.outputs["Vector"], warp.inputs["Vector"])
@@ -129,6 +131,7 @@ def mat_fabric():
     l.new(mapping.outputs["Vector"], grain.inputs["Vector"])
     l.new(warp.outputs["Fac"], weave.inputs[0])
     l.new(weft.outputs["Fac"], weave.inputs[1])
+    weave.inputs[1].default_value = 0.6
     l.new(grain.outputs["Fac"], scale.inputs[0])
     l.new(weave.outputs["Value"], mix.inputs[0])
     l.new(scale.outputs["Value"], mix.inputs[1])
@@ -200,7 +203,14 @@ clean()
 scene = bpy.context.scene
 
 fabric_m = mat_fabric()
-tape_m = mat_principled("Tape", NIGHT, 0.6, 0.0, 0.4)
+tape_m = mat_principled("Tape", (0.004, 0.0045, 0.012, 1), 0.55, 0.0, 0.45)
+_tn = tape_m.node_tree
+_tc = _tn.nodes.new("ShaderNodeTexCoord"); _tw = _tn.nodes.new("ShaderNodeTexWave")
+_tw.wave_type = "BANDS"; _tw.bands_direction = "Z"; _tw.inputs["Scale"].default_value = 18.0
+_tb = _tn.nodes.new("ShaderNodeBump"); _tb.inputs["Strength"].default_value = 0.6; _tb.inputs["Distance"].default_value = 0.06
+_tn.links.new(_tc.outputs["Object"], _tw.inputs["Vector"]); _tn.links.new(_tw.outputs["Fac"], _tb.inputs["Height"])
+_tn.links.new(_tb.outputs["Normal"], _tn.nodes["Principled BSDF"].inputs["Normal"])
+thread_m = mat_principled("Thread", (0.03, 0.036, 0.07, 1), 0.62, 0.0, 0.35)   # dark cotton topstitch, a shade lighter than the cloth
 metal_m = mat_principled("Metal", GUNMETAL, 0.14, 1.0, 0.5)
 slider_m = mat_principled("Slider", (0.06, 0.065, 0.085, 1), 0.12, 1.0, 0.5)
 
@@ -231,6 +241,22 @@ for side in (1, -1):
         t["side"] = side
         t["z0"] = z
         teeth.append(t)
+
+# topstitching: two rows of short thread segments along each tape edge
+stitches = []
+STITCH_ROWS = (TAPE_W + 0.45, TAPE_W + 1.6)
+STITCH_PITCH = 1.3
+if not NO_FABRIC:
+    for side in (1, -1):
+        for row_x in STITCH_ROWS:
+            n = int((Z_TOP - Z_BOT) / STITCH_PITCH)
+            for i in range(n):
+                z = Z_BOT + 0.6 + i * STITCH_PITCH
+                st = box(f"Stitch_{side}_{row_x:.1f}_{i}", 0.2, 0.18, 0.7, 0.08, thread_m, 2)
+                st["side"] = side
+                st["z0"] = z
+                st["x0"] = row_x
+                stitches.append(st)
 
 # slider: body, cap, pull tab with a hole
 slider = bpy.data.objects.new("Slider", None)
@@ -327,6 +353,13 @@ def apply_frame(scn):
         dz = 0.5
         slope = (open_amount(z + dz, t) - open_amount(z - dz, t)) / (2 * dz)
         tooth.rotation_euler = (0, 0, -side * math.atan(slope) * 0.6)
+    for st in stitches:
+        side = st["side"]
+        z = st["z0"]
+        o = open_amount(z, t)
+        falloff = 1.0 - min(1.0, (st["x0"] - TAPE_W) / 50.0) * 0.35
+        y = depth_amount(z, t) * falloff + 0.35 * math.sin(z * 0.28 + st["x0"] * side * 0.17)
+        st.location = (side * (st["x0"] + o * falloff), y - 0.12, z)
     slider.location = (0, 0.35 * math.sin(zs * 0.28), zs)
 
 bpy.app.handlers.frame_change_pre.clear()
