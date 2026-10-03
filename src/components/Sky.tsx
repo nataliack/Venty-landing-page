@@ -7,7 +7,8 @@
 export type SkyVariant =
   | "light"
   | "purple"
-  | "dark";
+  | "dark"
+  | "loader";
 
 export type SkyConcept = { v: SkyVariant; name: string; note: string };
 
