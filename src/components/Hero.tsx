@@ -2,104 +2,132 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { SplitText } from "gsap/SplitText";
-import { Orbs } from "./Orbs";
 import { LogoMark } from "./Logo";
 import { PrimaryButton } from "./PrimaryButton";
 
-gsap.registerPlugin(ScrollTrigger, SplitText);
+/* Hero, replicated from the Figma frame (1440 x 810).
+   Everything inside .hero-stage uses the Figma pixel values as written.
+   The stage is scaled to the viewport width, so the layout is identical at
+   every size, and the wrapper takes the scaled height. */
+
+const W = 1440;
+const H = 810;
 
 export function Hero() {
-  const ref = useRef<HTMLElement>(null);
+  const wrap = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const el = ref.current;
+    const el = wrap.current;
     if (!el) return;
+    const fit = () => {
+      const s = el.clientWidth / W;
+      el.style.setProperty("--s", String(s));
+      el.style.height = `${H * s}px`;
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+
     const ctx = gsap.context(() => {
-      const h1 = el.querySelector("h1")!;
-      const split = new SplitText(h1, { type: "lines,words", linesClass: "overflow-hidden pb-[0.08em]" });
-      gsap.set(el.querySelectorAll(".reveal"), { opacity: 1 });
       const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-      tl.from(split.words, { yPercent: 110, rotate: 3, duration: 1.4, stagger: 0.04 }, 0.2)
-        .from("[data-eyebrow]", { y: 12, opacity: 0, duration: 1 }, 0.3)
-        .from("[data-sub]", { y: 20, opacity: 0, duration: 1.2 }, 0.7)
-        .from("[data-cta] > *", { y: 20, opacity: 0, duration: 1, stagger: 0.08, clearProps: "transform,opacity" }, 0.9)
-        .from("[data-mark]", { scale: 0.85, opacity: 0, duration: 2, ease: "expo.out" }, 0.1)
-        .from("[data-readout]", { opacity: 0, duration: 1 }, 1.1);
-
-      // Bust readout counts up from 0 to 88.0
-      const num = { v: 0 };
-      const out = el.querySelector<HTMLElement>("[data-num]")!;
-      gsap.to(num, {
-        v: 88,
-        duration: 2.2,
-        delay: 1.1,
-        ease: "expo.out",
-        onUpdate: () => (out.textContent = num.v.toFixed(1)),
-      });
-
-      // Parallax out on scroll
-      gsap.to("[data-content]", {
-        yPercent: -18,
-        opacity: 0,
-        ease: "none",
-        scrollTrigger: { trigger: el, start: "top top", end: "bottom top", scrub: true },
-      });
-      gsap.to("[data-mark]", {
-        yPercent: 30,
-        scale: 1.2,
-        ease: "none",
-        scrollTrigger: { trigger: el, start: "top top", end: "bottom top", scrub: true },
-      });
+      tl.from("[data-bg]", { scale: 1.06, opacity: 0, duration: 2.2 }, 0)
+        .from("[data-glow]", { yPercent: 40, opacity: 0, duration: 2 }, 0.2)
+        .from("[data-logo]", { y: -10, opacity: 0, duration: 1.2 }, 0.6)
+        .from("[data-h] > *", { y: 30, opacity: 0, duration: 1.4, stagger: 0.08, clearProps: "transform,opacity" }, 0.7)
+        .from("[data-copy], [data-card], [data-cta]", { y: 16, opacity: 0, duration: 1.2, stagger: 0.1, clearProps: "transform,opacity" }, 1);
     }, el);
-    return () => ctx.revert();
+    return () => {
+      ro.disconnect();
+      ctx.revert();
+    };
   }, []);
 
   return (
-    <section ref={ref} id="top" data-wing="hero" className="relative flex min-h-[100svh] flex-col overflow-hidden">
-      <Orbs intensity={0.5} className="opacity-60" />
-      <LogoMark
-        data-mark
-        className="pointer-events-none absolute left-1/2 top-[8%] w-[120vw] max-w-none -translate-x-1/2 text-cloud opacity-[0.045] md:w-[70vw]"
-      />
+    <section ref={wrap} id="top" data-wing="hero" data-nav="Introduction" className="hero-wrap relative w-full overflow-hidden">
+      <div className="hero-stage" style={{ width: W, height: H }}>
+        {/* Gemini render, 1452 x 811 at -6, 0 */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          data-bg
+          src="/hero/maniki.webp"
+          alt=""
+          className="absolute select-none"
+          style={{ width: 1452, height: 811, left: -6, top: 0, objectFit: "cover" }}
+          draggable={false}
+        />
 
-      <div data-content className="relative z-10 flex flex-1 flex-col justify-end px-5 pb-10 pt-40 md:px-10 md:pb-14">
-        <p data-eyebrow className="eyebrow reveal text-muted">
-          AI pattern studio
-        </p>
-        <h1 className="headline reveal mt-5 max-w-[12ch] text-[clamp(3.2rem,9.5vw,9.5rem)]">
-          See a dress you love. Wear it, made for you.
-        </h1>
-        <div className="mt-10 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-          <p data-sub className="body-lg reveal max-w-md text-muted">
-            Upload any photo from Pinterest or a magazine. Venty drafts a sewing
-            pattern to your exact measurements, shows it on a body that is yours,
-            and prints it ready to cut.
-          </p>
-          <div data-cta className="reveal flex items-center gap-3">
-            <PrimaryButton href="#cta">Get started</PrimaryButton>
-            <a
-              href="#how"
-              className="glass rounded-full px-7 py-4 text-base font-normal text-fg transition-colors hover:text-cornflower"
+        {/* Dots, masked to the 1194 x 666 ellipse at 123, 72 */}
+        <div
+          className="hero-dots absolute inset-0"
+          style={{
+            WebkitMaskImage: "radial-gradient(597px 333px at 720px 405px, #000 35%, transparent 100%)",
+            maskImage: "radial-gradient(597px 333px at 720px 405px, #000 35%, transparent 100%)",
+          }}
+        />
+
+        {/* Cornflower ellipse, 1566 x 638, bottom -548, blur 85, 95% */}
+        <div
+          data-glow
+          className="absolute rounded-[50%] bg-cornflower"
+          style={{ width: 1566, height: 638, left: (W - 1566) / 2, bottom: -548, opacity: 0.95, filter: "blur(85px)" }}
+        />
+
+        {/* Logo mark, 48.9 wide, top 4.07% */}
+        <LogoMark
+          data-logo
+          className="absolute text-cornflower"
+          style={{ width: 48.9, left: W / 2 - 48.9 / 2 + 0.45, top: H * 0.0407 }}
+        />
+
+        {/* Made by card, 183 x 76 at 26, 300 */}
+        <a
+          data-card
+          href="#"
+          className="hero-glass absolute flex items-center"
+          style={{ width: 183, height: 76, left: 26, top: 300, padding: "4px 16px 4px 4px", gap: 8 }}
+        >
+          <span className="relative block shrink-0 overflow-hidden rounded-[4px]" style={{ width: 47, height: 66 }}>
+            <span
+              className="absolute rounded-[8px] bg-cornflower"
+              style={{
+                width: 75,
+                height: 128,
+                left: -14,
+                top: -58,
+                border: "1px solid rgba(255,255,255,0.12)",
+                boxShadow: "inset 0 1.5px 2px rgba(255,255,255,0.22)",
+              }}
             >
-              How it works
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* Live readout strip */}
-      <div data-readout className="reveal relative z-10 border-t border-line px-5 md:px-10">
-        <div className="flex items-end justify-between gap-6 py-5">
-          <div className="flex items-baseline gap-3">
-            <span data-num className="font-display text-[clamp(2.4rem,5vw,4.5rem)] leading-none tabular-nums">
-              0.0
+              <span className="absolute rounded-[50%]" style={{ inset: "7.33% 0 7.67% 0", background: "var(--color-night)", opacity: 0.95, filter: "blur(15px)" }} />
+              <span className="absolute rounded-[50%]" style={{ left: "-10%", right: "60%", top: "-10%", bottom: "82%", background: "rgba(255,255,255,0.35)", filter: "blur(15px)" }} />
             </span>
-            <span className="eyebrow text-faint">Bust · cm</span>
-          </div>
-          <div className="ticks hidden w-1/2 text-cloud md:block" />
-          <p className="eyebrow hidden text-faint lg:block">Scroll</p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/hero/natalia.png" alt="Natalia Chamon" className="absolute" style={{ width: 63.03, height: 66, left: -8, top: 0, objectFit: "cover" }} />
+          </span>
+          <span className="flex flex-col items-end justify-center" style={{ width: 106, height: 66, gap: 16 }}>
+            <span className="flex w-full flex-col items-start" style={{ gap: 4 }}>
+              <span className="hero-t12 uppercase text-periwinkle">Made by</span>
+              <span className="hero-t16 text-periwinkle">Natalia Chamon</span>
+            </span>
+            <span className="hero-t16 text-cloud">View more</span>
+          </span>
+        </a>
+
+        {/* Right copy, 210 wide at 1200, 314 */}
+        <p data-copy className="hero-t16 absolute" style={{ width: 210, left: 1200, top: 314, color: "rgba(255,255,255,0.6)" }}>
+          Upload any photo from Pinterest or a magazine. Venty drafts a sewing pattern to your exact measurements, ready to print.
+        </p>
+
+        {/* Headline */}
+        <div data-h>
+          <span className="hero-h absolute" style={{ left: 26, top: 653 }}>The average body</span>
+          <span className="hero-h hero-h--display absolute text-center" style={{ left: 26, top: 719.71, width: 184 }}>doesn&apos;t</span>
+          <span className="hero-h absolute" style={{ left: 226, top: 719.71 }}>exist</span>
+        </div>
+
+        {/* Button, 179 x 56 at 1233, 713 */}
+        <div data-cta className="absolute" style={{ left: W / 2 - 179 / 2 + 602.5, top: 713 }}>
+          <PrimaryButton href="#cta" className="w-[179px]">Create a pattern</PrimaryButton>
         </div>
       </div>
     </section>

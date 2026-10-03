@@ -48,7 +48,7 @@ export function Sizes() {
   }, []);
 
   return (
-    <section ref={ref} data-wing="story" className="relative px-5 py-[18vh] md:px-10">
+    <section ref={ref} data-wing="story" data-nav="No sizes" id="sizes" className="relative px-5 py-[18vh] md:px-10">
       <p className="eyebrow text-faint">No sizes</p>
       <div className="mt-6 flex flex-wrap items-baseline gap-x-[0.35em] font-display text-[clamp(4rem,14vw,15rem)] leading-[0.9]">
         {sizes.map((s) => (

@@ -54,7 +54,7 @@ export function Features() {
   }, []);
 
   return (
-    <section ref={ref} id="features" data-wing="perch" className="relative px-5 py-[16vh] md:px-10">
+    <section ref={ref} id="features" data-wing="perch" data-nav="Inside" className="relative px-5 py-[16vh] md:px-10">
       <div className="grid gap-8 md:grid-cols-12 md:items-end">
         <div className="md:col-span-7">
           <p className="eyebrow text-faint">Inside</p>

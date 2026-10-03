@@ -44,7 +44,7 @@ export function Cta() {
   }, []);
 
   return (
-    <section ref={ref} id="cta" data-wing="close" className="relative overflow-hidden px-5 pb-10 pt-[20vh] md:px-10">
+    <section ref={ref} id="cta" data-wing="close" data-nav="Start" className="relative overflow-hidden px-5 pb-10 pt-[20vh] md:px-10">
       <Orbs intensity={0.6} />
       <div className="relative z-10 grid gap-10 md:grid-cols-12 md:items-end">
         <div className="md:col-span-7">
