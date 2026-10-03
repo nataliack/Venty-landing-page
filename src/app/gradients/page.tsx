@@ -9,7 +9,7 @@ import { Sky, LIGHT, PURPLE, DARK, type SkyConcept } from "@/components/Sky";
 
 const FAMILIES: { key: string; title: string; eyebrow: string; items: SkyConcept[] }[] = [
   { key: "light", title: "Crown", eyebrow: "Light, locked", items: LIGHT },
-  { key: "purple", title: "Five purple concepts", eyebrow: "Purple", items: PURPLE },
+  { key: "purple", title: "Haze", eyebrow: "Purple, locked", items: PURPLE },
   { key: "dark", title: "Five dark concepts", eyebrow: "Dark", items: DARK },
 ];
 
@@ -84,7 +84,7 @@ export default function Gradients() {
           <h2 className="mt-2 text-3xl font-normal tracking-[-0.03em]">{f.title}</h2>
           <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-5">
             {f.items.map((c, i) => (
-              <Tile key={c.v} c={c} label={f.items.length === 1 ? "L" : `0${i + 1}`} onOpen={() => setOpen({ fam: fi, idx: i })} />
+              <Tile key={c.v} c={c} label={f.items.length === 1 ? (f.key === "light" ? "L" : "P") : `0${i + 1}`} onOpen={() => setOpen({ fam: fi, idx: i })} />
             ))}
           </div>
         </section>

@@ -5,6 +5,7 @@ cornflower, and the camera eases in. Every frame maps to a scroll position.
 
 Run headless:
   blender -b -P tools/workbench/workbench.py -- --mode preview --frames 1,75,150
+  blender -b -P tools/workbench/workbench.py -- --mode draft
   blender -b -P tools/workbench/workbench.py -- --mode final
 
 Axes: metres. Table top at z=0, front edge at y=FRONT, x runs left to right
@@ -317,7 +318,9 @@ def build_piece(name, spec, at, rot_deg, z, paper_m, ink_m, print_m, window):
     f0, f1 = window
     span = f1 - f0
     inks = []
-    outline = poly_curve(name + "_Cut", [(x, y, zi) for x, y, _ in pts], ink_m, 0.0007, closed=True)
+    # open loop back to the start: bevel factor is ignored on cyclic splines
+    loop = [(x, y, zi) for x, y, _ in pts] + [(pts[0][0], pts[0][1], zi)]
+    outline = poly_curve(name + "_Cut", loop, ink_m, 0.0007)
     inks.append((outline, f0, f0 + span * 0.6))
 
     if extra["dart"]:
@@ -692,8 +695,8 @@ if ORIENT == "portrait":
 else:
     scene.render.resolution_x, scene.render.resolution_y = 1920, 1080
 
-CAM_A, CAM_B = Vector((0.78, -1.55, 0.38)), Vector((0.52, -1.20, 0.28))
-AIM_A, AIM_B = Vector((-0.10, 0.02, 0.0)), Vector((-0.22, -0.08, 0.02))
+CAM_A, CAM_B = Vector((0.80, -1.60, 0.38)), Vector((0.66, -1.40, 0.31))
+AIM_A, AIM_B = Vector((-0.08, 0.02, 0.0)), Vector((-0.14, -0.04, 0.01))
 focus = link(bpy.data.objects.new("Focus", None))
 cam_data.dof.focus_object = focus
 
@@ -727,7 +730,10 @@ scene.view_settings.exposure = 0.0
 scene.cycles.volume_step_rate = 4.0
 scene.cycles.max_bounces = 6
 scene.cycles.transparent_max_bounces = 8
-if MODE == "preview":
+if MODE == "draft":                                     # quick motion check, all frames
+    scene.render.resolution_percentage = 33
+    scene.cycles.samples = 12
+elif MODE == "preview":
     scene.render.resolution_percentage = 50
     scene.cycles.samples = 48
 else:
