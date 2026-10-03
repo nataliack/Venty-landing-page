@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
+import { Sky } from "./Sky";
 
 /* Loading screen, visualisation stage.
    Background: the Welcome sky from the app (periwinkle beam falling into
@@ -28,11 +29,7 @@ export function Loader({ demo = true }: { demo?: boolean }) {
 
   return (
     <div ref={ref} className="loader fixed inset-0 z-[100] overflow-hidden">
-      <div className="sky">
-        <span className="drift d1" />
-        <span className="drift d2" />
-        <span className="drift d3" />
-      </div>
+      <Sky variant="light" />
 
       <div className="relative flex h-full flex-col items-center justify-center px-6">
         {/* eslint-disable-next-line @next/next/no-img-element */}

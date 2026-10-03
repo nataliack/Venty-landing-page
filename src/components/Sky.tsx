@@ -1,19 +1,21 @@
-/* Light sky, five concepts. Each variant is a CSS block in globals.css
-   (.sky-v1 .. .sky-v5) that sets the base gradient, the beam and the
-   drifting lights. Motion is slow and small on every variant. */
-export type SkyVariant = 1 | 2 | 3 | 4 | 5;
+/* Gradient skies.
+   "light" is LOCKED: the Crown, light from the top centre with a blue halo
+   rising from below. It is also the app's Welcome gradient.
+   "d1".."d5" are dark concepts for the landing page, built on the same
+   four-light structure and the same drift timing. */
+export type SkyVariant = "light" | "d1" | "d2" | "d3" | "d4" | "d5";
 
-export const SKY_VARIANTS: { v: SkyVariant; name: string; note: string }[] = [
-  { v: 1, name: "Balanced", note: "Beam toned down, blue bottom-right lifted to match it." },
-  { v: 2, name: "Twin lights", note: "Equal light top-left and blue bottom-right on a diagonal haze." },
-  { v: 3, name: "Crown", note: "Light from the top centre, blue halo rising from below." },
-  { v: 4, name: "Deep blue", note: "More cornflower everywhere, less white, haze sits lower." },
-  { v: 5, name: "Fog", note: "Lowest contrast. Periwinkle mist with one blue bloom." },
+export const DARK_VARIANTS: { v: SkyVariant; name: string; note: string }[] = [
+  { v: "d1", name: "Crown, inverted", note: "Same structure as the light. Dim periwinkle crown above, cornflower halo below, night between." },
+  { v: "d2", name: "Blue crown", note: "The light from above becomes cornflower. Everything below falls to night." },
+  { v: "d3", name: "Horizon", note: "Night above, a cornflower band low in the frame. Matches the hero's bottom glow." },
+  { v: "d4", name: "Twin, dark", note: "Steel glow top-left, cornflower bottom-right, both quiet." },
+  { v: "d5", name: "Void", note: "Almost pure night. One cornflower bloom wanders, nothing else." },
 ];
 
-export function Sky({ variant = 1, className = "" }: { variant?: SkyVariant; className?: string }) {
+export function Sky({ variant = "light", className = "" }: { variant?: SkyVariant; className?: string }) {
   return (
-    <div className={`sky sky-v${variant} ${className}`} aria-hidden="true">
+    <div className={`sky sky-${variant} ${className}`} aria-hidden="true">
       <span className="drift d1" />
       <span className="drift d2" />
       <span className="drift d3" />
