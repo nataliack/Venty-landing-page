@@ -1,4 +1,5 @@
 import { SectionNav } from "@/components/SectionNav";
+import { Loader } from "@/components/Loader";
 import { Hero } from "@/components/Hero";
 import { Marquee } from "@/components/Marquee";
 import { Manifesto } from "@/components/Manifesto";
@@ -13,6 +14,7 @@ import { Footer } from "@/components/Footer";
 export default function Home() {
   return (
     <>
+      <Loader />
       <SectionNav />
       <main>
         <Hero />

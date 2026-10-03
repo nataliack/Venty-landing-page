@@ -531,14 +531,11 @@ body {
   background: var(--color-night);
   color: var(--color-cloud);
 }
-.loader__zip {
+.loader__canvas {
   position: absolute;
-  left: 50%;
-  top: 0;
-  height: 100dvh;
-  width: auto;
-  translate: -50% 0;
+  inset: 0;
   z-index: 1;
+  pointer-events: none;
 }
 /* a wide soft band of night behind the line, so the zipper fades out
    above and below it instead of touching it */

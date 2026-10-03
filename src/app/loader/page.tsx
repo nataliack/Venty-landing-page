@@ -1,5 +1,5 @@
 import { Loader } from "@/components/Loader";
 
 export default function LoaderPreview() {
-  return <Loader demo />;
+  return <Loader loop />;
 }

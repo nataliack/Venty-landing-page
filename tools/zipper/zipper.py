@@ -27,7 +27,7 @@ FADE = float(arg("--fade", "0"))     # >0: the fabric fades to transparent this 
 OUT = arg("--out", os.path.join(os.path.dirname(os.path.abspath(__file__)), "render", ORIENT, MODE))
 os.makedirs(OUT, exist_ok=True)
 
-N_FRAMES = 100
+N_FRAMES = int(arg("--nframes", "60"))
 Z_TOP, Z_BOT = 95.0, -95.0            # long zipper, runs past the frame top and bottom on every camera
 Z_START, Z_END = 70.0, -74.0          # slider travel
 PITCH = 1.25                          # tooth spacing per side
@@ -378,6 +378,10 @@ scene.view_settings.exposure = 0.35
 if MODE == "preview":
     scene.render.resolution_percentage = 45
     scene.cycles.samples = 24
+elif MODE == "web":
+    # the sequence the site ships: lighter than final, far above preview
+    scene.render.resolution_percentage = 60
+    scene.cycles.samples = 36
 else:
     scene.render.resolution_percentage = 100
     scene.cycles.samples = 96
