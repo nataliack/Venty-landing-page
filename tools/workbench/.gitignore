@@ -1,3 +1,4 @@
 render/
 assets/
 *.blend1
+build/

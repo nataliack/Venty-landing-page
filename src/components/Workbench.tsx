@@ -11,12 +11,15 @@ gsap.registerPlugin(ScrollTrigger);
    a low front view while the window light drifts across it. Scroll position
    picks the frame; neighbouring frames are cross-faded so the motion stays
    smooth between them. The page goes dark as it arrives, three text beats
-   play over the scene, and night rises over it before the call to action. */
+   play over the scene. At the end the camera sinks past the table edge, the
+   table rises out of frame, and night fades up from the bottom of the screen
+   into the call to action. */
 
-const COUNT = 120;
+const COUNT = 150; // 1 to 120 the orbit, 121 to 150 the descent below the table
 const W = 1280;
 const H = 720;
-const FRAMES_END = 0.86; // the rest of the scroll is the exit
+const CLOSE_UP = 119; // the last frame of the orbit, the still for reduced motion
+const FRAMES_END = 0.97; // a short hold on solid night after the last frame
 const src = (i: number) => `/workbench/f_${String(i + 1).padStart(3, "0")}.webp`;
 
 export function Workbench() {
@@ -34,7 +37,7 @@ export function Workbench() {
 
     // ------------------------------------------------------------ frames
     const frames: (HTMLImageElement | null)[] = new Array(COUNT).fill(null);
-    let pos = reduce ? COUNT - 1 : 0;
+    let pos = reduce ? CLOSE_UP : 0;
 
     const nearest = (i: number) => {
       for (let d = 0; d < COUNT; d++) {
@@ -206,13 +209,16 @@ export function Workbench() {
       gsap.set("[data-line]", { opacity: 0, y: 30, filter: "blur(12px)" });
       tl.to("[data-bar-top], [data-bar-bottom]", { height: 0, duration: 0.3, ease: "power1.inOut" }, 0.02)
         .to("[data-beat='1'] [data-line]", inLine, 0.03)
-        .to("[data-beat='1'] [data-line]", outLine, 0.24)
-        .to("[data-beat='2'] [data-line]", inLine, 0.36)
-        .to("[data-beat='2'] [data-line]", outLine, 0.56)
-        .to("[data-beat='3'] [data-line]", { ...inLine, stagger: 0.035 }, 0.66)
-        .to("[data-hud]", { opacity: 0, duration: 0.05 }, 0.86)
-        .to("[data-beat='3']", { opacity: 0, y: -40, filter: "blur(8px)", duration: 0.08, ease: "power2.in" }, 0.9)
-        .fromTo("[data-curtain]", { yPercent: 100 }, { yPercent: 0, duration: 0.14, ease: "power2.inOut" }, 0.86);
+        .to("[data-beat='1'] [data-line]", outLine, 0.2)
+        .to("[data-beat='2'] [data-line]", inLine, 0.29)
+        .to("[data-beat='2'] [data-line]", outLine, 0.45)
+        .to("[data-beat='3'] [data-line]", { ...inLine, stagger: 0.035 }, 0.5)
+        // clears so the close-up has a clean moment before the camera sinks (frame 121 at about 0.78)
+        .to("[data-beat='3']", { opacity: 0, y: -40, filter: "blur(8px)", duration: 0.06, ease: "power2.in" }, 0.66)
+        // night fades up from the bottom while the table rises out of frame
+        .fromTo("[data-curtain]", { yPercent: 100 }, { yPercent: 0, duration: 0.18, ease: "power1.in" }, 0.8)
+        .to("[data-hud]", { opacity: 0, duration: 0.05 }, 0.92)
+        .set({}, {}, 1); // timeline length 1, so positions above are fractions of the scroll
 
       return () => mo.disconnect();
     }, el);
@@ -232,7 +238,7 @@ export function Workbench() {
       id="table"
       data-nav="The table"
       aria-label="The workbench"
-      className="relative h-[400vh] motion-reduce:h-[100svh] [&_[data-line]]:opacity-0"
+      className="relative h-[500vh] motion-reduce:h-[100svh] [&_[data-line]]:opacity-0"
     >
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-night">
         <div data-stage className="absolute inset-0">
@@ -300,7 +306,7 @@ export function Workbench() {
           </div>
         </div>
 
-        {/* night rises over the scene before the call to action; its soft
+        {/* night fades up from the bottom as the camera sinks; its soft
             edge ends above the viewport, so the final state is solid night */}
         <div
           data-curtain
