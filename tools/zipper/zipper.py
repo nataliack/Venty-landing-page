@@ -23,6 +23,7 @@ ORIENT = arg("--orient", "portrait")
 MODE = arg("--mode", "preview")
 FRAMES = [int(f) for f in arg("--frames", "").split(",") if f] or None
 NO_FABRIC = "--no-fabric" in argv   # hardware only: tape, teeth, slider. The page supplies the textile.
+FADE = float(arg("--fade", "0"))     # >0: the fabric fades to transparent this many units out from the tape
 OUT = arg("--out", os.path.join(os.path.dirname(os.path.abspath(__file__)), "render", ORIENT, MODE))
 os.makedirs(OUT, exist_ok=True)
 
@@ -135,6 +136,27 @@ def mat_fabric():
     l.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
     l.new(weave.outputs["Value"], tone.inputs["Color2"])
     l.new(tone.outputs["Color"], bsdf.inputs["Base Color"])
+    if FADE > 0:
+        # alpha = 1 at the tape edge, easing to 0 at FADE units out, so the
+        # rendered cloth dissolves into the page background
+        sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+        ab = nt.nodes.new("ShaderNodeMath"); ab.operation = "ABSOLUTE"
+        sub = nt.nodes.new("ShaderNodeMath"); sub.operation = "SUBTRACT"; sub.inputs[1].default_value = TAPE_W
+        div = nt.nodes.new("ShaderNodeMath"); div.operation = "DIVIDE"; div.inputs[1].default_value = FADE
+        clamp = nt.nodes.new("ShaderNodeClamp")
+        inv = nt.nodes.new("ShaderNodeMath"); inv.operation = "SUBTRACT"; inv.inputs[0].default_value = 1.0
+        ease = nt.nodes.new("ShaderNodeMath"); ease.operation = "POWER"; ease.inputs[1].default_value = 1.8
+        l.new(coord.outputs["Object"], sep.inputs["Vector"])
+        l.new(sep.outputs["X"], ab.inputs[0])
+        l.new(ab.outputs["Value"], sub.inputs[0])
+        l.new(sub.outputs["Value"], div.inputs[0])
+        l.new(div.outputs["Value"], clamp.inputs["Value"])
+        l.new(clamp.outputs["Result"], inv.inputs[1])
+        l.new(inv.outputs["Value"], ease.inputs[0])
+        l.new(ease.outputs["Value"], bsdf.inputs["Alpha"])
+        m.blend_method = "BLEND"
+        if hasattr(m, "surface_render_method"):
+            m.surface_render_method = "BLENDED"
     return m
 
 def grid(name, x0, x1, z0, z1, nx, nz, mat):
