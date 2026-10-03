@@ -22,6 +22,7 @@ def arg(name, default):
 ORIENT = arg("--orient", "portrait")
 MODE = arg("--mode", "preview")
 FRAMES = [int(f) for f in arg("--frames", "").split(",") if f] or None
+NO_FABRIC = "--no-fabric" in argv   # hardware only: tape, teeth, slider. The page supplies the textile.
 OUT = arg("--out", os.path.join(os.path.dirname(os.path.abspath(__file__)), "render", ORIENT, MODE))
 os.makedirs(OUT, exist_ok=True)
 
@@ -186,6 +187,9 @@ panels = []
 for side in (1, -1):
     tape = grid(f"Tape_{'R' if side > 0 else 'L'}", 0.0, TAPE_W * side, Z_BOT, Z_TOP, 4, 160, tape_m)
     panel = grid(f"Fabric_{'R' if side > 0 else 'L'}", TAPE_W * side, PANEL_W * side, Z_BOT, Z_TOP, 48, 160, fabric_m)
+    if NO_FABRIC:
+        panel.hide_render = True
+        panel.hide_viewport = True
     for ob in (tape, panel):
         ob["side"] = side
         sub = ob.modifiers.new("Subd", "SUBSURF")

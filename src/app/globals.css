@@ -433,42 +433,52 @@ body {
 }
 .loader__track {
   position: relative;
-  height: 2px;
+  height: 1px;
   width: 100%;
-  background: color-mix(in srgb, var(--color-cloud) 8%, transparent);
-  border-radius: 2px;
+  background: color-mix(in srgb, var(--color-cloud) 6%, transparent);
 }
+/* The fill is a line that is brightest at its moving head and fades back
+   toward the start, so the light reads as travelling. No end dot. */
 .loader__fill {
   position: absolute;
   left: 0;
   top: 0;
   height: 100%;
-  border-radius: 2px;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--color-cornflower) 70%, transparent), var(--color-cornflower) 70%, color-mix(in srgb, var(--color-cornflower) 60%, var(--color-cloud)));
-  box-shadow:
-    0 0 8px var(--color-cornflower),
-    0 0 22px var(--color-cornflower),
-    0 0 56px color-mix(in srgb, var(--color-cornflower) 70%, transparent),
-    0 0 110px color-mix(in srgb, var(--color-cornflower) 35%, transparent);
+  background: linear-gradient(90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--color-cornflower) 25%, transparent) 30%,
+    color-mix(in srgb, var(--color-cornflower) 70%, transparent) 75%,
+    var(--color-cornflower) 92%,
+    color-mix(in srgb, var(--color-cornflower) 55%, var(--color-cloud)) 100%);
   transition: width 0.12s linear;
 }
+.loader__fill::before,
 .loader__fill::after {
-  /* bright head of the line */
+  /* soft bloom around the head, wide and blurred, no hard shape */
   content: "";
   position: absolute;
-  right: -3px;
+  right: 0;
   top: 50%;
-  width: 6px;
-  height: 6px;
+  translate: 40% -50%;
   border-radius: 50%;
-  translate: 0 -50%;
-  background: color-mix(in srgb, var(--color-cornflower) 40%, var(--color-cloud));
-  box-shadow: 0 0 10px var(--color-cornflower), 0 0 28px var(--color-cornflower);
+  pointer-events: none;
+}
+.loader__fill::before {
+  width: 140px;
+  height: 36px;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--color-cornflower) 55%, transparent), transparent);
+  filter: blur(10px);
+}
+.loader__fill::after {
+  width: 48px;
+  height: 10px;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--color-cornflower) 60%, var(--color-cloud)), transparent);
+  filter: blur(3px);
 }
 .loader__pct {
-  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-size: clamp(1.3rem, 2.2vw, 1.9rem);
   line-height: 1;
-  color: var(--color-cloud);
+  color: color-mix(in srgb, var(--color-cloud) 85%, transparent);
 }
 .loader__pctsign {
   font-family: var(--font-sans);

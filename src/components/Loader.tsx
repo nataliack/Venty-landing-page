@@ -44,7 +44,7 @@ export function Loader({ demo = true }: { demo?: boolean }) {
           <div className="loader__track">
             <div className="loader__fill" style={{ width: `${pct}%` }} />
           </div>
-          <p className="loader__pct font-display mt-5 text-center tabular-nums">
+          <p className="loader__pct font-display mt-4 text-center tabular-nums">
             {pct}
             <span className="loader__pctsign">%</span>
           </p>
