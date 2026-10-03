@@ -19,15 +19,13 @@ export function Loader({ demo = true }: { demo?: boolean }) {
     if (!el) return;
     const ctx = gsap.context(() => {
       // the lit head breathes
-      gsap.to("[data-head]", { scale: 1.35, opacity: 0.75, duration: 1.1, ease: "sine.inOut", yoyo: true, repeat: -1 });
+      gsap.to("[data-head]", { opacity: 0.55, duration: 0.9, ease: "sine.inOut", yoyo: true, repeat: -1 });
       // a pulse of light runs from the start of the line to the head, over and over
       gsap.fromTo(
         "[data-pulse]",
         { xPercent: -100, opacity: 0 },
         { xPercent: 0, opacity: 1, duration: 1.6, ease: "power2.in", repeat: -1, repeatDelay: 0.5 },
       );
-      // the bloom behind the head drifts a little, so it never reads as a stamp
-      gsap.to("[data-bloom]", { x: 6, scaleX: 1.15, duration: 2.2, ease: "sine.inOut", yoyo: true, repeat: -1 });
     }, el);
 
     if (!demo) return () => ctx.revert();
@@ -65,7 +63,6 @@ export function Loader({ demo = true }: { demo?: boolean }) {
         <div className="loader__track">
           <div ref={fillRef} className="loader__fill" style={{ width: 0 }}>
             <span data-pulse className="loader__pulse" />
-            <span data-bloom className="loader__bloom" />
             <span data-head className="loader__head" />
           </div>
         </div>

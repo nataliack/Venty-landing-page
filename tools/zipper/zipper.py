@@ -27,13 +27,13 @@ OUT = arg("--out", os.path.join(os.path.dirname(os.path.abspath(__file__)), "ren
 os.makedirs(OUT, exist_ok=True)
 
 N_FRAMES = 100
-Z_TOP, Z_BOT = 30.0, -30.0
-Z_START, Z_END = 24.0, -26.0          # slider travel
+Z_TOP, Z_BOT = 75.0, -75.0            # long zipper: more of it to play with, fills tall phones
+Z_START, Z_END = 66.0, -70.0          # slider travel
 PITCH = 1.25                          # tooth spacing per side
 TOOTH_W, TOOTH_H, TOOTH_D = 1.35, 1.0, 0.7
 TAPE_W = 2.3
-MAX_OPEN = 22.0                       # per-side separation at the top when fully open
-PANEL_W = 80.0
+MAX_OPEN = 34.0                       # per-side separation at the top when fully open
+PANEL_W = 160.0
 
 # palette
 NIGHT = (0.0027, 0.0030, 0.0070, 1)
@@ -63,7 +63,7 @@ def open_amount(z, t):
     s = (z - zs) / max(0.001, (Z_TOP - zs))
     base = MAX_OPEN * (s ** 1.55)
     # final sweep: once nearly open, the panels slide fully away
-    sweep = smooth((t - 0.86) / 0.14) * 60.0
+    sweep = smooth((t - 0.86) / 0.14) * 120.0
     return base + sweep * (0.35 + 0.65 * s)
 
 def depth_amount(z, t):
@@ -185,8 +185,8 @@ slider_m = mat_principled("Slider", (0.06, 0.065, 0.085, 1), 0.12, 1.0, 0.5)
 # fabric panels and tapes (edge strips), finely subdivided near the zipper
 panels = []
 for side in (1, -1):
-    tape = grid(f"Tape_{'R' if side > 0 else 'L'}", 0.0, TAPE_W * side, Z_BOT, Z_TOP, 4, 160, tape_m)
-    panel = grid(f"Fabric_{'R' if side > 0 else 'L'}", TAPE_W * side, PANEL_W * side, Z_BOT, Z_TOP, 48, 160, fabric_m)
+    tape = grid(f"Tape_{'R' if side > 0 else 'L'}", 0.0, TAPE_W * side, Z_BOT, Z_TOP, 4, 400, tape_m)
+    panel = grid(f"Fabric_{'R' if side > 0 else 'L'}", TAPE_W * side, PANEL_W * side, Z_BOT, Z_TOP, 48, 400, fabric_m)
     if NO_FABRIC:
         panel.hide_render = True
         panel.hide_viewport = True
@@ -266,11 +266,13 @@ cam_data.lens = 50
 cam_data.sensor_fit = "VERTICAL"
 cam_data.sensor_height = 24
 if ORIENT == "portrait":
-    scene.render.resolution_x, scene.render.resolution_y = 1080, 1920
-    cam.location = (0, -92, -1)
+    # tall phone frame; the whole 150-unit zipper fits the height
+    scene.render.resolution_x, scene.render.resolution_y = 1080, 2340
+    cam.location = (0, -318, -2)
 else:
+    # desktop: the zipper runs past the top and bottom of the frame
     scene.render.resolution_x, scene.render.resolution_y = 1920, 1080
-    cam.location = (0, -56, -1)
+    cam.location = (0, -150, -2)
 cam.rotation_euler = (math.radians(90), 0, 0)
 cam_data.dof.use_dof = True
 cam_data.dof.focus_distance = abs(cam.location.y)
