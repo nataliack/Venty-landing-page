@@ -21,8 +21,8 @@ export const PURPLE: SkyConcept[] = [
 
 export const DARK: SkyConcept[] = [
   { v: "k1", name: "Edge", note: "As shown before. Soft cornflower glow rising from the bottom." },
-  { v: "k2", name: "Edge, quieter", note: "Glow at about half strength and sitting lower. Night takes the frame." },
-  { v: "k3", name: "Edge, hairline", note: "Night almost total. The glow is a rumour at the very foot." },
+  { v: "k2", name: "Edge, compact", note: "Same colour and strength, half the area. Slides along the bottom so night shows either side." },
+  { v: "k3", name: "Edge, roaming", note: "Same compact light, free to wander the whole frame." },
 ];
 
 export function Sky({ variant = "light", className = "" }: { variant?: SkyVariant; className?: string }) {
