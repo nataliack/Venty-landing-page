@@ -528,7 +528,9 @@ body {
    Loader layout
    ------------------------------------------------------------------ */
 .loader {
-  background: var(--color-night);
+  /* no background of its own: the clipped cloth is the only cover, so the
+     page shows through the opening */
+  background: transparent;
   color: var(--color-cloud);
 }
 .loader__canvas {
