@@ -550,31 +550,37 @@ body {
 .sky-k1 .d3 { width: 120%; aspect-ratio: 1; left: -10%; bottom: -100%; background: rgb(140 156 248 / 0.1); animation: v-s3 15s ease-in-out infinite alternate; }
 .sky-k1 .d4 { display: none; }
 
-/* 02 Edge, compact: same colour and strength as 01, half the area. The
-   glow is a single light that slides along the bottom, so night shows
-   on either side of it. No static base glow. */
+/* 02 Edge, smaller: identical softness to 01 (same 140px blur, same
+   long three-stop falloff), the whole glow scaled to about 60%. The lit
+   area shrinks, the feathered edge stays. Drifts so dark shows around it. */
 .sky-k2 {
-  background: linear-gradient(180deg, #0b0c15 0%, #0b0c15 100%);
+  background:
+    radial-gradient(95% 28% at 50% 112%, rgb(104 126 245 / 0.42) 0%, rgb(104 126 245 / 0.16) 35%, rgb(79 99 224 / 0.05) 60%, transparent 80%),
+    linear-gradient(180deg, #0b0c15 0%, #0b0c15 100%);
 }
-.sky-k2::before { background: none; }
-.sky-k2 .d1 { width: 70%; aspect-ratio: 1; left: 15%; bottom: -45%; background: rgb(104 126 245 / 0.5); filter: blur(90px); animation: v-e2 13s ease-in-out infinite alternate; }
-.sky-k2 .d2 { width: 50%; aspect-ratio: 1; left: 25%; bottom: -30%; background: rgb(140 156 248 / 0.22); filter: blur(80px); animation: v-e2b 15s ease-in-out infinite alternate; }
-.sky-k2 .d3 { display: none; }
+.sky-k2::before { background: radial-gradient(70% 18% at 50% 104%, rgb(192 200 219 / 0.12) 0%, transparent 70%); }
+.sky-k2 .d1 { width: 95%; aspect-ratio: 1; left: -30%; bottom: -75%; background: rgb(104 126 245 / 0.22); animation: v-f1 13s ease-in-out infinite alternate; }
+.sky-k2 .d2 { width: 95%; aspect-ratio: 1; right: -30%; bottom: -75%; background: rgb(79 99 224 / 0.22); animation: v-f2 15s ease-in-out infinite alternate; }
+.sky-k2 .d3 { width: 75%; aspect-ratio: 1; left: 12%; bottom: -60%; background: rgb(140 156 248 / 0.1); animation: v-f3 12s ease-in-out infinite alternate; }
 .sky-k2 .d4 { display: none; }
 
-/* 03 Edge, roaming: the same compact light, free to wander the whole
-   frame. It leaves the bottom, crosses the sides, comes back. */
+/* 03 Edge, smaller and roaming: the same soft small glow, but it is not
+   tied to the bottom. It wanders the lower two thirds so the dark shows
+   at the bottom and the sides in turn. No static base glow. */
 .sky-k3 {
   background: linear-gradient(180deg, #0b0c15 0%, #0b0c15 100%);
 }
 .sky-k3::before { background: none; }
-.sky-k3 .d1 { width: 60%; aspect-ratio: 1; left: 20%; top: 55%; background: rgb(104 126 245 / 0.5); filter: blur(90px); animation: v-e3 14s ease-in-out infinite alternate; }
-.sky-k3 .d2 { width: 45%; aspect-ratio: 1; left: 30%; top: 65%; background: rgb(140 156 248 / 0.2); filter: blur(80px); animation: v-e3b 11s ease-in-out infinite alternate; }
-.sky-k3 .d3 { display: none; }
+.sky-k3 .d1 { width: 95%; aspect-ratio: 1; left: 2%; top: 45%; background: rgb(104 126 245 / 0.24); animation: v-g1 15s ease-in-out infinite alternate; }
+.sky-k3 .d2 { width: 80%; aspect-ratio: 1; left: 10%; top: 55%; background: rgb(79 99 224 / 0.2); animation: v-g2 13s ease-in-out infinite alternate; }
+.sky-k3 .d3 { width: 60%; aspect-ratio: 1; left: 20%; top: 60%; background: rgb(140 156 248 / 0.1); animation: v-g3 11s ease-in-out infinite alternate; }
 .sky-k3 .d4 { display: none; }
 
-/* compact glow drifts: wide travel so the dark shows all round */
-@keyframes v-e2  { 0% { translate: -30% 10%; scale: 1; } 50% { translate: 30% 0%; scale: 1.1; } 100% { translate: -5% 18%; scale: 0.9; } }
-@keyframes v-e2b { 0% { translate: 20% 0%; } 50% { translate: -25% 8%; } 100% { translate: 10% -6%; } }
-@keyframes v-e3  { 0% { translate: -45% 20%; scale: 0.9; } 33% { translate: 40% -10%; scale: 1.1; } 66% { translate: -20% -45%; scale: 1; } 100% { translate: 35% 25%; scale: 0.95; } }
-@keyframes v-e3b { 0% { translate: 30% -20%; } 50% { translate: -35% 10%; } 100% { translate: 15% 30%; } }
+/* small-glow drifts: along the bottom, wide enough to clear each side */
+@keyframes v-f1 { 0% { translate: -12% 6%; } 50% { translate: 26% -4%; } 100% { translate: 4% 12%; } }
+@keyframes v-f2 { 0% { translate: 12% 2%; } 50% { translate: -28% -6%; } 100% { translate: -6% 10%; } }
+@keyframes v-f3 { 0% { translate: 0 0; scale: 1; } 50% { translate: -18% -10%; scale: 1.15; } 100% { translate: 16% 6%; scale: 0.9; } }
+/* roaming: lower two thirds of the frame */
+@keyframes v-g1 { 0% { translate: -40% 20%; scale: 0.95; } 33% { translate: 35% 5%; scale: 1.1; } 66% { translate: -15% -25%; scale: 1; } 100% { translate: 30% 30%; scale: 0.9; } }
+@keyframes v-g2 { 0% { translate: 30% 0%; } 50% { translate: -35% 15%; } 100% { translate: 15% -20%; } }
+@keyframes v-g3 { 0% { translate: 0 20%; } 50% { translate: -25% -10%; } 100% { translate: 25% 10%; } }
