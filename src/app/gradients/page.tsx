@@ -10,7 +10,7 @@ import { Sky, LIGHT, PURPLE, DARK, type SkyConcept } from "@/components/Sky";
 const FAMILIES: { key: string; title: string; eyebrow: string; items: SkyConcept[] }[] = [
   { key: "light", title: "Crown", eyebrow: "Light, locked", items: LIGHT },
   { key: "purple", title: "Haze", eyebrow: "Purple, locked", items: PURPLE },
-  { key: "dark", title: "Five dark concepts", eyebrow: "Dark", items: DARK },
+  { key: "dark", title: "Edge, three intensities", eyebrow: "Dark", items: DARK },
 ];
 
 function Tile({ c, label, onOpen }: { c: SkyConcept; label: string; onOpen: () => void }) {

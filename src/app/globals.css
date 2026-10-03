@@ -532,70 +532,44 @@ body {
 .sky-purple .d4 { width: 45%; aspect-ratio: 1; left: 15%; bottom: -15%; background: rgb(96 115 230 / 0.3); animation: v-s4 12s ease-in-out infinite alternate; }
 
 /* ------------------------------------------------------------------
-   Dark concepts, second pass. Night almost everywhere. Lights are huge,
-   heavily blurred and faint, with long falloffs, so nothing reads as a
-   circle. Blur is doubled for this family only.
+   Dark sky: Edge, three intensities. Night dominates, a soft cornflower
+   glow rises from the bottom. Lights are huge and heavily blurred.
    ------------------------------------------------------------------ */
 [class*="sky-k"] .drift { filter: blur(140px); }
 [class*="sky-k"]::before { opacity: 0.8; }
 
-/* 01 Night: ink breathing at the top, nothing else */
+/* 01 Edge, as shown: the version Jose liked */
 .sky-k1 {
-  background:
-    radial-gradient(140% 90% at 50% -40%, rgb(56 76 101 / 0.22) 0%, rgb(30 38 60 / 0.12) 40%, transparent 75%),
-    linear-gradient(180deg, #10121f 0%, #0d0f1a 40%, #0b0c15 100%);
-}
-.sky-k1::before { background: radial-gradient(120% 70% at 50% 0%, rgb(72 95 136 / 0.14) 0%, transparent 70%); }
-.sky-k1 .d1 { width: 160%; aspect-ratio: 1; left: -30%; top: -110%; background: rgb(56 76 101 / 0.22); animation: v-s1 11s ease-in-out infinite alternate; }
-.sky-k1 .d2 { width: 140%; aspect-ratio: 1; right: -60%; top: 10%; background: rgb(18 21 36 / 0.7); animation: v-s2 14s ease-in-out infinite alternate; }
-.sky-k1 .d3 { display: none; }
-.sky-k1 .d4 { display: none; }
-
-/* 02 Ember: a cornflower warmth low right, spread wide */
-.sky-k2 {
-  background:
-    radial-gradient(120% 90% at 85% 110%, rgb(104 126 245 / 0.2) 0%, rgb(79 99 224 / 0.1) 35%, transparent 70%),
-    linear-gradient(180deg, #0c0d18 0%, #0b0c15 100%);
-}
-.sky-k2::before { background: radial-gradient(100% 70% at 90% 100%, rgb(104 126 245 / 0.12) 0%, transparent 70%); }
-.sky-k2 .d1 { width: 150%; aspect-ratio: 1; right: -70%; bottom: -90%; background: rgb(104 126 245 / 0.2); animation: v-s4 12s ease-in-out infinite alternate; }
-.sky-k2 .d2 { width: 130%; aspect-ratio: 1; left: -60%; top: -60%; background: rgb(18 21 36 / 0.6); animation: v-s1 11s ease-in-out infinite alternate; }
-.sky-k2 .d3 { width: 110%; aspect-ratio: 1; left: 10%; bottom: -70%; background: rgb(79 99 224 / 0.1); animation: v-s3 15s ease-in-out infinite alternate; }
-.sky-k2 .d4 { display: none; }
-
-/* 03 Crown, dark: periwinkle haze from above, very wide */
-.sky-k3 {
-  background:
-    radial-gradient(130% 80% at 50% -30%, rgb(157 172 205 / 0.16) 0%, rgb(72 95 136 / 0.1) 35%, transparent 70%),
-    radial-gradient(140% 60% at 50% 125%, rgb(104 126 245 / 0.1) 0%, transparent 70%),
-    linear-gradient(180deg, #0f111d 0%, #0b0c15 55%, #0b0c15 100%);
-}
-.sky-k3::before { background: radial-gradient(90% 50% at 50% 0%, rgb(192 200 219 / 0.1) 0%, transparent 70%); }
-.sky-k3 .d1 { width: 150%; aspect-ratio: 1; left: -25%; top: -115%; background: rgb(157 172 205 / 0.16); animation: v-s1 11s ease-in-out infinite alternate; }
-.sky-k3 .d2 { width: 130%; aspect-ratio: 1; right: -55%; bottom: -80%; background: rgb(104 126 245 / 0.1); animation: v-s2 14s ease-in-out infinite alternate; }
-.sky-k3 .d3 { width: 130%; aspect-ratio: 1; left: -55%; bottom: -80%; background: rgb(79 99 224 / 0.09); animation: v-s3 15s ease-in-out infinite alternate; }
-.sky-k3 .d4 { display: none; }
-
-/* 04 Ink: night to ink, steel fog drifting across the middle */
-.sky-k4 {
-  background:
-    radial-gradient(120% 80% at 30% 50%, rgb(72 95 136 / 0.12) 0%, transparent 70%),
-    linear-gradient(180deg, #0b0c15 0%, #0e1020 50%, #121524 100%);
-}
-.sky-k4::before { background: radial-gradient(100% 60% at 70% 50%, rgb(56 76 101 / 0.1) 0%, transparent 70%); }
-.sky-k4 .d1 { width: 140%; aspect-ratio: 1; left: -30%; top: -30%; background: rgb(72 95 136 / 0.14); animation: v-s3 13s ease-in-out infinite alternate; }
-.sky-k4 .d2 { width: 130%; aspect-ratio: 1; right: -50%; top: -50%; background: rgb(56 76 101 / 0.1); animation: v-s2 14s ease-in-out infinite alternate; }
-.sky-k4 .d3 { width: 120%; aspect-ratio: 1; left: 0%; bottom: -70%; background: rgb(18 21 36 / 0.5); animation: v-s4 12s ease-in-out infinite alternate; }
-.sky-k4 .d4 { display: none; }
-
-/* 05 Edge: a cornflower glow rising from the bottom, long and soft */
-.sky-k5 {
   background:
     radial-gradient(160% 45% at 50% 118%, rgb(104 126 245 / 0.42) 0%, rgb(104 126 245 / 0.16) 35%, rgb(79 99 224 / 0.05) 60%, transparent 80%),
     linear-gradient(180deg, #0b0c15 0%, #0b0c15 60%, #0d0f1d 100%);
 }
-.sky-k5::before { background: radial-gradient(120% 30% at 50% 105%, rgb(192 200 219 / 0.12) 0%, transparent 70%); }
-.sky-k5 .d1 { width: 150%; aspect-ratio: 1; left: -65%; bottom: -120%; background: rgb(104 126 245 / 0.22); animation: v-s1 11s ease-in-out infinite alternate; }
-.sky-k5 .d2 { width: 150%; aspect-ratio: 1; right: -65%; bottom: -120%; background: rgb(79 99 224 / 0.22); animation: v-s2 14s ease-in-out infinite alternate; }
-.sky-k5 .d3 { width: 120%; aspect-ratio: 1; left: -10%; bottom: -100%; background: rgb(140 156 248 / 0.1); animation: v-s3 15s ease-in-out infinite alternate; }
-.sky-k5 .d4 { display: none; }
+.sky-k1::before { background: radial-gradient(120% 30% at 50% 105%, rgb(192 200 219 / 0.12) 0%, transparent 70%); }
+.sky-k1 .d1 { width: 150%; aspect-ratio: 1; left: -65%; bottom: -120%; background: rgb(104 126 245 / 0.22); animation: v-s1 11s ease-in-out infinite alternate; }
+.sky-k1 .d2 { width: 150%; aspect-ratio: 1; right: -65%; bottom: -120%; background: rgb(79 99 224 / 0.22); animation: v-s2 14s ease-in-out infinite alternate; }
+.sky-k1 .d3 { width: 120%; aspect-ratio: 1; left: -10%; bottom: -100%; background: rgb(140 156 248 / 0.1); animation: v-s3 15s ease-in-out infinite alternate; }
+.sky-k1 .d4 { display: none; }
+
+/* 02 Edge, quieter: glow at roughly half strength, sits lower */
+.sky-k2 {
+  background:
+    radial-gradient(160% 38% at 50% 122%, rgb(104 126 245 / 0.26) 0%, rgb(104 126 245 / 0.09) 38%, rgb(79 99 224 / 0.03) 62%, transparent 80%),
+    linear-gradient(180deg, #0b0c15 0%, #0b0c15 70%, #0c0d18 100%);
+}
+.sky-k2::before { background: radial-gradient(120% 24% at 50% 106%, rgb(192 200 219 / 0.07) 0%, transparent 70%); }
+.sky-k2 .d1 { width: 150%; aspect-ratio: 1; left: -65%; bottom: -130%; background: rgb(104 126 245 / 0.13); animation: v-s1 11s ease-in-out infinite alternate; }
+.sky-k2 .d2 { width: 150%; aspect-ratio: 1; right: -65%; bottom: -130%; background: rgb(79 99 224 / 0.13); animation: v-s2 14s ease-in-out infinite alternate; }
+.sky-k2 .d3 { width: 120%; aspect-ratio: 1; left: -10%; bottom: -108%; background: rgb(140 156 248 / 0.06); animation: v-s3 15s ease-in-out infinite alternate; }
+.sky-k2 .d4 { display: none; }
+
+/* 03 Edge, hairline: night almost total, the glow is a rumour at the foot */
+.sky-k3 {
+  background:
+    radial-gradient(170% 30% at 50% 126%, rgb(104 126 245 / 0.16) 0%, rgb(104 126 245 / 0.05) 40%, transparent 75%),
+    linear-gradient(180deg, #0b0c15 0%, #0b0c15 100%);
+}
+.sky-k3::before { background: radial-gradient(130% 18% at 50% 108%, rgb(192 200 219 / 0.04) 0%, transparent 70%); }
+.sky-k3 .d1 { width: 150%; aspect-ratio: 1; left: -65%; bottom: -140%; background: rgb(104 126 245 / 0.08); animation: v-s1 11s ease-in-out infinite alternate; }
+.sky-k3 .d2 { width: 150%; aspect-ratio: 1; right: -65%; bottom: -140%; background: rgb(79 99 224 / 0.08); animation: v-s2 14s ease-in-out infinite alternate; }
+.sky-k3 .d3 { display: none; }
+.sky-k3 .d4 { display: none; }

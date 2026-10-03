@@ -2,12 +2,12 @@
    light: LOCKED. The Crown, light from the top centre with a blue halo
           rising from below. Also the app Welcome gradient.
    purple: LOCKED. Haze, periwinkle washing in over cornflower.
-   k1-k5: dark concepts. Night almost everywhere, light kept to a hint.
+   k1-k3: dark, Edge at three intensities. Night dominates.
    All share the four-light drift structure and the 11-15s timing. */
 export type SkyVariant =
   | "light"
   | "purple"
-  | "k1" | "k2" | "k3" | "k4" | "k5";
+  | "k1" | "k2" | "k3";
 
 export type SkyConcept = { v: SkyVariant; name: string; note: string };
 
@@ -20,11 +20,9 @@ export const PURPLE: SkyConcept[] = [
 ];
 
 export const DARK: SkyConcept[] = [
-  { v: "k1", name: "Night", note: "Ink breathing at the top, nothing else. No colour." },
-  { v: "k2", name: "Ember", note: "A wide cornflower warmth low right, barely there." },
-  { v: "k3", name: "Crown, dark", note: "Periwinkle haze from above, very wide, the Crown's ghost." },
-  { v: "k4", name: "Ink", note: "Night to ink with steel fog drifting across the middle." },
-  { v: "k5", name: "Edge", note: "A long soft cornflower glow rising from the bottom." },
+  { v: "k1", name: "Edge", note: "As shown before. Soft cornflower glow rising from the bottom." },
+  { v: "k2", name: "Edge, quieter", note: "Glow at about half strength and sitting lower. Night takes the frame." },
+  { v: "k3", name: "Edge, hairline", note: "Night almost total. The glow is a rumour at the very foot." },
 ];
 
 export function Sky({ variant = "light", className = "" }: { variant?: SkyVariant; className?: string }) {
