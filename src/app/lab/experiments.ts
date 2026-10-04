@@ -16,6 +16,15 @@ export type Experiment = {
 
 export const EXPERIMENTS: Experiment[] = [
   {
+    slug: "glow-cards",
+    no: 7,
+    title: "Glow cards",
+    note: "The lab's cards as backlit glass, lit by a light that follows you. The first lab index, kept as a study.",
+    tag: "Interaction",
+    date: "04 Oct",
+    kind: "native",
+  },
+  {
     slug: "pairs",
     no: 6,
     title: "Colour pairs",

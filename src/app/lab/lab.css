@@ -245,3 +245,23 @@
   .lab-in { animation: none; }
   .glow-tile { transition: none; }
 }
+
+/* ------------------------------------------------------------------
+   Lab index card: flat and quick. Colour change only on hover.
+   ------------------------------------------------------------------ */
+.lab-card {
+  display: block;
+  height: 100%;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: color-mix(in oklab, var(--cloud) 4%, transparent);
+  border: 1px solid color-mix(in oklab, var(--cloud) 9%, transparent);
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.lab-card:hover {
+  background: color-mix(in oklab, var(--cornflower) 14%, transparent);
+  border-color: color-mix(in oklab, var(--cornflower) 55%, transparent);
+}
+.lab-card:active {
+  background: color-mix(in oklab, var(--cornflower) 22%, transparent);
+}
