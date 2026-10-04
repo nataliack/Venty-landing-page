@@ -8,31 +8,33 @@ import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import { LogoMark } from "./Logo";
 import { PrimaryButton } from "./PrimaryButton";
 import { APP_URL, CTA_LABEL } from "@/lib/site";
-import { createSequence } from "@/lib/sequence";
+import { HERO, createHeroPlayer, heroPoster } from "@/lib/heroSequence";
 
 gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin);
 
-/* Hero, three frames on one pinned scroll.
+/* Hero, the video on one pinned scroll (frames from src/lib/heroSequence).
    1.1 Opening   she lies on the liquid. Headline, line, button.
+   ...           scrolling plays her rising and the liquid dress forming.
    1.2 Problem   she stands, dressed. "This body doesn't exist." A standard
                  size spec runs across her.
    1.3 Hand-off  "Yours does." The spec is struck out and rewritten as yours,
                  then the scene dissolves into pattern paper, which is where
                  Photo to pattern begins.
 
-   The scene is an image sequence. Until the frames are rendered it is the
-   still. Drop frames in public/hero/seq/f_001.webp ... and set FRAMES. */
+   Scroll positions are fractions of the section. The video plays between
+   PLAY_START and PLAY_END and holds its last frame after that. The frame is
+   never scaled by the timeline, so it stays as sharp as the source. */
 
-const FRAMES = 0;
-const FRAME_W = 1920;
-const FRAME_H = 1080;
-const SEQ_END = 0.74; // the sequence plays over this much of the scroll, then the hand-off
-const frameSrc = (i: number) => `/hero/seq/f_${String(i + 1).padStart(3, "0")}.webp`;
+const PLAY_START = 0.04;
+const PLAY_END = 0.74;
+const DRESSED = 520; // the frame where the dress has fully formed
+const at = (frame: number) => PLAY_START + (PLAY_END - PLAY_START) * (frame / (HERO.frames - 1));
 
+// top on phones (upper half, the text sits at the bottom), then on desktop
 const SPEC = [
-  { k: "Bust", v: "92 cm", top: "29%" },
-  { k: "Waist", v: "74 cm", top: "70%" },
-  { k: "Hip", v: "99 cm", top: "83%" },
+  { k: "Bust", v: "92 cm", top: "22%", mdTop: "30%" },
+  { k: "Waist", v: "74 cm", top: "31%", mdTop: "52%" },
+  { k: "Hip", v: "99 cm", top: "40%", mdTop: "68%" },
 ];
 
 export function Hero() {
@@ -42,15 +44,13 @@ export function Hero() {
     const el = ref.current;
     if (!el) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const canvas = el.querySelector<HTMLCanvasElement>("[data-seq]");
-    const seq = canvas && FRAMES > 0 ? createSequence({ canvas, count: FRAMES, width: FRAME_W, height: FRAME_H, src: frameSrc }) : null;
-    seq?.load();
+    const player = createHeroPlayer(el.querySelector<HTMLCanvasElement>("[data-seq]")!);
 
     const ctx = gsap.context(() => {
       // 1.1 arrives on load
       const intro = gsap.timeline({ defaults: { ease: "expo.out" } });
       intro
-        .from("[data-scene]", { scale: 1.08, opacity: 0, duration: 2.4 }, 0)
+        .from("[data-scene]", { scale: 1.08, opacity: 0, duration: 2.4, clearProps: "transform" }, 0)
         .from("[data-glow]", { yPercent: 40, opacity: 0, duration: 2 }, 0.2)
         .from("[data-logo]", { y: -10, opacity: 0, duration: 1.2 }, 0.6)
         .from("[data-h1] [data-w]", { yPercent: 110, duration: 1.4, stagger: 0.06 }, 0.7)
@@ -73,72 +73,69 @@ export function Hero() {
           start: "top top",
           end: "bottom bottom",
           scrub: 0.8,
-          onUpdate: (self) => seq?.set(self.progress / SEQ_END),
+          onUpdate: (self) => player.set((self.progress - PLAY_START) / (PLAY_END - PLAY_START)),
         },
       });
 
       const move = reduce ? 0 : 1;
+      const t2 = at(DRESSED);
+      const t3 = PLAY_END + 0.06;
+      const out = PLAY_END + 0.14;
       tl
-        // the camera leans in while she rises
-        .to("[data-scene]", { scale: 1 + 0.16 * move, yPercent: -5 * move, ease: "none", duration: SEQ_END }, 0)
-        .to("[data-glow]", { yPercent: -18 * move, ease: "none", duration: SEQ_END }, 0)
+        // 1.1 out as she starts to rise; the dots and glow clear off the video
+        .to("[data-cue]", { opacity: 0, duration: 0.02 }, 0.01)
+        .to("[data-f1-head]", { y: -80 * move, opacity: 0, filter: reduce ? "none" : "blur(10px)", duration: 0.06 }, 0.03)
+        .to("[data-f1-side]", { opacity: 0, y: -30 * move, duration: 0.05, stagger: 0.01 }, 0.03)
+        .to("[data-dots]", { opacity: 0, duration: 0.06 }, 0.04)
+        .to("[data-glow]", { opacity: 0, yPercent: 30 * move, duration: 0.08 }, 0.04)
 
-        // 1.1 out
-        .to("[data-f1-head]", { y: -80 * move, opacity: 0, filter: reduce ? "none" : "blur(10px)", duration: 0.09 }, 0.05)
-        .to("[data-f1-side]", { opacity: 0, y: -30 * move, duration: 0.07, stagger: 0.01 }, 0.05)
-        .to("[data-cue]", { opacity: 0, duration: 0.03 }, 0.02)
-
-        // 1.2 in: the standard body
-        .to("[data-dim]", { opacity: 0.45, duration: 0.1 }, 0.14)
-        .to("[data-rule]", { scaleX: 1, duration: 0.1, stagger: 0.025, ease: "power3.out" }, 0.16)
-        .to("[data-row]", { opacity: 1, y: 0, duration: 0.06, stagger: 0.025 }, 0.19)
-        .to(split2.words, { yPercent: 0, duration: 0.07, stagger: 0.012, ease: "power3.out" }, 0.2)
-        .to("[data-f2] [data-sub]", { opacity: 1, y: 0, duration: 0.06 }, 0.27)
+        // 1.2 in, once she stands in the dress
+        .to("[data-rule]", { scaleX: 1, duration: 0.06, stagger: 0.015, ease: "power3.out" }, t2)
+        .to("[data-row]", { opacity: 1, y: 0, duration: 0.04, stagger: 0.015 }, t2 + 0.02)
+        .to(split2.words, { yPercent: 0, duration: 0.05, stagger: 0.008, ease: "power3.out" }, t2 + 0.02)
+        .to("[data-f2] [data-sub]", { opacity: 1, y: 0, duration: 0.04 }, t2 + 0.06)
 
         // 1.2 out: struck through
-        .to("[data-strike]", { scaleX: 1, duration: 0.06, stagger: 0.02, ease: "power2.in" }, 0.38)
-        .to(split2.words, { yPercent: -110, duration: 0.06, stagger: 0.008, ease: "power3.in" }, 0.44)
-        .to("[data-f2] [data-sub]", { opacity: 0, duration: 0.04 }, 0.44)
+        .to("[data-strike]", { scaleX: 1, duration: 0.04, stagger: 0.015, ease: "power2.in" }, PLAY_END)
+        .to(split2.words, { yPercent: -110, duration: 0.04, stagger: 0.006, ease: "power3.in" }, PLAY_END + 0.03)
+        .to("[data-f2] [data-sub]", { opacity: 0, duration: 0.03 }, PLAY_END + 0.03)
 
         // 1.3 in: the spec is rewritten as yours
-        .to("[data-dim]", { opacity: 0, duration: 0.08 }, 0.48)
-        .to("[data-strike]", { opacity: 0, duration: 0.04 }, 0.5)
-        .to("[data-spec-title]", { scrambleText: { text: "Your measurements", chars: "lowerCase", speed: 0.6 }, duration: 0.08, ease: "none" }, 0.5)
-        .to("[data-val]", { scrambleText: { text: "Yours", chars: "0123456789.", speed: 0.6 }, duration: 0.08, stagger: 0.02, ease: "none" }, 0.5)
-        .to("[data-val]", { color: "var(--color-cornflower)", duration: 0.04 }, 0.56)
-        .to(split3.chars, { yPercent: 0, duration: 0.08, stagger: 0.012, ease: "power3.out" }, 0.52)
-        .to("[data-f3] [data-sub]", { opacity: 1, y: 0, duration: 0.06 }, 0.6)
-        .to("[data-glow]", { scale: 1.1, duration: 0.15 }, 0.52)
+        .to("[data-dim]", { opacity: 0.4, duration: 0.05 }, t3)
+        .to("[data-strike]", { opacity: 0, duration: 0.03 }, t3)
+        .to("[data-spec-title]", { scrambleText: { text: "Your measurements", chars: "lowerCase", speed: 0.6 }, duration: 0.05, ease: "none" }, t3)
+        .to("[data-val]", { scrambleText: { text: "Yours", chars: "0123456789.", speed: 0.6 }, duration: 0.05, stagger: 0.015, ease: "none" }, t3)
+        .to("[data-val]", { color: "var(--color-cornflower)", duration: 0.03 }, t3 + 0.04)
+        .to(split3.chars, { yPercent: 0, duration: 0.05, stagger: 0.008, ease: "power3.out" }, t3 + 0.01)
+        .to("[data-f3] [data-sub]", { opacity: 1, y: 0, duration: 0.04 }, t3 + 0.05)
 
         // hand-off: the scene dissolves into pattern paper
-        .to("[data-paper]", { "--r": "140%", duration: 0.2, ease: "power2.in" }, SEQ_END)
-        .to("[data-scene]", { opacity: 0, scale: `+=${0.12 * move}`, duration: 0.18, ease: "power1.in" }, SEQ_END + 0.04)
-        .to("[data-rule]", { opacity: 0, duration: 0.08 }, SEQ_END + 0.02)
-        .to("[data-row]", { opacity: 0, duration: 0.06 }, SEQ_END + 0.02)
-        .to("[data-f3] [data-sub]", { opacity: 0, duration: 0.04 }, SEQ_END + 0.06)
-        .to(split3.chars, { yPercent: -110, duration: 0.06, stagger: 0.008, ease: "power3.in" }, SEQ_END + 0.1)
-        .to("[data-glow]", { opacity: 0, duration: 0.1 }, SEQ_END + 0.08)
+        .to("[data-paper]", { "--r": "140%", duration: 0.12, ease: "power2.in" }, out)
+        .to("[data-scene]", { opacity: 0, duration: 0.1, ease: "power1.in" }, out + 0.02)
+        .to("[data-rule], [data-row]", { opacity: 0, duration: 0.04 }, out)
+        .to("[data-f3] [data-sub]", { opacity: 0, duration: 0.03 }, out + 0.03)
+        .to(split3.chars, { yPercent: -110, duration: 0.04, stagger: 0.006, ease: "power3.in" }, out + 0.06)
         .set({}, {}, 1);
     }, el);
 
     return () => {
-      seq?.destroy();
+      player.destroy();
       ctx.revert();
     };
   }, []);
 
   return (
-    <section ref={ref} id="top" data-wing="hero" data-nav="Introduction" data-theme-zone="dark" className="relative h-[420vh]">
+    <section ref={ref} id="top" data-wing="hero" data-nav="Introduction" data-theme-zone="dark" className="relative h-[760vh]">
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-night">
-        {/* scene: the sequence when it exists, the still until then */}
-        <div data-scene className="absolute inset-0 will-change-transform">
-          {FRAMES > 0 ? (
-            <canvas data-seq aria-hidden className="absolute inset-0 h-full w-full" />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src="/hero/maniki.webp" alt="" draggable={false} className="absolute inset-0 h-full w-full select-none object-cover" />
-          )}
+        {/* scene: the poster (first frame) until the canvas has drawn */}
+        <div data-scene className="absolute inset-0">
+          <picture>
+            <source media="(max-aspect-ratio: 1/1)" srcSet={heroPoster("portrait")} />
+            <img src={heroPoster("landscape")} alt="" draggable={false} fetchPriority="high" className="absolute inset-0 h-full w-full select-none object-cover" />
+          </picture>
+          <canvas data-seq aria-hidden className="absolute inset-0 h-full w-full opacity-0" />
           <div
+            data-dots
             className="hero-dots absolute inset-0"
             style={{
               WebkitMaskImage: "radial-gradient(42% 41% at 50% 50%, #000 35%, transparent 100%)",
@@ -159,13 +156,18 @@ export function Hero() {
         {/* pattern paper, revealed from the centre at the hand-off */}
         <div data-paper aria-hidden className="paper-grid paper-reveal absolute inset-0 z-10" />
 
-        {/* the spec that runs across her in 1.2 and 1.3 */}
-        <div data-spec aria-hidden className="invisible absolute inset-0 z-20 px-5 text-cloud md:px-10">
-          <p data-row className="eyebrow absolute left-5 top-[22%] text-periwinkle md:left-10">
+        {/* the spec that runs across her in 1.2 and 1.3: the right side of the
+            frame on desktop, where she stands; the upper half on phones */}
+        <div data-spec aria-hidden className="invisible absolute inset-y-0 left-5 right-5 z-20 text-cloud [text-shadow:0_1px_14px_rgba(11,12,21,0.95)] md:left-[44%] md:right-10">
+          <p data-row className="eyebrow absolute left-0 top-[14%] text-periwinkle md:top-[22%]">
             <span data-spec-title>Standard size 12</span>
           </p>
           {SPEC.map((s) => (
-            <div key={s.k} className="absolute inset-x-5 flex items-center gap-4 md:inset-x-10" style={{ top: s.top }}>
+            <div
+              key={s.k}
+              className="absolute inset-x-0 top-[var(--t)] flex items-center gap-4 md:top-[var(--tm)]"
+              style={{ "--t": s.top, "--tm": s.mdTop } as React.CSSProperties}
+            >
               <span data-row className="eyebrow w-14 shrink-0 text-periwinkle">{s.k}</span>
               <span data-rule className="h-px flex-1 origin-left bg-[repeating-linear-gradient(90deg,var(--color-cloud)_0_6px,transparent_6px_12px)] opacity-50" />
               <span data-row className="relative shrink-0 font-display text-[clamp(1.1rem,2vw,1.75rem)] tabular-nums">
@@ -222,13 +224,14 @@ export function Hero() {
           <span className="scroll-cue block h-10 w-px overflow-hidden bg-cloud/15" />
         </div>
 
-        {/* 1.2 */}
-        <div data-f2 className="invisible absolute inset-0 z-30 grid place-items-center px-5 text-center text-cloud">
-          <div style={{ background: "radial-gradient(closest-side, rgba(11,12,21,0.6), transparent)" }} className="px-6 py-14">
-            <h2 data-h2 className="headline text-[clamp(2.6rem,8vw,8.5rem)]">
+        {/* 1.2, in the dark space she leaves on the left (at the bottom on phones) */}
+        <div data-f2 className="invisible absolute inset-0 z-30 flex items-end px-5 pb-[12svh] text-cloud md:items-center md:px-10 md:pb-0">
+          <div aria-hidden className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-night via-night/70 to-transparent md:inset-y-0 md:left-0 md:h-auto md:w-[60%] md:bg-gradient-to-r md:from-night/80 md:via-night/40" />
+          <div className="relative">
+            <h2 data-h2 className="headline max-w-[9ch] text-[clamp(2.8rem,6.4vw,7rem)]">
               This body doesn&apos;t exist.
             </h2>
-            <p data-sub className="body-lg mx-auto mt-6 max-w-[34ch] text-periwinkle">
+            <p data-sub className="body-lg mt-6 max-w-[26ch] text-periwinkle">
               Neither does the standard body shop patterns are drafted for.
             </p>
           </div>

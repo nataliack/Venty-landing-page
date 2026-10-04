@@ -14,3 +14,9 @@ Promotional launch website for Venty, an app that generates sewing patterns draf
 npm install
 npm run dev
 ```
+
+## Media
+
+Masters (the hero video and so on) live in `media/`, the scripts that turn
+them into site assets in `tools/`, and the generated assets in `public/`.
+See [media/README.md](media/README.md).

@@ -1,0 +1,15 @@
+{
+  "version": "4acac9b2",
+  "master": "media/hero/hero-master.mp4",
+  "frames": 608,
+  "fps": 25,
+  "landscape": {
+    "width": 1920,
+    "height": 1080
+  },
+  "portrait": {
+    "width": 864,
+    "height": 1080
+  },
+  "quality": 92
+}

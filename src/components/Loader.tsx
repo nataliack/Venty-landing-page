@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { Sky } from "./Sky";
+import { HERO, preloadHero } from "@/lib/heroSequence";
 import { ZIP, holePolygon, type Orient } from "@/lib/zipper";
 
 /* The loader, two phases.
@@ -122,7 +123,7 @@ export function Loader({ loop = false, onDone }: { loop?: boolean; onDone?: () =
 
     const run = async () => {
       // phase 1: load. frame 1 first so the closed zipper is on screen early
-      const total = ZIP.frames + 1;
+      const total = ZIP.frames + HERO.frames;
       let done = 0;
       const bump = () => setProgress(Math.round((++done / total) * 100));
       try {
@@ -132,7 +133,8 @@ export function Loader({ loop = false, onDone }: { loop?: boolean; onDone?: () =
       }
       show(1);
       bump();
-      const hero = fetch("/hero/maniki.webp").then((r) => r.blob()).then(bump).catch(bump);
+      // the hero video frames download behind the loader, one step per frame
+      const hero = preloadHero(() => bump());
       const queue = Array.from({ length: ZIP.frames - 1 }, (_, k) => k + 2);
       const worker = async () => {
         while (queue.length && !cancelled) {

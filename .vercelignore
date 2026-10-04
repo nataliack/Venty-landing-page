@@ -1,0 +1,3 @@
+# masters and asset tools are not needed to build or serve the site
+media/
+tools/
