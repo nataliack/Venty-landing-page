@@ -3,6 +3,8 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { PrimaryButton } from "./PrimaryButton";
+import { APP_URL, CTA_LABEL } from "@/lib/site";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -12,8 +14,8 @@ gsap.registerPlugin(ScrollTrigger);
    picks the frame; neighbouring frames are cross-faded so the motion stays
    smooth between them. The page goes dark as it arrives, three text beats
    play over the scene. At the end the camera sinks past the table edge, the
-   table rises out of frame, and night fades up from the bottom of the screen
-   into the call to action. */
+   table rises out of frame, night fades up from the bottom of the screen,
+   and the page closes on the last line and the button. */
 
 const COUNT = 150; // 1 to 120 the orbit, 121 to 150 the descent below the table
 const W = 1280;
@@ -120,27 +122,10 @@ export function Workbench() {
 
     // ------------------------------------------------------------ scroll
     const ctx = gsap.context(() => {
-      // Dark while the table is on screen. The CTA below turns the page light
-      // again when it is scrolled back past, so the section re-asserts dark.
-      const html = document.documentElement;
-      let active = false;
-      const dark = () => html.hasAttribute("data-theme") && html.removeAttribute("data-theme");
-      const mo = new MutationObserver(() => active && dark());
-      mo.observe(html, { attributes: true, attributeFilter: ["data-theme"] });
-      ScrollTrigger.create({
-        trigger: el,
-        start: "top 60%",
-        end: "bottom 40%",
-        onToggle: (self) => {
-          active = self.isActive;
-          if (active) dark();
-        },
-        onLeaveBack: () => html.setAttribute("data-theme", "light"),
-      });
-
       if (reduce) {
-        gsap.set("[data-beat='3'] [data-line]", { opacity: 1 });
-        return () => mo.disconnect();
+        gsap.set("[data-beat='final'] [data-line]", { opacity: 1 });
+        gsap.set("[data-beat='final']", { pointerEvents: "auto" });
+        return;
       }
 
       // the scene fades up out of night as the section arrives
@@ -181,10 +166,11 @@ export function Workbench() {
         .to("[data-beat='3']", { opacity: 0, y: -40, filter: "blur(8px)", duration: 0.06, ease: "power2.in" }, 0.66)
         // night fades up from the bottom while the table rises out of frame
         .fromTo("[data-curtain]", { yPercent: 100 }, { yPercent: 0, duration: 0.18, ease: "power1.in" }, 0.8)
-        .to("[data-hud]", { opacity: 0, duration: 0.05 }, 0.92)
+        .to("[data-hud]", { opacity: 0, duration: 0.05 }, 0.9)
+        // the last line and the button, on night
+        .to("[data-beat='final'] [data-line]", { ...inLine, stagger: 0.03 }, 0.88)
+        .set("[data-beat='final']", { pointerEvents: "auto" }, 0.9)
         .set({}, {}, 1); // timeline length 1, so positions above are fractions of the scroll
-
-      return () => mo.disconnect();
     }, el);
 
     return () => {
@@ -200,6 +186,7 @@ export function Workbench() {
       ref={ref}
       id="table"
       data-nav="The table"
+      data-theme-zone="dark"
       aria-label="The workbench"
       className="relative h-[500vh] motion-reduce:h-[100svh] [&_[data-line]]:opacity-0"
     >
@@ -230,10 +217,10 @@ export function Workbench() {
             className="px-10 py-12"
             style={{ background: "radial-gradient(closest-side, rgba(11,12,21,0.7), transparent)" }}
           >
-            <p data-line className="eyebrow text-periwinkle">Fig. 04 / The table</p>
+            <p data-line className="eyebrow text-periwinkle">Fig. 09 / The table</p>
             <h2 className="headline mt-6 text-[clamp(2.6rem,7vw,7.5rem)]">
-              <span data-line className="block">Where the pattern</span>
-              <span data-line className="font-display block text-[1.08em] leading-[1.05]">meets the cloth.</span>
+              <span data-line className="block">Paper on top.</span>
+              <span data-line className="font-display block text-[1.08em] leading-[1.05]">Cloth underneath.</span>
             </h2>
           </div>
         </div>
@@ -243,17 +230,17 @@ export function Workbench() {
           <p data-line className="eyebrow text-periwinkle">Printed at 1:1</p>
           <p className="headline mt-5 max-w-[16ch] text-[clamp(1.9rem,4vw,4rem)]">
             <span data-line className="block">Printed at true size.</span>
-            <span data-line className="block">Pinned to linen.</span>
-            <span data-line className="block text-periwinkle">Every line drafted for one body.</span>
+            <span data-line className="block">Pinned to the cloth.</span>
+            <span data-line className="block text-periwinkle">Every line drawn for one body.</span>
           </p>
         </div>
 
         {/* beat 3, in the dark above the table at the end of the move */}
         <div data-beat="3" className="absolute inset-x-0 top-[14vh] z-20 px-5 text-cloud md:px-10">
           <h2 className="headline text-[clamp(2.6rem,7.5vw,8rem)]">
-            <span data-line className="block">Your measurements.</span>
-            <span data-line className="block">Your cloth.</span>
-            <span data-line className="font-display block text-[1.08em] leading-[1.05] text-cornflower">Your Sunday.</span>
+            <span data-line className="block">One body.</span>
+            <span data-line className="block">One pattern.</span>
+            <span data-line className="font-display block text-[1.08em] leading-[1.05] text-cornflower">Yours.</span>
           </h2>
         </div>
 
@@ -262,7 +249,7 @@ export function Workbench() {
           <p className="eyebrow text-faint">Venty / Workbench</p>
           <div className="flex items-center gap-4">
             <span className="relative block h-px w-[18vw] max-w-56 overflow-hidden bg-cloud/15">
-              <span data-bar className="absolute inset-0 origin-left scale-x-0 bg-cornflower" />
+              <span data-bar className="absolute inset-0 origin-left bg-cornflower" style={{ transform: "scaleX(0)" }} />
             </span>
             <span data-count className="eyebrow tabular-nums text-faint">001 / {COUNT}</span>
           </div>
@@ -276,6 +263,19 @@ export function Workbench() {
           className="absolute inset-x-0 bottom-0 z-40 h-[135svh]"
           style={{ background: "linear-gradient(to top, var(--color-night) 76%, transparent)", transform: "translateY(100%)" }}
         />
+
+        {/* the close, on the night the curtain leaves behind */}
+        <div data-beat="final" className="pointer-events-none absolute inset-0 z-50 grid place-items-center px-5 text-center text-cloud">
+          <div className="flex flex-col items-center">
+            <h2 className="headline text-[clamp(2.8rem,8vw,9rem)]">
+              <span data-line className="block">The dress in your head.</span>
+              <span data-line className="font-display block text-[1.08em] leading-[1.05] text-cornflower">On the body you have.</span>
+            </h2>
+            <div data-line className="mt-12">
+              <PrimaryButton href={APP_URL}>{CTA_LABEL}</PrimaryButton>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

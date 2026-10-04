@@ -626,3 +626,168 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .sky::before, .sky .drift { animation: none; }
 }
+
+/* ------------------------------------------------------------------
+   Landing sections
+   ------------------------------------------------------------------ */
+
+/* Pattern paper: a cutting-mat grid, fine lines every 24px and a stronger
+   line every 120px, fading out toward the edges. The hero dissolves into it
+   and Photo to pattern sits on it. */
+.paper-grid {
+  background-color: var(--color-night);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--color-cornflower) 38%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-cornflower) 38%, transparent) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--color-cloud) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-cloud) 8%, transparent) 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+  background-position: center center;
+}
+.paper-grid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(80% 75% at 50% 50%, transparent 45%, var(--color-night) 100%);
+}
+.paper-grid--strong {
+  background-color: transparent;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--color-cornflower) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-cornflower) 45%, transparent) 1px, transparent 1px);
+  background-size: 120px 120px;
+}
+
+/* Scroll cue in the hero: a short light running down a hairline */
+.scroll-cue {
+  position: relative;
+}
+.scroll-cue::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 40%;
+  background: var(--color-cloud);
+  animation: cue 1.8s var(--ease-in-out-quart) infinite;
+}
+@keyframes cue {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(260%); }
+}
+
+/* Giant outlined words */
+.outline-word {
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--color-periwinkle) 28%, transparent);
+}
+.make-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.2px color-mix(in srgb, var(--fg) 45%, transparent);
+}
+
+/* Photo to pattern SVG type */
+.ptp-ui {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  fill: var(--color-periwinkle);
+}
+.ptp-label {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  fill: var(--color-cloud);
+}
+.ptp-measure {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  fill: var(--color-periwinkle);
+}
+.ptp-measure-v {
+  font-family: var(--font-display);
+  font-size: 26px;
+  letter-spacing: 0;
+  text-transform: none;
+  fill: var(--color-cloud);
+}
+
+/* The tape measure in How it works */
+.tape {
+  background: linear-gradient(180deg, var(--color-cloud), var(--color-mist));
+  box-shadow: inset 0 -6px 12px color-mix(in srgb, var(--color-ink) 18%, transparent);
+}
+
+/* Features: looping visuals */
+.feat-body {
+  transform: translate(calc(var(--i) * 18px), calc(var(--i) * 22px)) rotate(calc(var(--i) * 4deg));
+  animation: feat-fan 5s var(--ease-in-out-quart) infinite alternate;
+}
+@keyframes feat-fan {
+  to { transform: translate(calc(var(--i) * 30px), calc(var(--i) * 30px)) rotate(calc(var(--i) * 7deg)); }
+}
+.feat-fit-pill { animation: feat-pill 6s var(--ease-in-out-quart) infinite; }
+@keyframes feat-pill {
+  0%, 28% { transform: translateX(0); }
+  33%, 61% { transform: translateX(100%); }
+  66%, 94% { transform: translateX(200%); }
+  100% { transform: translateX(0); }
+}
+.feat-fit-garment { animation: feat-ease 6s var(--ease-in-out-quart) infinite; }
+@keyframes feat-ease {
+  0%, 28% { transform: scale(1.03, 1.01); }
+  33%, 61% { transform: scale(1.09, 1.03); }
+  66%, 94% { transform: scale(1.18, 1.06); }
+  100% { transform: scale(1.03, 1.01); }
+}
+.feat-fit-l {
+  opacity: 0;
+  animation: feat-label 6s var(--ease-in-out-quart) infinite;
+  animation-delay: calc(var(--i) * -4s);
+}
+@keyframes feat-label {
+  0% { opacity: 0; transform: translateY(100%); }
+  4%, 28% { opacity: 1; transform: none; }
+  33%, 100% { opacity: 0; transform: translateY(-100%); }
+}
+.feat-drape {
+  background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--color-cloud) 22%, transparent) 0 3px, transparent 3px 9px);
+  transform-origin: 50% 0;
+  animation: feat-drape 2.6s ease-in-out infinite alternate;
+}
+@keyframes feat-drape {
+  from { transform: skewX(calc(var(--s) * 14deg)) scaleY(1); }
+  to { transform: skewX(calc(var(--s) * -14deg)) scaleY(calc(1 + var(--s) * 0.08)); }
+}
+.feat-draw {
+  stroke-dasharray: 1;
+  animation: feat-draw 4s var(--ease-in-out-quart) infinite;
+  animation-delay: calc(var(--i) * 0.35s);
+}
+@keyframes feat-draw {
+  0% { stroke-dashoffset: 1; }
+  45%, 80% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue::after,
+  .feat-body,
+  .feat-fit-pill,
+  .feat-fit-garment,
+  .feat-drape,
+  .feat-draw { animation: none; }
+  .feat-fit-l { animation: none; opacity: 0; }
+  .feat-fit-l:first-child { opacity: 1; }
+  .feat-draw { stroke-dasharray: none; }
+}
+
+/* Hero hand-off: the paper spreads from the centre with a soft edge */
+.paper-reveal {
+  --r: 0%;
+  -webkit-mask-image: radial-gradient(circle at 50% 55%, #000 calc(var(--r) - 25%), transparent var(--r));
+  mask-image: radial-gradient(circle at 50% 55%, #000 calc(var(--r) - 25%), transparent var(--r));
+}

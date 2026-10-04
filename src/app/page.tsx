@@ -1,14 +1,15 @@
 import { SectionNav } from "@/components/SectionNav";
+import { ThemeZones } from "@/components/ThemeZones";
 import { Loader } from "@/components/Loader";
 import { Hero } from "@/components/Hero";
-import { Marquee } from "@/components/Marquee";
-import { Manifesto } from "@/components/Manifesto";
-import { Steps } from "@/components/Steps";
-import { Measure } from "@/components/Measure";
-import { Sizes } from "@/components/Sizes";
+import { PhotoToPattern } from "@/components/PhotoToPattern";
+import { HowItWorks } from "@/components/HowItWorks";
 import { Features } from "@/components/Features";
+import { WhatYouCanMake } from "@/components/WhatYouCanMake";
+import { MadeWith } from "@/components/MadeWith";
+import { Faq } from "@/components/Faq";
+import { Maker } from "@/components/Maker";
 import { Workbench } from "@/components/Workbench";
-import { Cta } from "@/components/Cta";
 import { Footer } from "@/components/Footer";
 
 export default function Home() {
@@ -16,16 +17,17 @@ export default function Home() {
     <>
       <Loader />
       <SectionNav />
+      <ThemeZones />
       <main>
         <Hero />
-        <Marquee />
-        <Manifesto />
-        <Steps />
-        <Measure />
-        <Sizes />
+        <PhotoToPattern />
+        <HowItWorks />
         <Features />
+        <WhatYouCanMake />
+        <MadeWith />
+        <Faq />
+        <Maker />
         <Workbench />
-        <Cta />
       </main>
       <Footer />
     </>

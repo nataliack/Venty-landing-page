@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { MAKES } from "./MadeWith";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,12 +12,14 @@ gsap.registerPlugin(ScrollTrigger);
    section; pick one to scroll there. Sections opt in with data-nav="Label". */
 const SECTIONS = [
   { id: "top", label: "Introduction" },
-  { id: "why", label: "Why Venty" },
+  { id: "photo", label: "Photo to pattern" },
   { id: "how", label: "How it works" },
-  { id: "measure", label: "Try the tape" },
-  { id: "sizes", label: "No sizes" },
-  { id: "features", label: "Inside" },
-  { id: "cta", label: "Start" },
+  { id: "features", label: "Features" },
+  { id: "make", label: "What you can make" },
+  ...(MAKES.length ? [{ id: "made", label: "Made with Venty" }] : []),
+  { id: "faq", label: "FAQ" },
+  { id: "maker", label: "Meet the maker" },
+  { id: "table", label: "The table" },
 ];
 
 export function SectionNav() {
