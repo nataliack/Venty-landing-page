@@ -90,7 +90,10 @@ body {
    - Status bar: <body>. The scroller covers it completely, so its colour is
      never seen on the page, and no element at the top edge has a background
      (the hero and table scenes keep theirs on a child for this reason).
-   - Toolbar: .safari-bar, a strip mostly below the bottom edge.
+   - Toolbar: .safari-bar, a strip mostly below the bottom edge, hidden
+     under Safari's floating toolbar. Other iOS browsers (Chrome, Firefox)
+     draw their toolbar below the page, where the strip would show as a
+     line, and do not tint from it, so it is Safari only.
    Cornflower while the page is dark, the page colour while it is light. */
 body {
   background-color: var(--color-cornflower);
@@ -114,10 +117,9 @@ body {
 :root[data-theme="light"] .safari-bar {
   background-color: var(--bg);
 }
-@supports (-webkit-touch-callout: none) {
-  .safari-bar {
-    display: block;
-  }
+/* iPhone Safari only: the class is set by a script in layout.tsx */
+:root.iphone-safari .safari-bar {
+  display: block;
 }
 .lenis.lenis-smooth {
   scroll-behavior: auto !important;

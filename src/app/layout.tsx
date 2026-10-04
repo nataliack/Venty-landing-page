@@ -28,17 +28,28 @@ export const metadata: Metadata = {
     "See a dress you love. Wear it, made for you. Venty drafts a printable sewing pattern to your exact measurements and shows it on a 3D model of your own body.",
 };
 
-// Chrome (Android) colours its toolbar from this. Safari 26 ignores it and
-// samples the .safari-bar elements below instead.
+// Chrome on Android colours its toolbar from this; ThemeZones switches it
+// with the page. Safari 26 ignores it (see .safari-bar in globals.css), and
+// Chrome on iOS lets no page colour its bars.
 export const viewport: Viewport = {
-  themeColor: "#0b0c15",
+  themeColor: "#687ef5",
 };
+
+/* Marks iPhone Safari on <html> before the page paints. Every iOS browser
+   runs on WebKit, so CSS cannot tell Safari from Chrome; the user agent can.
+   Only iPhone Safari gets the toolbar strip: its toolbar floats over the
+   page and hides it. Elsewhere (Chrome, Firefox, in-app browsers, iPad
+   Safari with no bottom toolbar) it would only show as a line. */
+const IPHONE_SAFARI = `(function(){var u=navigator.userAgent;var ios=/iP(hone|od)/.test(u);if(ios&&/Safari/.test(u)&&!/CriOS|FxiOS|EdgiOS|OPiOS|GSA|Instagram|FBAN|FBAV/.test(u))document.documentElement.classList.add("iphone-safari")})()`;
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en-AU" className={`${familjen.variable} ${bigilla.variable}`}>
+    <html lang="en-AU" className={`${familjen.variable} ${bigilla.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: IPHONE_SAFARI }} />
+      </head>
       <body className="grain">
         {/* the page scrolls in here, never the window: see SmoothScroll */}
         <div id="scroller" className="scroller">
