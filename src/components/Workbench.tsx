@@ -30,7 +30,6 @@ export function Workbench() {
     if (!el) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const canvas = el.querySelector<HTMLCanvasElement>("[data-frames]")!;
-    const dustCanvas = el.querySelector<HTMLCanvasElement>("[data-dust]")!;
     const counter = el.querySelector<HTMLElement>("[data-count]")!;
     const bar = el.querySelector<HTMLElement>("[data-bar]")!;
     const g = canvas.getContext("2d")!;
@@ -77,8 +76,6 @@ export function Workbench() {
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       canvas.width = Math.round(canvas.clientWidth * dpr);
       canvas.height = Math.round(canvas.clientHeight * dpr);
-      dustCanvas.width = Math.round(dustCanvas.clientWidth * 0.75);
-      dustCanvas.height = Math.round(dustCanvas.clientHeight * 0.75);
       draw();
     };
     const ro = new ResizeObserver(size);
@@ -120,39 +117,6 @@ export function Workbench() {
     };
     const io = new IntersectionObserver((e) => e[0].isIntersecting && load(), { rootMargin: "200% 0px" });
     io.observe(el);
-
-    // ------------------------------------------------------------ dust in the shaft
-    let raf = 0;
-    if (!reduce) {
-      const d = dustCanvas.getContext("2d")!;
-      const motes = Array.from({ length: 46 }, () => ({
-        x: Math.random(),
-        y: Math.random(),
-        r: 0.4 + Math.random() * 1.3,
-        s: 0.2 + Math.random() * 0.8,
-        p: Math.random() * Math.PI * 2,
-      }));
-      const tick = (time: number) => {
-        const w = dustCanvas.width;
-        const h = dustCanvas.height;
-        d.clearRect(0, 0, w, h);
-        for (const m of motes) {
-          const x = ((m.x + time * 0.000004 * m.s + 0.012 * Math.sin(time * 0.0003 * m.s + m.p)) % 1) * w;
-          const y = ((m.y - time * 0.0000025 * m.s + 1) % 1) * h;
-          // brightest inside the shaft, which falls from the left
-          const inShaft = Math.max(0, 1 - Math.abs(y / h - 0.55 - (x / w) * 0.1) * 3.2) * (1 - (x / w) * 0.6);
-          const a = inShaft * (0.25 + 0.35 * (0.5 + 0.5 * Math.sin(time * 0.0012 * m.s + m.p)));
-          if (a < 0.02) continue;
-          d.globalAlpha = a;
-          d.fillStyle = "#eff4ff";
-          d.beginPath();
-          d.arc(x, y, m.r, 0, Math.PI * 2);
-          d.fill();
-        }
-        raf = requestAnimationFrame(tick);
-      };
-      raf = requestAnimationFrame(tick);
-    }
 
     // ------------------------------------------------------------ scroll
     const ctx = gsap.context(() => {
@@ -225,7 +189,6 @@ export function Workbench() {
 
     return () => {
       cancelled = true;
-      cancelAnimationFrame(raf);
       io.disconnect();
       ro.disconnect();
       ctx.revert();
@@ -246,7 +209,6 @@ export function Workbench() {
           {/* the render's shadows reach pure black; lighten lifts anything darker
               than night up to night, so the scene meets the page without a step */}
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-night mix-blend-lighten" />
-          <canvas data-dust aria-hidden className="pointer-events-none absolute inset-0 h-full w-full mix-blend-screen" />
           {/* edges fall to night, and a soft pool of dark behind the type */}
           <div
             aria-hidden
