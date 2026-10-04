@@ -117,9 +117,14 @@ export function createHeroPlayer(canvas: HTMLCanvasElement, camera: (frame: numb
   const touch = window.matchMedia("(pointer: coarse)").matches;
   const AHEAD = touch ? 8 : 10;
   const BEHIND = touch ? 3 : 4;
+  // decodes running at once. A full-HD decode takes a phone tens of ms and
+  // cannot be cancelled, so the queue below is what keeps a fast scroll from
+  // piling up a backlog the landing frame then has to wait behind
+  const PARALLEL = touch ? 2 : 3;
   const g = canvas.getContext("2d", { alpha: false })!;
   const frames = new Map<number, Decoded>();
   const pending = new Set<number>();
+  const wanted = new Set<number>();
   let target = 0;
   let focus = camera(0);
   let dir = 1;
@@ -151,28 +156,64 @@ export function createHeroPlayer(canvas: HTMLCanvasElement, camera: (frame: numb
     drawnX = x;
   };
 
+  const inWindow = (i: number) => {
+    const ahead = (i - target) * dir;
+    return ahead <= AHEAD && ahead >= -BEHIND;
+  };
+
+  // Starts decodes, nearest the playhead first, never more than PARALLEL at
+  // a time. Requests that have fallen out of the window are dropped here, so
+  // only frames still worth showing are ever decoded.
+  const pump = () => {
+    while (pending.size < PARALLEL && !destroyed) {
+      let next = -1;
+      let best = Infinity;
+      for (const i of wanted) {
+        if (!inWindow(i) || frames.has(i)) {
+          wanted.delete(i);
+          continue;
+        }
+        const d = Math.abs(i - target) + ((i - target) * dir < 0 ? 0.5 : 0); // ahead before behind
+        if (d < best) {
+          best = d;
+          next = i;
+        }
+      }
+      if (next < 0) return;
+      wanted.delete(next);
+      const i = next;
+      pending.add(i);
+      decode(blobs[i]!)
+        .then((img) => {
+          if (destroyed || !inWindow(i)) {
+            if ("close" in img) img.close();
+            return;
+          }
+          frames.set(i, img);
+          if (drawn < 0 || Math.abs(i - target) < Math.abs(drawn - target)) draw();
+        })
+        .catch(() => {})
+        .finally(() => {
+          pending.delete(i);
+          pump();
+        });
+    }
+  };
+
   const want = (i: number) => {
     if (i < 0 || i >= N || frames.has(i) || pending.has(i)) return;
-    const blob = blobs[i];
-    if (!blob) {
-      // not downloaded yet: decode as soon as it lands
-      const list = waiting.get(i) ?? [];
-      list.push(() => !destroyed && Math.abs(i - target) <= AHEAD && want(i));
-      waiting.set(i, list);
+    if (blobs[i]) {
+      wanted.add(i);
       return;
     }
-    pending.add(i);
-    decode(blob)
-      .then((img) => {
-        pending.delete(i);
-        if (destroyed || Math.abs(i - target) > AHEAD + BEHIND) {
-          if ("close" in img) img.close();
-          return;
-        }
-        frames.set(i, img);
-        if (Math.abs(i - target) < Math.abs(drawn - target) || drawn < 0) draw();
-      })
-      .catch(() => pending.delete(i));
+    // not downloaded yet: queue it as soon as it lands
+    const list = waiting.get(i) ?? [];
+    list.push(() => {
+      if (destroyed || !inWindow(i)) return;
+      want(i);
+      pump();
+    });
+    waiting.set(i, list);
   };
 
   // whether the camera has moved the frame by a pixel since the last draw
@@ -183,6 +224,7 @@ export function createHeroPlayer(canvas: HTMLCanvasElement, camera: (frame: numb
   };
 
   const update = () => {
+    wanted.clear();
     want(target);
     for (let d = 1; d <= AHEAD; d++) want(target + d * dir);
     for (let d = 1; d <= BEHIND; d++) want(target - d * dir);
@@ -195,6 +237,7 @@ export function createHeroPlayer(canvas: HTMLCanvasElement, camera: (frame: numb
         frames.delete(i);
       }
     }
+    pump();
     draw();
   };
 

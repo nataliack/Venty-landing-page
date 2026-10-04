@@ -142,7 +142,10 @@ export function Hero() {
 
   return (
     <section ref={ref} id="top" data-wing="hero" data-nav="Introduction" data-theme-zone="dark" className="relative h-[760vh]">
-      <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-night">
+      <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
+        {/* the night behind the scene lives on a child: a sticky element with a
+            background at the top edge is what Safari would tint its status bar from */}
+        <div aria-hidden className="absolute inset-0 bg-night" />
         {/* scene: the poster (first frame) until the canvas has drawn */}
         <div data-scene className="absolute inset-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}

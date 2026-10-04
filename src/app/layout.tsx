@@ -46,9 +46,8 @@ export default function RootLayout({
           <Wings />
           <SmoothScroll>{children}</SmoothScroll>
         </div>
-        {/* Safari 26 tints its status bar and toolbar from these */}
-        <div className="safari-bar safari-bar--top" aria-hidden="true" />
-        <div className="safari-bar safari-bar--bottom" aria-hidden="true" />
+        {/* Safari 26 tints its toolbar from this; the status bar from <body> */}
+        <div className="safari-bar" aria-hidden="true" />
       </body>
     </html>
   );

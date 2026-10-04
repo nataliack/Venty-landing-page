@@ -66,7 +66,8 @@ html {
 }
 
 /* The window never scrolls; the page scrolls inside #scroller. That keeps
-   mobile toolbars at one size (see SmoothScroll.tsx). */
+   mobile toolbars at one size (see SmoothScroll.tsx). The scroller is not
+   position: fixed, so Safari does not sample it for its bar colours. */
 html,
 body {
   height: 100%;
@@ -74,8 +75,8 @@ body {
   overscroll-behavior: none;
 }
 .scroller {
-  position: fixed;
-  inset: 0;
+  position: relative;
+  height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: none;
@@ -83,32 +84,35 @@ body {
   transition: background-color 0.9s var(--ease-in-out-quart);
 }
 
-/* Safari 26 colours its status bar and toolbar from a fixed element at the
-   top or bottom edge that is at least 80% wide and 3px tall, and ignores
-   theme-color. These two are that element, opaque, above every
-   transparent full-screen layer (wings, dots, loader) that would otherwise
-   be sampled and turn the bars see-through. iOS only (touch-callout). */
+/* Safari 26 bar colours. It ignores theme-color and samples, in order: a
+   fixed or sticky element with a background at the top or bottom edge
+   (at least 80% wide and 3px tall), then <body>'s background, then <html>'s.
+   - Status bar: <body>. The scroller covers it completely, so its colour is
+     never seen on the page, and no element at the top edge has a background
+     (the hero and table scenes keep theirs on a child for this reason).
+   - Toolbar: .safari-bar, a strip mostly below the bottom edge.
+   Cornflower while the page is dark, the page colour while it is light. */
+body {
+  background-color: var(--color-cornflower);
+  transition: background-color 0.9s var(--ease-in-out-quart);
+}
+:root[data-theme="light"] body {
+  background-color: var(--bg);
+}
 .safari-bar {
   display: none;
   position: fixed;
   left: 0;
+  bottom: -8px;
   width: 100%;
+  height: 12px;
   z-index: 2147483647;
   pointer-events: none;
-  /* cornflower while the page is dark, the page colour while it is light */
   background-color: var(--color-cornflower);
   transition: background-color 0.9s var(--ease-in-out-quart);
 }
 :root[data-theme="light"] .safari-bar {
   background-color: var(--bg);
-}
-.safari-bar--top {
-  top: 0;
-  height: 3px;
-}
-.safari-bar--bottom {
-  bottom: -8px;
-  height: 12px;
 }
 @supports (-webkit-touch-callout: none) {
   .safari-bar {

@@ -190,7 +190,9 @@ export function Workbench() {
       aria-label="The workbench"
       className="relative h-[500vh] motion-reduce:h-[100svh] [&_[data-line]]:opacity-0"
     >
-      <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-night">
+      <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
+        {/* night on a child, not the sticky element: see Hero */}
+        <div aria-hidden className="absolute inset-0 bg-night" />
         <div data-stage className="absolute inset-0">
           <canvas data-frames aria-hidden className="absolute inset-0 h-full w-full" />
           {/* the render's shadows reach pure black; lighten lifts anything darker
