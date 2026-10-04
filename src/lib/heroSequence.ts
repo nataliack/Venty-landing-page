@@ -18,15 +18,27 @@ import manifest from "../../public/hero/sequence/manifest.json";
 
 export const HERO = manifest;
 
+/** The web frame showing a given master frame (0-based, as numbered in After
+    Effects). Repeated master frames are dropped by the encoder, so the two
+    numberings drift apart; talk in master frames and convert here. */
+export const heroFrame = (master: number) => {
+  const src = manifest.sourceFrames;
+  let k = 0;
+  while (k + 1 < src.length && src[k + 1] <= master) k++;
+  return k;
+};
+
 const frameUrl = (i: number) => `/hero/sequence/frames/${String(i + 1).padStart(4, "0")}.webp?v=${manifest.version}`;
 
 /** The first frame, for the poster under the canvas */
 export const heroPoster = frameUrl(0);
 
-/** A camera track: [frame, focus] keys, focus 0 to 1 across the frame width.
-    Between keys the focus eases (smoothstep), so the slice glides. */
+/** A camera track: [master frame, focus] keys, focus 0 to 1 across the frame
+    width. Between keys the focus eases (smoothstep), so the slice glides. */
 export type CameraKeys = readonly (readonly [number, number])[];
-export const cameraTrack = (keys: CameraKeys) => (f: number) => {
+export const cameraTrack = (masterKeys: CameraKeys) => {
+  const keys = masterKeys.map(([f, x]) => [heroFrame(f), x] as const);
+  return (f: number) => {
   if (f <= keys[0][0]) return keys[0][1];
   for (let k = 1; k < keys.length; k++) {
     const [f0, x0] = keys[k - 1];
@@ -37,6 +49,7 @@ export const cameraTrack = (keys: CameraKeys) => (f: number) => {
     }
   }
   return keys[keys.length - 1][1];
+  };
 };
 
 const blobs: (Blob | null)[] = new Array(manifest.frames).fill(null);

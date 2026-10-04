@@ -85,7 +85,7 @@ body {
 
 /* Safari 26 colours its status bar and toolbar from a fixed element at the
    top or bottom edge that is at least 80% wide and 3px tall, and ignores
-   theme-color. These two are that element, in the page colour, above every
+   theme-color. These two are that element, opaque, above every
    transparent full-screen layer (wings, dots, loader) that would otherwise
    be sampled and turn the bars see-through. iOS only (touch-callout). */
 .safari-bar {
@@ -95,8 +95,12 @@ body {
   width: 100%;
   z-index: 2147483647;
   pointer-events: none;
-  background-color: var(--bg);
+  /* cornflower while the page is dark, the page colour while it is light */
+  background-color: var(--color-cornflower);
   transition: background-color 0.9s var(--ease-in-out-quart);
+}
+:root[data-theme="light"] .safari-bar {
+  background-color: var(--bg);
 }
 .safari-bar--top {
   top: 0;

@@ -8,7 +8,7 @@ import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import { LogoMark } from "./Logo";
 import { PrimaryButton } from "./PrimaryButton";
 import { APP_URL, CTA_LABEL } from "@/lib/site";
-import { HERO, cameraTrack, createHeroPlayer, heroPoster } from "@/lib/heroSequence";
+import { HERO, cameraTrack, createHeroPlayer, heroFrame, heroPoster } from "@/lib/heroSequence";
 
 gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin);
 
@@ -27,24 +27,23 @@ gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin);
 
 const PLAY_START = 0.04;
 const PLAY_END = 0.74;
-const DRESSED = 520; // the frame where the dress has fully formed
-const at = (frame: number) => PLAY_START + (PLAY_END - PLAY_START) * (frame / (HERO.frames - 1));
+const DRESSED = 560; // master frame where the dress has formed (1.2 appears)
+const at = (master: number) => PLAY_START + (PLAY_END - PLAY_START) * (heroFrame(master) / (HERO.frames - 1));
 
 /* The camera, for screens narrower than the video (phones, mostly): which
    part of the frame sits in the middle of the screen, 0 the left edge, 1 the
-   right, by frame. Centred, then it glides left to keep her hand and the
-   drop in view, back to centre for the dress, and right for the final pose,
-   where she stands on the right of the frame. Wide screens see the whole
-   frame, so the track does nothing there. */
+   right, by master frame (as numbered in After Effects). Centred; then it
+   glides left so her fingers and the drop are the main point of the close-up,
+   and glides back to centre for the rest. Wide screens see the whole frame,
+   so the track does nothing there. */
 const CAMERA = [
   [0, 0.5],
-  [170, 0.5],
-  [215, 0.38], // the hand reaches out
-  [265, 0.36], // the drop lands on her finger
-  [290, 0.46],
-  [310, 0.5],
-  [540, 0.5],
-  [600, 0.64], // the final pose
+  [225, 0.5],
+  [255, 0.36], // her hand reaches out
+  [300, 0.34], // the drop lands on her fingers
+  [320, 0.32], // the finger close-up
+  [335, 0.42],
+  [355, 0.5], // back to centre
 ] as const;
 
 // top on phones (upper half, the text sits at the bottom), then on desktop

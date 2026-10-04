@@ -11,6 +11,11 @@
    same frames; which part of each one they see is the camera track in
    src/components/Hero.tsx, not something baked in here.
 
+   Repeated frames are dropped. A clip slowed down or conformed to another
+   frame rate in After Effects holds a frame twice; scrubbed by scroll, that
+   hold reads as a stutter. manifest.sourceFrames maps each web frame back to
+   its master frame, so the site can keep talking in master frame numbers.
+
      node tools/hero/encode.mjs [--master path] [--quality 92] [--reuse]
 
    --reuse skips decoding when tools/hero/build/frames already holds the
@@ -61,10 +66,32 @@ if (!(REUSE && fs.existsSync(stamp) && fs.readFileSync(stamp, "utf8") === master
   ], { stdio: "inherit" });
   fs.writeFileSync(stamp, masterHash);
 }
-const files = fs.readdirSync(BUILD).filter((f) => /^\d{4}\.png$/.test(f)).sort();
-const N = files.length;
+const all = fs.readdirSync(BUILD).filter((f) => /^\d{4}\.png$/.test(f)).sort();
 
-// 2. encode
+// 2. drop repeats: a frame that barely differs from the last kept one, while
+//    the frames around it move far more (so a slow, still shot is kept)
+const thumbs = [];
+for (const f of all) {
+  thumbs.push(await sharp(path.join(BUILD, f)).resize(240, 135, { fit: "fill" }).greyscale().raw().toBuffer());
+}
+const diff = (a, b) => {
+  let s = 0;
+  for (let k = 0; k < a.length; k++) s += Math.abs(a[k] - b[k]);
+  return s / a.length;
+};
+const steps = thumbs.map((t, i) => (i ? diff(t, thumbs[i - 1]) : Infinity));
+const keep = [0];
+for (let i = 1; i < all.length; i++) {
+  const around = steps.slice(Math.max(1, i - 3), i + 4).filter((x) => x !== steps[i]).sort((a, b) => a - b);
+  const median = around[Math.floor(around.length / 2)] ?? 1;
+  const d = diff(thumbs[i], thumbs[keep[keep.length - 1]]);
+  if (!(d < 0.15 && d < 0.3 * median)) keep.push(i);
+}
+const files = keep.map((i) => all[i]);
+const N = files.length;
+console.log(`${all.length - N} repeated frames dropped`);
+
+// 3. encode
 const FRAMES = path.join(OUT, "frames");
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(FRAMES, { recursive: true });
@@ -83,16 +110,18 @@ const worker = async () => {
 };
 await Promise.all(Array.from({ length: Math.max(1, os.cpus().length - 1) }, worker));
 
-// 3. manifest. The version changes with the master or the quality, and the
+// 4. manifest. The version changes with the master or the quality, and the
 //    site adds it to every frame URL, so a new encode is never served stale.
 const manifest = {
   version: createHash("sha1").update(`${masterHash}:${QUALITY}`).digest("hex").slice(0, 8),
   master: path.relative(ROOT, MASTER).replace(/\\/g, "/"),
   frames: N,
+  masterFrames: all.length,
   fps: FPS,
   width: W,
   height: H,
   quality: QUALITY,
+  sourceFrames: keep, // master frame (0-based) of each web frame
 };
 fs.writeFileSync(path.join(OUT, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
 console.log(`\n${N} frames, ${(bytes / 1048576).toFixed(1)} MB, version ${manifest.version}`);
