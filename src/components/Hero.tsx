@@ -8,7 +8,7 @@ import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import { LogoMark } from "./Logo";
 import { PrimaryButton } from "./PrimaryButton";
 import { APP_URL, CTA_LABEL } from "@/lib/site";
-import { HERO, createHeroPlayer, heroPoster } from "@/lib/heroSequence";
+import { HERO, cameraTrack, createHeroPlayer, heroPoster } from "@/lib/heroSequence";
 
 gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin);
 
@@ -30,6 +30,23 @@ const PLAY_END = 0.74;
 const DRESSED = 520; // the frame where the dress has fully formed
 const at = (frame: number) => PLAY_START + (PLAY_END - PLAY_START) * (frame / (HERO.frames - 1));
 
+/* The camera, for screens narrower than the video (phones, mostly): which
+   part of the frame sits in the middle of the screen, 0 the left edge, 1 the
+   right, by frame. Centred, then it glides left to keep her hand and the
+   drop in view, back to centre for the dress, and right for the final pose,
+   where she stands on the right of the frame. Wide screens see the whole
+   frame, so the track does nothing there. */
+const CAMERA = [
+  [0, 0.5],
+  [170, 0.5],
+  [215, 0.38], // the hand reaches out
+  [265, 0.36], // the drop lands on her finger
+  [290, 0.46],
+  [310, 0.5],
+  [540, 0.5],
+  [600, 0.64], // the final pose
+] as const;
+
 // top on phones (upper half, the text sits at the bottom), then on desktop
 const SPEC = [
   { k: "Bust", v: "92 cm", top: "22%", mdTop: "30%" },
@@ -44,7 +61,7 @@ export function Hero() {
     const el = ref.current;
     if (!el) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const player = createHeroPlayer(el.querySelector<HTMLCanvasElement>("[data-seq]")!);
+    const player = createHeroPlayer(el.querySelector<HTMLCanvasElement>("[data-seq]")!, cameraTrack(CAMERA));
 
     const ctx = gsap.context(() => {
       // 1.1 arrives on load
@@ -129,10 +146,8 @@ export function Hero() {
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-night">
         {/* scene: the poster (first frame) until the canvas has drawn */}
         <div data-scene className="absolute inset-0">
-          <picture>
-            <source media="(max-aspect-ratio: 1/1)" srcSet={heroPoster("portrait")} />
-            <img src={heroPoster("landscape")} alt="" draggable={false} fetchPriority="high" className="absolute inset-0 h-full w-full select-none object-cover" />
-          </picture>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={heroPoster} alt="" draggable={false} fetchPriority="high" className="absolute inset-0 h-full w-full select-none object-cover" />
           <canvas data-seq aria-hidden className="absolute inset-0 h-full w-full opacity-0" />
           <div
             data-dots

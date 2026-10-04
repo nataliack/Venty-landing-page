@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { MAKES } from "./MadeWith";
+import { scrollToElement } from "./SmoothScroll";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -52,7 +53,8 @@ export function SectionNav() {
 
   const go = (id: string) => {
     setOpen(false);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const target = document.getElementById(id);
+    if (target) scrollToElement(target);
   };
 
   return (

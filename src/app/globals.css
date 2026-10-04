@@ -65,9 +65,51 @@ html {
   transition: background-color 0.9s var(--ease-in-out-quart), color 0.9s var(--ease-in-out-quart);
 }
 
-html.lenis,
-html.lenis body {
-  height: auto;
+/* The window never scrolls; the page scrolls inside #scroller. That keeps
+   mobile toolbars at one size (see SmoothScroll.tsx). */
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+.scroller {
+  position: fixed;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  background: var(--bg);
+  transition: background-color 0.9s var(--ease-in-out-quart);
+}
+
+/* Safari 26 colours its status bar and toolbar from a fixed element at the
+   top or bottom edge that is at least 80% wide and 3px tall, and ignores
+   theme-color. These two are that element, in the page colour, above every
+   transparent full-screen layer (wings, dots, loader) that would otherwise
+   be sampled and turn the bars see-through. iOS only (touch-callout). */
+.safari-bar {
+  display: none;
+  position: fixed;
+  left: 0;
+  width: 100%;
+  z-index: 2147483647;
+  pointer-events: none;
+  background-color: var(--bg);
+  transition: background-color 0.9s var(--ease-in-out-quart);
+}
+.safari-bar--top {
+  top: 0;
+  height: 3px;
+}
+.safari-bar--bottom {
+  bottom: -8px;
+  height: 12px;
+}
+@supports (-webkit-touch-callout: none) {
+  .safari-bar {
+    display: block;
+  }
 }
 .lenis.lenis-smooth {
   scroll-behavior: auto !important;
@@ -81,7 +123,6 @@ body {
   font-weight: 300;
   letter-spacing: -0.02em;
   -webkit-font-smoothing: antialiased;
-  overflow-x: clip;
 }
 
 ::selection {

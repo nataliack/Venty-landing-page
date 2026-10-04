@@ -72,6 +72,7 @@ export function Wings() {
       });
     });
 
+    const scroller = document.getElementById("scroller");
     let raf = 0;
     const render = (time: number) => {
       KEYS.forEach((k) => (cur[k] += (target[k] - cur[k]) * (reduce ? 1 : 0.085)));
@@ -82,7 +83,7 @@ export function Wings() {
       wr.style.transform = `rotateY(${cur.a + flap}deg) rotateZ(${-cur.sp}deg)`;
       wl.style.transform = `rotateY(${-(cur.a + flap)}deg) rotateZ(${cur.sp}deg)`;
       rig.style.opacity = String(cur.o * (window.innerWidth < 760 ? 0.55 : 1));
-      stamp.style.transform = `rotate(${window.scrollY * 0.12}deg)`;
+      stamp.style.transform = `rotate(${(scroller?.scrollTop ?? 0) * 0.12}deg)`;
       aura.style.opacity = String(0.35 + cur.o * 0.65);
       aura.style.transform = `translate(calc(-50% + ${cur.x * 0.6}vw), calc(-50% + ${cur.y}vh)) scale(${0.7 + cur.s * 0.3})`;
       if (!reduce) raf = requestAnimationFrame(render);

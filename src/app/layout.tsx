@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { SmoothScroll } from "@/components/SmoothScroll";
@@ -28,17 +28,27 @@ export const metadata: Metadata = {
     "See a dress you love. Wear it, made for you. Venty drafts a printable sewing pattern to your exact measurements and shows it on a 3D model of your own body.",
 };
 
+// Chrome (Android) colours its toolbar from this. Safari 26 ignores it and
+// samples the .safari-bar elements below instead.
+export const viewport: Viewport = {
+  themeColor: "#0b0c15",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en-AU" className={`${familjen.variable} ${bigilla.variable}`}>
       <body className="grain">
-        <div className="dotgrid" aria-hidden="true" />
-        <Wings />
-        <SmoothScroll>
-          <div className="relative z-[1]">{children}</div>
-        </SmoothScroll>
+        {/* the page scrolls in here, never the window: see SmoothScroll */}
+        <div id="scroller" className="scroller">
+          <div className="dotgrid" aria-hidden="true" />
+          <Wings />
+          <SmoothScroll>{children}</SmoothScroll>
+        </div>
+        {/* Safari 26 tints its status bar and toolbar from these */}
+        <div className="safari-bar safari-bar--top" aria-hidden="true" />
+        <div className="safari-bar safari-bar--bottom" aria-hidden="true" />
       </body>
     </html>
   );

@@ -12,10 +12,14 @@ the site only ships what the tools in `tools/` produce into `public/`.
 The hero is the video played by scroll, as an image sequence: every frame of
 the master, WebP, at the master's own resolution.
 
-- `public/hero/sequence/landscape/` full 16:9 frames, for landscape screens
-- `public/hero/sequence/portrait/` 4:5 crops that follow her, for phones
-- `public/hero/sequence/manifest.json` frame count, sizes and a version the
+- `public/hero/sequence/frames/` every frame, 1920×1080
+- `public/hero/sequence/manifest.json` frame count, size and a version the
   site adds to every frame URL, so a new encode is never served from cache
+
+Phones get the same frames. Which part of each frame a narrow screen shows
+is the camera track (`CAMERA` in `src/components/Hero.tsx`): a focus point
+per frame that glides between keys, so it can follow the action without
+re-encoding anything.
 
 To change the video, replace `hero/hero-master.mp4` (same name) and run
 
@@ -24,6 +28,7 @@ node tools/hero/encode.mjs
 ```
 
 Options: `--quality 92` (WebP quality), `--master <path>`. A higher-resolution
-master (for example a 4K upscale) works as is: the sets are written at the
+master (for example a 4K upscale) works as is: the frames are written at the
 master's resolution. If the new cut changes when the dress has formed, update
-`DRESSED` in `src/components/Hero.tsx` (the frame where 1.2 appears).
+`DRESSED` in `src/components/Hero.tsx` (the frame where 1.2 appears) and the
+`CAMERA` keys.

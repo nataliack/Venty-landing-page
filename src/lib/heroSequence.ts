@@ -1,9 +1,10 @@
 /* The hero video, as a scroll-scrubbed image sequence.
 
    Frames come from tools/hero/encode.mjs (master: media/hero/hero-master.mp4)
-   and live in public/hero/sequence/{landscape,portrait}/0001.webp …
-   Landscape screens get the full 16:9 frame, portrait screens a 4:5 crop
-   that follows her, both at the source's own pixels.
+   and live in public/hero/sequence/frames/0001.webp …, full 16:9 frames at
+   the source's own pixels. Every screen gets the same frames; a narrow
+   (portrait) screen sees a slice of each one, and the camera picks which:
+   a horizontal focus per frame, so the slice can glide to follow the action.
 
    Two parts:
    - preloadHero() downloads every frame once, as compressed blobs (tens of
@@ -15,21 +16,28 @@
 
 import manifest from "../../public/hero/sequence/manifest.json";
 
-export type HeroOrient = "landscape" | "portrait";
-
 export const HERO = manifest;
 
-const frameUrl = (o: HeroOrient, i: number) =>
-  `/hero/sequence/${o}/${String(i + 1).padStart(4, "0")}.webp?v=${manifest.version}`;
+const frameUrl = (i: number) => `/hero/sequence/frames/${String(i + 1).padStart(4, "0")}.webp?v=${manifest.version}`;
 
 /** The first frame, for the poster under the canvas */
-export const heroPoster = (o: HeroOrient) => frameUrl(o, 0);
+export const heroPoster = frameUrl(0);
 
-// Chosen once per page load, like the loader: rotating a phone afterwards
-// still works, the canvas covers with whichever set was downloaded.
-let orient: HeroOrient | null = null;
-export const heroOrient = (): HeroOrient =>
-  (orient ??= window.innerWidth / window.innerHeight < 1 ? "portrait" : "landscape");
+/** A camera track: [frame, focus] keys, focus 0 to 1 across the frame width.
+    Between keys the focus eases (smoothstep), so the slice glides. */
+export type CameraKeys = readonly (readonly [number, number])[];
+export const cameraTrack = (keys: CameraKeys) => (f: number) => {
+  if (f <= keys[0][0]) return keys[0][1];
+  for (let k = 1; k < keys.length; k++) {
+    const [f0, x0] = keys[k - 1];
+    const [f1, x1] = keys[k];
+    if (f <= f1) {
+      const t = (f - f0) / (f1 - f0);
+      return x0 + (x1 - x0) * t * t * (3 - 2 * t);
+    }
+  }
+  return keys[keys.length - 1][1];
+};
 
 const blobs: (Blob | null)[] = new Array(manifest.frames).fill(null);
 const waiting = new Map<number, (() => void)[]>();
@@ -41,7 +49,6 @@ let preload: Promise<void> | null = null;
 export function preloadHero(onProgress?: (done: number, total: number) => void) {
   if (onProgress) listeners.add(onProgress);
   if (preload) return preload;
-  const o = heroOrient();
   // coarse to fine: every 16th frame first, so scrubbing works from the start
   const order: number[] = [];
   const seen = new Set<number>();
@@ -56,7 +63,7 @@ export function preloadHero(onProgress?: (done: number, total: number) => void) 
   const fetchFrame = async (i: number) => {
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        const res = await fetch(frameUrl(o, i));
+        const res = await fetch(frameUrl(i));
         if (!res.ok) throw new Error(String(res.status));
         blobs[i] = await res.blob();
         break;
@@ -89,19 +96,22 @@ const decode = (blob: Blob): Promise<Decoded> =>
         im.src = URL.createObjectURL(blob);
       });
 
-const AHEAD = 10; // decoded ahead of the playhead, in the direction of travel
-const BEHIND = 4;
-
-export function createHeroPlayer(canvas: HTMLCanvasElement) {
-  const o = heroOrient();
-  const { width: FW, height: FH } = manifest[o];
+export function createHeroPlayer(canvas: HTMLCanvasElement, camera: (frame: number) => number = () => 0.5) {
+  const { width: FW, height: FH } = manifest;
   const N = manifest.frames;
+  // decoded ahead of the playhead in the direction of travel, and behind it;
+  // a smaller window on touch screens, where memory is tighter
+  const touch = window.matchMedia("(pointer: coarse)").matches;
+  const AHEAD = touch ? 8 : 10;
+  const BEHIND = touch ? 3 : 4;
   const g = canvas.getContext("2d", { alpha: false })!;
   const frames = new Map<number, Decoded>();
   const pending = new Set<number>();
   let target = 0;
+  let focus = camera(0);
   let dir = 1;
   let drawn = -1;
+  let drawnX = NaN;
   let destroyed = false;
 
   const draw = (force = false) => {
@@ -111,16 +121,21 @@ export function createHeroPlayer(canvas: HTMLCanvasElement) {
       if (frames.has(target - d * dir)) k = target - d * dir;
       else if (frames.has(target + d * dir)) k = target + d * dir;
     }
-    if (k < 0 || (k === drawn && !force)) return;
+    if (k < 0) return;
+    if (k === drawn && !force && !moved()) return;
     const img = frames.get(k)!;
     const cw = canvas.width;
     const ch = canvas.height;
     const s = Math.max(cw / FW, ch / FH);
+    // the focus point goes to the middle of the screen, without ever
+    // pulling an edge of the frame into view
+    const x = Math.round(Math.min(0, Math.max(cw - FW * s, cw / 2 - focus * FW * s)));
     g.imageSmoothingEnabled = true;
     g.imageSmoothingQuality = "high";
-    g.drawImage(img, (cw - FW * s) / 2, (ch - FH * s) / 2, FW * s, FH * s);
+    g.drawImage(img, x, (ch - FH * s) / 2, FW * s, FH * s);
     if (drawn < 0) canvas.style.opacity = "1"; // the poster underneath until now
     drawn = k;
+    drawnX = x;
   };
 
   const want = (i: number) => {
@@ -145,6 +160,13 @@ export function createHeroPlayer(canvas: HTMLCanvasElement) {
         if (Math.abs(i - target) < Math.abs(drawn - target) || drawn < 0) draw();
       })
       .catch(() => pending.delete(i));
+  };
+
+  // whether the camera has moved the frame by a pixel since the last draw
+  const moved = () => {
+    const s = Math.max(canvas.width / FW, canvas.height / FH);
+    const x = Math.round(Math.min(0, Math.max(canvas.width - FW * s, canvas.width / 2 - focus * FW * s)));
+    return x !== drawnX;
   };
 
   const update = () => {
@@ -183,8 +205,11 @@ export function createHeroPlayer(canvas: HTMLCanvasElement) {
   return {
     /** 0 is the first frame, 1 the last */
     set(progress: number) {
-      const f = Math.round(Math.min(1, Math.max(0, progress)) * (N - 1));
-      if (f === target) return;
+      const pos = Math.min(1, Math.max(0, progress)) * (N - 1);
+      // the camera follows the exact scroll position, so it glides between frames
+      focus = camera(pos);
+      const f = Math.round(pos);
+      if (f === target) return draw();
       dir = f > target ? 1 : -1;
       target = f;
       update();

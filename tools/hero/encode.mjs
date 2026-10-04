@@ -1,16 +1,15 @@
 /* Hero video → scroll sequence.
 
    Reads the master (media/hero/hero-master.mp4), decodes every frame at full
-   quality and writes two WebP sets plus a manifest the site reads:
+   quality and writes them as WebP, plus a manifest the site reads:
 
-     public/hero/sequence/landscape/0001.webp …   full frame, source size
-     public/hero/sequence/portrait/0001.webp …    4:5 crop that follows her
-     public/hero/sequence/manifest.json           counts, sizes, version
+     public/hero/sequence/frames/0001.webp …   every frame, source size
+     public/hero/sequence/manifest.json        count, size, version
 
-   Nothing is ever scaled up or down: both sets keep every source pixel, so
-   the only resample is the one the browser does to fit the screen.
-   The portrait crop is centred on her: each frame's brightness-weighted
-   centre, smoothed across neighbouring frames so the crop glides.
+   Nothing is ever scaled up or down: every source pixel is kept, so the only
+   resample is the one the browser does to fit the screen. Phones get the
+   same frames; which part of each one they see is the camera track in
+   src/components/Hero.tsx, not something baked in here.
 
      node tools/hero/encode.mjs [--master path] [--quality 92] [--reuse]
 
@@ -34,7 +33,6 @@ const opt = (name, dflt) => {
 const MASTER = path.resolve(ROOT, opt("master", "media/hero/hero-master.mp4"));
 const QUALITY = Number(opt("quality", "92"));
 const REUSE = args.includes("--reuse");
-const PORTRAIT = 4 / 5; // width / height of the portrait crop
 const BUILD = path.join(ROOT, "tools/hero/build/frames");
 const OUT = path.join(ROOT, "public/hero/sequence");
 
@@ -66,73 +64,35 @@ if (!(REUSE && fs.existsSync(stamp) && fs.readFileSync(stamp, "utf8") === master
 const files = fs.readdirSync(BUILD).filter((f) => /^\d{4}\.png$/.test(f)).sort();
 const N = files.length;
 
-// 2. where she is in each frame, for the portrait crop
-const cw = Math.round((H * PORTRAIT) / 2) * 2;
-const centres = [];
-for (const f of files) {
-  const { data, info } = await sharp(path.join(BUILD, f)).resize(192, 108, { fit: "fill" }).greyscale().raw().toBuffer({ resolveWithObject: true });
-  const sorted = Uint8Array.from(data).sort();
-  const floor = sorted[Math.floor(sorted.length * 0.6)]; // the dark background
-  let sum = 0;
-  let wsum = 0;
-  for (let y = 0; y < info.height; y++) {
-    for (let x = 0; x < info.width; x++) {
-      const w = Math.max(0, data[y * info.width + x] - floor) ** 2;
-      sum += w * (x + 0.5);
-      wsum += w;
-    }
-  }
-  centres.push(wsum ? sum / wsum / info.width : 0.5);
-}
-const SIGMA = 12; // frames
-const smooth = centres.map((_, i) => {
-  let s = 0;
-  let ws = 0;
-  for (let k = -3 * SIGMA; k <= 3 * SIGMA; k++) {
-    const j = Math.min(N - 1, Math.max(0, i + k));
-    const w = Math.exp(-(k * k) / (2 * SIGMA * SIGMA));
-    s += centres[j] * w;
-    ws += w;
-  }
-  return s / ws;
-});
-const left = smooth.map((c) => Math.min(W - cw, Math.max(0, Math.round(c * W - cw / 2))));
-
-// 3. encode both sets
-for (const set of ["landscape", "portrait"]) {
-  fs.rmSync(path.join(OUT, set), { recursive: true, force: true });
-  fs.mkdirSync(path.join(OUT, set), { recursive: true });
-}
+// 2. encode
+const FRAMES = path.join(OUT, "frames");
+fs.rmSync(OUT, { recursive: true, force: true });
+fs.mkdirSync(FRAMES, { recursive: true });
 const webp = { quality: QUALITY, effort: 6, smartSubsample: true };
-const bytes = { landscape: 0, portrait: 0 };
+let bytes = 0;
 let next = 0;
 let done = 0;
 const worker = async () => {
   while (next < N) {
     const i = next++;
-    const src = path.join(BUILD, files[i]);
-    const name = `${String(i + 1).padStart(4, "0")}.webp`;
-    const land = await sharp(src).webp(webp).toBuffer();
-    const port = await sharp(src).extract({ left: left[i], top: 0, width: cw, height: H }).webp(webp).toBuffer();
-    fs.writeFileSync(path.join(OUT, "landscape", name), land);
-    fs.writeFileSync(path.join(OUT, "portrait", name), port);
-    bytes.landscape += land.length;
-    bytes.portrait += port.length;
+    const buf = await sharp(path.join(BUILD, files[i])).webp(webp).toBuffer();
+    fs.writeFileSync(path.join(FRAMES, `${String(i + 1).padStart(4, "0")}.webp`), buf);
+    bytes += buf.length;
     if (++done % 50 === 0 || done === N) process.stdout.write(`\rencoded ${done}/${N}`);
   }
 };
 await Promise.all(Array.from({ length: Math.max(1, os.cpus().length - 1) }, worker));
 
-const version = createHash("sha1").update(`${masterHash}:${QUALITY}:${PORTRAIT}`).digest("hex").slice(0, 8);
+// 3. manifest. The version changes with the master or the quality, and the
+//    site adds it to every frame URL, so a new encode is never served stale.
 const manifest = {
-  version,
+  version: createHash("sha1").update(`${masterHash}:${QUALITY}`).digest("hex").slice(0, 8),
   master: path.relative(ROOT, MASTER).replace(/\\/g, "/"),
   frames: N,
   fps: FPS,
-  landscape: { width: W, height: H },
-  portrait: { width: cw, height: H },
+  width: W,
+  height: H,
   quality: QUALITY,
 };
 fs.writeFileSync(path.join(OUT, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
-const mb = (b) => (b / 1048576).toFixed(1);
-console.log(`\nlandscape ${mb(bytes.landscape)} MB, portrait ${mb(bytes.portrait)} MB, version ${version}`);
+console.log(`\n${N} frames, ${(bytes / 1048576).toFixed(1)} MB, version ${manifest.version}`);

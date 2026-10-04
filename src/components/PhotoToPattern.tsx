@@ -245,7 +245,7 @@ export function PhotoToPattern() {
 
               {/* A: the scan */}
               <g data-scan-g opacity="0" clipPath="url(#ptp-card)">
-                <rect data-scan x="130" width="540" height="90" fill="url(#ptp-scan)" transform="translate(0 -90)" />
+                <rect data-scan x="130" y="40" width="540" height="90" fill="url(#ptp-scan)" transform="translate(0 -90)" />
               </g>
 
               {/* C: measurements */}

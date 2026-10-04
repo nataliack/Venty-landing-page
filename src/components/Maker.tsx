@@ -52,6 +52,7 @@ function Halftone() {
       g.setTransform(dpr, 0, 0, dpr, 0, 0);
       const cols = Math.floor(w / STEP);
       const rows = Math.floor(h / STEP);
+      if (cols < 1 || rows < 1) return; // not laid out yet; the observer calls again
       const off = document.createElement("canvas");
       off.width = cols;
       off.height = rows;
