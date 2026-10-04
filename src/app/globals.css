@@ -842,3 +842,143 @@ body {
   -webkit-mask-image: radial-gradient(circle at 50% 55%, #000 calc(var(--r) - 25%), transparent var(--r));
   mask-image: radial-gradient(circle at 50% 55%, #000 calc(var(--r) - 25%), transparent var(--r));
 }
+
+/* ------------------------------------------------------------------
+   Hero objects. Placed every frame by Hero.tsx in screen px, so they
+   stay on her as the video and the phone camera move.
+   ------------------------------------------------------------------ */
+
+/* A dimension line across her body: dashed, with end ticks and a glowing
+   point where it meets her. The row is positioned at the line's left end
+   and sized to its width; the label sits above it. */
+.hero-dim {
+  --nest: 0;
+  height: 0;
+  will-change: transform, width;
+  text-shadow: 0 1px 14px rgb(11 12 21 / 0.95);
+}
+.hero-dim__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, var(--color-cloud) 0 6px, transparent 6px 11px);
+  box-shadow: 0 0 10px rgb(11 12 21 / 0.6);
+}
+.hero-dim__line::before,
+.hero-dim__line::after {
+  content: "";
+  position: absolute;
+  top: -5px;
+  width: 7px;
+  height: 11px;
+  border-left: 1px solid var(--color-cloud);
+}
+.hero-dim__line::before {
+  left: 0;
+}
+.hero-dim__line::after {
+  right: -6px;
+}
+/* contact points, at both ends */
+.hero-dim::before,
+.hero-dim::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-cloud);
+  box-shadow: 0 0 12px 3px var(--color-cornflower);
+}
+.hero-dim::before {
+  left: -3px;
+}
+.hero-dim::after {
+  right: -3px;
+}
+/* the graded nest: ghost lines for the other sizes, smaller ones above,
+   larger ones below, shown while the line grades */
+.hero-dim__nest {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--color-cornflower);
+  transform: translate(-50%, calc((var(--n) - 1) * 70px)) scaleX(var(--n));
+  opacity: calc(var(--nest) * 0.55);
+}
+.hero-dim__label {
+  position: absolute;
+  left: 0;
+  bottom: 10px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+/* the focus ring on the drop: a dashed ring that turns slowly, with ticks */
+.hero-reticle {
+  width: 0;
+  height: 0;
+  will-change: transform;
+}
+.hero-reticle > span {
+  position: absolute;
+  left: -32px;
+  top: -32px;
+  width: 64px;
+  height: 64px;
+  border: 1px dashed var(--color-cloud);
+  border-radius: 50%;
+  box-shadow: 0 0 22px rgb(104 126 245 / 0.55), inset 0 0 14px rgb(104 126 245 / 0.35);
+  animation: reticle-turn 7s linear infinite;
+}
+.hero-reticle::before,
+.hero-reticle::after {
+  content: "";
+  position: absolute;
+  background: var(--color-cornflower);
+}
+.hero-reticle::before {
+  left: -48px;
+  top: 0;
+  width: 96px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--color-cornflower) 0 12px, transparent 12px 84px, var(--color-cornflower) 84px);
+}
+.hero-reticle::after {
+  left: 0;
+  top: -48px;
+  width: 1px;
+  height: 96px;
+  background: linear-gradient(180deg, var(--color-cornflower) 0 12px, transparent 12px 84px, var(--color-cornflower) 84px);
+}
+@keyframes reticle-turn {
+  to { transform: rotate(360deg); }
+}
+
+/* the scan beam that reads her as she rises, with a faint wash above it */
+.hero-scan {
+  height: 2px;
+  will-change: transform, width;
+  background: linear-gradient(90deg, transparent, var(--color-cornflower) 18%, var(--color-cloud) 50%, var(--color-cornflower) 82%, transparent);
+  box-shadow: 0 0 18px 2px rgb(104 126 245 / 0.7);
+}
+.hero-scan::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+  height: 140px;
+  background: linear-gradient(180deg, transparent, rgb(104 126 245 / 0.16));
+  mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-reticle > span { animation: none; }
+}

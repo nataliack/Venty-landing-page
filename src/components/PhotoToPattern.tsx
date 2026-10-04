@@ -54,7 +54,7 @@ const FORM =
   "M380 100 L420 100 L422 140 Q470 146 508 160 Q520 170 512 200 L502 232 Q512 270 506 305 Q498 345 484 385 Q500 430 510 480 Q512 520 500 545 L300 545 Q288 520 290 480 Q300 430 316 385 Q302 345 294 305 Q288 270 298 232 L288 200 Q280 170 292 160 Q330 146 378 140 Z";
 
 const BEATS = [
-  { k: "a", word: "Photo", h: "Start with any photo.", p: "A screenshot, a Pinterest save, a page from a magazine. If you can see the garment, it's enough to start." },
+  { k: "a", word: "Idea", h: "Start with any idea.", p: "A photo, a sketch on paper, or a few words describing it. If you can picture the garment, Venty can draft it." },
   { k: "b", word: "Pieces", h: "Venty drafts the pieces.", p: "Necklines, seams, length and cut become flat pattern pieces, with seam allowance, grainlines and notches." },
   { k: "c", word: "Yours", h: "Drafted on your body.", p: "Every piece is drawn from your measurements. See it on your body before you cut a thing." },
 ];

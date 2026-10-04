@@ -30,6 +30,16 @@ export const heroFrame = (master: number) => {
 
 const frameUrl = (i: number) => `/hero/sequence/frames/${String(i + 1).padStart(4, "0")}.webp?v=${manifest.version}`;
 
+/** Fractional web position of a master frame, for smooth scrubbing */
+export const heroPosition = (master: number) => {
+  const src = manifest.sourceFrames;
+  if (master <= src[0]) return 0;
+  for (let k = 1; k < src.length; k++) {
+    if (src[k] >= master) return k - 1 + (master - src[k - 1]) / (src[k] - src[k - 1]);
+  }
+  return src.length - 1;
+};
+
 /** The first frame, for the poster under the canvas */
 export const heroPoster = frameUrl(0);
 
@@ -216,6 +226,14 @@ export function createHeroPlayer(canvas: HTMLCanvasElement, camera: (frame: numb
     waiting.set(i, list);
   };
 
+  // where the frame sits in the canvas box, in CSS px: scale and offset
+  const view = () => {
+    const cw = canvas.clientWidth;
+    const ch = canvas.clientHeight;
+    const s = Math.max(cw / FW, ch / FH);
+    return { s, x: Math.min(0, Math.max(cw - FW * s, cw / 2 - focus * FW * s)), y: (ch - FH * s) / 2 };
+  };
+
   // whether the camera has moved the frame by a pixel since the last draw
   const moved = () => {
     const s = Math.max(canvas.width / FW, canvas.height / FH);
@@ -261,7 +279,11 @@ export function createHeroPlayer(canvas: HTMLCanvasElement, camera: (frame: numb
   return {
     /** 0 is the first frame, 1 the last */
     set(progress: number) {
-      const pos = Math.min(1, Math.max(0, progress)) * (N - 1);
+      this.setPosition(Math.min(1, Math.max(0, progress)) * (N - 1));
+    },
+    /** A web frame position, fractional */
+    setPosition(position: number) {
+      const pos = Math.min(N - 1, Math.max(0, position));
       // the camera follows the exact scroll position, so it glides between frames
       focus = camera(pos);
       const f = Math.round(pos);
@@ -269,6 +291,12 @@ export function createHeroPlayer(canvas: HTMLCanvasElement, camera: (frame: numb
       dir = f > target ? 1 : -1;
       target = f;
       update();
+    },
+    /** A point of the video frame (source px) on screen, CSS px from the
+        canvas's top left: what an overlay needs to stay stuck to her */
+    project(fx: number, fy: number) {
+      const v = view();
+      return { x: v.x + fx * v.s, y: v.y + fy * v.s, s: v.s };
     },
     destroy() {
       destroyed = true;
