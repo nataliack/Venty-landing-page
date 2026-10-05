@@ -3,7 +3,19 @@
    an entry here. "native" entries render a component from
    _components/registry.tsx; "frame" entries embed an existing route. */
 
+export type Group = "loaders" | "sections" | "gradients" | "colour" | "playground";
+
+export const GROUPS: { key: Group; label: string }[] = [
+  { key: "loaders", label: "Loaders" },
+  { key: "sections", label: "Sections" },
+  { key: "gradients", label: "Gradients" },
+  { key: "colour", label: "Colour" },
+  { key: "playground", label: "Playground" },
+];
+
 export type Experiment = {
+  /** which shelf it sits on in the lab; new entries should set it */
+  group?: Group;
   slug: string;
   no: number;
   title: string;
@@ -209,5 +221,15 @@ export const EXPERIMENTS: Experiment[] = [
     src: "/styleguide",
   },
 ];
+
+/* Older entries without a group are placed by slug */
+export const groupOf = (e: Experiment): Group => {
+  if (e.group) return e.group;
+  if (e.slug.startsWith("loader")) return "loaders";
+  if (e.slug === "home") return "sections";
+  if (e.slug === "gradients" || e.slug === "tiles") return "gradients";
+  if (e.slug === "pairs" || e.slug === "styleguide") return "colour";
+  return "playground";
+};
 
 export const findExperiment = (slug: string) => EXPERIMENTS.findIndex((e) => e.slug === slug);
