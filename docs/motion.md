@@ -55,6 +55,15 @@ Text never just fades in. It rises from behind a mask.
 
 Text masks get room for ascenders, descenders and swashes with `padMasks`
 and `.line-mask` (`src/lib/reveal.ts`), so nothing is clipped.
+Text waiting to rise sits at `HIDDEN` (160%), below its padded mask: any
+less and swashes peek out.
+
+Sections below the hero reveal with `useReveals(root)` (`src/lib/useReveals.ts`):
+each `[data-reveal]` group plays once when its top reaches 78% of the screen
+(or its own `data-reveal="top 70%"`), rising its `[data-rise]` spans
+(`textIn`), splitting and rising its `[data-lines]` text (`linesIn`) and
+fading up its `[data-up]` objects (`fadeUp`). The group gets `.is-in`, which
+CSS uses to start the small pieces inside it (ink drawing, chat bubbles).
 
 ## Hover and press
 
@@ -94,3 +103,18 @@ tab arrives with the loading screen, above it, and is already in.
 | Pattern | How | Used |
 | --- | --- | --- |
 | Dither rise | The next section is pulled up over the last screen of the one before (`margin-top: -100svh`, higher `z-index`), so it scrolls up over the pinned, still section 1:1 with the scroll. Above its top edge its colour dithers in (`DitherEdge`): an 8px screen grid, each cell 4 x 4 squares of 2px switching on in Bayer order, denser toward the edge, over a band 32% of the screen tall with a soft noise wobble. The grid is fixed to the screen, so squares flip on in place as the edge rises. Its copy reveals once it has arrived (`top 20%`). Overlapping theme zones resolve to the later one (`ThemeZones`); a zone can switch at its own point with `data-theme-at` | Hero to Made to measure |
+
+Every hand-off is a different textile, in the colour of the section rising:
+
+| From → to | Rising | Pattern | Over |
+| --- | --- | --- | --- |
+| Hero → Made to measure | cloud | squares, lumps | the pinned video |
+| How it works → Features | night | weave | the held end of the table (desktop) |
+| What you can make → Made with Venty | cloud | stitch | the held last garment (desktop) |
+| FAQ → Meet the maker | night | cross-stitch | the FAQ's empty foot |
+| Closing scene → footer | cloud | squares, wave | the held last line |
+
+A pinned section that something rises over holds one extra screen, still, at
+its end. Without a pin (phones, the FAQ), the band rises through empty room
+left at the foot of the section before (about 42svh), never over content.
+Night meets night with a stitched seam instead (Features → What you can make).

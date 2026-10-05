@@ -3,20 +3,13 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { SplitText } from "gsap/SplitText";
-import { HIDDEN, padMasks } from "@/lib/reveal";
 
-gsap.registerPlugin(ScrollTrigger, SplitText);
+gsap.registerPlugin(ScrollTrigger);
 
-/* Meet the maker. Natalia's portrait is redrawn as a halftone of dots, the
-   same dots as the button and the wings. They gather from a scatter when
-   the section arrives and lean away from the pointer. */
-
-// DRAFT copy: confirm Natalia's story and wording with her before launch.
-const STORY = [
-  "Natalia built Venty as her capstone project at QUT, in Brisbane.",
-  "It starts from a problem anyone who sews knows well. Shop patterns are drafted for a standard body, so most makes begin with redrafting. Venty starts from your measurements instead, and drafts the pattern around them.",
-];
+/* A portrait redrawn as a halftone of dots, the same dots as the button and
+   the wings. They gather from a scatter when it comes into view and lean
+   away from the pointer. A small photo is enough: it is sampled at one dot
+   every few px. (From the earlier Meet the maker section.) */
 
 const STEP = 5; // px between dot centres
 const RADIUS = 60; // pointer influence
@@ -24,7 +17,7 @@ const PUSH = 18;
 
 type Dot = { hx: number; hy: number; x: number; y: number; vx: number; vy: number; r: number; c: string };
 
-function Halftone() {
+export function Halftone({ src, label }: { src: string; label: string }) {
   const wrap = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -156,7 +149,7 @@ function Halftone() {
     };
 
     img.onload = build;
-    img.src = "/hero/natalia.png";
+    img.src = src;
     const ro = new ResizeObserver(build);
     ro.observe(el);
     const st = ScrollTrigger.create({ trigger: el, start: "top 75%", onEnter: gather, onEnterBack: gather });
@@ -169,63 +162,11 @@ function Halftone() {
       el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerleave", onLeave);
     };
-  }, []);
+  }, [src]);
 
   return (
-    <div ref={wrap} className="relative aspect-[126/132] w-full overflow-hidden rounded-t-full bg-[radial-gradient(80%_70%_at_50%_30%,#1b2035,var(--color-night))]">
-      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" role="img" aria-label="Portrait of Natalia Chamon, drawn in dots" />
+    <div ref={wrap} className="mk-tone">
+      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" role="img" aria-label={label} />
     </div>
-  );
-}
-
-export function Maker() {
-  const ref = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const ctx = gsap.context(() => {
-      const split = SplitText.create("[data-name]", { type: "chars", mask: "chars" });
-      padMasks(split.masks);
-      gsap.from(split.chars, {
-        yPercent: HIDDEN,
-        stagger: 0.035,
-        duration: 1.3,
-        ease: "expo.out",
-        scrollTrigger: { trigger: "[data-name]", start: "top 80%" },
-      });
-      gsap.from("[data-story] > *", {
-        y: 30,
-        opacity: 0,
-        stagger: 0.1,
-        duration: 1.2,
-        ease: "expo.out",
-        scrollTrigger: { trigger: "[data-story]", start: "top 80%" },
-      });
-    }, el);
-    return () => ctx.revert();
-  }, []);
-
-  return (
-    <section ref={ref} id="maker" data-wing="spread" data-nav="Meet the maker" data-theme-zone="dark" className="relative overflow-hidden px-5 py-[16vh] md:px-10">
-      <p className="eyebrow text-periwinkle">Meet the maker</p>
-      <h2 data-name className="font-display mt-6 text-[clamp(3.6rem,13vw,14rem)] leading-[0.9] text-fg">
-        Natalia Chamon
-      </h2>
-
-      <div className="mt-[8vh] grid gap-12 md:grid-cols-12 md:items-end">
-        <div className="mx-auto w-full max-w-[380px] md:col-span-5 md:mx-0">
-          <Halftone />
-          <p className="eyebrow mt-4 text-faint">Natalia Chamon · Designer of Venty</p>
-        </div>
-        <div data-story className="flex flex-col gap-6 md:col-span-6 md:col-start-7">
-          {STORY.map((p, i) => (
-            <p key={i} className={i === 0 ? "headline text-[clamp(1.7rem,3vw,3rem)] text-fg" : "body-lg max-w-[44ch] text-muted"}>
-              {p}
-            </p>
-          ))}
-        </div>
-      </div>
-    </section>
   );
 }

@@ -1,0 +1,221 @@
+/* 5. What you can make (make/Make.tsx). Night. Scoped to .wm. */
+
+.wm {
+  --night: #0b0c15;
+  --ink: #121524;
+  --steel: #485f88;
+  --peri: #9daccd;
+  --corn: #687ef5;
+  --cloud: #eff4ff;
+  --expo: cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  z-index: 10;
+  color: var(--cloud);
+  background: radial-gradient(70% 50% at 50% 100%, rgb(104 126 245 / 0.14), transparent 70%), var(--night);
+}
+/* desktop: the open run (RUN screens), a screen to stand in, and the
+   screen Made with Venty rises over */
+@media (min-width: 1024px) {
+  .wm { height: calc(100svh * (1 + 2.4 + 1)); }
+}
+
+.wm-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: clamp(80px, 12svh, 120px) 0 calc(42svh + 48px); /* phones: room for the light edge below */
+}
+@media (min-width: 1024px) {
+  .wm-stage {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    gap: 3.4svh;
+    padding: clamp(72px, 11svh, 120px) 48px 5svh;
+    overflow: hidden;
+  }
+}
+
+/* a stitched seam across the top: night meets night */
+.wm-seam {
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 16px;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, rgb(239 244 255 / 0.28) 0 8px, transparent 8px 14px);
+}
+@media (min-width: 1024px) { .wm-seam { left: 48px; right: 48px; } }
+
+/* ---- the head -------------------------------------------------------- */
+.wm-head { position: relative; display: flex; flex-direction: column; gap: 14px; padding: 0 16px; }
+@media (min-width: 1024px) { .wm-head { padding: 0; } }
+.wm-eyebrow { font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--peri); }
+.wm-title {
+  display: flex;
+  flex-direction: column;
+  max-width: 18ch;
+  font-weight: 400;
+  font-size: clamp(2.2rem, 4.6vw, 4.6rem);
+  line-height: 1.02;
+  letter-spacing: -0.05em;
+}
+@media (min-width: 1024px) { .wm-title { max-width: none; } }
+.wm-title em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--corn); }
+.wm-count {
+  display: none;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  font-family: var(--font-bigilla), Georgia, serif;
+  font-size: 22px;
+  color: var(--peri);
+}
+.wm-count span { display: inline-block; color: var(--cloud); animation: wm-roll 0.6s var(--expo); }
+@keyframes wm-roll { from { translate: 0 70%; opacity: 0; } }
+@media (min-width: 1024px) { .wm-count { display: block; } }
+
+/* ---- the row --------------------------------------------------------- */
+.wm-row {
+  display: flex;
+  gap: 10px;
+  padding: 0 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  list-style: none;
+}
+.wm-row::-webkit-scrollbar { display: none; }
+@media (min-width: 1024px) {
+  .wm-row { flex: 1; min-height: 0; gap: 12px; padding: 0; overflow: visible; }
+}
+
+.wm-panel {
+  position: relative;
+  flex: none;
+  width: min(78vw, 340px);
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 24px;
+  scroll-snap-align: center;
+  background: #10121c;
+  box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.08);
+}
+@media (min-width: 1024px) {
+  .wm-panel {
+    flex: 1 1 0;
+    width: auto;
+    aspect-ratio: auto;
+    min-width: 0;
+    transition: flex-grow 1.1s var(--expo);
+  }
+  .wm-panel.is-on { flex-grow: 3.6; }
+}
+.wm-panel__hit { position: absolute; inset: 0; z-index: 6; border-radius: inherit; cursor: pointer; }
+.wm-panel__hit:focus-visible { outline: 2px solid var(--corn); outline-offset: -2px; }
+.wm-panel__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(0.85) brightness(0.55);
+  scale: 1.08;
+  transition: filter 1.1s var(--expo), scale 1.6s var(--expo);
+}
+.wm-panel.is-on .wm-panel__img { filter: none; scale: 1; }
+@media (hover: hover) and (min-width: 1024px) {
+  .wm-panel:not(.is-on):hover .wm-panel__img { filter: grayscale(0.5) brightness(0.75); }
+}
+.wm-panel__shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(11 12 21 / 0.5) 0%, transparent 30%, transparent 55%, rgb(11 12 21 / 0.85) 100%);
+}
+.wm-panel__n {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 2;
+  font-family: var(--font-bigilla), Georgia, serif;
+  font-size: 18px;
+  color: var(--peri);
+  transition: color 0.6s;
+}
+.wm-panel.is-on .wm-panel__n { color: var(--cloud); }
+
+/* the pattern, drawn over the photograph in light */
+.wm-panel__draft {
+  position: absolute;
+  top: 16%;
+  right: 8%;
+  z-index: 2;
+  width: min(30%, 190px);
+  overflow: visible;
+  opacity: 0;
+  transition: opacity 0.6s var(--expo);
+}
+.wm-panel.is-on .wm-panel__draft { opacity: 1; transition-delay: 0.35s; }
+.wm-draft__cut {
+  fill: rgb(239 244 255 / 0.06);
+  stroke: var(--cloud);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  filter: drop-shadow(0 0 6px rgb(104 126 245 / 0.9));
+  transition: stroke-dashoffset 1.6s var(--expo);
+}
+.wm-panel.is-on .wm-draft__cut { stroke-dashoffset: 0; transition-delay: 0.4s; }
+.wm-draft__seam { fill: none; stroke: var(--corn); stroke-width: 0.9; stroke-dasharray: 3 3; }
+
+/* closed (desktop): the name stands up the side */
+.wm-panel__side {
+  display: none;
+  position: absolute;
+  left: 18px;
+  bottom: 22px;
+  z-index: 2;
+  writing-mode: vertical-rl;
+  rotate: 180deg;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  color: var(--peri);
+  transition: opacity 0.5s var(--expo);
+}
+@media (min-width: 1024px) {
+  .wm-panel__side { display: block; }
+  .wm-panel.is-on .wm-panel__side { opacity: 0; }
+}
+/* open: the name, large, and its pieces */
+.wm-panel__body {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  z-index: 2;
+}
+.wm-panel__name {
+  font-family: var(--font-bigilla), Georgia, serif;
+  font-weight: 700;
+  font-size: clamp(2.6rem, 5.4vw, 5.6rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+.wm-panel__pieces { margin-top: 8px; font-size: 14px; letter-spacing: -0.01em; color: var(--peri); }
+@media (min-width: 1024px) {
+  .wm-panel__body { left: 28px; bottom: 26px; min-width: 22ch; opacity: 0; translate: 0 24px; transition: opacity 0.5s var(--expo), translate 0.9s var(--expo); }
+  .wm-panel.is-on .wm-panel__body { opacity: 1; translate: 0 0; transition-delay: 0.3s; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wm *,
+  .wm *::before,
+  .wm *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+}

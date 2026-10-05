@@ -13,6 +13,7 @@ const PATTERNS: { key: DitherPattern; label: string }[] = [
   { key: "dots", label: "Dots" },
   { key: "stitch", label: "Stitch" },
   { key: "weave", label: "Weave" },
+  { key: "cross", label: "Cross-stitch" },
 ];
 const EDGES: { key: DitherEdgeMode; label: string }[] = [
   { key: "noise", label: "Lumps" },

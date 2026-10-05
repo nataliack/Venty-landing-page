@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { MAKES } from "./MadeWith";
+import { MAKES } from "./made/MadeWith";
 import { scrollToElement } from "./SmoothScroll";
 
 gsap.registerPlugin(ScrollTrigger);

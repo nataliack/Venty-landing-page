@@ -1,0 +1,138 @@
+/* 6. Made with Venty (made/MadeWith.tsx). Cloud, ink type. Scoped to .mw. */
+
+.mw {
+  --ink: #121524;
+  --navy: #384c65;
+  --steel: #485f88;
+  --corn: #687ef5;
+  --cloud: #eff4ff;
+  --expo: cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  z-index: 10;
+  isolation: isolate;
+  padding: clamp(96px, 16svh, 170px) 0 clamp(72px, 10svh, 120px);
+  color: var(--ink);
+  background: var(--cloud);
+}
+/* desktop: it rises over the last (held) screen of What you can make */
+@media (min-width: 1024px) {
+  .mw { margin-top: -100svh; }
+}
+.mw-dots {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(rgb(11 12 21 / 0.18) 1px, transparent 1.3px);
+  background-size: 18px 18px;
+  -webkit-mask-image: radial-gradient(ellipse 60% 40% at 50% 30%, #000 20%, transparent 100%);
+  mask-image: radial-gradient(ellipse 60% 40% at 50% 30%, #000 20%, transparent 100%);
+}
+
+.mw-head { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 0 16px; text-align: center; }
+.mw-eyebrow { font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--navy); }
+.mw-title {
+  display: flex;
+  flex-direction: column;
+  font-weight: 400;
+  font-size: clamp(2.3rem, 5.4vw, 5.2rem);
+  line-height: 1.02;
+  letter-spacing: -0.05em;
+}
+.mw-title em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--corn); }
+
+/* ---- the line -------------------------------------------------------- */
+.mw-line {
+  position: relative;
+  margin-top: clamp(40px, 7svh, 80px);
+  padding: 0 0 30px;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.mw-line[data-held] { cursor: grabbing; }
+/* the cord: the cards slide along it */
+.mw-line::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: linear-gradient(180deg, rgb(56 76 101 / 0.5), rgb(56 76 101 / 0.2));
+  box-shadow: 0 3px 4px rgb(30 44 78 / 0.12);
+  pointer-events: none;
+}
+.mw-track {
+  display: flex;
+  gap: clamp(18px, 2.4vw, 36px);
+  width: max-content;
+  padding: 0 clamp(18px, 2.4vw, 36px) 0 0;
+  list-style: none;
+  will-change: transform;
+}
+.mw-card {
+  position: relative;
+  flex: none;
+  width: clamp(220px, 21vw, 300px);
+  padding-top: 14px;
+  transform-origin: 50% 0;
+  animation: mw-sway 5.5s ease-in-out infinite alternate;
+  animation-delay: calc(var(--i) * -0.9s);
+}
+.mw-card:nth-child(even) { margin-top: 18px; animation-duration: 6.4s; }
+@keyframes mw-sway { from { rotate: -1.6deg; } to { rotate: 1.4deg; } }
+.mw-peg {
+  position: absolute;
+  top: 2px;
+  z-index: 2;
+  width: 9px;
+  height: 30px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #8c9cf8, #687ef5 60%, #5568d8);
+  box-shadow: -1px 2px 3px rgb(18 21 36 / 0.25);
+}
+.mw-peg::after { content: ""; position: absolute; left: 3px; top: 13px; width: 3px; height: 3px; border-radius: 50%; background: var(--cloud); }
+.mw-peg.is-l { left: 22%; rotate: -4deg; }
+.mw-peg.is-r { right: 22%; rotate: 5deg; }
+.mw-card__paper {
+  padding: 10px 10px 16px;
+  border-radius: 6px;
+  background: linear-gradient(225deg, #fff, #f5f7fd);
+  box-shadow: 0 0 0 0.5px rgb(18 21 36 / 0.08), -6px 14px 24px -12px rgb(30 44 78 / 0.4), -20px 34px 44px -26px rgb(30 44 78 / 0.32);
+}
+.mw-card__paper img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 3px;
+  background: #dfe4f2;
+  pointer-events: none;
+}
+.mw-card__g { margin-top: 12px; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: 22px; line-height: 1; letter-spacing: -0.01em; }
+.mw-card__who { margin-top: 6px; font-size: 12px; letter-spacing: -0.01em; color: var(--steel); }
+.mw-card__q { margin-top: 10px; font-size: 14px; line-height: 1.35; letter-spacing: -0.02em; color: var(--navy); }
+.mw-card__body {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed rgb(56 76 101 / 0.3);
+  font-size: 11px;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+.mw-card__body span { display: block; margin-bottom: 2px; font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--steel); }
+
+/* ---- the end --------------------------------------------------------- */
+.mw-end { display: flex; flex-direction: column; align-items: center; gap: 18px; margin-top: clamp(28px, 5svh, 56px); padding: 0 16px; text-align: center; }
+.mw-end__k { font-size: clamp(17px, 1.4vw, 20px); letter-spacing: -0.02em; color: var(--navy); }
+.mw .btn-primary {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25), inset 0 1px 0 rgb(255 255 255 / 0.45), inset 0 0 10px 1px rgb(206 214 255 / 0.35), 0 10px 24px -10px rgb(104 126 245 / 0.7);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mw-card { animation: none; }
+}

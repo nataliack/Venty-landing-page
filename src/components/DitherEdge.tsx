@@ -16,6 +16,8 @@ import { gsap } from "gsap";
      stitch   rows of running stitch: dashes lengthen, then thicken, until
               the rows close up
      weave    horizontal threads thicken first, then vertical ones cross them
+     cross    cross-stitch: an X in each 8px cell, the cells stitched in a
+              Bayer order, the threads thickening until the cells fill
 
    The edge itself either wobbles in soft lumps ("noise", still) or drifts as
    a slow wave ("wave", like a hem moving).
@@ -32,10 +34,10 @@ import { gsap } from "gsap";
    Put it inside the rising section (position: relative, above the section
    before it). */
 
-export type DitherPattern = "squares" | "dots" | "stitch" | "weave";
+export type DitherPattern = "squares" | "dots" | "stitch" | "weave" | "cross";
 export type DitherEdgeMode = "noise" | "wave";
 
-const PATTERNS: Record<DitherPattern, number> = { squares: 0, dots: 1, stitch: 2, weave: 3 };
+const PATTERNS: Record<DitherPattern, number> = { squares: 0, dots: 1, stitch: 2, weave: 3, cross: 4 };
 /** px of the strip that sit inside the section (see .dither-edge) */
 const OVERLAP = 2;
 
@@ -52,7 +54,7 @@ uniform float u_offset;  // screen y of the canvas's top edge, CSS px
 uniform vec2 u_view;     // the screen, CSS px
 uniform float u_edge;    // the section's top edge, screen CSS px
 uniform float u_band;    // how far above the edge the pattern reaches, CSS px
-uniform float u_pattern; // 0 squares, 1 dots, 2 stitch, 3 weave
+uniform float u_pattern; // 0 squares, 1 dots, 2 stitch, 3 weave, 4 cross
 uniform float u_wave;    // 0 noise, 1 wave
 uniform float u_time;
 uniform vec3 u_color;
@@ -102,13 +104,23 @@ void main() {
     float len = d * 14.0;
     float th = mix(1.5, 6.0, smoothstep(0.5, 1.0, d));
     a = step(abs(fx - 7.0), len * 0.5) * step(abs(mod(q.y, 6.0) - 3.0), th * 0.5) * step(0.02, d);
-  } else {
+  } else if (u_pattern < 3.5) {
     // weave: horizontal threads first, then the vertical ones
     float fx = abs(mod(q.x, 8.0) - 4.0);
     float fy = abs(mod(q.y, 8.0) - 4.0);
     float wh = smoothstep(0.0, 0.75, d) * 4.0;
     float wv = smoothstep(0.3, 1.0, d) * 4.0;
     a = max(step(fy, wh), step(fx, wv)) * step(0.02, d);
+  } else {
+    // cross-stitch: each 8px cell gets its X in a Bayer order, the threads
+    // thicken, and near the edge the cells fill in from their centres
+    vec2 cell = floor(q / 8.0);
+    vec2 l = mod(q, 8.0) - 4.0;
+    float k = clamp((d - bayer4(mod(cell, 4.0)) * 0.7) / 0.3, 0.0, 1.0);
+    float arm = min(abs(l.x - l.y), abs(l.x + l.y)) * 0.7071;
+    float box = max(abs(l.x), abs(l.y));
+    a = step(arm, mix(0.45, 1.6, k)) * step(box, 3.4) * step(0.001, k);
+    a = max(a, step(box, smoothstep(0.78, 1.0, d) * 4.2));
   }
   gl_FragColor = vec4(u_color * a, a);
 }

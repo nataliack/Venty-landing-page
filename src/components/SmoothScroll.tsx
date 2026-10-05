@@ -37,6 +37,27 @@ export function scrollToY(y: number, immediate = false) {
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
   const content = useRef<HTMLDivElement>(null);
 
+  // When the page's height changes after the triggers were placed (an image
+  // or a section that sizes itself late), every trigger below it would fire
+  // in the wrong place: measure them again, once it settles.
+  useEffect(() => {
+    const el = content.current;
+    if (!el) return;
+    let h = el.offsetHeight;
+    let t = 0;
+    const ro = new ResizeObserver(() => {
+      if (el.offsetHeight === h) return;
+      h = el.offsetHeight;
+      window.clearTimeout(t);
+      t = window.setTimeout(() => ScrollTrigger.refresh(), 250);
+    });
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      window.clearTimeout(t);
+    };
+  }, []);
+
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const wrapper = scroller ?? document.getElementById(SCROLLER_ID);

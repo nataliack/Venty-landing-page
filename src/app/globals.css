@@ -246,46 +246,6 @@ body {
   100% { transform: translate(0, 0); }
 }
 
-/* The Figma card: cornflower at the top, sinking to deep at the bottom,
-   with a glow bloom and a hairline. */
-.card-grad {
-  position: relative;
-  isolation: isolate;
-  border-radius: 1.75rem;
-  overflow: hidden;
-  background:
-    radial-gradient(120% 80% at 50% -10%, color-mix(in srgb, var(--color-cornflower) 90%, var(--color-cloud)) 0%, transparent 60%),
-    linear-gradient(180deg, var(--color-cornflower) 0%, color-mix(in srgb, var(--color-cornflower) 70%, var(--color-ink)) 45%, var(--deep) 100%);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--color-cloud) 35%, transparent),
-    inset 0 0 0 1px color-mix(in srgb, var(--color-cloud) 10%, transparent);
-}
-.card-dark {
-  position: relative;
-  isolation: isolate;
-  border-radius: 1.75rem;
-  overflow: hidden;
-  background:
-    radial-gradient(90% 60% at 50% 0%, color-mix(in srgb, var(--color-steel) 55%, transparent) 0%, transparent 70%),
-    linear-gradient(180deg, color-mix(in srgb, var(--color-navy) 45%, var(--color-ink)) 0%, var(--deep) 100%);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--color-cloud) 14%, transparent),
-    inset 0 0 0 1px color-mix(in srgb, var(--color-cloud) 7%, transparent);
-}
-
-/* Ruler ticks, one repeating gradient, no markup */
-.ticks {
-  height: 28px;
-  background-image:
-    repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 8px),
-    repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 40px);
-  background-size: 100% 12px, 100% 100%;
-  background-position: 0 100%, 0 0;
-  background-repeat: repeat-x;
-  opacity: 0.35;
-  mask-image: linear-gradient(90deg, transparent, black 15%, black 85%, transparent);
-}
-
 /* Glass pill */
 .glass {
   background: var(--glass);
@@ -1248,84 +1208,8 @@ html[data-announce="off"] .announce {
   to { transform: translateY(260%); }
 }
 
-/* Giant outlined words */
-.outline-word {
-  color: transparent;
-  -webkit-text-stroke: 1px color-mix(in srgb, var(--color-periwinkle) 28%, transparent);
-}
-.make-outline {
-  color: transparent;
-  -webkit-text-stroke: 1.2px color-mix(in srgb, var(--fg) 45%, transparent);
-}
-
-/* The tape measure in How it works */
-.tape {
-  background: linear-gradient(180deg, var(--color-cloud), var(--color-mist));
-  box-shadow: inset 0 -6px 12px color-mix(in srgb, var(--color-ink) 18%, transparent);
-}
-
-/* Features: looping visuals */
-.feat-body {
-  transform: translate(calc(var(--i) * 18px), calc(var(--i) * 22px)) rotate(calc(var(--i) * 4deg));
-  animation: feat-fan 5s var(--ease-in-out-quart) infinite alternate;
-}
-@keyframes feat-fan {
-  to { transform: translate(calc(var(--i) * 30px), calc(var(--i) * 30px)) rotate(calc(var(--i) * 7deg)); }
-}
-.feat-fit-pill { animation: feat-pill 6s var(--ease-in-out-quart) infinite; }
-@keyframes feat-pill {
-  0%, 28% { transform: translateX(0); }
-  33%, 61% { transform: translateX(100%); }
-  66%, 94% { transform: translateX(200%); }
-  100% { transform: translateX(0); }
-}
-.feat-fit-garment { animation: feat-ease 6s var(--ease-in-out-quart) infinite; }
-@keyframes feat-ease {
-  0%, 28% { transform: scale(1.03, 1.01); }
-  33%, 61% { transform: scale(1.09, 1.03); }
-  66%, 94% { transform: scale(1.18, 1.06); }
-  100% { transform: scale(1.03, 1.01); }
-}
-.feat-fit-l {
-  opacity: 0;
-  animation: feat-label 6s var(--ease-in-out-quart) infinite;
-  animation-delay: calc(var(--i) * -4s);
-}
-@keyframes feat-label {
-  0% { opacity: 0; transform: translateY(100%); }
-  4%, 28% { opacity: 1; transform: none; }
-  33%, 100% { opacity: 0; transform: translateY(-100%); }
-}
-.feat-drape {
-  background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--color-cloud) 22%, transparent) 0 3px, transparent 3px 9px);
-  transform-origin: 50% 0;
-  animation: feat-drape 2.6s ease-in-out infinite alternate;
-}
-@keyframes feat-drape {
-  from { transform: skewX(calc(var(--s) * 14deg)) scaleY(1); }
-  to { transform: skewX(calc(var(--s) * -14deg)) scaleY(calc(1 + var(--s) * 0.08)); }
-}
-.feat-draw {
-  stroke-dasharray: 1;
-  animation: feat-draw 4s var(--ease-in-out-quart) infinite;
-  animation-delay: calc(var(--i) * 0.35s);
-}
-@keyframes feat-draw {
-  0% { stroke-dashoffset: 1; }
-  45%, 80% { stroke-dashoffset: 0; }
-  100% { stroke-dashoffset: -1; }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .scroll-cue::after,
-  .feat-body,
-  .feat-fit-pill,
-  .feat-fit-garment,
-  .feat-drape,
-  .feat-draw { animation: none; }
-  .feat-fit-l { animation: none; opacity: 0; }
-  .feat-fit-l:first-child { opacity: 1; }
-  .feat-draw { stroke-dasharray: none; }
+  .scroll-cue::after { animation: none; }
 }
 
 /* ------------------------------------------------------------------

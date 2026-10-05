@@ -5,14 +5,14 @@ import { ThemeZones } from "@/components/ThemeZones";
 import { MeasureLoader } from "@/components/MeasureLoader";
 import { Hero } from "@/components/Hero";
 import { MadeToMeasure } from "@/components/MadeToMeasure";
-import { HowItWorks } from "@/components/HowItWorks";
-import { Features } from "@/components/Features";
-import { WhatYouCanMake } from "@/components/WhatYouCanMake";
-import { MadeWith } from "@/components/MadeWith";
-import { Faq } from "@/components/Faq";
-import { Maker } from "@/components/Maker";
-import { Workbench } from "@/components/Workbench";
-import { Footer } from "@/components/Footer";
+import { HowItWorks } from "@/components/how/HowItWorks";
+import { Features } from "@/components/features/Features";
+import { Make } from "@/components/make/Make";
+import { MadeWith } from "@/components/made/MadeWith";
+import { Faq } from "@/components/faq/Faq";
+import { Maker } from "@/components/maker/Maker";
+import { Closing } from "@/components/closing/Closing";
+import { Footer } from "@/components/footer/Footer";
 
 export default function Home() {
   return (
@@ -27,11 +27,11 @@ export default function Home() {
         <MadeToMeasure />
         <HowItWorks />
         <Features />
-        <WhatYouCanMake />
+        <Make />
         <MadeWith />
         <Faq />
         <Maker />
-        <Workbench />
+        <Closing />
       </main>
       <Footer />
     </>

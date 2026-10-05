@@ -19,3 +19,16 @@ export const VOTE_LINKS: { label: string; href: string }[] = [
   { label: "IxD", href: "" },
   { label: "VisCom", href: "" },
 ];
+
+/* The footer's media band: a video (or an image) behind the wordmark. Empty
+   until it is made; the light sky (Crown) stands in. e.g. "/footer/loop.mp4" */
+export const FOOTER_MEDIA = "";
+
+/* The footer's About and Legal links. Empty until the pages exist; they
+   show, but go nowhere yet. */
+export const CONTACT_URL = "";
+export const LEGAL_LINKS: { label: string; href: string }[] = [
+  { label: "Privacy", href: "" },
+  { label: "Terms", href: "" },
+  { label: "Accessibility", href: "" },
+];
