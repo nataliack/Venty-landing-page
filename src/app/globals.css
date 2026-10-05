@@ -1339,17 +1339,17 @@ html[data-announce="off"] .announce {
   height: 100svh;
   margin-top: -100svh;
 }
-/* the dither: a strip of canvas fixed to the screen, moved by DitherEdge to
-   sit just above the rising edge (its height set there too), under the page
-   itself, shown only while the edge is on screen */
+/* the dither: a strip of canvas just above the rising edge, part of the
+   section so it scrolls with it (its height set by DitherEdge), shown only
+   while it is on screen */
 .dither-edge {
-  position: fixed;
-  top: 0;
+  position: absolute;
+  bottom: calc(100% - 2px); /* 2px into the section: DitherEdge's OVERLAP */
+  z-index: 1;
   left: 0;
   width: 100%;
   pointer-events: none;
   visibility: hidden;
-  will-change: transform;
 }
 .measure__sheet {
   position: absolute;

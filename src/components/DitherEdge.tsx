@@ -20,18 +20,24 @@ import { gsap } from "gsap";
    The edge itself either wobbles in soft lumps ("noise", still) or drifts as
    a slow wave ("wave", like a hem moving).
 
-   Cost: one fragment shader, drawn only on a strip just above the edge (not
-   the whole screen), at 1 canvas px per CSS px for the hard-edged patterns
-   (scaled up crisp) and at most 1.5 for the round dots, and only on frames
-   where the edge has moved (every frame while a wave is on screen).
+   The strip is part of the section (absolute, just above its top edge), so
+   the browser scrolls the two together and they can never come apart; the
+   shader is told where the strip is on screen each frame, so the pattern
+   still sits on the screen's grid.
+
+   Cost: one fragment shader, drawn only on that strip (not the whole
+   screen), at up to 2 canvas px per CSS px, and only on frames where the
+   edge has moved (every frame while a wave is on screen).
 
    Put it inside the rising section (position: relative, above the section
-   before it); it reads that section's top each frame. */
+   before it). */
 
 export type DitherPattern = "squares" | "dots" | "stitch" | "weave";
 export type DitherEdgeMode = "noise" | "wave";
 
 const PATTERNS: Record<DitherPattern, number> = { squares: 0, dots: 1, stitch: 2, weave: 3 };
+/** px of the strip that sit inside the section (see .dither-edge) */
+const OVERLAP = 2;
 
 const VERT = `
 attribute vec2 a_pos;
@@ -166,10 +172,6 @@ export function DitherEdge({
     gl.uniform1f(u("u_pattern"), PATTERNS[pattern]);
     gl.uniform1f(u("u_wave"), edge === "wave" ? 1 : 0);
 
-    // hard-edged patterns at 1 canvas px per CSS px, scaled up crisp; the
-    // round dots a little finer so their curves stay smooth
-    const round = pattern === "dots";
-    canvas.style.imageRendering = round ? "auto" : "pixelated";
     const moving = edge === "wave";
 
     let scale = 1;
@@ -180,11 +182,13 @@ export function DitherEdge({
     let lastTop = NaN;
 
     const size = () => {
-      scale = round ? Math.min(1.5, window.devicePixelRatio || 1) : 1;
+      scale = Math.min(2, window.devicePixelRatio || 1);
       vw = window.innerWidth;
       vh = window.innerHeight;
-      // the strip: the band, plus room for the edge's shape above it
-      stripH = Math.ceil(band * vh * 1.3);
+      // the strip: the band, plus room for the edge's shape above it, plus
+      // OVERLAP px tucked into the section (solid) so no hairline shows at
+      // the seam when the edge lands between pixels
+      stripH = Math.ceil(band * vh * 1.3) + OVERLAP;
       canvas.style.height = `${stripH}px`;
       const w = Math.round(vw * scale);
       const h = Math.round(stripH * scale);
@@ -202,10 +206,8 @@ export function DitherEdge({
 
     const draw = (time: number) => {
       const top = section.getBoundingClientRect().top;
-      // the strip sits just above the edge, on whole px so the grid holds
-      const at = Math.round(top - stripH);
-      // only while the strip is on screen: once the section reaches the top
-      // it covers everything, and the canvas must not sit over what follows
+      const at = top - stripH + OVERLAP; // the strip's top on screen
+      // only while the strip is on screen
       const visible = top > 0 && at < vh;
       if (visible !== shown) {
         shown = visible;
@@ -213,7 +215,6 @@ export function DitherEdge({
       }
       if (!visible || (top === lastTop && !moving)) return;
       lastTop = top;
-      canvas.style.transform = `translate3d(0, ${at}px, 0)`;
       gl.uniform1f(uOffset, at);
       gl.uniform1f(uEdge, top);
       gl.uniform1f(uTime, time);
