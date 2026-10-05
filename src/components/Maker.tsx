@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
+import { HIDDEN, padMasks } from "@/lib/reveal";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -185,8 +186,9 @@ export function Maker() {
     if (!el) return;
     const ctx = gsap.context(() => {
       const split = SplitText.create("[data-name]", { type: "chars", mask: "chars" });
+      padMasks(split.masks);
       gsap.from(split.chars, {
-        yPercent: 110,
+        yPercent: HIDDEN,
         stagger: 0.035,
         duration: 1.3,
         ease: "expo.out",

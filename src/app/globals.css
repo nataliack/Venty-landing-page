@@ -84,6 +84,58 @@ body {
   transition: background-color 0.9s var(--ease-in-out-quart);
 }
 
+/* From tablet up the native scrollbar is hidden and ScrollBar.tsx draws
+   ours; phones keep their own, which only shows while scrolling anyway. */
+.scrollbar {
+  display: none;
+}
+@media (min-width: 768px) {
+  .scroller {
+    scrollbar-width: none;
+  }
+  .scroller::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar {
+    display: block;
+    position: fixed;
+    top: 8px;
+    bottom: 8px;
+    right: 0;
+    width: 16px;
+    z-index: 90;
+    cursor: pointer;
+  }
+  .scrollbar[data-hidden="true"] {
+    display: none;
+  }
+  .scrollbar__thumb {
+    position: absolute;
+    top: 0;
+    right: 5px;
+    width: 3px;
+    border-radius: 3px;
+    background: var(--fg);
+    opacity: 0.32;
+    cursor: grab;
+    will-change: transform;
+    transition: width 0.4s var(--ease-out-expo), right 0.4s var(--ease-out-expo), opacity 0.5s ease, background-color 0.9s var(--ease-in-out-quart);
+  }
+  .scrollbar[data-active="true"] .scrollbar__thumb {
+    opacity: 0.6;
+  }
+  .scrollbar:hover .scrollbar__thumb,
+  .scrollbar[data-dragging="true"] .scrollbar__thumb {
+    width: 6px;
+    right: 4px;
+    opacity: 0.85;
+    background: var(--color-cornflower);
+  }
+  .scrollbar[data-dragging="true"] .scrollbar__thumb {
+    cursor: grabbing;
+  }
+}
+
 /* Safari 26 bar colours. It ignores theme-color and samples, in order: a
    fixed or sticky element with a background at the top or bottom edge
    (at least 80% wide and 3px tall), then <body>'s background, then <html>'s.
@@ -981,4 +1033,13 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-reticle > span { animation: none; }
+}
+
+/* A hand-written reveal mask (see src/lib/reveal.ts): room for ascenders,
+   descenders and overhanging letters, taken back with negative margins. */
+.line-mask {
+  display: block;
+  overflow: clip;
+  padding: 0.3em 0.14em 0.36em;
+  margin: -0.3em -0.14em -0.36em;
 }

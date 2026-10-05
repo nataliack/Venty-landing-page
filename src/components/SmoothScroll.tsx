@@ -15,7 +15,8 @@ gsap.registerPlugin(ScrollTrigger);
    server HTML (and so #scroller) is in the page and before any section
    creates a trigger. It has to be the element: a selector string would be
    looked up inside each section's gsap.context and not found. */
-const scroller = typeof document === "undefined" ? null : document.getElementById("scroller");
+export const SCROLLER_ID = "scroller";
+const scroller = typeof document === "undefined" ? null : document.getElementById(SCROLLER_ID);
 if (scroller) ScrollTrigger.defaults({ scroller });
 
 let lenis: Lenis | null = null;
@@ -27,12 +28,18 @@ export function scrollToElement(el: HTMLElement) {
   else el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+/** Scrolls the page to a position in px: smoothly, or at once (dragging) */
+export function scrollToY(y: number, immediate = false) {
+  if (lenis) lenis.scrollTo(y, immediate ? { immediate: true } : { duration: 1.2 });
+  else document.getElementById(SCROLLER_ID)?.scrollTo({ top: y, behavior: immediate ? "auto" : "smooth" });
+}
+
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
   const content = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const wrapper = scroller ?? document.getElementById("scroller");
+    const wrapper = scroller ?? document.getElementById(SCROLLER_ID);
     if (reduce || !wrapper || !content.current) return;
 
     lenis = new Lenis({

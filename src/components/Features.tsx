@@ -198,7 +198,7 @@ export function Features() {
                       </h3>
                     </div>
                     <div className="grid md:grid-rows-[0fr] md:transition-[grid-template-rows] md:duration-700 md:ease-[var(--ease-out-expo)] md:group-data-[active=true]:grid-rows-[1fr]">
-                      <p className="body-lg mt-4 max-w-[34ch] overflow-hidden pl-9 text-muted md:pl-12">{d}</p>
+                      <p className="body-lg mt-4 max-w-[34ch] overflow-hidden pb-[0.2em] pl-9 text-muted md:pl-12">{d}</p>
                     </div>
                     <div className="mt-10 md:hidden">
                       <V />

@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { Wings } from "@/components/Wings";
+import { ScrollBar } from "@/components/ScrollBar";
 
 const familjen = localFont({
   src: [
@@ -57,6 +58,7 @@ export default function RootLayout({
           <Wings />
           <SmoothScroll>{children}</SmoothScroll>
         </div>
+        <ScrollBar />
         {/* Safari 26 tints its toolbar from this; the status bar from <body> */}
         <div className="safari-bar" aria-hidden="true" />
       </body>

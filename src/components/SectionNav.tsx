@@ -67,7 +67,7 @@ export function SectionNav() {
         className="hero-glass flex items-center"
         style={{ height: 44, minWidth: 178, padding: "11px 32px", gap: 16 }}
       >
-        <span className="hero-t16 relative block h-[16px] overflow-hidden text-periwinkle">
+        <span className="hero-t16 relative block h-[20px] shrink-0 overflow-hidden whitespace-nowrap py-[2px] text-periwinkle">
           <span key={current} className="section-nav__label block">{current}</span>
         </span>
         <span className="ml-auto flex flex-col items-center" style={{ width: 12, gap: 8 }} aria-hidden="true">

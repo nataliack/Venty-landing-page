@@ -69,8 +69,9 @@ export function WhatYouCanMake() {
         if (!reduce) {
           gsap.fromTo(
             row.querySelector("[data-drift]"),
-            { xPercent: -10 * dir },
-            { xPercent: 10 * dir, ease: "none", scrollTrigger: { trigger: row, start: "top bottom", end: "bottom top", scrub: 0.6 } },
+            // a gentle drift inside the row's padding, so no word leaves the screen
+            { xPercent: -4 * dir },
+            { xPercent: 4 * dir, ease: "none", scrollTrigger: { trigger: row, start: "top bottom", end: "bottom top", scrub: 0.6 } },
           );
         }
         gsap.fromTo(
@@ -104,13 +105,13 @@ export function WhatYouCanMake() {
       <ul className="mt-[10vh] flex flex-col gap-[4vh]">
         {GARMENTS.map((g, i) => (
           <li key={g.w} data-row className="relative">
-            <div data-drift className={`flex items-center gap-[3vw] whitespace-nowrap px-5 md:px-10 ${i % 2 ? "flex-row-reverse justify-start" : ""}`}>
+            <div data-drift className={`flex items-center gap-[3vw] whitespace-nowrap px-[8vw] ${i % 2 ? "flex-row-reverse justify-start" : ""}`}>
               <span className="eyebrow shrink-0 self-start pt-[2vw] text-faint">0{i + 1}</span>
-              <span className="relative block font-display text-[clamp(4.2rem,17vw,19rem)] leading-[0.85]">
+              <span className="relative block font-display text-[clamp(3rem,15vw,17rem)] leading-[0.85]">
                 <span className="make-outline block">{g.w}</span>
                 <span data-fill aria-hidden className="absolute inset-0 block text-cornflower">{g.w}</span>
               </span>
-              <svg data-sketch viewBox="0 0 200 260" className="h-[clamp(5rem,16vw,17rem)] w-auto shrink-0 overflow-visible" aria-hidden>
+              <svg data-sketch viewBox="0 0 200 260" className="h-[clamp(3rem,15vw,16rem)] w-auto shrink-0 overflow-visible" aria-hidden>
                 {g.d.map((d, k) => (
                   <path key={k} {...(k === 0 ? { "data-draw": "" } : { "data-seam": "" })} d={d} fill="none" stroke="currentColor" strokeWidth={k === 0 ? 2 : 1.25} strokeDasharray={k === 0 ? undefined : "4 4"} strokeLinejoin="round" strokeLinecap="round" />
                 ))}

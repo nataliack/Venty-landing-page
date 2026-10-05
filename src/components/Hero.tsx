@@ -9,6 +9,7 @@ import { LogoMark } from "./Logo";
 import { PrimaryButton } from "./PrimaryButton";
 import { APP_URL, CTA_LABEL } from "@/lib/site";
 import { HERO, cameraTrack, createHeroPlayer, heroPosition, heroPoster } from "@/lib/heroSequence";
+import { HIDDEN, padMasks } from "@/lib/reveal";
 
 gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin);
 
@@ -222,14 +223,15 @@ export function Hero() {
         .from("[data-scene]", { scale: 1.08, opacity: 0, duration: 2.4, clearProps: "transform" }, 0)
         .from("[data-glow]", { yPercent: 40, opacity: 0, duration: 2 }, 0.2)
         .from("[data-logo]", { y: -10, opacity: 0, duration: 1.2 }, 0.6)
-        .from("[data-h1] [data-w]", { yPercent: 110, duration: 1.4, stagger: 0.06 }, 0.7)
+        .from("[data-h1] [data-w]", { yPercent: HIDDEN, duration: 1.4, stagger: 0.06 }, 0.7)
         .from("[data-intro]", { y: 16, opacity: 0, duration: 1.2, stagger: 0.1, clearProps: "transform,opacity" }, 1);
 
       const split2 = SplitText.create("[data-h2]", { type: "words", mask: "words" });
       const split3 = SplitText.create("[data-h3]", { type: "chars", mask: "chars" });
+      padMasks([...split2.masks, ...split3.masks]);
 
       gsap.set("[data-f2], [data-f3]", { autoAlpha: 1 });
-      gsap.set([split2.words, split3.chars], { yPercent: 110 });
+      gsap.set([split2.words, split3.chars], { yPercent: HIDDEN });
       gsap.set("[data-f2] [data-sub], [data-f3] [data-sub]", { opacity: 0, y: reduce ? 0 : 14 });
       gsap.set("[data-strike]", { scaleX: 0 });
       gsap.set("[data-paper]", { "--r": "0%" });
@@ -258,15 +260,16 @@ export function Hero() {
       tl
         // 1.1 out as she starts to rise; the dots and glow clear off the video
         .to("[data-cue]", { opacity: 0, duration: 0.02 }, 0.01)
-        .to("[data-f1-head]", { y: -80 * move, opacity: 0, filter: reduce ? "none" : "blur(10px)", duration: 0.05 }, 0.04)
-        .to("[data-f1-side]", { opacity: 0, y: -30 * move, duration: 0.04, stagger: 0.01 }, 0.04)
+        .to("[data-f1-head]", { y: -80 * move, autoAlpha: 0, filter: reduce ? "none" : "blur(10px)", duration: 0.05 }, 0.04)
+        // autoAlpha: hidden once faded, so its button and link stop taking clicks
+        .to("[data-f1-side]", { autoAlpha: 0, y: -30 * move, duration: 0.04, stagger: 0.01 }, 0.04)
         .to("[data-dots]", { opacity: 0, duration: 0.05 }, 0.04)
         .to("[data-glow]", { opacity: 0, yPercent: 30 * move, duration: 0.06 }, 0.04)
 
         // the problem, as the dress fits her perfectly
         .to(split2.words, { yPercent: 0, duration: 0.04, stagger: 0.006, ease: "power3.out" }, tProblem)
         .to("[data-f2] [data-sub]", { opacity: 1, y: 0, duration: 0.03 }, tProblem + 0.03)
-        .to(split2.words, { yPercent: -110, duration: 0.03, stagger: 0.004, ease: "power3.in" }, tStrike)
+        .to(split2.words, { yPercent: -HIDDEN, duration: 0.03, stagger: 0.004, ease: "power3.in" }, tStrike)
         .to("[data-f2] [data-sub]", { opacity: 0, duration: 0.02 }, tStrike)
 
         // the standard values are struck out, then rewritten as yours
@@ -284,7 +287,7 @@ export function Hero() {
         .to("[data-scene]", { opacity: 0, duration: 0.09, ease: "power1.in" }, out + 0.02)
         .to("[data-track]", { opacity: 0, duration: 0.03 }, out)
         .to("[data-f3] [data-sub]", { opacity: 0, duration: 0.02 }, out + 0.03)
-        .to(split3.chars, { yPercent: -110, duration: 0.03, stagger: 0.005, ease: "power3.in" }, out + 0.06)
+        .to(split3.chars, { yPercent: -HIDDEN, duration: 0.03, stagger: 0.005, ease: "power3.in" }, out + 0.06)
         .set({}, {}, 1);
       scroll = tl.scrollTrigger;
     }, el);
@@ -332,7 +335,7 @@ export function Hero() {
         />
 
         {/* pattern paper, revealed from the centre at the hand-off */}
-        <div data-paper aria-hidden className="paper-grid paper-reveal absolute inset-0 z-10" />
+        <div data-paper aria-hidden className="paper-grid paper-reveal pointer-events-none absolute inset-0 z-10" />
 
         {/* objects on her, placed every frame in screen px (see track) */}
         <div data-track aria-hidden className="pointer-events-none absolute inset-0 z-20 text-cloud">
@@ -384,8 +387,8 @@ export function Hero() {
 
         <div data-f1-head className="absolute inset-x-5 bottom-[calc(7svh+150px)] z-30 text-cloud md:inset-x-10 md:bottom-[9vh]">
           <h1 data-h1 className="headline max-w-[16ch] text-[clamp(2.5rem,6.4vw,7rem)]">
-            <span className="block overflow-hidden pb-[0.06em]"><span data-w className="inline-block">The average body</span></span>
-            <span className="block overflow-hidden pb-[0.08em]">
+            <span className="line-mask"><span data-w className="inline-block">The average body</span></span>
+            <span className="line-mask">
               <span data-w className="font-display inline-block text-[1.06em] text-cornflower">doesn&apos;t exist.</span>
             </span>
           </h1>
@@ -407,7 +410,7 @@ export function Hero() {
 
         {/* the problem: bottom left, where the dress leaves the frame empty
             (at the top on phones, clear of the lines on her) */}
-        <div data-f2 className="invisible absolute inset-0 z-30 flex items-start px-5 pt-[96px] text-cloud md:items-end md:px-10 md:pb-[9vh] md:pt-0">
+        <div data-f2 className="pointer-events-none invisible absolute inset-0 z-30 flex items-start px-5 pt-[96px] text-cloud md:items-end md:px-10 md:pb-[9vh] md:pt-0">
           <div aria-hidden className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-night via-night/70 to-transparent md:inset-y-0 md:left-0 md:top-auto md:h-auto md:w-[55%] md:bg-gradient-to-r md:from-night/85 md:via-night/40" />
           <div className="relative">
             <h2 data-h2 className="headline max-w-[13ch] text-[clamp(2.2rem,5vw,5.6rem)]">
@@ -420,7 +423,7 @@ export function Hero() {
         </div>
 
         {/* the hand-off: left of her final pose (at the top on phones) */}
-        <div data-f3 className="invisible absolute inset-0 z-30 flex items-start px-5 pt-[96px] text-cloud md:items-center md:px-10 md:pt-0">
+        <div data-f3 className="pointer-events-none invisible absolute inset-0 z-30 flex items-start px-5 pt-[96px] text-cloud md:items-center md:px-10 md:pt-0">
           <div aria-hidden className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-night via-night/70 to-transparent md:hidden" />
           <div className="relative">
             <h2 data-h3 className="font-display text-[clamp(4.2rem,9vw,10rem)] leading-[0.9]">Yours does.</h2>
