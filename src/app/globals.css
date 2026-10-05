@@ -488,7 +488,11 @@ body {
 :root {
   --gutter: clamp(16px, 1.806vw, 26px);
   --head-gap: clamp(12px, 1.53vw, 22px);
+  --nav-h: 34px; /* the section menu's height; the logo centres on it */
   --announce-h: 0px;
+}
+@media (min-width: 768px) {
+  :root { --nav-h: 38px; }
 }
 html[data-announce="on"] {
   --announce-h: var(--announce-bar, 0px);
@@ -498,13 +502,41 @@ html[data-announce="on"] {
   top: calc(var(--announce-h) + var(--head-gap));
   transition: top 0.7s var(--ease-out-expo);
 }
-.hero-logo {
+.site-logo {
   left: var(--gutter);
   top: calc(var(--announce-h) + var(--head-gap));
-  height: 44px; /* the section menu's height, so the two centre on one line */
+  height: var(--nav-h);
   display: flex;
   align-items: center;
   transition: top 0.7s var(--ease-out-expo);
+}
+
+/* Section menu: a compact glass pill (phones smaller still) */
+.section-nav__btn {
+  height: var(--nav-h);
+  min-width: 128px;
+  padding: 0 12px 0 14px;
+  gap: 10px;
+  font-size: 14px;
+}
+.section-nav__icon {
+  width: 9px;
+  gap: 4px;
+}
+.section-nav__icon svg {
+  width: 9px;
+  height: 5px;
+}
+.section-nav__panel {
+  top: calc(var(--nav-h) + 6px);
+}
+.section-nav__item {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+@media (min-width: 768px) {
+  .section-nav__btn { min-width: 148px; padding: 0 16px 0 18px; gap: 12px; font-size: 15px; }
+  .section-nav__item { padding: 9px 20px; font-size: 15px; }
 }
 
 /* Announcement bar: maker | countdown | rolling line */
@@ -552,8 +584,8 @@ html[data-announce="off"] .announce {
   gap: 4px;
 }
 .announce__face {
-  width: 15px;
-  height: 15px;
+  width: 20px;
+  height: 20px;
   flex: none;
   object-fit: cover;
   border-radius: 2px;
@@ -627,7 +659,7 @@ html[data-announce="off"] .announce {
   margin-top: clamp(22px, 3.125vw, 45px);
   font-family: var(--font-sans);
   font-weight: 400;
-  font-size: clamp(2.25rem, 11.2vw, 2.9rem);
+  font-size: clamp(2rem, 10vw, 2.6rem);
   line-height: 1.06;
   letter-spacing: -0.04em;
   color: var(--color-cloud);
@@ -682,6 +714,34 @@ html[data-announce="off"] .announce {
   }
 }
 
+/* The fit line on the video's last beat. Phones: at the top, under the
+   menu. Tablets up: left of her, a little above the middle. */
+.hero-fit-wrap {
+  padding: calc(var(--head-gap) + var(--nav-h) + 40px) var(--gutter) 0;
+}
+.hero-fit {
+  max-width: 7.8em; /* breaks after "On a", as the frame: line one is 6.4em, with "body" 8.5em */
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: clamp(2rem, 9vw, 2.6rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: var(--color-cloud);
+}
+.hero-fit__sub {
+  max-width: 236px; /* two lines: "...for the" / "average body. Venty drafts for yours." */
+  margin-top: clamp(18px, 2.64vw, 38px);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: rgb(255 255 255 / 0.6);
+}
+@media (min-width: 768px) {
+  .hero-fit-wrap { padding: 0 var(--gutter) 18vh 8.75vw; }
+  .hero-fit { font-size: clamp(2.4rem, 3.5vw, 4.6rem); }
+}
+
 /* ------------------------------------------------------------------
    Vote for Venty: the tab on the right edge (VoteTab.tsx). Tab and panel
    are one strip; closed, it is pushed right by the panel's width.
@@ -697,11 +757,22 @@ html[data-announce="off"] .announce {
   translate: var(--panel) -50%;
   transition: translate 0.7s var(--ease-out-expo);
 }
+.vote__strip {
+  display: flex;
+  height: 100%;
+}
+.vote:not([data-ready]) {
+  visibility: hidden; /* until VoteTab has set up its entrance */
+}
 .vote[data-open="true"] {
   translate: 0 -50%;
 }
+/* tucked away off the right edge (VoteTab's HIDE list) */
+.vote[data-hidden="true"] {
+  translate: calc(100% + 8px) -50%;
+}
 @media (hover: hover) {
-  .vote[data-open="false"]:has(.vote__tab:hover) { translate: calc(var(--panel) - 6px) -50%; }
+  .vote[data-open="false"]:not([data-hidden="true"]):has(.vote__tab:hover) { translate: calc(var(--panel) - 6px) -50%; }
 }
 .vote__tab {
   position: relative;
@@ -712,7 +783,7 @@ html[data-announce="off"] .announce {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* the QUT mark sits flush on the top edge */
   gap: 12px;
   padding: 0 8px 14px;
   cursor: pointer;
@@ -735,7 +806,9 @@ html[data-announce="off"] .announce {
   outline-offset: -4px;
 }
 .vote__mark {
+  position: relative; /* over the tab's inner edge line */
   flex: none;
+  overflow: visible;
 }
 .vote__label {
   writing-mode: vertical-rl;
@@ -1266,8 +1339,7 @@ html[data-announce="off"] .announce {
 }
 
 /* Hero hand-off. --r runs 0% to 124%: the paper is masked from the bottom
-   edge up with a soft top (24% of the screen), and the light rides the line
-   where the paper turns solid. */
+   edge up, with a soft top edge 24% of the screen tall. */
 .handoff {
   --r: 0%;
 }
@@ -1275,165 +1347,6 @@ html[data-announce="off"] .announce {
   -webkit-mask-image: linear-gradient(to top, #000 calc(var(--r) - 24%), transparent var(--r));
   mask-image: linear-gradient(to top, #000 calc(var(--r) - 24%), transparent var(--r));
 }
-.handoff__edge {
-  transform: translate3d(0, calc(124% - var(--r)), 0);
-  will-change: transform;
-}
-.handoff__edge::before {
-  content: "";
-  position: absolute;
-  inset: -1px 0 auto;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-cornflower) 70%, transparent) 25%, var(--color-periwinkle) 50%, color-mix(in srgb, var(--color-cornflower) 70%, transparent) 75%, transparent);
-}
-.handoff__edge::after {
-  content: "";
-  position: absolute;
-  inset: -70px 0 auto;
-  height: 140px;
-  background: radial-gradient(50% 50% at 50% 50%, color-mix(in srgb, var(--color-cornflower) 22%, transparent), transparent);
-}
-
-/* ------------------------------------------------------------------
-   Hero objects. Placed every frame by Hero.tsx in screen px, so they
-   stay on her as the video and the phone camera move.
-   ------------------------------------------------------------------ */
-
-/* A dimension line across her body: dashed, with end ticks and a glowing
-   point where it meets her. The row is positioned at the line's left end
-   and sized to its width; the label sits above it. */
-.hero-dim {
-  --nest: 0;
-  height: 0;
-  will-change: transform, width;
-  text-shadow: 0 1px 14px rgb(11 12 21 / 0.95);
-}
-.hero-dim__line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 1px;
-  background: repeating-linear-gradient(90deg, var(--color-cloud) 0 6px, transparent 6px 11px);
-  box-shadow: 0 0 10px rgb(11 12 21 / 0.6);
-}
-.hero-dim__line::before,
-.hero-dim__line::after {
-  content: "";
-  position: absolute;
-  top: -5px;
-  width: 7px;
-  height: 11px;
-  border-left: 1px solid var(--color-cloud);
-}
-.hero-dim__line::before {
-  left: 0;
-}
-.hero-dim__line::after {
-  right: -6px;
-}
-/* contact points, at both ends */
-.hero-dim::before,
-.hero-dim::after {
-  content: "";
-  position: absolute;
-  top: -3px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--color-cloud);
-  box-shadow: 0 0 12px 3px var(--color-cornflower);
-}
-.hero-dim::before {
-  left: -3px;
-}
-.hero-dim::after {
-  right: -3px;
-}
-/* the graded nest: ghost lines for the other sizes, smaller ones above,
-   larger ones below, shown while the line grades */
-.hero-dim__nest {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 100%;
-  height: 1px;
-  background: var(--color-cornflower);
-  transform: translate(-50%, calc((var(--n) - 1) * 70px)) scaleX(var(--n));
-  opacity: calc(var(--nest) * 0.55);
-}
-.hero-dim__label {
-  position: absolute;
-  left: 0;
-  bottom: 10px;
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  white-space: nowrap;
-}
-
-/* the focus ring on the drop: a dashed ring that turns slowly, with ticks */
-.hero-reticle {
-  width: 0;
-  height: 0;
-  will-change: transform;
-}
-.hero-reticle > span {
-  position: absolute;
-  left: -32px;
-  top: -32px;
-  width: 64px;
-  height: 64px;
-  border: 1px dashed var(--color-cloud);
-  border-radius: 50%;
-  box-shadow: 0 0 22px rgb(104 126 245 / 0.55), inset 0 0 14px rgb(104 126 245 / 0.35);
-  animation: reticle-turn 7s linear infinite;
-}
-.hero-reticle::before,
-.hero-reticle::after {
-  content: "";
-  position: absolute;
-  background: var(--color-cornflower);
-}
-.hero-reticle::before {
-  left: -48px;
-  top: 0;
-  width: 96px;
-  height: 1px;
-  background: linear-gradient(90deg, var(--color-cornflower) 0 12px, transparent 12px 84px, var(--color-cornflower) 84px);
-}
-.hero-reticle::after {
-  left: 0;
-  top: -48px;
-  width: 1px;
-  height: 96px;
-  background: linear-gradient(180deg, var(--color-cornflower) 0 12px, transparent 12px 84px, var(--color-cornflower) 84px);
-}
-@keyframes reticle-turn {
-  to { transform: rotate(360deg); }
-}
-
-/* the scan beam that reads her as she rises, with a faint wash above it */
-.hero-scan {
-  height: 2px;
-  will-change: transform, width;
-  background: linear-gradient(90deg, transparent, var(--color-cornflower) 18%, var(--color-cloud) 50%, var(--color-cornflower) 82%, transparent);
-  box-shadow: 0 0 18px 2px rgb(104 126 245 / 0.7);
-}
-.hero-scan::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 2px;
-  height: 140px;
-  background: linear-gradient(180deg, transparent, rgb(104 126 245 / 0.16));
-  mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero-reticle > span { animation: none; }
-}
-
 /* A hand-written reveal mask (see src/lib/reveal.ts): room for ascenders,
    descenders and overhanging letters, taken back with negative margins. */
 .line-mask {

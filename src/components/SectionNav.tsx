@@ -65,18 +65,17 @@ export function SectionNav() {
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-haspopup="listbox"
-        className="hero-glass flex items-center"
-        style={{ height: 44, minWidth: 178, padding: "11px 32px", gap: 16 }}
+        className="section-nav__btn hero-glass flex items-center"
       >
-        <span className="hero-t16 relative block h-[20px] shrink-0 overflow-hidden whitespace-nowrap py-[2px] text-periwinkle">
+        <span className="relative block h-[20px] shrink-0 overflow-hidden whitespace-nowrap py-[2px] leading-[16px] tracking-[-0.02em] text-periwinkle">
           <span key={current} className="section-nav__label block">{current}</span>
         </span>
-        <span className="ml-auto flex flex-col items-center" style={{ width: 12, gap: 8 }} aria-hidden="true">
-          <svg width="12" height="6" viewBox="0 0 12 6" fill="none" className={`transition-transform duration-500 ease-[var(--ease-out-expo)] ${open ? "translate-y-[2px]" : ""}`}>
-            <path d="M1 5.5 6 .5l5 5" stroke="var(--color-periwinkle)" strokeWidth="1" />
+        <span className="section-nav__icon ml-auto flex flex-col items-center" aria-hidden="true">
+          <svg viewBox="0 0 12 6" fill="none" className={`transition-transform duration-500 ease-[var(--ease-out-expo)] ${open ? "translate-y-[1.5px]" : ""}`}>
+            <path d="M1 5.5 6 .5l5 5" stroke="var(--color-periwinkle)" strokeWidth="1.2" />
           </svg>
-          <svg width="12" height="6" viewBox="0 0 12 6" fill="none" className={`transition-transform duration-500 ease-[var(--ease-out-expo)] ${open ? "-translate-y-[2px]" : ""}`}>
-            <path d="M1 .5 6 5.5l5-5" stroke="var(--color-periwinkle)" strokeWidth="1" />
+          <svg viewBox="0 0 12 6" fill="none" className={`transition-transform duration-500 ease-[var(--ease-out-expo)] ${open ? "-translate-y-[1.5px]" : ""}`}>
+            <path d="M1 .5 6 5.5l5-5" stroke="var(--color-periwinkle)" strokeWidth="1.2" />
           </svg>
         </span>
       </button>
@@ -84,7 +83,7 @@ export function SectionNav() {
       <div
         role="listbox"
         aria-label="Sections"
-        className={`hero-glass section-nav__panel absolute right-0 top-[52px] flex min-w-[220px] flex-col overflow-hidden transition-all duration-500 ease-[var(--ease-out-expo)] ${
+        className={`hero-glass section-nav__panel absolute right-0 flex min-w-[190px] flex-col md:min-w-[210px] overflow-hidden transition-all duration-500 ease-[var(--ease-out-expo)] ${
           open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
         }`}
         style={{ padding: 6 }}
@@ -96,7 +95,7 @@ export function SectionNav() {
             role="option"
             aria-selected={s.label === current}
             onClick={() => go(s.id)}
-            className={`hero-t16 flex items-center justify-between gap-8 whitespace-nowrap rounded-[2px] px-[26px] py-[11px] text-left transition-colors hover:bg-cloud/10 ${
+            className={`section-nav__item flex items-center justify-between gap-8 whitespace-nowrap rounded-[2px] text-left leading-[16px] tracking-[-0.02em] transition-colors hover:bg-cloud/10 ${
               s.label === current ? "text-cloud" : "text-periwinkle hover:text-cloud"
             }`}
           >

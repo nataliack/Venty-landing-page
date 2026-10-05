@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FESTIVAL_AT } from "@/lib/site";
-import { scrollToElement } from "./SmoothScroll";
+import { FESTIVAL_AT, MAKER_URL } from "@/lib/site";
 
-/* The announcement bar across the top of the hero: who made Venty (to Meet
-   the maker), a countdown to the QUT Design Festival, and a line that rolls
+/* The announcement bar across the top of the hero: who made Venty (to her
+   site), a countdown to the QUT Design Festival, and a line that rolls
    through Venty's promise. It sits at the top of the hero and slides away
    once you scroll (html[data-announce], set by Hero.tsx). The logo and the
    section menu sit under it while it shows (--announce-h).
@@ -15,9 +14,10 @@ import { scrollToElement } from "./SmoothScroll";
 
 const LINES = [
   "No sizes. Just measurements.",
-  "Start from a photo, a sketch or a few words.",
-  "Drafted from your measurements.",
-  "Ready to print.",
+  "Sketch it. Say it. Sew it.",
+  "Your body is the pattern.",
+  "From screen to scissors.",
+  "Pin it. Cut it. Wear it.",
 ];
 const ROLL_MS = 3600;
 
@@ -81,18 +81,9 @@ export function AnnounceBar() {
   return (
     <div data-bar className="announce">
       <div className="announce__row">
-        <a
-          href="#maker"
-          className="announce__maker"
-          onClick={(e) => {
-            const target = document.getElementById("maker");
-            if (!target) return;
-            e.preventDefault();
-            scrollToElement(target);
-          }}
-        >
+        <a href={MAKER_URL} target="_blank" rel="noopener" className="announce__maker">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/hero/natalia.png" alt="" width={15} height={15} className="announce__face" />
+          <img src="/hero/natalia-face.webp" alt="" width={20} height={20} className="announce__face" />
           <span className="announce__who">
             <span className="announce__label">Made by:</span>
             <span>Natalia Chamon</span>
