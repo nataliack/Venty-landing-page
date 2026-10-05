@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useRef, useState, type ReactNode } from "react";
 import { BODIES, FITS, PROMPT, SAMPLE_A, SAMPLE_B, SKETCH_SVG, type Att, type Body, type Fit, type Kind, type Pin } from "./data";
 import { Icon, I } from "./icons";
 import { Pad } from "./Pad";
@@ -23,6 +23,13 @@ const FULL: Att[] = [
 ];
 
 type Props = {
+  /** the references and the prompt it opens with (defaults: the gown) */
+  refs?: Att[];
+  prompt?: string;
+  /** false: the entrance ends on a hint to press Draft instead of pressing it */
+  autoDraft?: boolean;
+  /** shown in place of the Draft button once drafted (e.g. the CTA) */
+  done?: ReactNode;
   play: boolean;
   drafting: boolean;
   body: Body;
@@ -32,7 +39,10 @@ type Props = {
   onDraft: () => void;
 };
 
-export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer({ play, drafting, body, fit, onBody, onFit, onDraft }, draftRef) {
+export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
+  { refs = FULL, prompt = PROMPT, autoDraft = true, done, play, drafting, body, fit, onBody, onFit, onDraft },
+  draftRef,
+) {
   const nextId = useRef(4);
   const [atts, setAtts] = useState<Att[]>([]);
   const [text, setText] = useState("");
@@ -41,6 +51,7 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer({
   const [pad, setPad] = useState<null | { forId?: number }>(null);
   const [drag, setDrag] = useState(false);
   const [pressed, setPressed] = useState(false);
+  const [hint, setHint] = useState(false);
   const file = useRef<HTMLInputElement>(null);
   const replaceId = useRef<number | null>(null);
   const timers = useRef<number[]>([]);
@@ -52,31 +63,39 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer({
     timers.current = [];
     if (!scripted.current) return;
     scripted.current = false;
-    setAtts(FULL);
-    setText(PROMPT);
+    setAtts(refs);
+    setText(prompt);
     setPressed(false);
-    onDraft(); // a touch mid-entrance completes the story, it never stalls it
+    // a touch mid-entrance completes the story, it never stalls it
+    if (autoDraft) onDraft();
+    else setHint(true);
   };
   useEffect(() => {
     if (!play) return;
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (still) {
-      setAtts(FULL);
-      setText(PROMPT);
-      onDraft();
+      setAtts(refs);
+      setText(prompt);
+      if (autoDraft) onDraft();
       return;
     }
     scripted.current = true;
     const t = (ms: number, fn: () => void) => timers.current.push(window.setTimeout(fn, ms));
-    FULL.forEach((a, i) => t(250 + i * 260, () => setAtts((l) => [...l, a])));
-    for (let i = 1; i <= PROMPT.length; i++) t(1000 + i * 26, () => setText(PROMPT.slice(0, i)));
-    const end = 1000 + PROMPT.length * 26 + 350;
-    t(end, () => setPressed(true));
-    t(end + 220, () => {
-      setPressed(false);
-      scripted.current = false;
-      onDraft();
-    });
+    refs.forEach((a, i) => t(250 + i * 260, () => setAtts((l) => [...l, a])));
+    for (let i = 1; i <= prompt.length; i++) t(1000 + i * 26, () => setText(prompt.slice(0, i)));
+    const end = 1000 + prompt.length * 26 + 350;
+    if (autoDraft) {
+      t(end, () => setPressed(true));
+      t(end + 220, () => {
+        setPressed(false);
+        scripted.current = false;
+        onDraft();
+      });
+    } else
+      t(end, () => {
+        scripted.current = false;
+        setHint(true);
+      });
     return () => timers.current.forEach(clearTimeout);
     // runs once, when the section first comes into view
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -212,11 +231,17 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer({
             </button>
           ))}
         </div>
+        {done ? (
+          <div className="mtm-go mtm-done">{done}</div>
+        ) : (
         <button
           ref={draftRef}
           type="button"
-          className={`btn-primary is-small mtm-go ${pressed ? "is-pressed" : ""}`}
-          onClick={onDraft}
+          className={`btn-primary is-small mtm-go ${pressed ? "is-pressed" : ""} ${hint && !drafting ? "is-hint" : ""}`}
+          onClick={() => {
+            setHint(false);
+            onDraft();
+          }}
           disabled={drafting || (!text.trim() && !atts.length)}
         >
           <span className="btn-primary__label">
@@ -225,6 +250,7 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer({
           </span>
           {drafting && <span className="mtm-go__bar" aria-hidden="true" />}
         </button>
+        )}
       </div>
 
       <input
