@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import { LogoMark } from "./Logo";
+import { AnnounceBar } from "./AnnounceBar";
 import { PrimaryButton } from "./PrimaryButton";
 import { APP_URL, CTA_LABEL } from "@/lib/site";
 import { HERO, cameraTrack, createHeroPlayer, heroPosition, heroPoster } from "@/lib/heroSequence";
@@ -217,12 +218,24 @@ export function Hero() {
       scan.style.opacity = String(beam);
     };
 
+    // the announcement bar shows only at the very top of the page; the logo
+    // and the section menu sit under it while it does (globals.css)
+    const root = document.documentElement;
+    const bar = el.querySelector<HTMLElement>("[data-bar]");
+    const barSize = new ResizeObserver(() => root.style.setProperty("--announce-bar", `${bar?.offsetHeight ?? 0}px`));
+    if (bar) barSize.observe(bar);
+    const announce = (p: number) => {
+      const on = p < 0.012 ? "on" : "off";
+      if (root.dataset.announce !== on) root.dataset.announce = on;
+    };
+
     const ctx = gsap.context(() => {
       // 1.1 arrives on load
       const intro = gsap.timeline({ defaults: { ease: "expo.out" } });
       intro
         .from("[data-scene]", { scale: 1.08, opacity: 0, duration: 2.4, clearProps: "transform" }, 0)
         .from("[data-glow]", { yPercent: 40, opacity: 0, duration: 2 }, 0.2)
+        .from("[data-bar]", { yPercent: -100, opacity: 0, duration: 1.2, clearProps: "transform,opacity" }, 0.5)
         .from("[data-logo]", { y: -10, opacity: 0, duration: 1.2 }, 0.6)
         .from("[data-h1] [data-w]", { yPercent: HIDDEN, duration: 1.4, stagger: 0.06 }, 0.7)
         .from("[data-intro]", { y: 16, opacity: 0, duration: 1.2, stagger: 0.1, clearProps: "transform,opacity" }, 1);
@@ -235,6 +248,8 @@ export function Hero() {
       gsap.set([split2.words, split3.chars], { yPercent: HIDDEN });
       gsap.set("[data-f2] [data-sub], [data-f3] [data-sub]", { opacity: 0, y: reduce ? 0 : 14 });
       gsap.set("[data-strike]", { scaleX: 0 });
+      // the shade behind each line comes and goes with its words
+      gsap.set("[data-shade]", { opacity: 0 });
       gsap.set("[data-handoff]", { "--r": "0%" });
       track(0);
 
@@ -247,6 +262,7 @@ export function Hero() {
           scrub: 0.8,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
+            announce(self.progress);
             const f = frameAt(self.progress);
             player.setPosition(heroPosition(f));
             track(f);
@@ -269,10 +285,13 @@ export function Hero() {
         .to("[data-glow]", { opacity: 0, yPercent: 30 * move, duration: 0.06 }, 0.04)
 
         // the problem, as the dress fits her perfectly
+        .to("[data-f2] [data-shade]", { opacity: 1, duration: 0.04, ease: "none" }, tProblem - 0.01)
         .to(split2.words, { yPercent: 0, duration: 0.04, stagger: 0.006, ease: "power3.out" }, tProblem)
         .to("[data-f2] [data-sub]", { opacity: 1, y: 0, duration: 0.03 }, tProblem + 0.03)
         .to(split2.words, { yPercent: -HIDDEN, duration: 0.03, stagger: 0.004, ease: "power3.in" }, tStrike)
         .to("[data-f2] [data-sub]", { opacity: 0, duration: 0.02 }, tStrike)
+        .to("[data-f2] [data-shade]", { opacity: 0, duration: 0.03, ease: "none" }, tStrike + 0.02)
+        .to("[data-f3] [data-shade]", { opacity: 1, duration: 0.03, ease: "none" }, tYours - 0.01)
 
         // the standard values are struck out, then rewritten as yours
         .to("[data-strike]", { scaleX: 1, duration: 0.03, stagger: 0.01, ease: "power2.in" }, tStrike + 0.01)
@@ -299,6 +318,7 @@ export function Hero() {
         .to("[data-f3]", { autoAlpha: 0, duration: 0.02 }, out + 0.12)
         .set({}, {}, 1);
       scroll = tl.scrollTrigger;
+      announce(scroll?.progress ?? 0);
     }, el);
 
     // the overlay is in screen px, so it is re-placed when the screen changes
@@ -308,6 +328,9 @@ export function Hero() {
 
     return () => {
       ro.disconnect();
+      barSize.disconnect();
+      delete root.dataset.announce;
+      root.style.removeProperty("--announce-bar");
       player.destroy();
       ctx.revert();
     };
@@ -379,55 +402,45 @@ export function Hero() {
           ))}
         </div>
 
-        {/* 1.1 */}
-        <LogoMark data-logo className="absolute right-5 top-[26px] z-30 w-[clamp(36px,3.4vw,49px)] text-cornflower md:left-1/2 md:right-auto md:top-[4%] md:-translate-x-1/2" />
+        {/* 1.1: the announcement bar, the logo under it (the section menu
+            sits opposite, see SectionNav), and the opening along the bottom */}
+        <AnnounceBar />
 
-        <a
-          data-f1-side
-          href="#maker"
-          className="hero-glass absolute left-5 top-[37%] z-30 hidden items-center md:left-[26px] md:flex"
-          style={{ width: 183, height: 76, padding: "4px 16px 4px 4px", gap: 8 }}
-        >
-          <span data-intro className="relative block shrink-0 overflow-hidden rounded-[4px] bg-cornflower" style={{ width: 47, height: 66 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/hero/natalia.png" alt="Natalia Chamon" className="absolute" style={{ width: 63, height: 66, left: -8, top: 0, objectFit: "cover" }} />
-          </span>
-          <span data-intro className="flex flex-col justify-center" style={{ height: 66, gap: 14 }}>
-            <span className="flex flex-col" style={{ gap: 4 }}>
-              <span className="hero-t12 uppercase text-periwinkle">Made by</span>
-              <span className="hero-t16 text-periwinkle">Natalia Chamon</span>
-            </span>
-            <span className="hero-t16 text-cloud">Meet the maker</span>
-          </span>
-        </a>
-
-        <div data-f1-head className="absolute inset-x-5 bottom-[calc(7svh+150px)] z-30 text-cloud md:inset-x-10 md:bottom-[9vh]">
-          <h1 data-h1 className="headline max-w-[16ch] text-[clamp(2.5rem,6.4vw,7rem)]">
-            <span className="line-mask"><span data-w className="inline-block">The average body</span></span>
-            <span className="line-mask">
-              <span data-w className="font-display inline-block text-[1.06em] text-cornflower">doesn&apos;t exist.</span>
-            </span>
-          </h1>
+        <div data-logo className="hero-logo absolute z-40">
+          <LogoMark className="w-[clamp(36px,3.4vw,49px)] text-cornflower" />
         </div>
 
-        <div data-f1-side className="absolute inset-x-5 bottom-[7svh] z-30 flex flex-col gap-5 md:inset-x-auto md:bottom-auto md:right-10 md:top-[37%] md:w-[280px] md:gap-6">
-          <p data-intro className="hero-t16 leading-[1.35] text-cloud/70">
-            Start from a photo, a sketch or a few words. Venty turns it into a sewing pattern drafted from your measurements, ready to print.
-          </p>
-          <div data-intro>
-            <PrimaryButton href={APP_URL}>{CTA_LABEL}</PrimaryButton>
+        <div className="hero-open absolute inset-x-0 bottom-0 z-30 text-cloud">
+          <div data-f1-head className="hero-open__main">
+            <div data-intro>
+              <PrimaryButton href={APP_URL}>{CTA_LABEL}</PrimaryButton>
+            </div>
+            <h1 data-h1 className="hero-title">
+              <span className="line-mask"><span data-w className="inline-block">The average body</span></span>
+              <span className="line-mask">
+                <span data-w className="inline-block">
+                  <span className="hero-title__serif">doesn&apos;t</span> exist
+                </span>
+              </span>
+            </h1>
           </div>
-        </div>
 
-        <div data-cue aria-hidden className="absolute bottom-5 left-1/2 z-30 hidden -translate-x-1/2 flex-col items-center gap-2 md:flex">
-          <span className="eyebrow text-periwinkle/70">Scroll</span>
-          <span className="scroll-cue block h-10 w-px overflow-hidden bg-cloud/15" />
+          <div data-cue aria-hidden className="hero-open__cue">
+            <span>Scroll</span>
+            <span className="scroll-cue block h-10 w-px overflow-hidden bg-cloud/15" />
+          </div>
+
+          <p data-f1-side className="hero-open__line">
+            <span data-intro className="block">
+              Start from a photo, a sketch or a few words. Venty turns it into a sewing pattern drafted from your measurements, ready to print.
+            </span>
+          </p>
         </div>
 
         {/* the problem: bottom left, where the dress leaves the frame empty
             (at the top on phones, clear of the lines on her) */}
         <div data-f2 className="pointer-events-none invisible absolute inset-0 z-30 flex items-start px-5 pt-[96px] text-cloud md:items-end md:px-10 md:pb-[9vh] md:pt-0">
-          <div aria-hidden className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-night via-night/70 to-transparent md:inset-y-0 md:left-0 md:top-auto md:h-auto md:w-[55%] md:bg-gradient-to-r md:from-night/85 md:via-night/40" />
+          <div data-shade aria-hidden className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-night via-night/70 to-transparent md:inset-y-0 md:left-0 md:top-auto md:h-auto md:w-[55%] md:bg-gradient-to-r md:from-night/85 md:via-night/40" />
           <div className="relative">
             <h2 data-h2 className="headline max-w-[13ch] text-[clamp(2.2rem,5vw,5.6rem)]">
               Yet every shop pattern is drafted for it.
@@ -440,7 +453,7 @@ export function Hero() {
 
         {/* the hand-off: left of her final pose (at the top on phones) */}
         <div data-f3 className="pointer-events-none invisible absolute inset-0 z-30 flex items-start px-5 pt-[96px] text-cloud md:items-center md:px-10 md:pt-0">
-          <div aria-hidden className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-night via-night/70 to-transparent md:hidden" />
+          <div data-shade aria-hidden className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-night via-night/70 to-transparent md:hidden" />
           <div data-f3-copy className="relative">
             <h2 data-h3 className="font-display text-[clamp(4.2rem,9vw,10rem)] leading-[0.9]">Yours does.</h2>
             <p data-sub className="body-lg mt-5 max-w-[26ch] text-periwinkle">

@@ -8,9 +8,10 @@ import { scrollToElement } from "./SmoothScroll";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* Top-left section label from the Figma frame (178 x 44 at 26, 34).
-   Shows the name of the section in view. Click opens a list of every
-   section; pick one to scroll there. Sections opt in with data-nav="Label". */
+/* Top-right section label (178 x 44 in the frame). Shows the name of the
+   section in view. Click opens a list of every section; pick one to scroll
+   there. Sections opt in with data-nav="Label". It sits under the hero's
+   announcement bar while that shows (.section-nav in globals.css). */
 const SECTIONS = [
   { id: "top", label: "Introduction" },
   { id: "photo", label: "Photo to pattern" },
@@ -58,7 +59,7 @@ export function SectionNav() {
   };
 
   return (
-    <div ref={ref} className="section-nav fixed z-50" style={{ left: "clamp(16px, 1.806vw, 26px)", top: "clamp(16px, 2.36vw, 34px)" }}>
+    <div ref={ref} className="section-nav fixed z-[70]">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -83,7 +84,7 @@ export function SectionNav() {
       <div
         role="listbox"
         aria-label="Sections"
-        className={`hero-glass section-nav__panel absolute left-0 top-[52px] flex min-w-[220px] flex-col overflow-hidden transition-all duration-500 ease-[var(--ease-out-expo)] ${
+        className={`hero-glass section-nav__panel absolute right-0 top-[52px] flex min-w-[220px] flex-col overflow-hidden transition-all duration-500 ease-[var(--ease-out-expo)] ${
           open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
         }`}
         style={{ padding: 6 }}

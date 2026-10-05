@@ -316,6 +316,7 @@ body {
 /* Primary pill: the Venty app's primary button (.pill-primary on the app's
    overhaul branch). A periwinkle core, light pooling at the edges, a fine
    dot grid, and a soft gradient swirling inside it on hover.
+   Type is the landing page's own (18px, as the Figma Button/Pill).
    Our hover, in place of the app's lift and outer glow: the pill is drawn
    toward the pointer (--mx/--my, set by PrimaryButton.tsx, the label a
    little further) and gives slightly under it, its inner edge light
@@ -334,9 +335,10 @@ body {
   border-radius: 999px;
   white-space: nowrap;
   font-family: var(--font-sans);
-  font-size: 16px;
-  font-weight: 500;
-  letter-spacing: -0.005em;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 22px;
+  letter-spacing: -0.04em;
   color: #fff;
   background-color: #687ef5;
   background-image: radial-gradient(rgb(255 255 255 / 0.16) 0.8px, transparent 1.1px), linear-gradient(180deg, #7387f6, #687ef5 55%, #6479f2);
@@ -359,7 +361,8 @@ body {
 }
 /* the swirl: a blurred conic gradient turning slowly under the label,
    faded in and running only while hovered or pressed */
-.btn-primary::after {
+.btn-primary::after,
+.vote__tab::after {
   content: "";
   position: absolute;
   left: 50%;
@@ -381,7 +384,8 @@ body {
   to { rotate: 360deg; }
 }
 @media (hover: hover) {
-  .btn-primary:hover::after { opacity: 1; animation-play-state: running; }
+  .btn-primary:hover::after,
+  .vote__tab:hover::after { opacity: 1; animation-play-state: running; }
   /* gives under the pointer: a touch smaller, the inner edge light drawn in
      tighter and brighter, the shadow beneath pulled closer (no glow out) */
   .btn-primary:hover {
@@ -398,13 +402,15 @@ body {
   scale: 0.965;
   transition-duration: 0.6s, 0.12s, 0.12s, 0.2s;
 }
-.btn-primary:active::after {
+.btn-primary:active::after,
+.vote__tab:active::after {
   opacity: 1;
   animation-play-state: running;
   transition-duration: 0.1s;
 }
 @media (prefers-reduced-motion: reduce) {
-  .btn-primary::after { animation: none !important; }
+  .btn-primary::after,
+  .vote__tab::after { animation: none !important; }
 }
 
 /* Hairline stroke box */
@@ -471,6 +477,364 @@ body {
   line-height: 63px;
   letter-spacing: -0.02em;
   margin-top: -7px; /* Bigilla sits lower in its box than Familjen; aligns baselines */
+}
+
+/* ------------------------------------------------------------------
+   Page edges and the hero header. --gutter is the side margin (26px in
+   the 1440 frame). While the hero's announcement bar shows
+   (html[data-announce="on"], set by Hero.tsx) the logo and the section
+   menu sit under it; when it slides away they ease up to the top.
+   ------------------------------------------------------------------ */
+:root {
+  --gutter: clamp(16px, 1.806vw, 26px);
+  --head-gap: clamp(12px, 1.53vw, 22px);
+  --announce-h: 0px;
+}
+html[data-announce="on"] {
+  --announce-h: var(--announce-bar, 0px);
+}
+.section-nav {
+  right: var(--gutter);
+  top: calc(var(--announce-h) + var(--head-gap));
+  transition: top 0.7s var(--ease-out-expo);
+}
+.hero-logo {
+  left: var(--gutter);
+  top: calc(var(--announce-h) + var(--head-gap));
+  height: 44px; /* the section menu's height, so the two centre on one line */
+  display: flex;
+  align-items: center;
+  transition: top 0.7s var(--ease-out-expo);
+}
+
+/* Announcement bar: maker | countdown | rolling line */
+.announce {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 40;
+  border-bottom: 1px solid var(--color-navy);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 16px;
+  letter-spacing: -0.02em;
+  color: var(--color-periwinkle);
+  transition: translate 0.7s var(--ease-out-expo), opacity 0.5s ease;
+}
+html[data-announce="off"] .announce {
+  translate: 0 -100%;
+  opacity: 0;
+  pointer-events: none;
+}
+.announce__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 38px;
+  padding: 0 var(--gutter);
+}
+.announce__maker {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+.announce__maker:hover,
+.announce__maker:focus-visible {
+  color: var(--color-cloud);
+}
+.announce__who {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.announce__face {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  object-fit: cover;
+  border-radius: 2px;
+  background: var(--color-periwinkle);
+}
+.announce__label,
+.announce__time {
+  font-size: 12px;
+  line-height: 14px;
+  text-transform: uppercase;
+}
+.announce__count {
+  justify-self: end;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  white-space: nowrap;
+}
+.announce__time {
+  display: inline-flex;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.announce__roll {
+  display: none;
+}
+@media (max-width: 639px) {
+  .announce__label { display: none; }
+}
+@media (max-width: 359px) {
+  .announce__count-label { display: none; }
+}
+@media (min-width: 1024px) {
+  .announce__row { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+  .announce__count { justify-self: center; }
+  /* every line sits in one grid cell, so the cell is as wide as the
+     longest; the current one is in, the last one rolls out above */
+  .announce__roll {
+    display: grid;
+    justify-self: end;
+    justify-items: end;
+    overflow: clip;
+    padding-block: 2px;
+    white-space: nowrap;
+  }
+  .announce__roll > [aria-hidden] {
+    grid-area: 1 / 1;
+    translate: 0 110%;
+    opacity: 0;
+    transition: translate 0.8s var(--ease-out-expo), opacity 0.5s ease;
+  }
+  .announce__roll > [data-state="in"] { translate: 0 0; opacity: 1; }
+  .announce__roll > [data-state="out"] { translate: 0 -110%; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .announce__roll > [aria-hidden] { translate: none !important; }
+}
+
+/* Hero opening along the bottom. Phones: one column (button, title, line).
+   Tablets: the line moves beside the title. Laptops up: title left,
+   Scroll centred, line right, all sitting on the bottom edge. */
+.hero-open {
+  display: grid;
+  gap: 20px;
+  padding: 0 var(--gutter) calc(env(safe-area-inset-bottom) + clamp(24px, 5svh, 48px));
+}
+.hero-open__main {
+  min-width: 0;
+}
+.hero-title {
+  margin-top: clamp(22px, 3.125vw, 45px);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 11.2vw, 2.9rem);
+  line-height: 1.06;
+  letter-spacing: -0.04em;
+  color: var(--color-cloud);
+  white-space: nowrap;
+}
+/* a column, so the masks' negative margins add up instead of collapsing
+   into each other (which would push the lines apart) */
+.hero-title {
+  display: flex;
+  flex-direction: column;
+}
+.hero-title__serif {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.hero-open__cue {
+  display: none;
+}
+.hero-open__line {
+  max-width: 34ch;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: rgb(255 255 255 / 0.6);
+}
+@media (min-width: 768px) {
+  .hero-open {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 230px);
+    align-items: end;
+    column-gap: 32px;
+    padding-bottom: clamp(20px, 3.3vh, 32px);
+  }
+  .hero-title { font-size: clamp(2.9rem, 4.37vw, 6.5rem); }
+  .hero-open__line { justify-self: end; max-width: 230px; }
+}
+@media (min-width: 1024px) {
+  .hero-open { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+  .hero-open__cue {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    justify-self: center;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 16px;
+    letter-spacing: -0.02em;
+    color: rgb(255 255 255 / 0.6);
+  }
+}
+
+/* ------------------------------------------------------------------
+   Vote for Venty: the tab on the right edge (VoteTab.tsx). Tab and panel
+   are one strip; closed, it is pushed right by the panel's width.
+   ------------------------------------------------------------------ */
+.vote {
+  --panel: 156px;
+  position: fixed;
+  right: 0;
+  top: 50%;
+  z-index: 65;
+  display: flex;
+  height: 149px;
+  translate: var(--panel) -50%;
+  transition: translate 0.7s var(--ease-out-expo);
+}
+.vote[data-open="true"] {
+  translate: 0 -50%;
+}
+@media (hover: hover) {
+  .vote[data-open="false"]:has(.vote__tab:hover) { translate: calc(var(--panel) - 6px) -50%; }
+}
+.vote__tab {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: 42px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 8px 14px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: -0.04em;
+  color: var(--color-cloud);
+  background-color: #687ef5;
+  background-image: radial-gradient(rgb(255 255 255 / 0.16) 0.8px, transparent 1.1px), linear-gradient(180deg, #7387f6, #687ef5 55%, #6479f2);
+  background-size: 5px 5px, 100% 100%;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3), inset 0 0 18px 3px rgb(206 214 255 / 0.55);
+  transition: box-shadow 0.35s ease;
+}
+@media (hover: hover) {
+  .vote__tab:hover { box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.36), inset 0 0 11px 2px rgb(214 222 255 / 0.7); }
+}
+.vote__tab:focus-visible {
+  outline: 2px solid var(--color-cloud);
+  outline-offset: -4px;
+}
+.vote__mark {
+  flex: none;
+}
+.vote__label {
+  writing-mode: vertical-rl;
+  rotate: 180deg;
+  white-space: nowrap;
+}
+.vote__panel {
+  width: var(--panel);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 8px;
+  text-align: center;
+  font-family: var(--font-sans);
+  letter-spacing: -0.04em;
+  background: var(--color-ink);
+  border-block: 1px solid rgb(72 95 136 / 0.5);
+}
+.vote__head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--color-periwinkle);
+}
+.vote__title { font-size: 16px; line-height: 1.1; }
+.vote__sub { font-size: 12px; line-height: 1.1; }
+.vote__links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+/* the panel's contents arrive a beat after it opens */
+.vote__head,
+.vote__links > li {
+  opacity: 0;
+  translate: 14px 0;
+  transition: opacity 0.3s ease, translate 0.6s var(--ease-out-expo);
+}
+.vote[data-open="true"] .vote__head,
+.vote[data-open="true"] .vote__links > li {
+  opacity: 1;
+  translate: 0 0;
+}
+.vote[data-open="true"] .vote__head { transition-delay: 0.12s; }
+.vote[data-open="true"] .vote__links > li:nth-child(1) { transition-delay: 0.2s; }
+.vote[data-open="true"] .vote__links > li:nth-child(2) { transition-delay: 0.26s; }
+.vote__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 4px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 22px;
+  font-weight: 600;
+  color: var(--color-cloud);
+}
+.vote__link[aria-disabled="true"] {
+  cursor: default;
+}
+/* hover: an underline draws in from the left, the arrow flies out to the
+   right and a second one follows it in */
+.vote__text {
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+  transition: background-size 0.5s var(--ease-out-expo);
+}
+.vote__arrow {
+  position: relative;
+  width: 10px;
+  height: 9px;
+  overflow: hidden;
+}
+.vote__arrow svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: translate 0.5s var(--ease-out-expo);
+}
+.vote__arrow svg + svg {
+  translate: -130% 0;
+}
+.vote__link:hover .vote__text,
+.vote__link:focus-visible .vote__text {
+  background-size: 100% 1px;
+}
+.vote__link:hover .vote__arrow svg:first-child,
+.vote__link:focus-visible .vote__arrow svg:first-child {
+  translate: 130% 0;
+}
+.vote__link:hover .vote__arrow svg + svg,
+.vote__link:focus-visible .vote__arrow svg + svg {
+  translate: 0 0;
+}
+.vote__link:focus-visible {
+  outline: 1px solid var(--color-periwinkle);
+  outline-offset: 2px;
 }
 
 /* Section nav label swap */
