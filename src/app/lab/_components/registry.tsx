@@ -16,6 +16,7 @@ import { Orbit, Drift, Tunnel } from "./loaders/Reel";
 import { Layout } from "./loaders/Layout";
 import { Strip } from "./loaders/Strip";
 import { MadeToMeasure } from "./sections/MadeToMeasure";
+import { DitherRise } from "./exp/DitherRise";
 
 /* Loader concepts run inside the harness: stand-in page, simulated
    network, Replay. */
@@ -66,6 +67,7 @@ function LoaderForm() {
 
 /* Native lab experiments by slug. Pair each with an entry in experiments.ts. */
 export const NATIVE: Record<string, ComponentType> = {
+  "dither-rise": DitherRise,
   tiles: Tiles,
   pairs: Pairs,
   "glow-cards": GlowCards,

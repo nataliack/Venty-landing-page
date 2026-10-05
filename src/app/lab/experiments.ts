@@ -29,6 +29,16 @@ export type Experiment = {
 export const EXPERIMENTS: Experiment[] = [
   {
     group: "sections",
+    slug: "dither-rise",
+    no: 23,
+    title: "Dither rise",
+    note: "The hero to Made to measure hand-off in four patterns (squares, dots, stitch, weave) and two edges (lumps, a moving wave). Scroll to run it.",
+    tag: "Transition",
+    date: "05 Oct",
+    kind: "native",
+  },
+  {
+    group: "sections",
     slug: "section-made-to-measure",
     no: 22,
     title: "Made to measure",
