@@ -137,3 +137,15 @@ export function SrProgress({ value }: { value: number }) {
 }
 
 export const pad3 = (n: number) => String(Math.round(n)).padStart(3, "0");
+
+/* Crown, the locked light sky (lab copy, see loaders.css). */
+export function Crown({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <div className={`crown ${className}`} style={style} aria-hidden="true">
+      <span className="drift d1" />
+      <span className="drift d2" />
+      <span className="drift d3" />
+      <span className="drift d4" />
+    </div>
+  );
+}

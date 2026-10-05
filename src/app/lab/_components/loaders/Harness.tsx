@@ -48,26 +48,26 @@ function useFakeLoad(seconds: number, run: number) {
   return p;
 }
 
-function StandIn({ live }: { live: boolean }) {
+function StandIn({ live, tone }: { live: boolean; tone: "dark" | "light" }) {
   return (
-    <div className={`ld-page absolute inset-0 overflow-clip ${live ? "is-live" : ""}`}>
+    <div className={`ld-page absolute inset-0 overflow-clip ${live ? "is-live" : ""} ${tone === "light" ? "is-light" : ""}`}>
       <div className="ld-page__glow" />
       <header className="ld-page__in absolute inset-x-0 top-0 flex items-center justify-between px-5 py-5 md:px-10" style={{ "--d": "0.15s" } as React.CSSProperties}>
-        <span className="flex items-center gap-2 text-[22px] text-[var(--cloud)]">
+        <span className="ld-page__fg flex items-center gap-2 text-[22px]">
           <LogoMark className="h-[1.05em] w-auto" />
           <Wordmark className="h-[0.95em] w-auto" />
         </span>
-        <span className="text-[13px] text-[var(--periwinkle)]">Stand-in page</span>
+        <span className="ld-page__muted text-[13px]">Stand-in page</span>
       </header>
       <div className="absolute inset-x-0 bottom-[22%] px-5 md:bottom-[18%] md:px-10">
-        <p className="ld-page__in lab-eyebrow text-[var(--periwinkle)]" style={{ "--d": "0.25s" } as React.CSSProperties}>
+        <p className="ld-page__in ld-page__muted lab-eyebrow" style={{ "--d": "0.25s" } as React.CSSProperties}>
           Venty · made to measure
         </p>
         <h2 className="ld-page__in lab-display mt-3 max-w-[12ch] text-[clamp(2.8rem,9vw,7rem)] leading-[0.88]" style={{ "--d": "0.35s" } as React.CSSProperties}>
           Your body, your pattern.
         </h2>
         <span
-          className="ld-page__in mt-6 inline-flex h-12 items-center rounded-full bg-[var(--cornflower)] px-6 text-[16px]"
+          className="ld-page__in mt-6 inline-flex h-12 items-center rounded-full bg-[var(--cornflower)] px-6 text-[16px] text-[var(--cloud)]"
           style={{ "--d": "0.5s", boxShadow: "inset 0 0 18px var(--cloud)" } as React.CSSProperties}
         >
           Draft your pattern
@@ -77,7 +77,8 @@ function StandIn({ live }: { live: boolean }) {
   );
 }
 
-export function Harness({ Concept }: { Concept: ComponentType<LoaderProps> }) {
+export function Harness({ Concept, page = "dark" }: { Concept: ComponentType<LoaderProps>; page?: "dark" | "light" }) {
+  const [tone, setTone] = useState(page);
   const [speed, setSpeed] = useState<(typeof SPEEDS)[number]["key"]>("typical");
   const [run, setRun] = useState(1);
   const [live, setLive] = useState(false);
@@ -93,10 +94,13 @@ export function Harness({ Concept }: { Concept: ComponentType<LoaderProps> }) {
 
   return (
     <div className="absolute inset-0 overflow-clip bg-[var(--night)]">
-      <StandIn live={live} />
+      <StandIn live={live} tone={tone} />
       {!gone && <Concept key={run} progress={progress} onExit={() => setLive(true)} onDone={() => setGone(true)} />}
 
-      <div className="lab-glass absolute left-1/2 top-[max(12px,env(safe-area-inset-top))] z-[80] flex -translate-x-1/2 items-center gap-1 rounded-full p-1 text-[13px]">
+      <div
+        className="lab-glass absolute left-1/2 top-[max(12px,env(safe-area-inset-top))] z-[80] flex -translate-x-1/2 items-center gap-1 rounded-full p-1 text-[13px]"
+        style={{ background: "color-mix(in oklab, var(--night) 55%, transparent)" }}
+      >
         {SPEEDS.map((s) => (
           <button
             key={s.key}
@@ -111,6 +115,18 @@ export function Harness({ Concept }: { Concept: ComponentType<LoaderProps> }) {
             {s.label}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => {
+            setTone((t) => (t === "dark" ? "light" : "dark"));
+            replay();
+          }}
+          aria-label={`Page behind: ${tone}. Switch to ${tone === "dark" ? "light" : "dark"}`}
+          title="Page behind the loader: dark or light"
+          className="lab-focus grid h-9 w-9 place-items-center rounded-full text-[var(--periwinkle)]"
+        >
+          <span className="block h-3.5 w-3.5 rounded-full border border-current" style={{ background: tone === "light" ? "var(--cloud)" : "var(--night)" }} />
+        </button>
         <button type="button" onClick={replay} className="lab-focus h-9 rounded-full bg-[var(--cornflower)] px-4">
           Replay
         </button>

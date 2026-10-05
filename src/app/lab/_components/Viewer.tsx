@@ -51,6 +51,7 @@ export function Viewer({ slug }: { slug: string }) {
       <nav
         aria-label="Lab"
         className="lab-glass lab-in absolute bottom-[max(16px,env(safe-area-inset-bottom))] left-1/2 z-[90] flex max-w-[calc(100vw-32px)] -translate-x-1/2 items-center gap-1 rounded-full p-1"
+        style={{ background: "color-mix(in oklab, var(--night) 55%, transparent)" }}
       >
         <Link href="/lab" className="lab-btn lab-focus" aria-label="All experiments">
           <Icon d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" />

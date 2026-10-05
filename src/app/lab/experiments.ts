@@ -16,6 +16,42 @@ export type Experiment = {
 
 export const EXPERIMENTS: Experiment[] = [
   {
+    slug: "loader-form",
+    no: 15,
+    title: "Light loader · Form",
+    note: "On Crown: a dress form in a matrix of dots lights from the hem up, measurement tags pop out, then the dots float away.",
+    tag: "Loader · Light",
+    date: "05 Oct",
+    kind: "native",
+  },
+  {
+    slug: "loader-sizes",
+    no: 14,
+    title: "Light loader · Sizes",
+    note: "On Crown: an odometer rolls through standard sizes, strikes each one, lands on \"Yours.\" and the sky closes in on it.",
+    tag: "Loader · Light",
+    date: "05 Oct",
+    kind: "native",
+  },
+  {
+    slug: "loader-thread",
+    no: 13,
+    title: "Light loader · Thread",
+    note: "On Crown: the Venty mark and wordmark are traced in one thread, fill in, then the sky lifts like a blind.",
+    tag: "Loader · Light",
+    date: "05 Oct",
+    kind: "native",
+  },
+  {
+    slug: "loader-swatches",
+    no: 12,
+    title: "Light loader · Swatches",
+    note: "On Crown: a swatch book in the palette stacks card by card, fans open, and the cards fly out.",
+    tag: "Loader · Light",
+    date: "05 Oct",
+    kind: "native",
+  },
+  {
     slug: "loader-draft",
     no: 11,
     title: "Loader · Draft",
