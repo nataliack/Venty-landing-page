@@ -740,10 +740,10 @@ body {
 .paper-grid {
   background-color: var(--color-night);
   background-image:
-    linear-gradient(color-mix(in srgb, var(--color-cornflower) 38%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--color-cornflower) 38%, transparent) 1px, transparent 1px),
-    linear-gradient(color-mix(in srgb, var(--color-cloud) 8%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--color-cloud) 8%, transparent) 1px, transparent 1px);
+    linear-gradient(color-mix(in srgb, var(--color-periwinkle) 13%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-periwinkle) 13%, transparent) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--color-cloud) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-cloud) 4%, transparent) 1px, transparent 1px);
   background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
   background-position: center center;
 }
@@ -751,13 +751,13 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(80% 75% at 50% 50%, transparent 45%, var(--color-night) 100%);
+  background: radial-gradient(80% 75% at 50% 50%, transparent 35%, var(--color-night) 100%);
 }
 .paper-grid--strong {
   background-color: transparent;
   background-image:
-    linear-gradient(color-mix(in srgb, var(--color-cornflower) 45%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--color-cornflower) 45%, transparent) 1px, transparent 1px);
+    linear-gradient(color-mix(in srgb, var(--color-cornflower) 22%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-cornflower) 22%, transparent) 1px, transparent 1px);
   background-size: 120px 120px;
 }
 
@@ -888,11 +888,33 @@ body {
   .feat-draw { stroke-dasharray: none; }
 }
 
-/* Hero hand-off: the paper spreads from the centre with a soft edge */
-.paper-reveal {
+/* Hero hand-off. --r runs 0% to 124%: the paper is masked from the bottom
+   edge up with a soft top (24% of the screen), and the light rides the line
+   where the paper turns solid. */
+.handoff {
   --r: 0%;
-  -webkit-mask-image: radial-gradient(circle at 50% 55%, #000 calc(var(--r) - 25%), transparent var(--r));
-  mask-image: radial-gradient(circle at 50% 55%, #000 calc(var(--r) - 25%), transparent var(--r));
+}
+.handoff__paper {
+  -webkit-mask-image: linear-gradient(to top, #000 calc(var(--r) - 24%), transparent var(--r));
+  mask-image: linear-gradient(to top, #000 calc(var(--r) - 24%), transparent var(--r));
+}
+.handoff__edge {
+  transform: translate3d(0, calc(124% - var(--r)), 0);
+  will-change: transform;
+}
+.handoff__edge::before {
+  content: "";
+  position: absolute;
+  inset: -1px 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-cornflower) 70%, transparent) 25%, var(--color-periwinkle) 50%, color-mix(in srgb, var(--color-cornflower) 70%, transparent) 75%, transparent);
+}
+.handoff__edge::after {
+  content: "";
+  position: absolute;
+  inset: -70px 0 auto;
+  height: 140px;
+  background: radial-gradient(50% 50% at 50% 50%, color-mix(in srgb, var(--color-cornflower) 22%, transparent), transparent);
 }
 
 /* ------------------------------------------------------------------

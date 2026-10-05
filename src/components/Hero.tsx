@@ -28,7 +28,8 @@ gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin);
                                                   grade through sizes 8 to 16
    606 to 635     the final pose                  values struck out; "Yours does.";
                                                   the labels rewrite as yours
-   then           the last frame holds            it dissolves into pattern paper
+   then           the last frame holds            pattern paper rises from the bottom
+                                                  edge and lifts the video away
 
    All frame numbers are master frames, as numbered in After Effects. The
    objects are placed in video pixels and projected through the same scale
@@ -234,7 +235,7 @@ export function Hero() {
       gsap.set([split2.words, split3.chars], { yPercent: HIDDEN });
       gsap.set("[data-f2] [data-sub], [data-f3] [data-sub]", { opacity: 0, y: reduce ? 0 : 14 });
       gsap.set("[data-strike]", { scaleX: 0 });
-      gsap.set("[data-paper]", { "--r": "0%" });
+      gsap.set("[data-handoff]", { "--r": "0%" });
       track(0);
 
       const tl = gsap.timeline({
@@ -244,6 +245,7 @@ export function Hero() {
           start: "top top",
           end: "bottom bottom",
           scrub: 0.8,
+          invalidateOnRefresh: true,
           onUpdate: (self) => {
             const f = frameAt(self.progress);
             player.setPosition(heroPosition(f));
@@ -282,12 +284,19 @@ export function Hero() {
         .to(split3.chars, { yPercent: 0, duration: 0.04, stagger: 0.006, ease: "power3.out" }, tYours + 0.01)
         .to("[data-f3] [data-sub]", { opacity: 1, y: 0, duration: 0.03 }, tYours + 0.04)
 
-        // hand-off: the scene dissolves into pattern paper
-        .to("[data-paper]", { "--r": "140%", duration: 0.11, ease: "power2.in" }, out)
-        .to("[data-scene]", { opacity: 0, duration: 0.09, ease: "power1.in" }, out + 0.02)
+        // hand-off: pattern paper rises from the bottom edge, a light along
+        // its edge, and lifts the video (and "Yours does.") up and away
+        .to("[data-handoff]", { "--r": "124%", duration: 0.12, ease: "power1.inOut" }, out)
+        .fromTo("[data-edge]", { opacity: 0 }, { opacity: 1, duration: 0.015, ease: "none" }, out)
+        .to("[data-edge]", { opacity: 0, duration: 0.02, ease: "none" }, out + 0.1)
+        .to("[data-lift]", { yPercent: -26 * move, scale: reduce ? 1 : 0.94, duration: 0.12, ease: "power1.in" }, out)
+        .to("[data-dim]", { opacity: 0.7, duration: 0.1, ease: "none" }, out)
         .to("[data-track]", { opacity: 0, duration: 0.03 }, out)
-        .to("[data-f3] [data-sub]", { opacity: 0, duration: 0.02 }, out + 0.03)
-        .to(split3.chars, { yPercent: -HIDDEN, duration: 0.03, stagger: 0.005, ease: "power3.in" }, out + 0.06)
+        // (on phones it sits just under the menu, so it barely rises)
+        .to("[data-f3-copy]", { yPercent: () => (phone.matches ? -12 : -60) * move, duration: 0.1, ease: "power1.in" }, out)
+        .to("[data-f3] [data-sub]", { opacity: 0, duration: 0.03 }, out + 0.02)
+        .to(split3.chars, { yPercent: -HIDDEN, duration: 0.03, stagger: 0.005, ease: "power3.in" }, out + 0.05)
+        .to("[data-f3]", { autoAlpha: 0, duration: 0.02 }, out + 0.12)
         .set({}, {}, 1);
       scroll = tl.scrollTrigger;
     }, el);
@@ -310,19 +319,22 @@ export function Hero() {
         {/* the night behind the scene lives on a child: a sticky element with a
             background at the top edge is what Safari would tint its status bar from */}
         <div aria-hidden className="absolute inset-0 bg-night" />
-        {/* scene: the poster (first frame) until the canvas has drawn */}
-        <div data-scene className="absolute inset-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={heroPoster} alt="" draggable={false} fetchPriority="high" className="absolute inset-0 h-full w-full select-none object-cover" />
-          <canvas data-seq aria-hidden className="absolute inset-0 h-full w-full opacity-0" />
-          <div
-            data-dots
-            className="hero-dots absolute inset-0"
-            style={{
-              WebkitMaskImage: "radial-gradient(42% 41% at 50% 50%, #000 35%, transparent 100%)",
-              maskImage: "radial-gradient(42% 41% at 50% 50%, #000 35%, transparent 100%)",
-            }}
-          />
+        {/* lifts away at the hand-off */}
+        <div data-lift className="absolute inset-0 origin-top">
+          {/* scene: the poster (first frame) until the canvas has drawn */}
+          <div data-scene className="absolute inset-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={heroPoster} alt="" draggable={false} fetchPriority="high" className="absolute inset-0 h-full w-full select-none object-cover" />
+            <canvas data-seq aria-hidden className="absolute inset-0 h-full w-full opacity-0" />
+            <div
+              data-dots
+              className="hero-dots absolute inset-0"
+              style={{
+                WebkitMaskImage: "radial-gradient(42% 41% at 50% 50%, #000 35%, transparent 100%)",
+                maskImage: "radial-gradient(42% 41% at 50% 50%, #000 35%, transparent 100%)",
+              }}
+            />
+          </div>
         </div>
         <div data-dim aria-hidden className="pointer-events-none absolute inset-0 bg-night opacity-0" />
 
@@ -334,8 +346,12 @@ export function Hero() {
           style={{ width: "109vw", height: "79vh", bottom: "-68vh", translate: "-50% 0", opacity: 0.95, filter: "blur(85px)" }}
         />
 
-        {/* pattern paper, revealed from the centre at the hand-off */}
-        <div data-paper aria-hidden className="paper-grid paper-reveal pointer-events-none absolute inset-0 z-10" />
+        {/* the hand-off: pattern paper rising from the bottom edge, with a
+            light running along its edge (both follow --r, see .handoff) */}
+        <div data-handoff aria-hidden className="handoff pointer-events-none absolute inset-0 z-10">
+          <div className="handoff__paper paper-grid absolute inset-0" />
+          <div data-edge className="handoff__edge absolute inset-0 opacity-0" />
+        </div>
 
         {/* objects on her, placed every frame in screen px (see track) */}
         <div data-track aria-hidden className="pointer-events-none absolute inset-0 z-20 text-cloud">
@@ -425,7 +441,7 @@ export function Hero() {
         {/* the hand-off: left of her final pose (at the top on phones) */}
         <div data-f3 className="pointer-events-none invisible absolute inset-0 z-30 flex items-start px-5 pt-[96px] text-cloud md:items-center md:px-10 md:pt-0">
           <div aria-hidden className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-night via-night/70 to-transparent md:hidden" />
-          <div className="relative">
+          <div data-f3-copy className="relative">
             <h2 data-h3 className="font-display text-[clamp(4.2rem,9vw,10rem)] leading-[0.9]">Yours does.</h2>
             <p data-sub className="body-lg mt-5 max-w-[26ch] text-periwinkle">
               Venty drafts every pattern from your measurements.
