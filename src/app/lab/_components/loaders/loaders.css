@@ -294,3 +294,169 @@
   background: var(--cornflower);
   box-shadow: 0 0 10px var(--cornflower);
 }
+
+/* ================================================================
+   SEAM, LIGHT, HORIZONTAL (on Crown)
+   A pattern sheet: the running stitch sews left to right along the
+   middle while the pattern's other lines draw in around it. Each line
+   reveals through a feathered mask driven by --q (0..1), and the whole
+   field fades out at the left and right edges.
+   ================================================================ */
+.sl {
+  --sa: clamp(18px, 3.2svh, 30px); /* seam allowance: stitch to cut line */
+}
+.sl-field {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
+}
+.sl-line {
+  --q: 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--q) * 108% - 8%), transparent calc(var(--q) * 108%));
+  mask-image: linear-gradient(90deg, #000 calc(var(--q) * 108% - 8%), transparent calc(var(--q) * 108%));
+}
+.sl-stitch {
+  top: calc(50% - 1px);
+  height: 2px;
+  background: repeating-linear-gradient(90deg, var(--cloud) 0 var(--on, 14px), transparent var(--on, 14px) 22px);
+  filter: drop-shadow(0 1px 1px rgb(11 12 21 / 0.55)) drop-shadow(0 0 var(--glow, 0px) var(--cornflower));
+}
+.sl-cut {
+  background: color-mix(in oklab, var(--cloud) 62%, transparent);
+}
+.sl-fold {
+  background: repeating-linear-gradient(90deg, var(--cloud) 0 18px, transparent 18px 24px, var(--cloud) 24px 27px, transparent 27px 33px);
+  opacity: 0.5;
+}
+.sl-outer--ink {
+  background: color-mix(in oklab, var(--ink) 30%, transparent);
+}
+.sl-outer--cloud {
+  background: color-mix(in oklab, var(--cloud) 24%, transparent);
+}
+.sl-hair {
+  background: repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 8px);
+  height: 6px;
+  opacity: 0.35;
+}
+
+/* marks that appear as the needle passes */
+.sl-mark {
+  position: absolute;
+  opacity: 0;
+  transition: opacity 0.7s var(--ease), translate 0.8s var(--ease), scale 0.8s var(--ease);
+}
+.sl-mark.is-on {
+  opacity: 1;
+}
+.sl-tick {
+  top: calc(50% - var(--sa) - 22px);
+  height: calc(var(--sa) * 2 + 44px);
+  width: 1px;
+  background: repeating-linear-gradient(180deg, var(--cloud) 0 4px, transparent 4px 8px);
+  translate: 0 -8px;
+}
+.sl-tick.is-on {
+  translate: 0 0;
+}
+.sl-notch {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  translate: -50% 0;
+}
+.sl-notch--top {
+  top: calc(50% - var(--sa));
+  border-top: 7px solid color-mix(in oklab, var(--cloud) 80%, transparent);
+}
+.sl-notch--bot {
+  top: calc(50% + var(--sa) - 7px);
+  border-bottom: 7px solid color-mix(in oklab, var(--cloud) 80%, transparent);
+}
+.sl-label {
+  translate: -50% 0;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: color-mix(in oklab, var(--night) 72%, transparent);
+  color: var(--cloud);
+  white-space: nowrap;
+}
+.sl-grain {
+  height: 1px;
+  background: color-mix(in oklab, var(--cloud) 75%, transparent);
+  scale: 0 1;
+}
+.sl-grain.is-on {
+  scale: 1 1;
+}
+.sl-grain::before,
+.sl-grain::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  width: 0;
+  height: 0;
+  border-top: 4.5px solid transparent;
+  border-bottom: 4.5px solid transparent;
+}
+.sl-grain::before {
+  left: -1px;
+  border-right: 8px solid color-mix(in oklab, var(--cloud) 75%, transparent);
+}
+.sl-grain::after {
+  right: -1px;
+  border-left: 8px solid color-mix(in oklab, var(--cloud) 75%, transparent);
+}
+.sl-reg {
+  width: 20px;
+  height: 20px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  scale: 0.6;
+}
+.sl-reg.is-on {
+  scale: 1;
+}
+.sl-reg::before,
+.sl-reg::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  background: currentColor;
+  translate: -50% -50%;
+}
+.sl-reg::before { width: 30px; height: 1px; }
+.sl-reg::after { width: 1px; height: 30px; }
+
+.sl-needle {
+  position: absolute;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: var(--cloud);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--cornflower) 40%, transparent), 0 0 28px 8px color-mix(in oklab, var(--cornflower) 65%, transparent);
+}
+.sl-half {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50%;
+  overflow: hidden;
+  will-change: transform;
+}
+.sl-half__inner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 200%;
+}

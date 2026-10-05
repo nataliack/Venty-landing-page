@@ -11,6 +11,7 @@ import { Thread } from "./loaders/Thread";
 import { Sizes } from "./loaders/Sizes";
 import { Swatches } from "./loaders/Swatches";
 import { Form } from "./loaders/Form";
+import { SeamLight } from "./loaders/SeamLight";
 
 /* Loader concepts run inside the harness: stand-in page, simulated
    network, Replay. */
@@ -36,6 +37,9 @@ function LoaderSizes() {
 function LoaderSwatches() {
   return <Harness Concept={Swatches} page="light" />;
 }
+function LoaderSeamLight() {
+  return <Harness Concept={SeamLight} page="light" />;
+}
 function LoaderForm() {
   return <Harness Concept={Form} page="light" />;
 }
@@ -53,4 +57,5 @@ export const NATIVE: Record<string, ComponentType> = {
   "loader-sizes": LoaderSizes,
   "loader-swatches": LoaderSwatches,
   "loader-form": LoaderForm,
+  "loader-seam-light": LoaderSeamLight,
 };

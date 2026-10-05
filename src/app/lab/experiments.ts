@@ -16,6 +16,15 @@ export type Experiment = {
 
 export const EXPERIMENTS: Experiment[] = [
   {
+    slug: "loader-seam-light",
+    no: 16,
+    title: "Light loader · Seam",
+    note: "On Crown, left to right: the stitch sews a pattern sheet as cut lines, folds, notches and grainlines draw in around it, then it splits top and bottom.",
+    tag: "Loader · Light",
+    date: "05 Oct",
+    kind: "native",
+  },
+  {
     slug: "loader-form",
     no: 15,
     title: "Light loader · Form",
