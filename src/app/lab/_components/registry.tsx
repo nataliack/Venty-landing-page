@@ -17,6 +17,7 @@ import { Layout } from "./loaders/Layout";
 import { Strip } from "./loaders/Strip";
 import { MadeToMeasure } from "./sections/MadeToMeasure";
 import { HowItWorksLight } from "./sections/HowItWorks";
+import { HowItWorksDesk } from "./sections/HowItWorksDesk";
 import { DitherRise } from "./exp/DitherRise";
 
 /* Loader concepts run inside the harness: stand-in page, simulated
@@ -84,6 +85,7 @@ export const NATIVE: Record<string, ComponentType> = {
   "loader-strip": LoaderStrip,
   "section-made-to-measure": MadeToMeasure,
   "section-how-it-works": HowItWorksLight,
+  "section-how-it-works-desk": HowItWorksDesk,
   "loader-layout": LoaderLayout,
   "loader-orbit": LoaderOrbit,
   "loader-drift": LoaderDrift,

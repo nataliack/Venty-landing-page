@@ -29,6 +29,16 @@ export type Experiment = {
 export const EXPERIMENTS: Experiment[] = [
   {
     group: "sections",
+    slug: "section-how-it-works-desk",
+    no: 26,
+    title: "How it works · Desk",
+    note: "Section 3 on a cutting mat seen from above: the steps as paper cards, real things beside them, the desk sliding sideways as you scroll. On phones it runs downwards. Placeholders mark the cut-out photos still to come.",
+    tag: "Section",
+    date: "05 Oct",
+    kind: "native",
+  },
+  {
+    group: "sections",
     slug: "section-how-it-works",
     no: 25,
     title: "How it works",
