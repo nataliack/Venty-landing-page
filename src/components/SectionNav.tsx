@@ -65,9 +65,9 @@ export function SectionNav() {
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-haspopup="listbox"
-        className="section-nav__btn hero-glass flex items-center"
+        className="section-nav__btn section-nav__glass flex items-center"
       >
-        <span className="relative block h-[20px] shrink-0 overflow-hidden whitespace-nowrap py-[2px] leading-[16px] tracking-[-0.02em] text-periwinkle">
+        <span className="section-nav__text relative block h-[20px] shrink-0 overflow-hidden whitespace-nowrap py-[2px] leading-[16px] tracking-[-0.02em] text-periwinkle">
           <span key={current} className="section-nav__label block">{current}</span>
         </span>
         <span className="section-nav__icon ml-auto flex flex-col items-center" aria-hidden="true">
@@ -83,7 +83,7 @@ export function SectionNav() {
       <div
         role="listbox"
         aria-label="Sections"
-        className={`hero-glass section-nav__panel absolute right-0 flex min-w-[190px] flex-col md:min-w-[210px] overflow-hidden transition-all duration-500 ease-[var(--ease-out-expo)] ${
+        className={`section-nav__glass section-nav__panel absolute right-0 flex min-w-[190px] flex-col md:min-w-[210px] overflow-hidden transition-all duration-500 ease-[var(--ease-out-expo)] ${
           open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
         }`}
         style={{ padding: 6 }}

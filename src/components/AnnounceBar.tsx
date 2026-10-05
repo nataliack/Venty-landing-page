@@ -83,7 +83,7 @@ export function AnnounceBar() {
       <div className="announce__row">
         <a href={MAKER_URL} target="_blank" rel="noopener" className="announce__maker">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/hero/natalia-face.webp" alt="" width={20} height={20} className="announce__face" />
+          <img src="/hero/natalia-chamon-face.webp" alt="" width={20} height={20} className="announce__face" />
           <span className="announce__who">
             <span className="announce__label">Made by:</span>
             <span>Natalia Chamon</span>

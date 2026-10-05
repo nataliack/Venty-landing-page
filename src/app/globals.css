@@ -511,13 +511,51 @@ html[data-announce="on"] {
   transition: top 0.7s var(--ease-out-expo);
 }
 
-/* Section menu: a compact glass pill (phones smaller still) */
+/* Section menu: a compact glass pill (phones smaller still). The pill and
+   the list it opens share one frosted glass: a light 10% fill and edge over
+   a 40px blur of whatever is behind. */
+.section-nav__glass {
+  background-color: color-mix(in srgb, var(--color-cloud) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-cloud) 10%, transparent);
+  -webkit-backdrop-filter: blur(40px);
+  backdrop-filter: blur(40px);
+}
 .section-nav__btn {
   height: var(--nav-h);
   min-width: 128px;
   padding: 0 12px 0 14px;
   gap: 10px;
   font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.35s ease, border-color 0.35s ease, scale 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.section-nav__text {
+  transition: color 0.35s ease;
+}
+/* hover: the glass lights up, the label brightens and the two chevrons
+   ease apart, an invitation to open it */
+@media (hover: hover) {
+  .section-nav__btn:hover {
+    background-color: color-mix(in srgb, var(--color-cloud) 17%, transparent);
+    border-color: color-mix(in srgb, var(--color-cloud) 26%, transparent);
+  }
+  .section-nav__btn:hover .section-nav__text {
+    color: var(--color-cloud);
+  }
+  .section-nav__btn[aria-expanded="false"]:hover .section-nav__icon svg:first-child {
+    translate: 0 -1.5px;
+  }
+  .section-nav__btn[aria-expanded="false"]:hover .section-nav__icon svg:last-child {
+    translate: 0 1.5px;
+  }
+}
+.section-nav__btn:active {
+  scale: 0.97;
+  transition-duration: 0.12s;
+}
+.section-nav__btn:focus-visible {
+  outline: 2px solid var(--color-cloud);
+  outline-offset: 2px;
 }
 .section-nav__icon {
   width: 9px;
@@ -917,9 +955,6 @@ html[data-announce="off"] .announce {
 @keyframes nav-label-in {
   from { transform: translateY(110%); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
-}
-.section-nav__panel {
-  background: color-mix(in srgb, var(--color-night) 88%, var(--color-cloud));
 }
 
 /* ------------------------------------------------------------------

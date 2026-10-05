@@ -142,7 +142,8 @@ export function Hero() {
 
       const move = reduce ? 0 : 1;
       const tFit = at(552);
-      const tGlow = at(585);
+      const tGlow = at(556); // as the dress settles on her
+      const tGlowFull = at(620); // fully back for the final pose
       tl
         // 1.1 out as she starts to rise; the dots and glow clear off the video
         .to("[data-cue]", { opacity: 0, duration: 0.02 }, 0.01)
@@ -159,7 +160,7 @@ export function Hero() {
         .to("[data-f2] [data-sub]", { opacity: 1, y: 0, duration: 0.03 }, tFit + 0.03)
 
         // the glow rises back along the bottom edge as she settles
-        .to("[data-glow]", { opacity: 0.95, yPercent: 0, duration: OUT - tGlow, ease: "power1.inOut" }, tGlow)
+        .to("[data-glow]", { opacity: 0.95, yPercent: 0, duration: tGlowFull - tGlow, ease: "power1.inOut" }, tGlow)
 
         // hand-off: pattern paper rises from the bottom edge, covers the line
         // and lifts the video up and away
