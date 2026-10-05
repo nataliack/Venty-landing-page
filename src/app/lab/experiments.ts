@@ -16,6 +16,33 @@ export type Experiment = {
 
 export const EXPERIMENTS: Experiment[] = [
   {
+    slug: "loader-orbit",
+    no: 19,
+    title: "Reel loader · Orbit",
+    note: "Frames ride a tilted 3D ring round a viewfinder, slow down, land on the hero's first frame and grow into it. Vote tab on from the start.",
+    tag: "Loader · Reel",
+    date: "05 Oct",
+    kind: "native",
+  },
+  {
+    slug: "loader-drift",
+    no: 18,
+    title: "Reel loader · Drift",
+    note: "A lightboard of scattered frames pans with parallax; the hero frame drifts into the viewfinder, the rest part, and it fills the screen.",
+    tag: "Loader · Reel",
+    date: "05 Oct",
+    kind: "native",
+  },
+  {
+    slug: "loader-tunnel",
+    no: 17,
+    title: "Reel loader · Tunnel",
+    note: "Frames fly toward you past the viewfinder while the hero frame travels down the middle, locks in the brackets and fills the screen.",
+    tag: "Loader · Reel",
+    date: "05 Oct",
+    kind: "native",
+  },
+  {
     slug: "loader-seam-light",
     no: 16,
     title: "Light loader · Seam",

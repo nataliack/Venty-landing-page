@@ -2,6 +2,8 @@
 
 import { useEffect, useState, type ComponentType } from "react";
 import { LogoMark, Wordmark } from "@/components/Logo";
+import { VoteTab } from "@/components/VoteTab";
+import { heroPoster } from "@/lib/heroSequence";
 import type { LoaderProps } from "./shared";
 import "./loaders.css";
 
@@ -48,7 +50,18 @@ function useFakeLoad(seconds: number, run: number) {
   return p;
 }
 
-function StandIn({ live, tone }: { live: boolean; tone: "dark" | "light" }) {
+type Tone = "dark" | "light" | "hero";
+const TONES: Tone[] = ["dark", "light", "hero"];
+
+function StandIn({ live, tone }: { live: boolean; tone: Tone }) {
+  // the hero's opening frame, exactly as the hero poster draws it
+  if (tone === "hero")
+    return (
+      <div className="ld-page is-hero absolute inset-0 overflow-clip">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={heroPoster} alt="" draggable={false} />
+      </div>
+    );
   return (
     <div className={`ld-page absolute inset-0 overflow-clip ${live ? "is-live" : ""} ${tone === "light" ? "is-light" : ""}`}>
       <div className="ld-page__glow" />
@@ -77,7 +90,7 @@ function StandIn({ live, tone }: { live: boolean; tone: "dark" | "light" }) {
   );
 }
 
-export function Harness({ Concept, page = "dark" }: { Concept: ComponentType<LoaderProps>; page?: "dark" | "light" }) {
+export function Harness({ Concept, page = "dark", vote = false }: { Concept: ComponentType<LoaderProps>; page?: Tone; vote?: boolean }) {
   const [tone, setTone] = useState(page);
   const [speed, setSpeed] = useState<(typeof SPEEDS)[number]["key"]>("typical");
   const [run, setRun] = useState(1);
@@ -96,6 +109,9 @@ export function Harness({ Concept, page = "dark" }: { Concept: ComponentType<Loa
     <div className="absolute inset-0 overflow-clip bg-[var(--night)]">
       <StandIn live={live} tone={tone} />
       {!gone && <Concept key={run} progress={progress} onExit={() => setLive(true)} onDone={() => setGone(true)} />}
+      {/* the site's real Vote for Venty tab, there from the first frame of
+          the loader: its entrance runs on mount, so Replay remounts it */}
+      {vote && <VoteTab key={`vote-${run}`} />}
 
       <div
         className="lab-glass absolute left-1/2 top-[max(12px,env(safe-area-inset-top))] z-[80] flex -translate-x-1/2 items-center gap-1 rounded-full p-1 text-[13px]"
@@ -118,14 +134,17 @@ export function Harness({ Concept, page = "dark" }: { Concept: ComponentType<Loa
         <button
           type="button"
           onClick={() => {
-            setTone((t) => (t === "dark" ? "light" : "dark"));
+            setTone((t) => TONES[(TONES.indexOf(t) + 1) % TONES.length]);
             replay();
           }}
-          aria-label={`Page behind: ${tone}. Switch to ${tone === "dark" ? "light" : "dark"}`}
-          title="Page behind the loader: dark or light"
+          aria-label={`Page behind the loader: ${tone}. Switch`}
+          title="Page behind the loader: dark, light or the hero's first frame"
           className="lab-focus grid h-9 w-9 place-items-center rounded-full text-[var(--periwinkle)]"
         >
-          <span className="block h-3.5 w-3.5 rounded-full border border-current" style={{ background: tone === "light" ? "var(--cloud)" : "var(--night)" }} />
+          <span
+            className="block h-3.5 w-3.5 rounded-full border border-current"
+            style={{ background: tone === "light" ? "var(--cloud)" : tone === "hero" ? "linear-gradient(135deg, var(--steel), var(--night))" : "var(--night)" }}
+          />
         </button>
         <button type="button" onClick={replay} className="lab-focus h-9 rounded-full bg-[var(--cornflower)] px-4">
           Replay

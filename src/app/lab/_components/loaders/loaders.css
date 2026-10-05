@@ -460,3 +460,60 @@
   right: 0;
   height: 200%;
 }
+
+/* ---- Reel: frames moving round a viewfinder, one is chosen --------- */
+.ld-reel-card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--night);
+  box-shadow: 0 18px 40px rgb(11 12 21 / 0.28), inset 0 0 0 1px rgb(239 244 255 / 0.12);
+  will-change: transform, opacity;
+  transform-origin: 50% 50%;
+}
+.ld-reel-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* the same centred cover crop as the hero poster */
+  user-select: none;
+}
+.ld-reel-card.is-chosen {
+  will-change: left, top, width, height;
+}
+.ld-reel-cross {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  translate: -50% -50%;
+  z-index: 1001;
+  pointer-events: none;
+}
+.ld-reel-cross::before,
+.ld-reel-cross::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  background: var(--cloud);
+  box-shadow: 0 0 2px rgb(11 12 21 / 0.6);
+}
+.ld-reel-cross::before { width: 15px; height: 1px; }
+.ld-reel-cross::after { width: 1px; height: 15px; }
+
+/* stand-in page: the hero's first frame, full bleed, as the hero shows it */
+.ld-page.is-hero { background: var(--night); }
+.ld-page.is-hero img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* ink HUD text over passing frames: a soft cloud halo keeps it legible */
+.ld-halo {
+  text-shadow: 0 0 2px rgb(239 244 255 / 0.9), 0 0 10px rgb(239 244 255 / 0.75);
+}
