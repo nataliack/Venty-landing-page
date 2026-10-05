@@ -1329,14 +1329,14 @@ html[data-announce="off"] .announce {
 }
 
 /* ------------------------------------------------------------------
-   Made to measure (MadeToMeasure.tsx): the first light screen. Pulled up
-   over the hero's last screen so it rises over the pinned video, with the
-   cloud colour dithering in above its edge (DitherEdge).
+   Made to measure (MadeToMeasure.tsx; its own styles in
+   components/measure/measure.css). Pulled up over the hero's last screen so
+   it rises over the pinned video, with the cloud colour dithering in above
+   its edge (DitherEdge).
    ------------------------------------------------------------------ */
 .measure {
   position: relative;
   z-index: 10;
-  height: 100svh;
   margin-top: -100svh;
 }
 /* the dither: a strip of canvas just above the rising edge, part of the
@@ -1350,53 +1350,6 @@ html[data-announce="off"] .announce {
   width: 100%;
   pointer-events: none;
   visibility: hidden;
-}
-.measure__sheet {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  background: var(--color-cloud);
-}
-/* dots, fading out toward the edges (the frame's blurred ellipse mask) */
-.measure__dots {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: radial-gradient(color-mix(in srgb, var(--color-ink) 17%, transparent) 1px, transparent 1.3px);
-  background-size: 18px 18px;
-  background-position: center;
-  -webkit-mask-image: radial-gradient(ellipse 46% 46% at 50% 50%, #000 30%, transparent 100%);
-  mask-image: radial-gradient(ellipse 46% 46% at 50% 50%, #000 30%, transparent 100%);
-}
-.measure__copy {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  margin: 0 auto;
-  padding: calc(var(--head-gap) + var(--nav-h) + 56px) var(--gutter) 0;
-  text-align: center;
-}
-.measure__eyebrow {
-  font-family: var(--font-sans);
-  font-size: 12px;
-  line-height: 14px;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
-  color: var(--color-navy);
-}
-.measure__title {
-  max-width: 11em; /* 692px at the frame's 62.93px */
-  font-family: var(--font-sans);
-  font-weight: 400;
-  font-size: clamp(2rem, 4.37vw, 5.6rem);
-  line-height: 1.255;
-  letter-spacing: -0.04em;
-  color: var(--color-ink);
-}
-@media (min-width: 768px) {
-  .measure__copy { padding-top: 17svh; }
 }
 
 /* the section menu on light sections: ink glass, navy and ink type */
