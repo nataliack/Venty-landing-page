@@ -2,10 +2,34 @@ import type { ComponentType } from "react";
 import { Tiles } from "./exp/Tiles";
 import { Pairs } from "./exp/Pairs";
 import { GlowCards } from "./exp/GlowCards";
+import { Harness } from "./loaders/Harness";
+import { Draft } from "./loaders/Draft";
+import { Tape } from "./loaders/Tape";
+import { Fit } from "./loaders/Fit";
+import { Seam } from "./loaders/Seam";
+
+/* Loader concepts run inside the harness: stand-in page, simulated
+   network, Replay. */
+function LoaderDraft() {
+  return <Harness Concept={Draft} />;
+}
+function LoaderFit() {
+  return <Harness Concept={Fit} />;
+}
+function LoaderSeam() {
+  return <Harness Concept={Seam} />;
+}
+function LoaderTape() {
+  return <Harness Concept={Tape} />;
+}
 
 /* Native lab experiments by slug. Pair each with an entry in experiments.ts. */
 export const NATIVE: Record<string, ComponentType> = {
   tiles: Tiles,
   pairs: Pairs,
   "glow-cards": GlowCards,
+  "loader-draft": LoaderDraft,
+  "loader-fit": LoaderFit,
+  "loader-seam": LoaderSeam,
+  "loader-tape": LoaderTape,
 };

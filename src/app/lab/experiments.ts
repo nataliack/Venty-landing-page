@@ -16,6 +16,42 @@ export type Experiment = {
 
 export const EXPERIMENTS: Experiment[] = [
   {
+    slug: "loader-draft",
+    no: 11,
+    title: "Loader · Draft",
+    note: "A bodice is drafted on pattern paper as the page loads, measurements decode in, then the sheet lifts away.",
+    tag: "Loader",
+    date: "05 Oct",
+    kind: "native",
+  },
+  {
+    slug: "loader-fit",
+    no: 10,
+    title: "Loader · Fit",
+    note: "Three measurement rings tighten until they fit the Venty mark, then open from the centre.",
+    tag: "Loader",
+    date: "05 Oct",
+    kind: "native",
+  },
+  {
+    slug: "loader-seam",
+    no: 9,
+    title: "Loader · Seam",
+    note: "A running stitch sews down the cloth, the thread pulls tight and the two halves part. The zipper idea, no image sequence.",
+    tag: "Loader",
+    date: "05 Oct",
+    kind: "native",
+  },
+  {
+    slug: "loader-tape",
+    no: 8,
+    title: "Loader · Tape",
+    note: "A measuring tape reads the progress in centimetres, whips back, and the night splits along its line.",
+    tag: "Loader",
+    date: "05 Oct",
+    kind: "native",
+  },
+  {
     slug: "glow-cards",
     no: 7,
     title: "Glow cards",
