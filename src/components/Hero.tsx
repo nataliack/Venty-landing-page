@@ -113,21 +113,22 @@ export function Hero() {
     };
 
     const ctx = gsap.context(() => {
-      // The footage settles in at once, under the loading screen, so the
-      // loader opens onto it
-      gsap
-        .timeline()
-        .from("[data-scene]", { scale: 1.08, opacity: 0, duration: DUR.long, ease: EASE.out, clearProps: "transform" }, 0)
-        .from("[data-glow]", { yPercent: 40, opacity: 0, duration: 2, ease: EASE.out }, 0.2);
+      // The footage sits still from the start: the loading screen's last move
+      // is the hero's first frame growing to fill the screen, landing on this
+      // exact frame, so nothing here may move or appear before it has gone.
 
       // 1.1 builds once the loader has gone, top to bottom, every object
       // with a motion from src/lib/motion (see docs/motion.md):
+      //   the glow rises along the bottom edge and the dots fade up
       //   the bar's rule draws out from the centre, its three items drop in
       //   the logo and the section menu drop in at the corners
       //   the title rises line by line; the button wipes open; the line
       //   below rises line by line; Scroll rises and its hairline grows
-      //   (the Vote for Venty tab joins from the right, see VoteTab)
+      //   (the Vote for Venty tab is already in, from the loading screen)
       const opening = gsap.timeline({ paused: true });
+      opening
+        .from("[data-glow]", { yPercent: 40, opacity: 0, duration: DUR.long, ease: EASE.out }, 0)
+        .from("[data-dots]", { opacity: 0, duration: DUR.reveal, ease: EASE.soft }, 0.1);
       drawLine(opening, "[data-bar-line]", 0);
       fadeDown(opening, "[data-bar-item]", 0.15);
       if (logo) fadeDown(opening, logo, 0.25);

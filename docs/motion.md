@@ -80,12 +80,14 @@ Once the loader has gone (`Hero.tsx`):
 | 0.32s | Section menu | `fadeDown` |
 | 0.35s | Title | `textIn`, line by line |
 | 0.55s | Create your pattern | `wipeIn` |
-| 0.6s | Vote for Venty | Slides in from the right, label writes in, the QUT mark builds (`VoteTab.tsx`) |
 | 0.65s | Line under the title | `linesIn` |
 | 0.8s | Scroll | `textIn`, then its hairline `drawLine` downward |
 
-The footage and the bottom glow settle in underneath the loading screen, so
-the loader opens onto them.
+Before all of it, the loading screen (`MeasureLoader.tsx`) ends by growing
+the hero's first frame to fill the screen, landing exactly on the hero, so
+the footage never moves or fades in: the glow rising along the bottom and
+the dots fading up are the first moves of the opening. The Vote for Venty
+tab arrives with the loading screen, above it, and is already in.
 
 ## Section hand-offs
 

@@ -801,7 +801,7 @@ html[data-announce="off"] .announce {
   position: fixed;
   right: 0;
   top: 50%;
-  z-index: 65;
+  z-index: 110; /* over the loading screen (z 100): it arrives with it */
   display: flex;
   height: 149px;
   translate: var(--panel) -50%;
@@ -1422,4 +1422,160 @@ html[data-theme="light"] .section-nav__icon path { stroke: var(--color-navy); }
   overflow: clip;
   padding: 0.3em 0.14em 0.36em;
   margin: -0.3em -0.14em -0.36em;
+}
+
+/* ------------------------------------------------------------------
+   The loading screen (MeasureLoader.tsx): Strip and Tape from the lab.
+   The Crown sky behind, images along the top, the reading and the
+   measuring tape along the bottom.
+   ------------------------------------------------------------------ */
+.ml {
+  color: var(--color-cloud);
+  background: var(--color-night);
+}
+.ml-glow {
+  position: absolute;
+  left: 15vw;
+  bottom: -18vh;
+  width: 70vw;
+  height: 46vh;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgb(104 126 245 / 0.55), rgb(104 126 245 / 0.18) 55%, transparent);
+  filter: blur(10px);
+}
+.ml-tile {
+  position: absolute;
+  overflow: hidden;
+  background: var(--color-night);
+}
+.ml-tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
+/* arriving: each drops in from above the top edge */
+.ml-tile.is-in {
+  animation: ml-drop var(--dur-reveal) var(--ease-out-expo) both;
+}
+@keyframes ml-drop {
+  from { translate: 0 -105%; }
+  to { translate: 0 0; }
+}
+/* the reading, centred over the tape */
+.ml-read {
+  position: absolute;
+  inset-inline: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.ml-roll {
+  display: grid;
+  justify-items: center;
+  overflow: clip;
+  padding-block: 2px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  line-height: 1.7;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--color-cloud) 82%, transparent); /* over the Crown's lighter middle */
+}
+.ml-roll > [aria-hidden] {
+  grid-area: 1 / 1;
+  translate: 0 110%;
+  opacity: 0;
+  transition: translate 0.8s var(--ease-out-expo), opacity 0.5s ease;
+}
+.ml-roll > [data-state="in"] { translate: 0 0; opacity: 1; }
+.ml-roll > [data-state="out"] { translate: 0 -110%; opacity: 0; }
+.ml-cm {
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(3.5rem, 8vw, 7rem);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.ml-cm span {
+  margin-left: 0.18em;
+  vertical-align: top;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 0.22em;
+  color: var(--color-periwinkle);
+}
+/* the measuring tape: 1 cm is --cm wide; ticks every cm, half and tenth */
+.ml-tape-wrap {
+  position: absolute;
+  inset-inline: 0;
+}
+.ml-tape {
+  --cm: 44px;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  height: 100%;
+  background-color: var(--color-cloud);
+  background-image:
+    repeating-linear-gradient(90deg, var(--color-ink) 0 1px, transparent 1px var(--cm)),
+    repeating-linear-gradient(90deg, var(--color-ink) 0 1px, transparent 1px calc(var(--cm) / 2)),
+    repeating-linear-gradient(90deg, color-mix(in oklab, var(--color-ink) 55%, transparent) 0 1px, transparent 1px calc(var(--cm) / 10));
+  background-size: 100% 46%, 100% 30%, 100% 18%;
+  background-repeat: repeat-x;
+  box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--color-ink) 20%, transparent), 0 10px 30px rgb(0 0 0 / 0.45);
+  will-change: transform;
+}
+@media (min-width: 768px) {
+  .ml-tape { --cm: 64px; }
+}
+.ml-tape__n {
+  position: absolute;
+  bottom: 10%;
+  translate: -50% 0;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+.ml-tape__n.is-ten {
+  font-weight: 600;
+  color: var(--color-cornflower);
+}
+.ml-tape__hook {
+  position: absolute;
+  left: -10px;
+  top: -4px;
+  width: 10px;
+  height: calc(100% + 8px);
+  border-radius: 3px 0 0 3px;
+  background: var(--color-steel);
+}
+.ml-tape__line {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1px;
+  translate: -50% -50%;
+  background: var(--color-cornflower);
+  box-shadow: 0 0 12px var(--color-cornflower);
+}
+.ml-tape__mark {
+  position: absolute;
+  left: 50%;
+  width: 0;
+  height: 0;
+  translate: -50% 0;
+  border-inline: 6px solid transparent;
+  border-top: 8px solid var(--color-cornflower);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ml-tile.is-in { animation: none; }
+  .ml-roll > [aria-hidden] { translate: none !important; }
 }

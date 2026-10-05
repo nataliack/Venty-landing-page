@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { VOTE_LINKS } from "@/lib/site";
-import { DUR, EASE, afterLoader } from "@/lib/motion";
+import { DUR, EASE } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -238,8 +238,10 @@ export function VoteTab() {
         )
         .add(mark, 0.45);
 
-      // joins the hero's opening once its title is up (Hero.tsx)
-      stop = afterLoader(() => entrance.delay(0.6).restart(true));
+      // it arrives with the loading screen, above it, and stays (z-index in
+      // .vote), so it is already there when the hero opens
+      const t = window.setTimeout(() => entrance.play(), 900);
+      stop = () => clearTimeout(t);
     }, el);
 
     // Hover: the bars pull up into the top edge, then drop again, in the

@@ -28,6 +28,17 @@ export type Experiment = {
 
 export const EXPERIMENTS: Experiment[] = [
   {
+    group: "loaders",
+    slug: "loader-zipper",
+    no: 24,
+    title: "Loader · Zipper",
+    note: "The previous main loader, kept here: the zipper opens over the dark sky cloth while the hero frames load. Replaced on the page by Strip and Tape together.",
+    tag: "Loader · Previous",
+    date: "05 Oct",
+    kind: "frame",
+    src: "/loader",
+  },
+  {
     group: "sections",
     slug: "dither-rise",
     no: 23,

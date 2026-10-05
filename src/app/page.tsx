@@ -2,7 +2,7 @@ import { SectionNav } from "@/components/SectionNav";
 import { VoteTab } from "@/components/VoteTab";
 import { SiteLogo } from "@/components/SiteLogo";
 import { ThemeZones } from "@/components/ThemeZones";
-import { Loader } from "@/components/Loader";
+import { MeasureLoader } from "@/components/MeasureLoader";
 import { Hero } from "@/components/Hero";
 import { MadeToMeasure } from "@/components/MadeToMeasure";
 import { HowItWorks } from "@/components/HowItWorks";
@@ -17,7 +17,7 @@ import { Footer } from "@/components/Footer";
 export default function Home() {
   return (
     <>
-      <Loader />
+      <MeasureLoader />
       <SiteLogo />
       <SectionNav />
       <VoteTab />
