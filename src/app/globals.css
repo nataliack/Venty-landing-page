@@ -1330,35 +1330,30 @@ html[data-announce="off"] .announce {
 
 /* ------------------------------------------------------------------
    Made to measure (MadeToMeasure.tsx): the first light screen. Pulled up
-   over the hero's last screen so it rises over the pinned video. Its top
-   edge is a dome, --curve 1 to 0 as it rises (a scrubbed ScrollTrigger),
-   with the cornflower halo of the hero's glow behind it.
+   over the hero's last screen so it rises over the pinned video, with the
+   cloud colour dithering in above its edge (DitherEdge).
    ------------------------------------------------------------------ */
 .measure {
-  --curve: 0;
-  --dome: 12vh; /* the dome's rise on phones */
   position: relative;
   z-index: 10;
   height: 100svh;
   margin-top: -100svh;
 }
-.measure__halo {
-  position: absolute;
-  left: -15vw;
-  right: -15vw;
-  top: -10vh;
-  height: 34vh;
-  border-radius: 50%;
-  background: var(--color-cornflower);
-  filter: blur(70px);
+/* the dither: a screen-sized canvas, under the page itself, shown by
+   DitherEdge only while the rising edge is on screen */
+.dither-edge {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
+  visibility: hidden;
 }
 .measure__sheet {
   position: absolute;
   inset: 0;
   overflow: hidden;
   background: var(--color-cloud);
-  border-radius: 50% 50% 0 0 / calc(var(--curve) * var(--dome)) calc(var(--curve) * var(--dome)) 0 0;
 }
 /* dots, fading out toward the edges (the frame's blurred ellipse mask) */
 .measure__dots {
@@ -1399,7 +1394,6 @@ html[data-announce="off"] .announce {
   color: var(--color-ink);
 }
 @media (min-width: 768px) {
-  .measure { --dome: 22vh; }
   .measure__copy { padding-top: 17svh; }
 }
 

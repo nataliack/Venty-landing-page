@@ -4,16 +4,17 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { fadeUp, linesIn } from "@/lib/motion";
+import { DitherEdge } from "./DitherEdge";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* Made to measure: the first light section, one static screen.
+/* Made to measure: the first light screen, one static screen.
 
    The hand-off from the hero: this page is pulled up over the last screen
    of the hero (-100svh), so it rises from the bottom edge while the video
-   stays pinned behind it. It comes up out of the hero's bottom glow: its top
-   edge is a dome the shape of that glow, with a cornflower halo around it,
-   and the dome flattens as the page reaches the top. No fades.
+   stays pinned, perfectly still, behind it. Above its top edge the cloud
+   colour dithers in, square by square on a fixed screen grid (DitherEdge),
+   so the video dissolves into the page rather than being wiped.
 
    Once it has arrived, the eyebrow and the line reveal (src/lib/motion). */
 export function MadeToMeasure() {
@@ -22,22 +23,9 @@ export function MadeToMeasure() {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const ctx = gsap.context(() => {
-      // the dome flattens and the halo burns off as the page rises
-      if (!still) {
-        gsap
-          .timeline({ scrollTrigger: { trigger: el, start: "top bottom", end: "top top", scrub: true } })
-          // over the whole rise (the timeline is 1 long: 0 = entering, 1 = at the top)
-          .fromTo(el, { "--curve": 1 }, { "--curve": 0, duration: 1, ease: "power2.in" }, 0)
-          .fromTo("[data-halo]", { opacity: 1 }, { opacity: 0, duration: 0.5, ease: "power1.in" }, 0.5);
-      } else {
-        gsap.set(el, { "--curve": 0 });
-      }
-
-      // the copy, once the page has (nearly) arrived; the line waits
-      // hidden, so it never shows before its reveal
+      // the line waits hidden, so it never shows before its reveal
       const line = el.querySelector("[data-line]");
       gsap.set(line, { autoAlpha: 0 });
       const reveal = gsap.timeline({ paused: true });
@@ -57,9 +45,8 @@ export function MadeToMeasure() {
   }, []);
 
   return (
-    <section ref={ref} id="measure" data-nav="Made to measure" data-wing="spread" data-theme-zone="light" data-theme-at="top 12%" className="measure">
-      {/* the cornflower light around the rising edge, behind the page */}
-      <div data-halo aria-hidden className="measure__halo" />
+    <section ref={ref} id="measure" data-nav="Made to measure" data-wing="spread" data-theme-zone="light" data-theme-at="top 35%" className="measure">
+      <DitherEdge color="#eff4ff" />
       <div className="measure__sheet">
         <div aria-hidden className="measure__dots" />
         <div className="measure__copy">

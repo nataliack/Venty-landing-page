@@ -24,9 +24,9 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
                                                      isn't real." comes in and stays;
                                                      the glow rises back along the
                                                      bottom edge
-   then           the hand-off                       Made to measure rises over it,
-                                                     out of the glow, and covers the
-                                                     line; the video drifts back
+   then           the hand-off                       Made to measure rises over the
+                                                     still video, its cloud colour
+                                                     dithering in above its edge
 
    All frame numbers are master frames, as numbered in After Effects. */
 
@@ -186,9 +186,8 @@ export function Hero() {
         // the glow rises back along the bottom edge as she settles
         .to("[data-glow]", { opacity: 0.95, yPercent: 0, duration: tGlowFull - tGlow, ease: "power1.inOut" }, tGlow)
 
-        // hand-off: Made to measure rises over the pinned hero (its own
-        // scroll); underneath, the video drifts up and back, for depth
-        .to("[data-lift]", { yPercent: -10 * move, scale: reduce ? 1 : 0.96, duration: 1 - OUT, ease: "none" }, OUT)
+        // hand-off: Made to measure rises over the pinned, still hero on its
+        // own scroll, dithering in (MadeToMeasure, DitherEdge)
         .set({}, {}, 1);
       announce(tl.scrollTrigger?.progress ?? 0);
     }, el);
@@ -214,8 +213,7 @@ export function Hero() {
         {/* the night behind the scene lives on a child: a sticky element with a
             background at the top edge is what Safari would tint its status bar from */}
         <div aria-hidden className="absolute inset-0 bg-night" />
-        {/* drifts back at the hand-off */}
-        <div data-lift className="absolute inset-0 origin-top">
+        <div className="absolute inset-0">
           {/* scene: the poster (first frame) until the canvas has drawn */}
           <div data-scene className="absolute inset-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
