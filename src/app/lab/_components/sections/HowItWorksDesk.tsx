@@ -16,16 +16,21 @@ import "./hiwdesk.css";
    fractions of the table, so it stays put at any size; type inside the
    table is sized to the table (container units).
 
-   The light in the photo comes from the top right: every shadow, the
-   table's own included, falls down and to the left.
+   The light in the photo comes from the top right: the shadows of the
+   things on it fall down and to the left, and the photo's own window light
+   (a blurred copy of it) is laid over them. The table's shadow falls on the
+   floor below it.
 
-   Desktop: the section pins and you travel along the table as you scroll:
-   the title on the floor, the table, the button on the floor beyond it.
-   Each thing drops onto the table as it comes into view.
+   Desktop: the section pins. The title stays put while the table slides
+   in from the right and passes over it; the button waits on the floor past
+   the table's end. Each thing drops onto the table as it comes into view.
    Phones: no sideways travel. Each step is its card, then a close crop of
    its stretch of the table with that step's things on it. */
 
 const TABLE = { src: "/lab/desk/table.webp", w: 2483, h: 921 };
+/* the photo's light, blurred: laid over everything drawn on the table so
+   the window shadows fall across the cards, the type and the phone too */
+const LIGHT = "/lab/desk/light.webp";
 const ASPECT = TABLE.w / TABLE.h;
 
 const PROMPT = "A slip dress, bias cut, midi length, in silk.";
@@ -71,7 +76,7 @@ const CROPS = [
 ];
 
 const at = (s: Spot, i = 0) =>
-  ({ left: `${s.x * 100}%`, top: `${s.y * 100}%`, width: `${s.w * 100}%`, "--r": `${s.r}deg`, "--i": i }) as CSSProperties;
+  ({ left: `${s.x * 100}%`, top: `${s.y * 100}%`, width: `${s.w * 100}%`, "--r": `${s.r}deg`, "--i": i, "--lx": s.x, "--ly": s.y }) as CSSProperties;
 
 /* ---- the things drawn in code ---------------------------------------- */
 
@@ -124,7 +129,20 @@ function Phone({ on }: { on: boolean }) {
   }, [on]);
   return (
     <div className="dk-phone">
+      <span className="dk-phone__btn is-action" aria-hidden="true" />
+      <span className="dk-phone__btn is-up" aria-hidden="true" />
+      <span className="dk-phone__btn is-down" aria-hidden="true" />
+      <span className="dk-phone__btn is-power" aria-hidden="true" />
       <div className="dk-phone__screen">
+        <div className="dk-phone__status" aria-hidden="true">
+          <span>9:41</span>
+          <span className="dk-phone__island" />
+          <span className="dk-phone__icons">
+            <i />
+            <i />
+            <i />
+          </span>
+        </div>
         <p className="dk-phone__bar">Venty</p>
         <div className="dk-phone__refs">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -141,6 +159,8 @@ function Phone({ on }: { on: boolean }) {
           <span>Loose</span>
         </div>
         <span className="dk-phone__go">Draft pattern</span>
+        <span className="dk-phone__home" aria-hidden="true" />
+        <span className="dk-phone__glare" aria-hidden="true" />
       </div>
     </div>
   );
@@ -183,7 +203,7 @@ function Table({ crop, phoneOn, cards }: { crop?: (typeof CROPS)[number]; phoneO
     ? ({ position: "absolute", top: 0, height: "100%", width: `${100 / span}%`, left: `${(-crop.x0 / span) * 100}%` } as CSSProperties)
     : undefined;
   const table = (
-    <div className="dk-table" style={inner}>
+    <div className="dk-table" style={{ ...inner, "--light": `url(${LIGHT})` } as CSSProperties}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={TABLE.src} alt="" draggable={false} className="dk-table__img" />
       <div className="dk-on" data-drop style={at(NOTE, 1)}>
@@ -248,7 +268,7 @@ export function HowItWorksDesk() {
       const p = Math.min(1, Math.max(0, (sc.scrollTop - sec.offsetTop) / Math.max(1, run)));
       const x = p * run;
       tr.style.transform = `translate3d(${-x}px, 0, 0)`;
-      const look = x + window.innerWidth * 0.55;
+      const look = x + window.innerWidth * 0.4;
       let a = 0;
       marks.forEach((m, i) => look > m && (a = i));
       setActive(a);
@@ -298,18 +318,18 @@ export function HowItWorksDesk() {
     <div ref={scroller} data-lenis-prevent className="absolute inset-0 overflow-y-auto overflow-x-hidden">
       <section ref={section} className="dk" aria-labelledby="dk-title">
         <div className="dk-stage">
+          {/* the title stays put; on desktop the table slides in over it */}
+          <header className="dk-intro" data-drop>
+            <p className="dk-eyebrow">Three steps</p>
+            <h2 id="dk-title" className="dk-title">
+              How it works
+            </h2>
+            <p className="dk-sub">From your body to the cutting table.</p>
+            <p className="dk-hint" aria-hidden="true">
+              Scroll <span>→</span>
+            </p>
+          </header>
           <div ref={track} className="dk-track">
-            <header className="dk-intro" data-drop>
-              <p className="dk-eyebrow">Three steps</p>
-              <h2 id="dk-title" className="dk-title">
-                How it works
-              </h2>
-              <p className="dk-sub">From your body to the cutting table.</p>
-              <p className="dk-hint" aria-hidden="true">
-                Scroll <span>→</span>
-              </p>
-            </header>
-
             {wide ? (
               <div className="dk-place">
                 <Table phoneOn={phoneOn} cards />

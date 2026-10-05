@@ -1,7 +1,9 @@
 /* 3. How it works · Desk (lab study). Jose's linen table seen from above,
-   on a cool studio floor, with paper things laid on it in code. The light
-   in the photo comes from the top right, so every shadow here falls down
-   and to the left. Scoped to .dk. */
+   with paper things laid on it in code. The light in the photo comes from
+   the top right: the things on the table cast their shadows down and to
+   the left, and the photo's own window light (a blurred copy of it) is
+   laid over them, type included. The table's shadow falls straight down
+   onto the floor. Scoped to .dk. */
 
 .dk {
   --ink: #121524;
@@ -10,32 +12,34 @@
   --peri: #9daccd;
   --corn: #687ef5;
   --cloud: #eff4ff;
-  --paper: #fbfcff;
-  --floor: #c7d1e2;
+  --paper: #fdfdff;
   --line: rgb(18 21 36 / 0.1);
   --spring: cubic-bezier(0.2, 1.4, 0.4, 1);
   --expo: cubic-bezier(0.16, 1, 0.3, 1);
-  /* lying flat on the table, light from the top right */
-  --lie: 0 1px 1px rgb(18 21 36 / 0.1), -3px 4px 7px -1px rgb(38 52 84 / 0.18), -12px 16px 26px -10px rgb(38 52 84 / 0.34);
-  --lift: 0 2px 2px rgb(18 21 36 / 0.08), -18px 26px 36px -12px rgb(38 52 84 / 0.36);
+  /* paper lying flat: a hairline, a tight contact shadow, and the soft one
+     the window throws, down and to the left like the photo's own */
+  --lie:
+    0 0 0 0.5px rgb(18 21 36 / 0.06),
+    -1px 1.5px 1.5px rgb(18 21 36 / 0.14),
+    -6px 8px 10px -4px rgb(30 44 78 / 0.22),
+    -24px 28px 38px -18px rgb(30 44 78 / 0.34);
+  /* thicker things sit higher, so their shadow travels further */
+  --lift:
+    -1px 2px 2px rgb(18 21 36 / 0.2),
+    -10px 14px 16px -6px rgb(30 44 78 / 0.32),
+    -34px 40px 50px -20px rgb(30 44 78 / 0.38);
   position: relative;
   overflow-x: clip;
   color: var(--ink);
   font-family: var(--font-familjen), system-ui, sans-serif;
-  background: var(--floor);
+  background: var(--cloud);
 }
 
-/* ---- the floor and the travel ----------------------------------- */
-.dk-stage {
-  position: relative;
-  /* the window light carries on across the floor, at the photo's angle */
-  background:
-    repeating-linear-gradient(151deg, rgb(255 255 255 / 0.16) 0 210px, transparent 210px 330px),
-    radial-gradient(120% 90% at 100% 0%, rgb(255 255 255 / 0.35), transparent 60%),
-    radial-gradient(100% 90% at 0% 100%, rgb(38 52 84 / 0.16), transparent 60%),
-    var(--floor);
-}
+/* ---- the stage and the travel ------------------------------------ */
+.dk-stage { position: relative; }
 .dk-track {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 40px;
@@ -45,25 +49,33 @@
   .dk-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
   .dk-track {
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
     gap: 0;
     width: max-content;
     height: 100%;
-    padding: 0;
+    /* the table starts out peeking in from the right, beside the title */
+    padding: 0 0 0 72vw;
     will-change: transform;
   }
 }
 
-/* ---- the title, on the floor ------------------------------------- */
+/* ---- the title: it stays put, the table passes over it ------------ */
 .dk-intro {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 60svh;
-  padding-top: 72px;
+  min-height: 56svh;
+  padding: 72px 16px 0;
 }
 @media (min-width: 1024px) {
-  .dk-intro { flex: none; width: 46vw; min-height: 0; padding: 0 0 0 7vw; }
+  .dk-intro {
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: 1;
+    width: 64vw;
+    min-height: 0;
+    padding: 0 0 0 7vw;
+  }
 }
 .dk-intro > * { opacity: 0; translate: 0 18px; transition: opacity 1s var(--expo), translate 1.2s var(--expo); }
 .dk-intro.is-placed > * { opacity: 1; translate: 0 0; }
@@ -93,7 +105,7 @@
 
 /* ---- the table --------------------------------------------------- */
 @media (min-width: 1024px) {
-  .dk-place { flex: none; height: min(80svh, 820px); aspect-ratio: 2483 / 921; }
+  .dk-place { flex: none; height: min(74svh, 780px); margin-top: 8svh; aspect-ratio: 2483 / 921; }
 }
 .dk-table {
   position: relative;
@@ -106,16 +118,12 @@
   width: 100%;
   height: 100%;
   user-select: none;
-  /* grounded: a soft shadow down and to the left, and a tighter contact one */
-  filter: drop-shadow(-26px 34px 38px rgb(30 44 78 / 0.34)) drop-shadow(-5px 8px 8px rgb(18 21 36 / 0.22));
+  /* standing on the floor: a broad shadow below it and a tight one where the legs meet it */
+  filter: drop-shadow(0 48px 46px rgb(30 44 78 / 0.42)) drop-shadow(0 14px 14px rgb(18 21 36 / 0.3));
 }
 
 /* phones: a window onto one stretch of the table */
-.dk-crop {
-  position: relative;
-  margin: 0 -16px;
-  overflow: hidden;
-}
+.dk-crop { position: relative; margin: 0 -16px; overflow: hidden; }
 .dk-crop .dk-table__img { filter: none; }
 .dk-step { display: flex; flex-direction: column; }
 .dk-step__card {
@@ -135,6 +143,7 @@
 .dk-on { position: absolute; z-index: 2; }
 .dk-on--card { z-index: 3; }
 .dk-on > * {
+  position: relative;
   rotate: var(--r);
   opacity: 0;
   scale: 1.06;
@@ -146,14 +155,27 @@
   transition-delay: calc(var(--i) * 0.12s);
 }
 .dk-on.is-placed > * { opacity: 1; scale: 1; translate: 0 0; }
+/* the window light, cut from the photo at exactly this spot */
+.dk-on > *::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--light) no-repeat;
+  background-size: 100cqw calc(100cqw / 2.696);
+  background-position: calc(var(--lx) * -100cqw) calc(var(--ly) * -100cqw / 2.696);
+  mix-blend-mode: multiply;
+}
 
 /* the step card: type sized to the table, never below a readable floor */
 .dk-card {
-  position: relative;
   padding: max(20px, 1.15cqw) max(20px, 1.1cqw) max(22px, 1.25cqw);
-  border-radius: 6px;
-  background: linear-gradient(200deg, #fff, rgb(239 244 255 / 0.85)), var(--paper);
-  box-shadow: var(--lie);
+  border-radius: 4px;
+  /* lit from the top right: that edge catches a sliver of light */
+  background: linear-gradient(225deg, #fff 0%, #f7f9fe 70%, #f1f4fb 100%);
+  box-shadow: var(--lie), inset -1px 1px 0 rgb(255 255 255 / 0.95);
 }
 .dk-tape {
   position: absolute;
@@ -164,6 +186,7 @@
   translate: -50% 0;
   rotate: -3deg;
   background: rgb(104 126 245 / 0.34);
+  box-shadow: -1px 1px 1px rgb(30 44 78 / 0.12);
   clip-path: polygon(3% 0, 97% 4%, 100% 100%, 0 94%);
 }
 .dk-card__top { display: flex; align-items: center; justify-content: space-between; }
@@ -187,33 +210,54 @@
 /* the measurements note */
 .dk-note {
   padding: 0.8cqw 0.8cqw 0.6cqw;
-  border-radius: 3px;
+  border-radius: 2px;
   background: #fffdf6 repeating-linear-gradient(transparent 0 1.2cqw, rgb(104 126 245 / 0.2) 1.2cqw calc(1.2cqw + 1px));
   background-position: 0 1.6cqw;
-  box-shadow: var(--lie);
+  box-shadow: var(--lie), inset -1px 1px 0 rgb(255 255 255 / 0.9);
 }
 .dk-note__h { font-size: 0.5cqw; letter-spacing: 0.04em; text-transform: uppercase; color: var(--steel); }
 .dk-note dl > div { display: flex; justify-content: space-between; align-items: flex-end; height: 1.2cqw; font-size: 0.62cqw; }
 .dk-note dd { font-family: var(--font-bigilla), Georgia, serif; font-size: 0.78cqw; }
 
-/* the phone, face up on the sketchbook's blank page */
+/* ---- the phone: a titanium band, black glass, face up -------------- */
 .dk-phone {
-  padding: 0.42cqw;
-  border-radius: 1.6cqw;
-  background: #1b2035;
-  box-shadow: var(--lift), inset 0 0 0 1px rgb(255 255 255 / 0.08);
+  padding: 0.16cqw;
+  border-radius: 1.9cqw;
+  /* the band catches the window on its top right edge */
+  background: linear-gradient(225deg, #f2f4f8 0%, #b9bfcc 18%, #7f8698 42%, #cdd2dc 62%, #6d7486 100%);
+  box-shadow: var(--lift);
 }
+.dk-phone__btn {
+  position: absolute;
+  width: 0.14cqw;
+  border-radius: 1px;
+  background: linear-gradient(90deg, #6d7486, #c3c8d3);
+}
+.dk-phone__btn.is-action { left: -0.1cqw; top: 15%; height: 3.5%; }
+.dk-phone__btn.is-up { left: -0.1cqw; top: 22%; height: 7%; }
+.dk-phone__btn.is-down { left: -0.1cqw; top: 31%; height: 7%; }
+.dk-phone__btn.is-power { right: -0.1cqw; top: 25%; height: 11%; background: linear-gradient(90deg, #c3c8d3, #6d7486); }
 .dk-phone__screen {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.45cqw;
-  aspect-ratio: 9 / 18.5;
-  padding: 1.2cqw 0.62cqw 0.7cqw;
-  border-radius: 1.2cqw;
+  aspect-ratio: 9 / 19.5;
+  padding: 0.5cqw 0.62cqw 0.5cqw;
+  border-radius: 1.74cqw;
+  /* a hair of black bezel around the display */
+  border: 0.22cqw solid #07080c;
   background: var(--cloud);
   overflow: hidden;
   font-size: 0.56cqw;
 }
+.dk-phone__status { display: flex; align-items: center; justify-content: space-between; height: 1.2cqw; font-size: 0.5cqw; font-weight: 600; letter-spacing: -0.01em; }
+.dk-phone__island { width: 34%; height: 1cqw; border-radius: 999px; background: #07080c; }
+.dk-phone__icons { display: flex; gap: 0.12cqw; align-items: flex-end; }
+.dk-phone__icons i { display: block; width: 0.22cqw; background: var(--ink); border-radius: 1px; }
+.dk-phone__icons i:nth-child(1) { height: 0.24cqw; }
+.dk-phone__icons i:nth-child(2) { height: 0.34cqw; }
+.dk-phone__icons i:nth-child(3) { width: 0.6cqw; height: 0.3cqw; border-radius: 2px; }
 .dk-phone__bar { text-align: center; color: var(--navy); }
 .dk-phone__refs { display: flex; gap: 0.3cqw; }
 .dk-phone__refs img,
@@ -232,9 +276,19 @@
 .dk-phone__seg span { flex: 1; padding: 0.22cqw 0; text-align: center; border-radius: 999px; transition: background-color 0.3s, color 0.3s; }
 .dk-phone__seg .is-on { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgb(18 21 36 / 0.15); }
 .dk-phone__go { padding: 0.42cqw 0; border-radius: 999px; background: var(--corn); color: var(--cloud); text-align: center; font-size: 0.52cqw; }
+.dk-phone__home { align-self: center; width: 36%; height: 0.14cqw; margin-top: 0.1cqw; border-radius: 999px; background: var(--ink); opacity: 0.85; }
+/* glass: the window's reflection slides across from the top right */
+.dk-phone__glare {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(225deg, rgb(255 255 255 / 0.5) 0%, rgb(255 255 255 / 0.12) 22%, transparent 38%),
+    linear-gradient(225deg, transparent 52%, rgb(255 255 255 / 0.14) 60%, transparent 70%);
+}
 
 /* the A4 pages, taped together */
-.dk-pages { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); aspect-ratio: 300 / 424; filter: drop-shadow(-8px 10px 12px rgb(38 52 84 / 0.26)); }
+.dk-pages { display: grid; grid-template-columns: repeat(3, 1fr); aspect-ratio: 300 / 424; filter: drop-shadow(-1px 1.5px 1.5px rgb(18 21 36 / 0.14)) drop-shadow(-12px 14px 16px rgb(30 44 78 / 0.24)); }
 .dk-page {
   position: relative;
   background: #fff;
@@ -262,7 +316,7 @@
 
 /* ---- the end: a swing tag on the floor --------------------------- */
 .dk-end { display: grid; place-items: center; padding: 24px 0 0; }
-@media (min-width: 1024px) { .dk-end { flex: none; width: 40vw; height: 100%; padding: 0; } }
+@media (min-width: 1024px) { .dk-end { flex: none; width: 30vw; height: 100%; padding: 0; } }
 .dk-tag {
   position: relative;
   display: grid;
@@ -270,15 +324,15 @@
   gap: 18px;
   padding: 44px 40px 36px;
   border-radius: 8px;
-  background: var(--paper);
-  box-shadow: var(--lift);
+  background: linear-gradient(225deg, #fff 0%, #f5f7fd 100%);
+  box-shadow: 0 1px 1px rgb(18 21 36 / 0.1), 0 18px 34px -14px rgb(30 44 78 / 0.36);
   rotate: -3deg;
   opacity: 0;
   translate: 10px -16px;
   transition: opacity 0.6s var(--expo), translate 1s var(--expo);
 }
 .dk-end.is-placed .dk-tag { opacity: 1; translate: 0 0; }
-.dk-tag__hole { position: absolute; top: 14px; width: 12px; height: 12px; border-radius: 50%; background: var(--floor); box-shadow: inset 1px 2px 2px rgb(38 52 84 / 0.3); }
+.dk-tag__hole { position: absolute; top: 14px; width: 12px; height: 12px; border-radius: 50%; background: var(--cloud); box-shadow: inset 1px 2px 2px rgb(38 52 84 / 0.3); }
 .dk-tag__k { font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--navy); }
 .dk .btn-primary {
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25), inset 0 1px 0 rgb(255 255 255 / 0.45), inset 0 0 10px 1px rgb(206 214 255 / 0.35), 0 10px 24px -10px rgb(104 126 245 / 0.7);
@@ -288,7 +342,7 @@
 .dk-steps {
   position: absolute;
   left: 50%;
-  top: 24px; /* above the table, clear of the lab's own pill */
+  bottom: 76px; /* below the table, above the lab's own pill */
   z-index: 50;
   display: flex;
   gap: 4px;
@@ -296,7 +350,7 @@
   translate: -50% 0;
   list-style: none;
   border-radius: 999px;
-  background: rgb(255 255 255 / 0.6);
+  background: rgb(255 255 255 / 0.7);
   box-shadow: inset 0 0 0 1px var(--line), 0 10px 30px -14px rgb(38 52 84 / 0.4);
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
