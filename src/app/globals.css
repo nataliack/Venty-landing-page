@@ -740,10 +740,10 @@ body {
 .paper-grid {
   background-color: var(--color-night);
   background-image:
-    linear-gradient(color-mix(in srgb, var(--color-periwinkle) 13%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--color-periwinkle) 13%, transparent) 1px, transparent 1px),
-    linear-gradient(color-mix(in srgb, var(--color-cloud) 4%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--color-cloud) 4%, transparent) 1px, transparent 1px);
+    linear-gradient(color-mix(in srgb, var(--color-periwinkle) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-periwinkle) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--color-cloud) 2.5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-cloud) 2.5%, transparent) 1px, transparent 1px);
   background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
   background-position: center center;
 }
@@ -756,8 +756,8 @@ body {
 .paper-grid--strong {
   background-color: transparent;
   background-image:
-    linear-gradient(color-mix(in srgb, var(--color-cornflower) 22%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--color-cornflower) 22%, transparent) 1px, transparent 1px);
+    linear-gradient(color-mix(in srgb, var(--color-cornflower) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-cornflower) 12%, transparent) 1px, transparent 1px);
   background-size: 120px 120px;
 }
 
