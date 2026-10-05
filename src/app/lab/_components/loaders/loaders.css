@@ -622,3 +622,93 @@
   border-radius: 1px;
   background: var(--cornflower);
 }
+
+/* ================================================================
+   STRIP (Jose's frame): images along the top, percentage and a rolling
+   line, a ruler across the bottom
+   ================================================================ */
+.ld-tile {
+  position: absolute;
+  overflow: hidden;
+  background: var(--night);
+}
+.ld-tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
+/* arriving: each drops in from above the top edge (EASE.out) */
+.ld-tile.is-in {
+  animation: ld-drop 1.2s var(--ease) both;
+}
+@keyframes ld-drop {
+  from { translate: 0 -105%; }
+  to { translate: 0 0; }
+}
+.ld-pct {
+  font-family: var(--font-bigilla), Georgia, serif;
+  font-weight: 700;
+  font-size: clamp(52px, 4.86vw, 96px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.ld-pct span {
+  font-family: var(--font-familjen), system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 0.3em;
+  letter-spacing: -0.04em;
+  margin-left: 0.06em;
+}
+/* the rolling line: one grid cell, the announcement bar's roll */
+.ld-roll2 {
+  display: grid;
+  justify-items: center;
+  overflow: clip;
+  margin-top: 10px;
+  padding-block: 2px;
+  font-family: var(--font-familjen), system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+.ld-roll2 > [aria-hidden] {
+  grid-area: 1 / 1;
+  translate: 0 110%;
+  opacity: 0;
+  transition: translate 0.8s var(--ease), opacity 0.5s ease;
+}
+.ld-roll2 > [data-state="in"] { translate: 0 0; opacity: 1; }
+.ld-roll2 > [data-state="out"] { translate: 0 -110%; opacity: 0; }
+/* the ruler runs off the bottom edge (as the frame), fading hard at both sides */
+.ld-ruler2 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -14px;
+  height: 96px;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 32%, #000 68%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 32%, #000 68%, transparent 100%);
+}
+.ld-ruler2 canvas { display: block; }
+.ld-glow2 {
+  position: absolute;
+  left: 50%;
+  bottom: -18vh;
+  width: 70vw;
+  height: 46vh;
+  translate: -50% 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgb(104 126 245 / 0.55), rgb(104 126 245 / 0.18) 55%, transparent);
+  filter: blur(10px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ld-tile.is-in { animation: none; }
+  .ld-roll2 > [aria-hidden] { translate: none !important; }
+}

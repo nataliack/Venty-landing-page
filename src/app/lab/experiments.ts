@@ -16,6 +16,15 @@ export type Experiment = {
 
 export const EXPERIMENTS: Experiment[] = [
   {
+    slug: "loader-strip",
+    no: 21,
+    title: "Loader · Strip",
+    note: "From Jose's frame: mixed-size images glide along the top and stop on the hero frame, which grows to fill the screen; a running ruler and a rolling line below.",
+    tag: "Loader · Pattern",
+    date: "05 Oct",
+    kind: "native",
+  },
+  {
     slug: "loader-layout",
     no: 20,
     title: "Loader · Layout",
