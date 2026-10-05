@@ -318,7 +318,11 @@
 
 /* the cursor at the end of the prompt: a mirror of the text, invisible but for
    a cornflower caret, laid exactly over the field */
-.mtm-textwrap { position: relative; }
+/* the gap above the field lives on the wrapper, so the mirror and the field
+   start on the same line (a margin on the field alone would collapse out of
+   the wrapper and leave the mirror 10px low) */
+.mtm-textwrap { position: relative; margin-top: 10px; }
+.mtm-textwrap > .mtm-text { margin-top: 0; }
 .mtm-text { overflow: hidden; white-space: pre-wrap; overflow-wrap: break-word; }
 .mtm-mirror {
   position: absolute;
@@ -355,13 +359,35 @@
   letter-spacing: 0.08em;
   color: var(--steel);
 }
+/* the label and the options share one centre line */
+.mtm-ease { align-items: center; }
 .mtm-ease-drop { display: none; }
-.mtm-menu--ease { left: auto; right: 0; width: 220px; }
+.mtm-menu--ease { width: 220px; }
+
+/* menus are drawn at the top of the page (see Menu in Composer.tsx), over
+   the sleeve and the pieces; they carry their own tokens there */
+.mtm-pop {
+  --ink: #121524;
+  --navy: #384c65;
+  --steel: #485f88;
+  --corn: #687ef5;
+  --line: rgb(18 21 36 / 0.1);
+  --soft: rgb(18 21 36 / 0.05);
+  --expo: cubic-bezier(0.16, 1, 0.3, 1);
+  position: fixed;
+  right: auto;
+  bottom: auto;
+  z-index: 90;
+  color: var(--ink);
+  font-family: var(--font-familjen), system-ui, sans-serif;
+}
+.mtm-pop button:focus-visible { outline: 2px solid var(--corn); outline-offset: 2px; }
 
 /* phones: two rows at most. Row one: add, sketch, who, ease (a dropdown);
    row two: Draft pattern */
 @media (max-width: 640px) {
-  .mtm-tools { gap: 6px; }
+  /* clear air round the first row, so a thumb on it never lands on Draft */
+  .mtm-tools { gap: 18px 6px; padding-top: 16px; }
   .mtm-tools .mtm-icon { width: 38px; height: 38px; }
   .mtm-tools .mtm-chip { height: 38px; padding: 0 11px; gap: 6px; }
   .mtm-ease { display: none; }

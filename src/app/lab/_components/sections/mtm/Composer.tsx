@@ -1,6 +1,7 @@
 "use client";
 
-import { forwardRef, useEffect, useRef, useState, type ReactNode } from "react";
+import { forwardRef, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
+import { createPortal } from "react-dom";
 import { BODIES, FITS, PROMPT, SAMPLE_A, SAMPLE_B, SKETCH_SVG, type Att, type Body, type Fit, type Kind, type Pin } from "./data";
 import dynamic from "next/dynamic";
 import { Icon, I } from "./icons";
@@ -53,8 +54,10 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
   const nextId = useRef(4);
   const [atts, setAtts] = useState<Att[]>([]);
   const [text, setText] = useState("");
-  const [bodyOpen, setBodyOpen] = useState(false);
-  const [easeOpen, setEaseOpen] = useState(false);
+  // one menu open at a time: opening one closes the other
+  const [menu, setMenu] = useState<null | "body" | "ease">(null);
+  const bodyBtn = useRef<HTMLButtonElement>(null);
+  const easeBtn = useRef<HTMLButtonElement>(null);
   const [focused, setFocused] = useState(false);
   const [typing, setTyping] = useState(false);
   const [view, setView] = useState<number | null>(null);
@@ -85,6 +88,8 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
     if (!play) return;
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (still) {
+      // reduced motion: the finished state at once, by design
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAtts(refs);
       setText(prompt);
       if (autoDraft) onDraft();
@@ -135,13 +140,20 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
     imgs.slice(0, 6).forEach((f) => add("photo", URL.createObjectURL(f)));
   };
 
+  // any press outside the open menu closes it (its own button toggles it); Escape too
   useEffect(() => {
-    if (!bodyOpen && !easeOpen) return;
+    if (!menu) return;
+    const btn = menu === "body" ? bodyBtn : easeBtn;
     const off = (e: Event) => {
-      if (e instanceof KeyboardEvent && e.key !== "Escape") return;
-      if (e instanceof PointerEvent && (e.target as HTMLElement).closest(".mtm-menu, .mtm-menu-btn")) return;
-      setBodyOpen(false);
-      setEaseOpen(false);
+      if (e instanceof KeyboardEvent) {
+        if (e.key !== "Escape") return;
+        setMenu(null);
+        btn.current?.focus();
+        return;
+      }
+      const t = e.target as Node;
+      if (btn.current?.contains(t) || (t as HTMLElement).closest?.(".mtm-menu")) return;
+      setMenu(null);
     };
     document.addEventListener("pointerdown", off);
     document.addEventListener("keydown", off);
@@ -149,7 +161,8 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
       document.removeEventListener("pointerdown", off);
       document.removeEventListener("keydown", off);
     };
-  }, [bodyOpen, easeOpen]);
+  }, [menu]);
+  const toggle = (m: "body" | "ease") => setMenu((o) => (o === m ? null : m));
 
   const current = view !== null ? atts.find((a) => a.id === view) : undefined;
   const padFor = pad?.forId ? atts.find((a) => a.id === pad.forId) : undefined;
@@ -247,13 +260,13 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
         </button>
         <span className="mtm-divider" aria-hidden="true" />
         <div className="relative">
-          <button type="button" className="mtm-chip mtm-menu-btn" onClick={() => setBodyOpen((o) => !o)} aria-expanded={bodyOpen} aria-label={`Drafted for ${body.name}. Change`} title={body.m}>
+          <button ref={bodyBtn} type="button" className="mtm-chip mtm-menu-btn" onClick={() => toggle("body")} aria-expanded={menu === "body"} aria-haspopup="listbox" aria-label={`Drafted for ${body.name}. Change`} title={body.m}>
             <Icon d={I.tape} size={16} />
             {body.name}
             <Icon d={I.chev} size={14} />
           </button>
-          {bodyOpen && (
-            <ul className="mtm-menu mtm-menu--body" role="listbox" aria-label="Draft for">
+          {menu === "body" && (
+            <Menu anchor={bodyBtn} className="mtm-menu--body" label="Draft for">
               {BODIES.map((b) => (
                 <li key={b.id}>
                   <button
@@ -262,7 +275,8 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
                     aria-selected={b.id === body.id}
                     onClick={() => {
                       onBody(b);
-                      setBodyOpen(false);
+                      setMenu(null);
+                      bodyBtn.current?.focus();
                     }}
                   >
                     <span>{b.name}</span>
@@ -270,7 +284,7 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
                   </button>
                 </li>
               ))}
-            </ul>
+            </Menu>
           )}
         </div>
         <div className="mtm-seg mtm-ease" role="group" aria-label="Ease: how much room it has">
@@ -285,13 +299,13 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
           ))}
         </div>
         <div className="relative mtm-ease-drop">
-          <button type="button" className="mtm-chip mtm-menu-btn" onClick={() => setEaseOpen((o) => !o)} aria-expanded={easeOpen} aria-label={`Ease: ${fit}. Change`}>
+          <button ref={easeBtn} type="button" className="mtm-chip mtm-menu-btn" onClick={() => toggle("ease")} aria-expanded={menu === "ease"} aria-haspopup="listbox" aria-label={`Ease: ${fit}. Change`}>
             <Icon d={I.ease} size={15} />
             {fit}
             <Icon d={I.chev} size={14} />
           </button>
-          {easeOpen && (
-            <ul className="mtm-menu mtm-menu--body mtm-menu--ease" role="listbox" aria-label="Ease">
+          {menu === "ease" && (
+            <Menu anchor={easeBtn} className="mtm-menu--body mtm-menu--ease" label="Ease" end>
               {FITS.map((f) => (
                 <li key={f}>
                   <button
@@ -300,7 +314,8 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
                     aria-selected={fit === f}
                     onClick={() => {
                       onFit(f);
-                      setEaseOpen(false);
+                      setMenu(null);
+                      easeBtn.current?.focus();
                     }}
                   >
                     <span>{f}</span>
@@ -308,7 +323,7 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
                   </button>
                 </li>
               ))}
-            </ul>
+            </Menu>
           )}
         </div>
         {done ? (
@@ -441,3 +456,41 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
     </div>
   );
 });
+
+/* A menu off its button, drawn at the top of the page (a portal) so nothing
+   in the section can sit over it: not the sleeve, not the pieces. It opens
+   below the button when there is room, above when there is not, and keeps
+   to the screen's edges. `end` lines it up with the button's right edge. */
+function Menu({ anchor, className, label, end, children }: { anchor: RefObject<HTMLButtonElement | null>; className: string; label: string; end?: boolean; children: ReactNode }) {
+  const el = useRef<HTMLUListElement>(null);
+  const [at, setAt] = useState<CSSProperties>({ visibility: "hidden" });
+  useLayoutEffect(() => {
+    const place = () => {
+      const b = anchor.current?.getBoundingClientRect();
+      const m = el.current;
+      if (!b || !m) return;
+      const w = m.offsetWidth;
+      const h = m.offsetHeight;
+      const gap = 8;
+      const below = window.innerHeight - b.bottom - gap >= h || b.top - gap < h;
+      const x = end ? b.right - w : b.left;
+      setAt({
+        top: below ? b.bottom + gap : b.top - gap - h,
+        left: Math.max(gap, Math.min(x, window.innerWidth - w - gap)),
+      });
+    };
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [anchor, end]);
+  return createPortal(
+    <ul ref={el} className={`mtm-menu mtm-pop ${className}`} style={at} role="listbox" aria-label={label}>
+      {children}
+    </ul>,
+    document.body,
+  );
+}
