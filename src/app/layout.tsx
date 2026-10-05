@@ -4,6 +4,7 @@ import "./globals.css";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { Wings } from "@/components/Wings";
 import { ScrollBar } from "@/components/ScrollBar";
+import { SITE_URL } from "@/lib/site";
 
 const familjen = localFont({
   src: [
@@ -24,6 +25,7 @@ const bigilla = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Venty",
   description:
     "See a dress you love. Wear it, made for you. Venty drafts a printable sewing pattern to your exact measurements and shows it on a 3D model of your own body.",
