@@ -5,6 +5,8 @@ export const I = {
   // sketching is making, not editing: a brush with its painted stroke
   brush: "M9.06 11.9l8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z",
   more: "M6 12h.01M12 12h.01M18 12h.01",
+  // ease: room either side of the body
+  ease: "M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4",
   marker: "M9 15l-4 4h6l1.5-1.5M9 15l7-7 3 3-7 7M9 15l3 3M14 6l2-2 4 4-2 2",
   erase: "M7 20h10M5.5 13.5l7-7a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L12 17H8z",
   pin: "M12 21s-6-5.6-6-11a6 6 0 0 1 12 0c0 5.4-6 11-6 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z",

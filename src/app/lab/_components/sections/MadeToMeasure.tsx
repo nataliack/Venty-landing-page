@@ -183,7 +183,6 @@ export function MadeToMeasure() {
             done={
               drafted ? (
                 <>
-                  <span className="mtm-small mtm2-spec">{RIG_PIECES.length} pieces · A4, 16 pages</span>
                   <button type="button" className="mtm-icon" onClick={() => setDrafted(false)} aria-label="Edit and draft again" title="Edit">
                     <Icon d={I.replay} size={16} />
                   </button>
@@ -263,24 +262,25 @@ export function MadeToMeasure() {
           ))}
         </div>
 
+        {/* the idea in three words each: short enough to hold one line on a phone */}
         <ul className="mtm-cues mtm2-cues" aria-label="How it adds up">
           <li>
             <Icon d={I.image} />
-            Photo, sketch or words
+            Any idea
           </li>
           <li aria-hidden="true" className="mtm-cues__plus">
             +
           </li>
           <li>
             <Icon d={I.tape} />
-            Your measurements
+            Your body
           </li>
           <li aria-hidden="true" className="mtm-cues__plus">
             =
           </li>
           <li>
             <Icon d={I.print} />
-            A pattern to print
+            Your pattern
           </li>
         </ul>
       </section>

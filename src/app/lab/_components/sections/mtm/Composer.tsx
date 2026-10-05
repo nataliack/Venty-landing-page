@@ -9,6 +9,8 @@ import { Icon, I } from "./icons";
 const Pad = dynamic(() => import("./Pad").then((m) => m.Pad), { ssr: false });
 // uploads are local previews: free their memory when they go
 const release = (src?: string) => src?.startsWith("blob:") && URL.revokeObjectURL(src);
+// what each ease means, in plain words
+const EASE_HINT: Record<Fit, string> = { Close: "Sits close to the body", Easy: "A little room to move", Loose: "Relaxed and roomy" };
 
 /* The composer. One field: references as compact chips above the words,
    the body and the fit on the toolbar, Draft pattern on the right.
@@ -52,6 +54,9 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
   const [atts, setAtts] = useState<Att[]>([]);
   const [text, setText] = useState("");
   const [bodyOpen, setBodyOpen] = useState(false);
+  const [easeOpen, setEaseOpen] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [typing, setTyping] = useState(false);
   const [view, setView] = useState<number | null>(null);
   const [pad, setPad] = useState<null | { forId?: number }>(null);
   const [drag, setDrag] = useState(false);
@@ -70,6 +75,7 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
     scripted.current = false;
     setAtts(refs);
     setText(prompt);
+    setTyping(false);
     setPressed(false);
     // a touch mid-entrance completes the story, it never stalls it
     if (autoDraft) onDraft();
@@ -87,7 +93,9 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
     scripted.current = true;
     const t = (ms: number, fn: () => void) => timers.current.push(window.setTimeout(fn, ms));
     refs.forEach((a, i) => t(250 + i * 260, () => setAtts((l) => [...l, a])));
+    t(1000, () => setTyping(true));
     for (let i = 1; i <= prompt.length; i++) t(1000 + i * 26, () => setText(prompt.slice(0, i)));
+    t(1000 + prompt.length * 26 + 60, () => setTyping(false));
     const end = 1000 + prompt.length * 26 + 350;
     if (autoDraft) {
       t(end, () => setPressed(true));
@@ -128,11 +136,12 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
   };
 
   useEffect(() => {
-    if (!bodyOpen) return;
+    if (!bodyOpen && !easeOpen) return;
     const off = (e: Event) => {
       if (e instanceof KeyboardEvent && e.key !== "Escape") return;
       if (e instanceof PointerEvent && (e.target as HTMLElement).closest(".mtm-menu, .mtm-menu-btn")) return;
       setBodyOpen(false);
+      setEaseOpen(false);
     };
     document.addEventListener("pointerdown", off);
     document.addEventListener("keydown", off);
@@ -140,7 +149,7 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
       document.removeEventListener("pointerdown", off);
       document.removeEventListener("keydown", off);
     };
-  }, [bodyOpen]);
+  }, [bodyOpen, easeOpen]);
 
   const current = view !== null ? atts.find((a) => a.id === view) : undefined;
   const padFor = pad?.forId ? atts.find((a) => a.id === pad.forId) : undefined;
@@ -177,19 +186,28 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
       {/* references */}
       <ul className="mtm-chips" aria-label="References">
         {atts.map((a) => (
-          <li key={a.id}>
-            <button type="button" className="mtm-chipref" onClick={() => setView(a.id)} aria-label={`${label(a)}${a.marked ? ", marked up" : ""}${a.pins?.length ? `, ${a.pins.length} notes` : ""}. Open`} title={label(a)}>
+          <li key={a.id} className="mtm-chipwrap">
+            {/* the whole image opens it; the dots are where the eye goes */}
+            <button type="button" className="mtm-chipref" onClick={() => setView(a.id)} aria-label={`${label(a)}${a.marked ? ", marked up" : ""}${a.pins?.length ? `, ${a.pins.length} notes` : ""}. Options`} title={label(a)}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={a.src} alt="" draggable={false} />
               <span className="mtm-chipref__more" aria-hidden="true">
-                <Icon d={I.more} size={20} weight={3} />
+                <Icon d={I.more} size={18} weight={3} />
               </span>
-              {a.kind === "sketch" && (
-                <span className="mtm-chipref__kind">
-                  <Icon d={I.brush} size={10} />
-                </span>
-              )}
-              {(a.marked || !!a.pins?.length) && <span className="mtm-chipref__count">{a.pins?.length || <Icon d={I.brush} size={9} />}</span>}
+              {!!a.pins?.length && <span className="mtm-chipref__count">{a.pins.length}</span>}
+            </button>
+            {/* remove: on the corner, half outside the image */}
+            <button
+              type="button"
+              className="mtm-chipx"
+              aria-label={`Remove ${label(a)}`}
+              title="Remove"
+              onClick={() => {
+                release(a.src);
+                setAtts((l) => l.filter((x) => x.id !== a.id));
+              }}
+            >
+              <Icon d={I.x} size={11} weight={2.2} />
             </button>
           </li>
         ))}
@@ -199,7 +217,26 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
       <label className="sr-only" htmlFor="mtm-prompt">
         Describe it
       </label>
-      <textarea id="mtm-prompt" className="mtm-text" rows={3} value={text} onChange={(e) => setText(e.target.value)} placeholder="Describe it in a few words" />
+      <div className="mtm-textwrap">
+        <textarea
+          id="mtm-prompt"
+          className="mtm-text"
+          rows={3}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          placeholder="Describe it in a few words"
+        />
+        {/* the cursor at the end of the words: solid while typing, blinking at rest,
+            gone once the field is focused (the real caret takes over) */}
+        {!focused && (
+          <div className="mtm-text mtm-mirror" aria-hidden="true">
+            {text}
+            <span className={`mtm-caret ${typing ? "is-typing" : ""}`} />
+          </div>
+        )}
+      </div>
 
       <div className="mtm-tools">
         <button type="button" className="mtm-icon" onClick={() => file.current?.click()} aria-label="Add images" title="Add images">
@@ -236,15 +273,43 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
             </ul>
           )}
         </div>
-        <div className="mtm-seg" role="group" aria-label="Fit: how close it sits" title="How close it sits on the body">
+        <div className="mtm-seg mtm-ease" role="group" aria-label="Ease: how much room it has">
           <span className="mtm-seg__label" aria-hidden="true">
-            Fit
+            <Icon d={I.ease} size={13} />
+            Ease
           </span>
           {FITS.map((f) => (
-            <button key={f} type="button" aria-pressed={fit === f} onClick={() => onFit(f)}>
+            <button key={f} type="button" aria-pressed={fit === f} onClick={() => onFit(f)} title={EASE_HINT[f]}>
               {f}
             </button>
           ))}
+        </div>
+        <div className="relative mtm-ease-drop">
+          <button type="button" className="mtm-chip mtm-menu-btn" onClick={() => setEaseOpen((o) => !o)} aria-expanded={easeOpen} aria-label={`Ease: ${fit}. Change`}>
+            <Icon d={I.ease} size={15} />
+            {fit}
+            <Icon d={I.chev} size={14} />
+          </button>
+          {easeOpen && (
+            <ul className="mtm-menu mtm-menu--body mtm-menu--ease" role="listbox" aria-label="Ease">
+              {FITS.map((f) => (
+                <li key={f}>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={fit === f}
+                    onClick={() => {
+                      onFit(f);
+                      setEaseOpen(false);
+                    }}
+                  >
+                    <span>{f}</span>
+                    <span className="mtm-small">{EASE_HINT[f]}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
         {done ? (
           <div className="mtm-go mtm-done">{done}</div>
