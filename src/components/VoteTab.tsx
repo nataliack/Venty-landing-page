@@ -29,7 +29,7 @@ gsap.registerPlugin(ScrollTrigger);
    section. */
 const HIDE: [selector: string, on: "phone" | "desktop" | "all"][] = [
   ["#hero-end", "phone"], // phones: from the end of the hero sequence
-  ["#photo", "phone"],
+  ["#measure", "phone"],
   ["#how", "phone"],
   ["#features", "phone"],
   ["#make", "phone"],

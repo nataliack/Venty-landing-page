@@ -24,9 +24,9 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
                                                      isn't real." comes in and stays;
                                                      the glow rises back along the
                                                      bottom edge
-   then           the hand-off                       pattern paper rises from the
-                                                     bottom edge, covers the line and
-                                                     lifts the video away
+   then           the hand-off                       Made to measure rises over it,
+                                                     out of the glow, and covers the
+                                                     line; the video drifts back
 
    All frame numbers are master frames, as numbered in After Effects. */
 
@@ -44,11 +44,13 @@ const PACE = [
   [0.34, 318], // the drop
   [0.44, 520], // the dress forms
   [0.62, 606], // it fits: the line reads
-  [0.84, LAST], // the final pose, slowly, into the hand-off
+  [0.92, LAST], // the final pose, slowly, on into the hand-off
 ] as const;
 const PLAY_END = PACE[PACE.length - 1][0];
-/** where the hand-off starts: just before the last frame, so nothing holds */
-const OUT = PLAY_END - 0.02;
+/** Where the hand-off starts: the next section is pulled up over the last
+    screen of the hero (MadeToMeasure, -100svh), so it starts to rise one
+    screen before the hero's end, at (900 - 200) / (900 - 100) of its scroll. */
+const OUT = 7 / 8;
 
 const frameAt = (p: number) => {
   for (let k = 1; k < PACE.length; k++) {
@@ -147,7 +149,6 @@ export function Hero() {
       gsap.set(split.words, { yPercent: HIDDEN });
       gsap.set("[data-f2] [data-sub]", { opacity: 0, y: reduce ? 0 : 14 });
       gsap.set("[data-shade]", { opacity: 0 });
-      gsap.set("[data-handoff]", { "--r": "0%" });
 
       const tl = gsap.timeline({
         defaults: { ease: "power2.inOut" },
@@ -185,11 +186,9 @@ export function Hero() {
         // the glow rises back along the bottom edge as she settles
         .to("[data-glow]", { opacity: 0.95, yPercent: 0, duration: tGlowFull - tGlow, ease: "power1.inOut" }, tGlow)
 
-        // hand-off: pattern paper rises from the bottom edge, covers the line
-        // and lifts the video up and away
-        .to("[data-handoff]", { "--r": "124%", duration: 0.12, ease: "power1.inOut" }, OUT)
-        .to("[data-lift]", { yPercent: -26 * move, scale: reduce ? 1 : 0.94, duration: 0.12, ease: "power1.in" }, OUT)
-        .to("[data-dim]", { opacity: 0.7, duration: 0.1, ease: "none" }, OUT)
+        // hand-off: Made to measure rises over the pinned hero (its own
+        // scroll); underneath, the video drifts up and back, for depth
+        .to("[data-lift]", { yPercent: -10 * move, scale: reduce ? 1 : 0.96, duration: 1 - OUT, ease: "none" }, OUT)
         .set({}, {}, 1);
       announce(tl.scrollTrigger?.progress ?? 0);
     }, el);
@@ -215,7 +214,7 @@ export function Hero() {
         {/* the night behind the scene lives on a child: a sticky element with a
             background at the top edge is what Safari would tint its status bar from */}
         <div aria-hidden className="absolute inset-0 bg-night" />
-        {/* lifts away at the hand-off */}
+        {/* drifts back at the hand-off */}
         <div data-lift className="absolute inset-0 origin-top">
           {/* scene: the poster (first frame) until the canvas has drawn */}
           <div data-scene className="absolute inset-0">
@@ -232,8 +231,6 @@ export function Hero() {
             />
           </div>
         </div>
-        {/* dims the video as it lifts away at the hand-off only */}
-        <div data-dim aria-hidden className="pointer-events-none absolute inset-0 bg-night opacity-0" />
 
         {/* cornflower ellipse rising from the bottom edge: at the start, and
             again as the sequence ends */}
@@ -289,11 +286,6 @@ export function Hero() {
           </div>
         </div>
 
-        {/* the hand-off: pattern paper rising from the bottom edge, over the
-            line above (see .handoff) */}
-        <div data-handoff aria-hidden className="handoff pointer-events-none absolute inset-0 z-[35]">
-          <div className="handoff__paper paper-grid absolute inset-0" />
-        </div>
       </div>
     </section>
   );

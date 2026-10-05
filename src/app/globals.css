@@ -1231,33 +1231,6 @@ html[data-announce="off"] .announce {
    Landing sections
    ------------------------------------------------------------------ */
 
-/* Pattern paper: a cutting-mat grid, fine lines every 24px and a stronger
-   line every 120px, fading out toward the edges. The hero dissolves into it
-   and Photo to pattern sits on it. */
-.paper-grid {
-  background-color: var(--color-night);
-  background-image:
-    linear-gradient(color-mix(in srgb, var(--color-periwinkle) 7%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--color-periwinkle) 7%, transparent) 1px, transparent 1px),
-    linear-gradient(color-mix(in srgb, var(--color-cloud) 2.5%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--color-cloud) 2.5%, transparent) 1px, transparent 1px);
-  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
-  background-position: center center;
-}
-.paper-grid::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(80% 75% at 50% 50%, transparent 35%, var(--color-night) 100%);
-}
-.paper-grid--strong {
-  background-color: transparent;
-  background-image:
-    linear-gradient(color-mix(in srgb, var(--color-cornflower) 12%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--color-cornflower) 12%, transparent) 1px, transparent 1px);
-  background-size: 120px 120px;
-}
-
 /* Scroll cue in the hero: a short light running down a hairline */
 .scroll-cue {
   position: relative;
@@ -1283,36 +1256,6 @@ html[data-announce="off"] .announce {
 .make-outline {
   color: transparent;
   -webkit-text-stroke: 1.2px color-mix(in srgb, var(--fg) 45%, transparent);
-}
-
-/* Photo to pattern SVG type */
-.ptp-ui {
-  font-family: var(--font-sans);
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  fill: var(--color-periwinkle);
-}
-.ptp-label {
-  font-family: var(--font-sans);
-  font-size: 15px;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  fill: var(--color-cloud);
-}
-.ptp-measure {
-  font-family: var(--font-sans);
-  font-size: 15px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  fill: var(--color-periwinkle);
-}
-.ptp-measure-v {
-  font-family: var(--font-display);
-  font-size: 26px;
-  letter-spacing: 0;
-  text-transform: none;
-  fill: var(--color-cloud);
 }
 
 /* The tape measure in How it works */
@@ -1385,15 +1328,97 @@ html[data-announce="off"] .announce {
   .feat-draw { stroke-dasharray: none; }
 }
 
-/* Hero hand-off. --r runs 0% to 124%: the paper is masked from the bottom
-   edge up, with a soft top edge 24% of the screen tall. */
-.handoff {
-  --r: 0%;
+/* ------------------------------------------------------------------
+   Made to measure (MadeToMeasure.tsx): the first light screen. Pulled up
+   over the hero's last screen so it rises over the pinned video. Its top
+   edge is a dome, --curve 1 to 0 as it rises (a scrubbed ScrollTrigger),
+   with the cornflower halo of the hero's glow behind it.
+   ------------------------------------------------------------------ */
+.measure {
+  --curve: 0;
+  --dome: 12vh; /* the dome's rise on phones */
+  position: relative;
+  z-index: 10;
+  height: 100svh;
+  margin-top: -100svh;
 }
-.handoff__paper {
-  -webkit-mask-image: linear-gradient(to top, #000 calc(var(--r) - 24%), transparent var(--r));
-  mask-image: linear-gradient(to top, #000 calc(var(--r) - 24%), transparent var(--r));
+.measure__halo {
+  position: absolute;
+  left: -15vw;
+  right: -15vw;
+  top: -10vh;
+  height: 34vh;
+  border-radius: 50%;
+  background: var(--color-cornflower);
+  filter: blur(70px);
+  pointer-events: none;
 }
+.measure__sheet {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--color-cloud);
+  border-radius: 50% 50% 0 0 / calc(var(--curve) * var(--dome)) calc(var(--curve) * var(--dome)) 0 0;
+}
+/* dots, fading out toward the edges (the frame's blurred ellipse mask) */
+.measure__dots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(color-mix(in srgb, var(--color-ink) 17%, transparent) 1px, transparent 1.3px);
+  background-size: 18px 18px;
+  background-position: center;
+  -webkit-mask-image: radial-gradient(ellipse 46% 46% at 50% 50%, #000 30%, transparent 100%);
+  mask-image: radial-gradient(ellipse 46% 46% at 50% 50%, #000 30%, transparent 100%);
+}
+.measure__copy {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 0 auto;
+  padding: calc(var(--head-gap) + var(--nav-h) + 56px) var(--gutter) 0;
+  text-align: center;
+}
+.measure__eyebrow {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 14px;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--color-navy);
+}
+.measure__title {
+  max-width: 11em; /* 692px at the frame's 62.93px */
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: clamp(2rem, 4.37vw, 5.6rem);
+  line-height: 1.255;
+  letter-spacing: -0.04em;
+  color: var(--color-ink);
+}
+@media (min-width: 768px) {
+  .measure { --dome: 22vh; }
+  .measure__copy { padding-top: 17svh; }
+}
+
+/* the section menu on light sections: ink glass, navy and ink type */
+html[data-theme="light"] .section-nav__glass {
+  background-color: color-mix(in srgb, var(--color-ink) 5%, transparent);
+  border-color: color-mix(in srgb, var(--color-ink) 10%, transparent);
+}
+html[data-theme="light"] .section-nav .text-periwinkle { color: var(--color-navy); }
+html[data-theme="light"] .section-nav .text-cloud { color: var(--color-ink); }
+html[data-theme="light"] .section-nav__icon path { stroke: var(--color-navy); }
+@media (hover: hover) {
+  html[data-theme="light"] .section-nav__btn:hover {
+    background-color: color-mix(in srgb, var(--color-ink) 9%, transparent);
+    border-color: color-mix(in srgb, var(--color-ink) 18%, transparent);
+  }
+  html[data-theme="light"] .section-nav__btn:hover .section-nav__text { color: var(--color-ink); }
+}
+
 /* A hand-written reveal mask (see src/lib/reveal.ts): room for ascenders,
    descenders and overhanging letters, taken back with negative margins. */
 .line-mask {

@@ -86,3 +86,9 @@ Once the loader has gone (`Hero.tsx`):
 
 The footage and the bottom glow settle in underneath the loading screen, so
 the loader opens onto them.
+
+## Section hand-offs
+
+| Pattern | How | Used |
+| --- | --- | --- |
+| Rise over | The next section is pulled up over the last screen of the one before (`margin-top: -100svh`, higher `z-index`), so it scrolls up over the pinned section 1:1 with the scroll, no fades. Its top edge is a dome (`--curve` 1 to 0, scrubbed from `top bottom` to `top top`) with the cornflower glow as a halo behind it, burning off over the second half. The section underneath drifts up and back a little for depth. Its copy reveals once it has arrived (`top 20%`). Overlapping theme zones resolve to the later one (`ThemeZones`), and a zone can switch at its own point with `data-theme-at` | Hero to Made to measure |

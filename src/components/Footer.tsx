@@ -4,7 +4,7 @@ const cols = [
   {
     h: "Venty",
     items: [
-      ["Photo to pattern", "#photo"],
+      ["Made to measure", "#measure"],
       ["How it works", "#how"],
       ["Features", "#features"],
       ["FAQ", "#faq"],

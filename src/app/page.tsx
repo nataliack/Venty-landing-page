@@ -4,7 +4,7 @@ import { SiteLogo } from "@/components/SiteLogo";
 import { ThemeZones } from "@/components/ThemeZones";
 import { Loader } from "@/components/Loader";
 import { Hero } from "@/components/Hero";
-import { PhotoToPattern } from "@/components/PhotoToPattern";
+import { MadeToMeasure } from "@/components/MadeToMeasure";
 import { HowItWorks } from "@/components/HowItWorks";
 import { Features } from "@/components/Features";
 import { WhatYouCanMake } from "@/components/WhatYouCanMake";
@@ -24,7 +24,7 @@ export default function Home() {
       <ThemeZones />
       <main>
         <Hero />
-        <PhotoToPattern />
+        <MadeToMeasure />
         <HowItWorks />
         <Features />
         <WhatYouCanMake />

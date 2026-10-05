@@ -14,7 +14,7 @@ gsap.registerPlugin(ScrollTrigger);
    announcement bar while that shows (.section-nav in globals.css). */
 const SECTIONS = [
   { id: "top", label: "Introduction" },
-  { id: "photo", label: "Photo to pattern" },
+  { id: "measure", label: "Made to measure" },
   { id: "how", label: "How it works" },
   { id: "features", label: "Features" },
   { id: "make", label: "What you can make" },
