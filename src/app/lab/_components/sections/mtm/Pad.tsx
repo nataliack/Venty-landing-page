@@ -122,6 +122,7 @@ export function Pad({
   const board = useRef<HTMLDivElement>(null);
   const under = useRef<HTMLCanvasElement>(null);
   const over = useRef<HTMLCanvasElement>(null);
+  const liveCv = useRef<HTMLCanvasElement>(null);
   const img = useRef<HTMLImageElement | null>(null);
   const strokes = useRef<Stroke[]>([]);
   const redo = useRef<Stroke[]>([]);
@@ -171,9 +172,22 @@ export function Pad({
     }
   }, [dims, guide]);
 
-  const paintOver = useCallback(() => {
-    const c = over.current;
-    if (!c || !board.current) return;
+  // one stroke, in the board's own size
+  const drawStroke = (ctx: CanvasRenderingContext2D, st: Stroke, w: number, h: number) => {
+    ctx.globalCompositeOperation = st.tool === "eraser" ? "destination-out" : "source-over";
+    ctx.globalAlpha = st.tool === "marker" ? 0.35 : 1;
+    ctx.strokeStyle = st.color;
+    ctx.lineWidth = st.tool === "marker" ? st.size * 3 : st.tool === "eraser" ? st.size * 4 : st.size;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    st.pts.forEach(([x, y], i) => (i ? ctx.lineTo(x * w, y * h) : ctx.moveTo(x * w, y * h)));
+    if (st.pts.length === 1) ctx.lineTo(st.pts[0][0] * w + 0.1, st.pts[0][1] * h);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
+  };
+  const fit = (c: HTMLCanvasElement) => {
     const { w, h, dpr } = dims();
     if (c.width !== Math.round(w * dpr)) {
       c.width = w * dpr;
@@ -181,22 +195,37 @@ export function Pad({
     }
     const ctx = c.getContext("2d")!;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx, w, h };
+  };
+
+  // the finished strokes: repainted only on undo, redo, clear or resize
+  const paintOver = useCallback(() => {
+    const c = over.current;
+    if (!c || !board.current) return;
+    const { ctx, w, h } = fit(c);
     ctx.clearRect(0, 0, w, h);
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    for (const s of [...strokes.current, ...(live.current ? [live.current] : [])]) {
-      ctx.globalCompositeOperation = s.tool === "eraser" ? "destination-out" : "source-over";
-      ctx.globalAlpha = s.tool === "marker" ? 0.35 : 1;
-      ctx.strokeStyle = s.color;
-      ctx.lineWidth = s.tool === "marker" ? s.size * 3 : s.tool === "eraser" ? s.size * 4 : s.size;
-      ctx.beginPath();
-      s.pts.forEach(([x, y], i) => (i ? ctx.lineTo(x * w, y * h) : ctx.moveTo(x * w, y * h)));
-      if (s.pts.length === 1) ctx.lineTo(s.pts[0][0] * w + 0.1, s.pts[0][1] * h);
-      ctx.stroke();
-    }
-    ctx.globalAlpha = 1;
-    ctx.globalCompositeOperation = "source-over";
+    for (const st of strokes.current) drawStroke(ctx, st, w, h);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dims]);
+
+  // the stroke being drawn: only it, on its own layer, so each move stays
+  // cheap however much is already on the board
+  const paintLive = () => {
+    const c = liveCv.current;
+    const st = live.current;
+    if (!c || !board.current) return;
+    const { ctx, w, h } = fit(c);
+    ctx.clearRect(0, 0, w, h);
+    if (!st) return;
+    if (st.tool === "eraser") {
+      // the eraser works on the finished strokes directly, a segment at a time
+      const o = fit(over.current!);
+      const n = st.pts.length;
+      drawStroke(o.ctx, { ...st, pts: st.pts.slice(Math.max(0, n - 2)) }, o.w, o.h);
+      return;
+    }
+    drawStroke(ctx, st, w, h);
+  };
 
   // the board takes the photo's own shape; a sketch is 4:5 paper
   useEffect(() => {
@@ -248,7 +277,7 @@ export function Pad({
   }, [undo, again, onClose]);
 
   const at = (e: React.PointerEvent): [number, number] => {
-    const r = over.current!.getBoundingClientRect();
+    const r = liveCv.current!.getBoundingClientRect();
     return [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height];
   };
   const down = (e: React.PointerEvent) => {
@@ -258,21 +287,31 @@ export function Pad({
       setEditing(pins.length);
       return;
     }
-    e.currentTarget.setPointerCapture(e.pointerId);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId); // keep the stroke if the finger leaves the board
+    } catch {
+      /* no capturable pointer (synthetic events): draw anyway */
+    }
     live.current = { tool, color, size, pts: [at(e)] };
     redo.current = [];
-    paintOver();
+    paintLive();
   };
   const move = (e: React.PointerEvent) => {
     if (!live.current) return;
     live.current.pts.push(at(e));
-    paintOver();
+    paintLive();
   };
   const up = () => {
-    if (!live.current) return;
-    strokes.current.push(live.current);
+    const st = live.current;
+    if (!st) return;
+    strokes.current.push(st);
     live.current = null;
-    paintOver();
+    // the finished stroke settles onto its layer (the eraser already has)
+    if (st.tool !== "eraser") {
+      const o = fit(over.current!);
+      drawStroke(o.ctx, st, o.w, o.h);
+    }
+    paintLive();
     bump();
   };
   const choose = (c: string, keep = true) => {
@@ -301,7 +340,7 @@ export function Pad({
   // rendered on the body: the composer's glass (backdrop-filter) would
   // otherwise trap a fixed dialog inside the card
   return createPortal(
-    <div className="mtm-modal" role="dialog" aria-modal="true" aria-label={title}>
+    <div className="mtm-modal" role="dialog" aria-modal="true" aria-label={title} data-lenis-prevent>
       <div className="mtm-modal__scrim" onClick={onClose} />
       <div className="mtm-pad">
         <div className="mtm-pad__head">
@@ -387,8 +426,9 @@ export function Pad({
         <div className="mtm-pad__body">
           <div ref={board} className="mtm-pad__board" style={{ aspectRatio: String(ratio), width: `min(100%, calc(62svh * ${ratio}))` }}>
             <canvas ref={under} className="absolute inset-0 h-full w-full" aria-hidden="true" />
+            <canvas ref={over} className="absolute inset-0 h-full w-full" aria-hidden="true" />
             <canvas
-              ref={over}
+              ref={liveCv}
               className="absolute inset-0 h-full w-full touch-none"
               style={{ cursor: tool === "pin" ? "copy" : tool === "eraser" ? "cell" : "crosshair" }}
               onPointerDown={down}

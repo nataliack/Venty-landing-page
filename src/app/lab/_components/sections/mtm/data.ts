@@ -14,10 +14,11 @@ export const SKETCH_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(
 
 export const PROMPT = "An organdy halter gown like photo 1, floor length, sheer sleeves, with the neckline from my sketch.";
 
+// the people you draft for: a name and their measurements, nothing else
 export const BODIES = [
-  { id: "me-oct", name: "Me", date: "Oct 2026", m: "Bust 92 · Waist 74 · Hip 98" },
-  { id: "me-mar", name: "Me", date: "Mar 2026", m: "Bust 90 · Waist 73 · Hip 97" },
-  { id: "mum", name: "Mum", date: "Jun 2026", m: "Bust 101 · Waist 86 · Hip 106" },
+  { id: "natalia", name: "Natalia", m: "Bust 92 · Waist 74 · Hip 98" },
+  { id: "mei", name: "Mei", m: "Bust 86 · Waist 68 · Hip 92" },
+  { id: "amara", name: "Amara", m: "Bust 101 · Waist 86 · Hip 106" },
 ];
 export type Body = (typeof BODIES)[number];
 export const FITS = ["Close", "Easy", "Loose"] as const;

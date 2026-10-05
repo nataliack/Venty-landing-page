@@ -165,7 +165,7 @@ export function Outcome({ run, from, body, fit, onReplay }: { run: number; from:
         {/* spec and what next */}
         <div className="mtm-spec" style={{ top: pct(plan.spec, plan.h) }}>
           <p className="mtm-spec__tag">
-            {PIECES.length} pieces · {body.name} · {body.date} · {fit} fit · A4, 16 pages
+            {PIECES.length} pieces · for {body.name} · {fit} fit · A4, 16 pages
           </p>
           <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
             <PrimaryButton href={APP_URL} size="sm">

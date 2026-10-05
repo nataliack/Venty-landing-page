@@ -2,8 +2,13 @@
 
 import { forwardRef, useEffect, useRef, useState, type ReactNode } from "react";
 import { BODIES, FITS, PROMPT, SAMPLE_A, SAMPLE_B, SKETCH_SVG, type Att, type Body, type Fit, type Kind, type Pin } from "./data";
+import dynamic from "next/dynamic";
 import { Icon, I } from "./icons";
-import { Pad } from "./Pad";
+
+// the drawing pad's code only loads the first time someone opens it
+const Pad = dynamic(() => import("./Pad").then((m) => m.Pad), { ssr: false });
+// uploads are local previews: free their memory when they go
+const release = (src?: string) => src?.startsWith("blob:") && URL.revokeObjectURL(src);
 
 /* The composer. One field: references as compact chips above the words,
    the body and the fit on the toolbar, Draft pattern on the right.
@@ -109,7 +114,13 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
     if (replaceId.current !== null && imgs[0]) {
       const id = replaceId.current;
       const src = URL.createObjectURL(imgs[0]);
-      setAtts((l) => l.map((a) => (a.id === id ? { ...a, src, marked: false, pins: [] } : a)));
+      setAtts((l) =>
+        l.map((a) => {
+          if (a.id !== id) return a;
+          release(a.src);
+          return { ...a, src, marked: false, pins: [] };
+        }),
+      );
       replaceId.current = null;
       return;
     }
@@ -170,12 +181,15 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
             <button type="button" className="mtm-chipref" onClick={() => setView(a.id)} aria-label={`${label(a)}${a.marked ? ", marked up" : ""}${a.pins?.length ? `, ${a.pins.length} notes` : ""}. Open`} title={label(a)}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={a.src} alt="" draggable={false} />
+              <span className="mtm-chipref__more" aria-hidden="true">
+                <Icon d={I.more} size={20} weight={3} />
+              </span>
               {a.kind === "sketch" && (
                 <span className="mtm-chipref__kind">
-                  <Icon d={I.pen} size={10} />
+                  <Icon d={I.brush} size={10} />
                 </span>
               )}
-              {(a.marked || !!a.pins?.length) && <span className="mtm-chipref__count">{a.pins?.length || <Icon d={I.pen} size={9} />}</span>}
+              {(a.marked || !!a.pins?.length) && <span className="mtm-chipref__count">{a.pins?.length || <Icon d={I.brush} size={9} />}</span>}
             </button>
           </li>
         ))}
@@ -192,13 +206,13 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
           <Icon d={I.plus} size={18} />
         </button>
         <button type="button" className="mtm-icon" onClick={() => setPad({})} aria-label="New sketch" title="Sketch">
-          <Icon d={I.pen} size={17} />
+          <Icon d={I.brush} size={17} />
         </button>
         <span className="mtm-divider" aria-hidden="true" />
         <div className="relative">
-          <button type="button" className="mtm-chip mtm-menu-btn" onClick={() => setBodyOpen((o) => !o)} aria-expanded={bodyOpen} aria-label={`Draft for ${body.name}, ${body.date}`}>
+          <button type="button" className="mtm-chip mtm-menu-btn" onClick={() => setBodyOpen((o) => !o)} aria-expanded={bodyOpen} aria-label={`Drafted for ${body.name}. Change`} title={body.m}>
             <Icon d={I.tape} size={16} />
-            {body.name} · {body.date}
+            {body.name}
             <Icon d={I.chev} size={14} />
           </button>
           {bodyOpen && (
@@ -214,9 +228,7 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
                       setBodyOpen(false);
                     }}
                   >
-                    <span>
-                      {b.name} · {b.date}
-                    </span>
+                    <span>{b.name}</span>
                     <span className="mtm-small">{b.m}</span>
                   </button>
                 </li>
@@ -224,7 +236,10 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
             </ul>
           )}
         </div>
-        <div className="mtm-seg" role="group" aria-label="Fit">
+        <div className="mtm-seg" role="group" aria-label="Fit: how close it sits" title="How close it sits on the body">
+          <span className="mtm-seg__label" aria-hidden="true">
+            Fit
+          </span>
           {FITS.map((f) => (
             <button key={f} type="button" aria-pressed={fit === f} onClick={() => onFit(f)}>
               {f}
@@ -308,7 +323,7 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
                   setView(null);
                 }}
               >
-                <Icon d={I.pen} size={16} /> Draw on it
+                <Icon d={I.brush} size={16} /> Draw on it
               </button>
               {current.kind === "photo" && (
                 <button
@@ -327,6 +342,7 @@ export const Composer = forwardRef<HTMLButtonElement, Props>(function Composer(
                 type="button"
                 className="mtm-ghost is-danger"
                 onClick={() => {
+                  release(current.src);
                   setAtts((l) => l.filter((a) => a.id !== current.id));
                   setView(null);
                 }}

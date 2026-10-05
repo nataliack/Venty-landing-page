@@ -112,6 +112,27 @@ export function MadeToMeasure() {
         onPointerMove={onMove}
       >
         <div className="mtm-dots" aria-hidden="true" />
+        <svg width="0" height="0" className="absolute" aria-hidden="true">
+          <defs>
+            {/* paper grain: fine noise, kept inside each piece */}
+            <filter id="mtm2-grain" x="0" y="0" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="4" result="n" />
+              <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.22  0 0 0 0 0.3  0 0 0 0 0.4  0 0 0 0.09 0" result="g" />
+              <feComposite in="g" in2="SourceGraphic" operator="in" result="gc" />
+              <feMerge>
+                <feMergeNode in="SourceGraphic" />
+                <feMergeNode in="gc" />
+              </feMerge>
+            </filter>
+            {/* a soft crease of light across the tissue */}
+            <linearGradient id="mtm2-crease" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="#fff" stopOpacity="0.5" />
+              <stop offset="0.45" stopColor="#fff" stopOpacity="0" />
+              <stop offset="0.55" stopColor="#384c65" stopOpacity="0.05" />
+              <stop offset="1" stopColor="#384c65" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+        </svg>
 
         <div ref={head} className="mtm-head mtm2-head">
           <p className="mtm-eyebrow">
@@ -206,25 +227,36 @@ export function MadeToMeasure() {
               aria-hidden="true"
             >
               <div className="mtm2-pc__bob" style={{ animationDuration: `${6 + (i % 4) * 1.3}s`, animationDelay: `${-i * 0.9}s` }}>
-                <svg viewBox="-6 -6 112 112" className="mtm2-pc__svg">
+                {/* printed tissue: grain, a soft crease light, the cutting line, the
+                    stitching line inside it, grainline, quilting, and the name printed on */}
+                <svg viewBox="-4 -4 108 108" className="mtm2-pc__svg">
                   <defs>
                     <clipPath id={`mtm2-c-${p.key}`}>
                       <path d={p.d} />
                     </clipPath>
                   </defs>
-                  <path d={p.d} className="mtm2-pc__allow" transform="translate(50 50) scale(1.08) translate(-50 -50)" />
-                  <path d={p.d} className="mtm2-pc__paper" />
+                  <path d={p.d} className="mtm2-pc__paper" filter="url(#mtm2-grain)" />
+                  <path d={p.d} fill="url(#mtm2-crease)" />
                   {p.quilt && (
                     <g clipPath={`url(#mtm2-c-${p.key})`} className="mtm2-pc__quilt">
-                      {[28, 44, 60, 76].map((y) => (
-                        <line key={y} x1="0" x2="100" y1={y} y2={y + 3} />
+                      {[30, 46, 62, 78].map((y) => (
+                        <line key={y} x1="0" x2="100" y1={y} y2={y + 2} />
                       ))}
                     </g>
                   )}
+                  <path d={p.d} className="mtm2-pc__stitch" transform="translate(50 52) scale(0.88) translate(-50 -52)" />
                   <path d={p.d} className="mtm2-pc__line" pathLength={1} />
-                  <path d="M50 30 L50 74 M46 35 L50 30 L54 35 M46 69 L50 74 L54 69" className="mtm2-pc__grain" />
+                  <path d="M50 26 L50 72 M47 30 L50 26 L53 30 M47 68 L50 72 L53 68" className="mtm2-pc__grain" />
+                  <text x="56" y="50" className="mtm2-pc__print">
+                    {p.name.toUpperCase()}
+                  </text>
+                  <text x="56" y="58" className="mtm2-pc__print is-sm">
+                    {p.note.toUpperCase()}
+                  </text>
+                  <text x="56" y="65" className="mtm2-pc__print is-sm">
+                    VENTY 001
+                  </text>
                 </svg>
-                <p className="mtm2-pc__name">{p.name}</p>
                 <p className="mtm2-pc__len">{p.len(b, ease)}</p>
               </div>
             </div>

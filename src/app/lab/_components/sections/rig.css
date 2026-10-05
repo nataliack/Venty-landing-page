@@ -61,7 +61,8 @@
 .mtm2-anchor {
   position: relative;
   width: min(900px, 100%);
-  margin-top: calc(var(--jw) * 0.7 + 24px);
+  /* room for the hanging jacket, plus clear air under the headline */
+  margin-top: calc(var(--jw) * 0.7 + clamp(56px, 9vh, 120px));
 }
 .mtm2-anchor > .mtm-card {
   position: relative;
@@ -74,18 +75,18 @@
 /* room under the references for the sleeve to hang without touching the words */
 .mtm2 .mtm-chips { min-height: 76px; align-content: flex-start; }
 
-/* the rig: behind everything; a copy above the card shows only the sleeve */
+/* the rig: behind everything; a copy above the card shows only the sleeve.
+   The two never move (no sway, no drop): any motion would open a seam
+   between them. They only appear, and the cables reveal outward. */
 .mtm2-rig {
   position: absolute;
   z-index: 0;
   pointer-events: none;
   opacity: 0;
-  translate: 0 -40px;
-  transition: opacity 0.9s ease 0.15s, translate 1.8s var(--expo) 0.15s;
+  transition: opacity 0.9s ease 0.15s;
 }
 .mtm2-rig--over { z-index: 4; }
-.mtm2.is-in .mtm2-rig { opacity: 1; translate: 0 0; }
-.mtm2.is-in.is-drafted .mtm2-rig { translate: 0 -6px; } /* the cables pull taut */
+.mtm2.is-in .mtm2-rig { opacity: 1; }
 .mtm2-rig img {
   display: block;
   width: 100%;
@@ -97,15 +98,7 @@
   transition: --rv 2s cubic-bezier(0.65, 0, 0.35, 1) 0.2s;
 }
 .mtm2.is-in .mtm2-rig img { --rv: 140%; }
-.mtm2-sway {
-  position: relative;
-  transform-origin: var(--cx) var(--cy);
-  animation: mtm2-sway 7s ease-in-out infinite alternate;
-}
-@keyframes mtm2-sway {
-  from { transform: translateY(-3px) rotate(-0.3deg); }
-  to { transform: translateY(3px) rotate(0.3deg); }
-}
+.mtm2-sway { position: relative; }
 /* the sleeve's contact shadow on the card */
 .mtm2-sleeve { filter: drop-shadow(0 10px 8px rgb(11 12 21 / 0.3)); }
 /* drafting: a band of light runs down the jacket, kept to its silhouette */
@@ -155,47 +148,56 @@
   from { transform: translateY(-6px) rotate(-1.4deg); }
   to { transform: translateY(6px) rotate(1.4deg); }
 }
+/* printed pattern tissue: slightly translucent, grained, a low close shadow */
 .mtm2-pc__svg {
   display: block;
   width: 100%;
   overflow: visible;
-  filter: drop-shadow(0 14px 18px rgb(56 76 101 / 0.28));
+  filter: drop-shadow(0 2px 1.5px rgb(56 76 101 / 0.14)) drop-shadow(0 10px 12px rgb(56 76 101 / 0.12));
 }
-.mtm2-pc__paper { fill: rgb(255 255 255 / 0.86); }
-.mtm2-pc__allow {
-  fill: none;
-  stroke: rgb(18 21 36 / 0.35);
-  stroke-width: 1;
-  stroke-dasharray: 3 3;
+.mtm2-pc__paper { fill: rgb(250 251 255 / 0.9); }
+.mtm2-pc__quilt line {
+  stroke: rgb(56 76 101 / 0.32);
+  stroke-width: 0.8;
+  stroke-dasharray: 1 3;
+  stroke-linecap: round;
   vector-effect: non-scaling-stroke;
 }
-.mtm2-pc__quilt line { stroke: rgb(104 126 245 / 0.35); stroke-width: 1; vector-effect: non-scaling-stroke; }
+/* the cutting line: thin, printed navy */
 .mtm2-pc__line {
   fill: none;
-  stroke: var(--ink);
-  stroke-width: 1.3;
+  stroke: var(--navy);
+  stroke-width: 1;
   stroke-linejoin: round;
   stroke-dasharray: 1;
+}
+/* the stitching line inside it */
+.mtm2-pc__stitch {
+  fill: none;
+  stroke: rgb(56 76 101 / 0.5);
+  stroke-width: 0.7;
+  stroke-dasharray: 3 2.5;
+  vector-effect: non-scaling-stroke;
 }
 .mtm2.is-drafted .mtm2-pc__line { animation: mtm2-redraw 1.1s cubic-bezier(0.65, 0, 0.35, 1) calc(var(--i) * 0.09s) both; }
 @keyframes mtm2-redraw {
   from { stroke-dashoffset: 1; stroke: var(--corn); }
   70% { stroke: var(--corn); }
-  to { stroke-dashoffset: 0; stroke: var(--ink); }
+  to { stroke-dashoffset: 0; stroke: var(--navy); }
 }
-.mtm2-pc__grain { fill: none; stroke: var(--corn); stroke-width: 1; vector-effect: non-scaling-stroke; }
-.mtm2-pc__name {
-  margin-top: 6px;
-  text-align: center;
-  font-size: 10px;
-  line-height: 12px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--ink);
+.mtm2-pc__grain { fill: none; stroke: var(--navy); stroke-width: 0.8; vector-effect: non-scaling-stroke; }
+/* the name and note, printed on the piece like a commercial pattern */
+.mtm2-pc__print {
+  font-family: var(--font-familjen), system-ui, sans-serif;
+  font-size: 7px;
+  letter-spacing: 0.08em;
+  fill: var(--navy);
 }
+.mtm2-pc__print.is-sm { font-size: 4.6px; letter-spacing: 0.1em; fill: rgb(56 76 101 / 0.75); }
 .mtm2-pc__len {
+  margin-top: 4px;
   text-align: center;
-  font-size: 11px;
+  font-size: 10.5px;
   line-height: 14px;
   letter-spacing: -0.01em;
   color: var(--corn);
@@ -211,7 +213,67 @@
 @media (max-width: 640px) {
   .mtm-done { width: 100%; justify-content: space-between; }
 }
+/* ---- the composer, refined -------------------------------------- */
+/* clicking into the prompt draws no ring round the card: the caret shows
+   where you are, and the toolbar's rule warms to cornflower */
+.mtm-card:focus-within { box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 30px 80px -36px rgb(56 76 101 / 0.45), 0 2px 6px -2px rgb(56 76 101 / 0.12); }
+.mtm .mtm-text:focus,
+.mtm .mtm-text:focus-visible { outline: none; }
+.mtm-card .mtm-tools { transition: border-color 0.3s ease; }
+.mtm-card:has(.mtm-text:focus) .mtm-tools { border-top-color: rgb(104 126 245 / 0.4); }
+
+/* the heading inside the fit control */
+.mtm-seg__label {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 6px 0 10px;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+
+/* attachments: hover darkens the image and shows a clear "more" in the centre */
+.mtm-chipref::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgb(11 12 21 / 0.52);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.mtm-chipref__more {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  color: var(--cloud);
+  opacity: 0;
+  scale: 0.8;
+  transition: opacity 0.25s ease, scale 0.35s var(--spring);
+}
+.mtm-chipref__kind,
+.mtm-chipref__count { z-index: 2; }
+@media (hover: hover) {
+  .mtm .mtm-chipref:hover { scale: 1; box-shadow: inset 0 0 0 1px var(--line); }
+  .mtm-chipref:hover::after,
+  .mtm-chipref:focus-visible::after { opacity: 1; }
+  .mtm-chipref:hover .mtm-chipref__more,
+  .mtm-chipref:focus-visible .mtm-chipref__more { opacity: 1; scale: 1; }
+}
+
+/* the drawing pad on phones: no zoom on tap (inputs at 16px), no double-tap
+   zoom, and the dialog keeps its own scroll */
+.mtm-modal { touch-action: manipulation; overscroll-behavior: contain; }
+.mtm-pad { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+@media (pointer: coarse) {
+  .mtm-note input,
+  .mtm-hex { font-size: 16px; }
+  .mtm-pad__tools { gap: 8px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .mtm2-sway, .mtm2-pc__bob, .mtm2-scan { animation: none; }
+  .mtm2-pc__bob, .mtm2-scan { animation: none; }
   .mtm2-rig, .mtm2-rig img, .mtm2-pc, .mtm2-anchor > .mtm-card { transition: none; }
 }

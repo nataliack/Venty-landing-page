@@ -42,6 +42,8 @@ export const bust = (b: Body) => Number(b.m.match(/Bust (\d+)/)?.[1] ?? 92);
 export type RigPiece = {
   key: string;
   name: string;
+  /** the cutting note printed on the piece */
+  note: string;
   d: string;
   quilt: boolean;
   x: number;
@@ -51,76 +53,58 @@ export type RigPiece = {
   phone?: { x: number; y: number; w: number };
   len: (b: number, ease: number) => string;
 };
+/* Four pieces, small and close to the jacket, all above the card. Front
+   and back show on wide screens only. */
 export const RIG_PIECES: RigPiece[] = [
   {
     key: "hood",
     name: "Hood",
+    note: "Cut 2",
     d: "M18 92 Q6 44 36 14 Q64 -2 86 26 Q98 58 84 92 Z",
     quilt: false,
-    x: -1.3,
-    y: -1.0,
-    w: 0.36,
-    r: -12,
-    phone: { x: -0.84, y: -0.6, w: 0.42 },
+    x: -0.98,
+    y: -0.84,
+    w: 0.27,
+    r: -10,
+    phone: { x: -0.84, y: -0.64, w: 0.34 },
     len: (b, e) => `Depth ${((b + e) * 0.38).toFixed(1)} cm`,
   },
   {
     key: "sleeve",
     name: "Sleeve",
+    note: "Cut 2",
     d: "M8 22 Q50 2 92 22 L80 96 L20 96 Z",
     quilt: true,
-    x: 1.12,
-    y: -0.92,
-    w: 0.4,
-    r: 13,
-    phone: { x: 0.86, y: -0.46, w: 0.44 },
+    x: 0.98,
+    y: -0.74,
+    w: 0.29,
+    r: 11,
+    phone: { x: 0.86, y: -0.52, w: 0.36 },
     len: (b, e) => `Length ${(57 + (b - 92) * 0.12 + e * 0.3).toFixed(1)} cm`,
   },
   {
     key: "front",
     name: "Front",
+    note: "Cut 2",
     d: "M18 6 L58 6 Q60 20 74 24 L92 30 L86 96 L18 96 Z",
     quilt: true,
-    x: -1.52,
-    y: -0.1,
-    w: 0.4,
-    r: 7,
+    x: -1.12,
+    y: -0.46,
+    w: 0.28,
+    r: 6,
     len: (b, e) => `½ chest ${((b + e) / 4).toFixed(1)} cm`,
   },
   {
     key: "back",
     name: "Back",
+    note: "Cut 1 on fold",
     d: "M8 12 Q50 2 92 12 L94 96 L6 96 Z",
     quilt: true,
-    x: 1.48,
-    y: 0.04,
-    w: 0.42,
-    r: -8,
-    len: (b, e) => `½ back ${((b + e) / 4 + 0.5).toFixed(1)} cm`,
-  },
-  {
-    key: "cuff",
-    name: "Cuff",
-    d: "M4 32 L96 32 L96 68 L4 68 Z",
-    quilt: false,
-    x: -1.3,
-    y: 0.98,
+    x: 1.1,
+    y: -0.4,
     w: 0.3,
-    r: -16,
-    phone: { x: -0.7, y: 2.75, w: 0.46 },
-    len: (b, e) => `Wrist ${(16 + (b - 92) * 0.05 + e * 0.25).toFixed(1)} cm`,
-  },
-  {
-    key: "pocket",
-    name: "Pocket",
-    d: "M10 10 L90 10 L90 78 Q50 96 10 78 Z",
-    quilt: false,
-    x: 1.28,
-    y: 1.04,
-    w: 0.24,
-    r: 19,
-    phone: { x: 0.78, y: 2.8, w: 0.38 },
-    len: () => `Opening 16.0 cm`,
+    r: -7,
+    len: (b, e) => `½ back ${((b + e) / 4 + 0.5).toFixed(1)} cm`,
   },
 ];
 
