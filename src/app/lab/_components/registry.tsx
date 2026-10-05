@@ -13,6 +13,7 @@ import { Swatches } from "./loaders/Swatches";
 import { Form } from "./loaders/Form";
 import { SeamLight } from "./loaders/SeamLight";
 import { Orbit, Drift, Tunnel } from "./loaders/Reel";
+import { Layout } from "./loaders/Layout";
 
 /* Loader concepts run inside the harness: stand-in page, simulated
    network, Replay. */
@@ -39,6 +40,9 @@ function LoaderSwatches() {
   return <Harness Concept={Swatches} page="light" />;
 }
 /* Reel concepts: the hero's first frame behind, the real Vote tab on top */
+function LoaderLayout() {
+  return <Harness Concept={Layout} page="hero" vote />;
+}
 function LoaderOrbit() {
   return <Harness Concept={Orbit} page="hero" vote />;
 }
@@ -69,6 +73,7 @@ export const NATIVE: Record<string, ComponentType> = {
   "loader-swatches": LoaderSwatches,
   "loader-form": LoaderForm,
   "loader-seam-light": LoaderSeamLight,
+  "loader-layout": LoaderLayout,
   "loader-orbit": LoaderOrbit,
   "loader-drift": LoaderDrift,
   "loader-tunnel": LoaderTunnel,

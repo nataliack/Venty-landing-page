@@ -16,6 +16,15 @@ export type Experiment = {
 
 export const EXPERIMENTS: Experiment[] = [
   {
+    slug: "loader-layout",
+    no: 20,
+    title: "Loader · Layout",
+    note: "Images cut into pattern pieces are laid out on the paper, a ruler measures the load, and the bodice front unfolds into the hero's first frame.",
+    tag: "Loader · Pattern",
+    date: "05 Oct",
+    kind: "native",
+  },
+  {
     slug: "loader-orbit",
     no: 19,
     title: "Reel loader · Orbit",
