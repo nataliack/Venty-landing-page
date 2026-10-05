@@ -28,6 +28,16 @@ export type Experiment = {
 
 export const EXPERIMENTS: Experiment[] = [
   {
+    group: "sections",
+    slug: "section-made-to-measure",
+    no: 22,
+    title: "Made to measure",
+    note: "Section 2, light: one composer for photos, sketches and words, with draw-over, body and fit on the toolbar, and the drafted pattern as its result.",
+    tag: "Section",
+    date: "05 Oct",
+    kind: "native",
+  },
+  {
     slug: "loader-strip",
     no: 21,
     title: "Loader · Strip",

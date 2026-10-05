@@ -15,6 +15,7 @@ import { SeamLight } from "./loaders/SeamLight";
 import { Orbit, Drift, Tunnel } from "./loaders/Reel";
 import { Layout } from "./loaders/Layout";
 import { Strip } from "./loaders/Strip";
+import { MadeToMeasure } from "./sections/MadeToMeasure";
 
 /* Loader concepts run inside the harness: stand-in page, simulated
    network, Replay. */
@@ -78,6 +79,7 @@ export const NATIVE: Record<string, ComponentType> = {
   "loader-form": LoaderForm,
   "loader-seam-light": LoaderSeamLight,
   "loader-strip": LoaderStrip,
+  "section-made-to-measure": MadeToMeasure,
   "loader-layout": LoaderLayout,
   "loader-orbit": LoaderOrbit,
   "loader-drift": LoaderDrift,

@@ -1,0 +1,494 @@
+/* Lab sections. Light mode: cloud page, ink type, palette colours (white
+   only as light on glass, as the hero's glass uses it). */
+
+/* ---- 2. Made to measure (Figma frame 1440 x 810) ---------------- */
+.mtm {
+  --ink: #121524;
+  --navy: #384c65;
+  --steel: #485f88;
+  --peri: #9daccd;
+  --mist: #c0c8db;
+  --corn: #687ef5;
+  --cloud: #eff4ff;
+  --line: rgb(18 21 36 / 0.1);
+  --soft: rgb(18 21 36 / 0.05);
+  position: relative;
+  isolation: isolate;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(80px, 11vh, 138px) 16px 120px;
+  background: var(--cloud);
+  color: var(--ink);
+  font-family: var(--font-familjen), system-ui, sans-serif;
+}
+/* the dot grid, fading out inside an ellipse (the Figma mask group) */
+.mtm-dots {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(rgb(11 12 21 / 0.2) 1px, transparent 1.3px);
+  background-size: 18px 18px;
+  background-position: center top;
+  -webkit-mask-image: radial-gradient(ellipse 42% 42% at 50% 46%, #000 30%, transparent 100%);
+  mask-image: radial-gradient(ellipse 42% 42% at 50% 46%, #000 30%, transparent 100%);
+}
+.mtm-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  max-width: 692px;
+  text-align: center;
+}
+.mtm-eyebrow {
+  font-size: 12px;
+  line-height: 14px;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--navy);
+}
+.mtm-title {
+  font-weight: 400;
+  font-size: clamp(2.1rem, 4.37vw, 3.93rem);
+  line-height: 1.255;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
+/* ---- the composer card ----------------------------------------- */
+.mtm-card {
+  position: relative;
+  width: min(920px, 100%);
+  margin-top: clamp(28px, 5vh, 52px);
+  padding: 14px;
+  border-radius: 28px;
+  background: rgb(255 255 255 / 0.62);
+  border: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 30px 80px -36px rgb(56 76 101 / 0.45), 0 2px 6px -2px rgb(56 76 101 / 0.12);
+  transition: box-shadow 0.35s ease;
+}
+.mtm-card:focus-within {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 0 0 4px rgb(104 126 245 / 0.14), 0 30px 80px -36px rgb(56 76 101 / 0.45);
+}
+
+/* attachments */
+.mtm-atts {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 4px;
+  scrollbar-width: none;
+}
+.mtm-atts::-webkit-scrollbar { display: none; }
+.mtm-att {
+  position: relative;
+  flex: none;
+  width: 92px;
+  height: 112px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--mist);
+  box-shadow: inset 0 0 0 1px var(--line);
+  animation: mtm-pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.mtm-att img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+@keyframes mtm-pop {
+  from { scale: 0.85; opacity: 0; }
+  to { scale: 1; opacity: 1; }
+}
+.mtm-att__tag {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  padding: 3px 6px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.86);
+  font-size: 11px;
+  line-height: 13px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mtm-att__acts {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  translate: 0 -4px;
+  transition: opacity 0.25s ease, translate 0.35s var(--ease-out-expo);
+}
+.mtm-att:hover .mtm-att__acts,
+.mtm-att:focus-within .mtm-att__acts {
+  opacity: 1;
+  translate: 0 0;
+}
+/* touch screens have no hover: the actions are always there */
+@media (hover: none) {
+  .mtm-att__acts { opacity: 1; translate: 0 0; }
+}
+.mtm-att__acts button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.92);
+  color: var(--ink);
+  box-shadow: 0 2px 8px -2px rgb(18 21 36 / 0.3);
+  transition: background-color 0.2s, color 0.2s, scale 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.mtm-att__acts button:hover { background: var(--corn); color: var(--cloud); scale: 1.06; }
+.mtm-att--add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: var(--soft);
+  color: var(--navy);
+  font-size: 12px;
+  animation: none;
+  transition: background-color 0.25s, color 0.25s;
+}
+.mtm-att--add:hover { background: rgb(104 126 245 / 0.12); color: var(--corn); }
+
+.mtm-text {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 6px 6px 4px;
+  resize: none;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: clamp(17px, 1.4vw, 20px);
+  line-height: 1.35;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+.mtm-text::placeholder { color: var(--steel); }
+
+.mtm-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.mtm-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--line);
+}
+.mtm-go { margin-left: auto; }
+.mtm-go:disabled,
+.mtm-save:disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.mtm-go__bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 100%;
+  transform-origin: 0 50%;
+  background: rgb(255 255 255 / 0.85);
+  animation: mtm-bar 1.6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+@keyframes mtm-bar {
+  from { scale: 0 1; }
+  to { scale: 1 1; }
+}
+
+/* secondary: quiet ink-on-glass pills; tertiary chip; segmented */
+.mtm-ghost,
+.mtm-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--soft);
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: 14px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  white-space: nowrap;
+  transition: background-color 0.25s, box-shadow 0.25s, color 0.25s, scale 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.mtm-ghost:hover,
+.mtm-chip:hover {
+  background: rgb(104 126 245 / 0.1);
+  box-shadow: inset 0 0 0 1px rgb(104 126 245 / 0.4);
+  color: var(--corn);
+}
+.mtm-ghost:active,
+.mtm-chip:active { scale: 0.96; }
+.mtm-ghost:disabled { opacity: 0.4; pointer-events: none; }
+.mtm-chip { background: transparent; }
+.mtm-seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--soft);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.mtm-seg button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 13px;
+  border-radius: 999px;
+  font-size: 14px;
+  letter-spacing: -0.02em;
+  color: var(--navy);
+  transition: background-color 0.25s, color 0.25s, box-shadow 0.25s;
+}
+.mtm-seg button[aria-pressed="true"] {
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgb(18 21 36 / 0.16), inset 0 0 0 1px var(--line);
+}
+.mtm-seg button:hover:not([aria-pressed="true"]) { color: var(--corn); }
+.mtm-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.9), 0 0 0 1px var(--line);
+}
+.mtm-swatch[aria-pressed="true"] { box-shadow: inset 0 0 0 2px #fff, 0 0 0 2px var(--corn); }
+.mtm-card button:focus-visible,
+.mtm-card textarea:focus-visible {
+  outline: 2px solid var(--corn);
+  outline-offset: 2px;
+}
+
+/* menus */
+.mtm-menu {
+  position: absolute;
+  z-index: 10;
+  left: 14px;
+  top: 134px;
+  width: min(340px, calc(100% - 28px));
+  padding: 8px;
+  border-radius: 18px;
+  background: rgb(255 255 255 / 0.96);
+  box-shadow: 0 0 0 1px var(--line), 0 20px 50px -20px rgb(56 76 101 / 0.5);
+  animation: mtm-in 0.35s var(--ease-out-expo) both;
+}
+@keyframes mtm-in {
+  from { opacity: 0; translate: 0 -6px; }
+  to { opacity: 1; translate: 0 0; }
+}
+.mtm-menu__thumb {
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 10px;
+  transition: scale 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.mtm-menu__thumb:hover { scale: 1.05; }
+.mtm-menu__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.mtm-menu--body {
+  top: auto;
+  bottom: calc(100% + 8px);
+  left: 0;
+  width: 260px;
+}
+.mtm-menu--body button {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  font-size: 14px;
+  text-align: left;
+}
+.mtm-menu--body button:hover { background: var(--soft); }
+.mtm-menu--body button[aria-selected="true"] { background: rgb(104 126 245 / 0.1); }
+.mtm-small {
+  font-size: 12px;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: var(--steel);
+}
+
+/* the sketch pad, in place of the field */
+.mtm-pad__bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mtm-pad__title {
+  flex: 1;
+  text-align: center;
+  font-size: 14px;
+  color: var(--navy);
+}
+.mtm-pad__board {
+  position: relative;
+  height: clamp(280px, 42vh, 420px);
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 18px;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.mtm-pad__hint {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  translate: -50% 0;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.85);
+  font-size: 12px;
+  color: var(--navy);
+  pointer-events: none;
+}
+.mtm-pad__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* the result: the drafted pieces on pattern paper, and what comes next */
+.mtm-result {
+  display: grid;
+  gap: 14px;
+}
+@media (min-width: 720px) {
+  .mtm-result { grid-template-columns: 1.6fr 1fr; }
+}
+.mtm-sheet {
+  aspect-ratio: 37 / 25;
+  padding: 14px;
+  border-radius: 18px;
+  background-color: #fff;
+  background-image:
+    linear-gradient(rgb(104 126 245 / 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(104 126 245 / 0.1) 1px, transparent 1px);
+  background-size: 18px 18px;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.mtm-piece {
+  fill: rgb(104 126 245 / 0.08);
+  stroke: var(--ink);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: mtm-draw 1.1s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+@keyframes mtm-draw {
+  to { stroke-dashoffset: 0; }
+}
+.mtm-piece__label {
+  font-family: var(--font-familjen), system-ui, sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  fill: var(--navy);
+}
+.mtm-result__side {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 4px;
+}
+.mtm-result__title {
+  margin-top: 4px;
+  font-size: 26px;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+.mtm-facts {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.mtm-facts li {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+.mtm-facts li span:first-child { color: var(--steel); }
+
+/* the three cues under the card */
+.mtm-cues {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: 22px;
+  font-size: 14px;
+  letter-spacing: -0.02em;
+  color: var(--navy);
+}
+.mtm-cues li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.mtm-cues li svg { color: var(--corn); }
+.mtm-cues__plus { color: var(--peri); }
+
+@media (max-width: 640px) {
+  .mtm-go { width: 100%; margin-left: 0; }
+  .mtm-divider { display: none; }
+  .mtm-att { width: 80px; height: 98px; }
+  .mtm-menu { top: 118px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mtm-att, .mtm-menu { animation: none; }
+  .mtm-piece { animation: none; stroke-dashoffset: 0; }
+}
+
+/* the primary pill in light mode: the same pill, its inner glow tighter
+   and fainter so the cornflower holds its colour on a light surface */
+.mtm .btn-primary {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25), inset 0 1px 0 rgb(255 255 255 / 0.45), inset 0 0 10px 1px rgb(206 214 255 / 0.35), 0 10px 24px -10px rgb(104 126 245 / 0.7);
+}
+@media (hover: hover) {
+  .mtm .btn-primary:hover {
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3), inset 0 1px 0 rgb(255 255 255 / 0.4), inset 0 0 8px 1px rgb(214 222 255 / 0.5), 0 6px 16px -8px rgb(104 126 245 / 0.6);
+  }
+}
+.mtm-att__tag { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+.mtm-att__marked {
+  display: grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--corn);
+  color: var(--cloud);
+}
+.mtm-sheet { aspect-ratio: 37 / 26.2; }
