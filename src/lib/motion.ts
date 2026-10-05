@@ -64,14 +64,27 @@ export function textIn(tl: TL, targets: Targets, at: gsap.Position, stagger: num
 
 /** Splits a block of running text into masked lines and reveals them.
     The split is undone once the reveal ends, so the text reflows freely
-    on resize. */
+    on resize. While split, the block is a flex column: the masks' padding
+    is taken back with negative margins, and in normal flow neighbouring
+    margins would collapse into each other and push the lines apart (the
+    text would jump taller, then snap back). */
 export function linesIn(tl: TL, el: Element | null, at: gsap.Position, stagger: number = STAGGER.lines) {
-  if (!el) return tl;
+  if (!(el instanceof HTMLElement)) return tl;
   const split = SplitText.create(el, { type: "lines", mask: "lines" });
   padMasks(split.masks);
+  gsap.set(el, { display: "flex", flexDirection: "column" });
   return tl.from(
     split.lines,
-    { yPercent: HIDDEN, duration: DUR.reveal, ease: EASE.out, stagger, onComplete: () => split.revert() },
+    {
+      yPercent: HIDDEN,
+      duration: DUR.reveal,
+      ease: EASE.out,
+      stagger,
+      onComplete: () => {
+        split.revert();
+        gsap.set(el, { clearProps: "display,flexDirection" });
+      },
+    },
     at,
   );
 }
