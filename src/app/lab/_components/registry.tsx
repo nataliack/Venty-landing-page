@@ -16,6 +16,7 @@ import { Orbit, Drift, Tunnel } from "./loaders/Reel";
 import { Layout } from "./loaders/Layout";
 import { Strip } from "./loaders/Strip";
 import { MadeToMeasure } from "./sections/MadeToMeasure";
+import { HowItWorksLight } from "./sections/HowItWorks";
 import { DitherRise } from "./exp/DitherRise";
 
 /* Loader concepts run inside the harness: stand-in page, simulated
@@ -82,6 +83,7 @@ export const NATIVE: Record<string, ComponentType> = {
   "loader-seam-light": LoaderSeamLight,
   "loader-strip": LoaderStrip,
   "section-made-to-measure": MadeToMeasure,
+  "section-how-it-works": HowItWorksLight,
   "loader-layout": LoaderLayout,
   "loader-orbit": LoaderOrbit,
   "loader-drift": LoaderDrift,

@@ -28,6 +28,16 @@ export type Experiment = {
 
 export const EXPERIMENTS: Experiment[] = [
   {
+    group: "sections",
+    slug: "section-how-it-works",
+    no: 25,
+    title: "How it works",
+    note: "Section 3, light: three glass cards joined by a stitched thread. Drag the tape, watch the prompt type, switch the print between A4 pages and one A0 sheet.",
+    tag: "Section",
+    date: "05 Oct",
+    kind: "native",
+  },
+  {
     group: "loaders",
     slug: "loader-zipper",
     no: 24,
