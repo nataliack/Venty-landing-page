@@ -314,17 +314,21 @@ body {
 }
 
 /* Primary pill: the Venty app's primary button (.pill-primary on the app's
-   overhaul branch), copied as is. A periwinkle core, light pooling at the
-   edges, a fine dot grid. Hover lifts it, brightens the inner glow and
-   swirls a soft gradient inside it; a press dips it and springs back. */
+   overhaul branch). A periwinkle core, light pooling at the edges, a fine
+   dot grid, and a soft gradient swirling inside it on hover.
+   Our hover, in place of the app's lift and outer glow: the pill is drawn
+   toward the pointer (--mx/--my, set by PrimaryButton.tsx, the label a
+   little further) and gives slightly under it, its inner edge light
+   tightening. A press dips it further and springs back. */
 .btn-primary {
+  --mx: 0px;
+  --my: 0px;
   position: relative;
   isolation: isolate;
   overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
   height: 56px;
   padding: 0 32px;
   border-radius: 999px;
@@ -338,12 +342,20 @@ body {
   background-image: radial-gradient(rgb(255 255 255 / 0.16) 0.8px, transparent 1.1px), linear-gradient(180deg, #7387f6, #687ef5 55%, #6479f2);
   background-size: 5px 5px, 100% 100%;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3), inset 0 1px 0 rgb(255 255 255 / 0.6), inset 0 0 18px 3px rgb(206 214 255 / 0.55), 0 10px 30px -8px rgb(104 126 245 / 0.5);
-  transition: transform 0.35s cubic-bezier(0.2, 1.4, 0.4, 1), box-shadow 0.35s ease, filter 0.15s ease, opacity 0.2s;
+  translate: var(--mx) var(--my);
+  transition: translate 0.6s cubic-bezier(0.2, 1.2, 0.4, 1), scale 0.35s cubic-bezier(0.2, 1.4, 0.4, 1), box-shadow 0.35s ease, opacity 0.2s;
 }
 .btn-primary.is-small {
   height: 44px;
   padding: 0 22px;
   font-size: 15px;
+}
+.btn-primary__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  translate: calc(var(--mx) * 0.4) calc(var(--my) * 0.4);
+  transition: translate 0.6s cubic-bezier(0.2, 1.2, 0.4, 1);
 }
 /* the swirl: a blurred conic gradient turning slowly under the label,
    faded in and running only while hovered or pressed */
@@ -370,19 +382,21 @@ body {
 }
 @media (hover: hover) {
   .btn-primary:hover::after { opacity: 1; animation-play-state: running; }
+  /* gives under the pointer: a touch smaller, the inner edge light drawn in
+     tighter and brighter, the shadow beneath pulled closer (no glow out) */
   .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.4), inset 0 1px 0 rgb(255 255 255 / 0.7), inset 0 0 22px 4px rgb(214 222 255 / 0.65), 0 18px 44px -8px rgb(104 126 245 / 0.65);
+    scale: 0.98;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.36), inset 0 1px 0 rgb(255 255 255 / 0.5), inset 0 0 11px 2px rgb(214 222 255 / 0.7), 0 6px 18px -8px rgb(104 126 245 / 0.45);
   }
 }
 .btn-primary:focus-visible {
   outline: 2px solid var(--color-cloud);
   outline-offset: 3px;
 }
-/* pressing: the swirl blooms instantly, the button dips, then springs back */
+/* pressing: the swirl blooms instantly, the pill dips further, then springs back */
 .btn-primary:active {
-  transform: scale(0.965);
-  transition-duration: 0.12s;
+  scale: 0.965;
+  transition-duration: 0.6s, 0.12s, 0.12s, 0.2s;
 }
 .btn-primary:active::after {
   opacity: 1;
