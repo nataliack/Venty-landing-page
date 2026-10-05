@@ -100,7 +100,7 @@ export function SectionNav() {
             }`}
           >
             <span>{s.label}</span>
-            <span className="font-display text-[13px] text-steel">{String(i + 1).padStart(2, "0")}</span>
+            <span className="font-display text-[13px]">{String(i + 1).padStart(2, "0")}</span>
           </button>
         ))}
       </div>

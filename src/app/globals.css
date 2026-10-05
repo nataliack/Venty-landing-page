@@ -16,6 +16,13 @@
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+  /* motion tokens, mirrored from src/lib/motion.ts (docs/motion.md) */
+  --ease-in: cubic-bezier(0.32, 0, 0.67, 0); /* power3.in */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); /* power3.inOut */
+  --ease-spring: cubic-bezier(0.2, 1.4, 0.4, 1); /* presses, pills, small pulls */
+  --dur-quick: 0.35s;
+  --dur-base: 0.7s;
+  --dur-reveal: 1.2s;
 }
 
 /* Theme roles. Dark is the default, the page flips to light on scroll
@@ -345,7 +352,7 @@ body {
   background-size: 5px 5px, 100% 100%;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3), inset 0 1px 0 rgb(255 255 255 / 0.6), inset 0 0 18px 3px rgb(206 214 255 / 0.55), 0 10px 30px -8px rgb(104 126 245 / 0.5);
   translate: var(--mx) var(--my);
-  transition: translate 0.6s cubic-bezier(0.2, 1.2, 0.4, 1), scale 0.35s cubic-bezier(0.2, 1.4, 0.4, 1), box-shadow 0.35s ease, opacity 0.2s;
+  transition: translate var(--dur-base) var(--ease-spring), scale var(--dur-quick) var(--ease-spring), box-shadow var(--dur-quick) ease, opacity 0.2s;
 }
 .btn-primary.is-small {
   height: 44px;
@@ -357,7 +364,7 @@ body {
   align-items: center;
   gap: 10px;
   translate: calc(var(--mx) * 0.4) calc(var(--my) * 0.4);
-  transition: translate 0.6s cubic-bezier(0.2, 1.2, 0.4, 1);
+  transition: translate var(--dur-base) var(--ease-spring);
 }
 /* the swirl: a blurred conic gradient turning slowly under the label,
    faded in and running only while hovered or pressed */
@@ -500,7 +507,7 @@ html[data-announce="on"] {
 .section-nav {
   right: var(--gutter);
   top: calc(var(--announce-h) + var(--head-gap));
-  transition: top 0.7s var(--ease-out-expo);
+  transition: top var(--dur-base) var(--ease-out-expo);
 }
 .site-logo {
   left: var(--gutter);
@@ -508,7 +515,7 @@ html[data-announce="on"] {
   height: var(--nav-h);
   display: flex;
   align-items: center;
-  transition: top 0.7s var(--ease-out-expo);
+  transition: top var(--dur-base) var(--ease-out-expo);
 }
 
 /* Section menu: a compact glass pill (phones smaller still). The pill and
@@ -527,10 +534,10 @@ html[data-announce="on"] {
   gap: 10px;
   font-size: 14px;
   cursor: pointer;
-  transition: background-color 0.35s ease, border-color 0.35s ease, scale 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
+  transition: background-color var(--dur-quick) ease, border-color var(--dur-quick) ease, scale var(--dur-quick) var(--ease-spring);
 }
 .section-nav__text {
-  transition: color 0.35s ease;
+  transition: color var(--dur-quick) ease;
 }
 /* hover: the glass lights up, the label brightens and the two chevrons
    ease apart, an invitation to open it */
@@ -582,13 +589,18 @@ html[data-announce="on"] {
   position: absolute;
   inset: 0 0 auto;
   z-index: 40;
-  border-bottom: 1px solid var(--color-navy);
   font-family: var(--font-sans);
   font-size: 14px;
   line-height: 16px;
   letter-spacing: -0.02em;
   color: var(--color-periwinkle);
-  transition: translate 0.7s var(--ease-out-expo), opacity 0.5s ease;
+  transition: translate var(--dur-base) var(--ease-out-expo), opacity 0.5s ease;
+}
+.announce__line {
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  background: var(--color-navy);
 }
 html[data-announce="off"] .announce {
   translate: 0 -100%;
@@ -793,7 +805,7 @@ html[data-announce="off"] .announce {
   display: flex;
   height: 149px;
   translate: var(--panel) -50%;
-  transition: translate 0.7s var(--ease-out-expo);
+  transition: translate var(--dur-base) var(--ease-out-expo);
 }
 .vote__strip {
   display: flex;
@@ -834,7 +846,7 @@ html[data-announce="off"] .announce {
   background-image: radial-gradient(rgb(255 255 255 / 0.16) 0.8px, transparent 1.1px), linear-gradient(180deg, #7387f6, #687ef5 55%, #6479f2);
   background-size: 5px 5px, 100% 100%;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3), inset 0 0 18px 3px rgb(206 214 255 / 0.55);
-  transition: box-shadow 0.35s ease;
+  transition: box-shadow var(--dur-quick) ease;
 }
 @media (hover: hover) {
   .vote__tab:hover { box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.36), inset 0 0 11px 2px rgb(214 222 255 / 0.7); }

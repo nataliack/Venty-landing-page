@@ -9,6 +9,7 @@ import { PrimaryButton } from "./PrimaryButton";
 import { APP_URL, CTA_LABEL } from "@/lib/site";
 import { HERO, cameraTrack, createHeroPlayer, heroPosition, heroPoster } from "@/lib/heroSequence";
 import { HIDDEN, padMasks } from "@/lib/reveal";
+import { DUR, EASE, afterLoader, drawLine, fadeDown, linesIn, textIn, wipeIn } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -93,7 +94,10 @@ export function Hero() {
     if (!el) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const player = createHeroPlayer(el.querySelector<HTMLCanvasElement>("[data-seq]")!, cameraTrack(CAMERA));
-    const logo = document.querySelector<HTMLElement>("[data-logo]"); // fixed, outside the hero (SiteLogo)
+    // fixed, outside the hero: the logo (SiteLogo) and the section menu
+    const logo = document.querySelector<HTMLElement>("[data-logo]");
+    const nav = document.querySelector<HTMLElement>(".section-nav");
+    let stopOpening = () => {};
 
     // the announcement bar shows only at the very top of the page; the logo
     // and the section menu sit under it while it does (globals.css)
@@ -107,15 +111,34 @@ export function Hero() {
     };
 
     const ctx = gsap.context(() => {
-      // 1.1 arrives on load
-      const intro = gsap.timeline({ defaults: { ease: "expo.out" } });
-      intro
-        .from("[data-scene]", { scale: 1.08, opacity: 0, duration: 2.4, clearProps: "transform" }, 0)
-        .from("[data-glow]", { yPercent: 40, opacity: 0, duration: 2 }, 0.2)
-        .from("[data-bar]", { yPercent: -100, opacity: 0, duration: 1.2, clearProps: "transform,opacity" }, 0.5)
-        .from("[data-h1] [data-w]", { yPercent: HIDDEN, duration: 1.4, stagger: 0.06 }, 0.7)
-        .from("[data-intro]", { y: 16, opacity: 0, duration: 1.2, stagger: 0.1, clearProps: "transform,opacity" }, 1);
-      if (logo) intro.from(logo, { y: -10, opacity: 0, duration: 1.2, clearProps: "transform,opacity" }, 0.6);
+      // The footage settles in at once, under the loading screen, so the
+      // loader opens onto it
+      gsap
+        .timeline()
+        .from("[data-scene]", { scale: 1.08, opacity: 0, duration: DUR.long, ease: EASE.out, clearProps: "transform" }, 0)
+        .from("[data-glow]", { yPercent: 40, opacity: 0, duration: 2, ease: EASE.out }, 0.2);
+
+      // 1.1 builds once the loader has gone, top to bottom, every object
+      // with a motion from src/lib/motion (see docs/motion.md):
+      //   the bar's rule draws out from the centre, its three items drop in
+      //   the logo and the section menu drop in at the corners
+      //   the title rises line by line; the button wipes open; the line
+      //   below rises line by line; Scroll rises and its hairline grows
+      //   (the Vote for Venty tab joins from the right, see VoteTab)
+      const opening = gsap.timeline({ paused: true });
+      drawLine(opening, "[data-bar-line]", 0);
+      fadeDown(opening, "[data-bar-item]", 0.15);
+      if (logo) fadeDown(opening, logo, 0.25);
+      if (nav) fadeDown(opening, nav, 0.32);
+      textIn(opening, "[data-h1] [data-w]", 0.35);
+      wipeIn(opening, "[data-cta] .btn-primary", 0.55);
+      textIn(opening, "[data-cue-text]", 0.8);
+      drawLine(opening, "[data-cue-line]", 0.9, "50% 0%", "y");
+      stopOpening = afterLoader(() => {
+        // split into lines only now, with the fonts in, so the breaks are right
+        linesIn(opening, el.querySelector("[data-line-text]"), 0.65);
+        opening.play();
+      });
 
       const split = SplitText.create("[data-h2]", { type: "words", mask: "words" });
       padMasks(split.masks);
@@ -172,6 +195,7 @@ export function Hero() {
     }, el);
 
     return () => {
+      stopOpening();
       barSize.disconnect();
       delete root.dataset.announce;
       root.style.removeProperty("--announce-bar");
@@ -228,7 +252,7 @@ export function Hero() {
 
         <div className="hero-open absolute inset-x-0 bottom-0 z-30 text-cloud">
           <div data-f1-head className="hero-open__main">
-            <div data-intro>
+            <div data-cta>
               <PrimaryButton href={APP_URL}>{CTA_LABEL}</PrimaryButton>
             </div>
             <h1 data-h1 className="hero-title">
@@ -242,12 +266,14 @@ export function Hero() {
           </div>
 
           <div data-cue aria-hidden className="hero-open__cue">
-            <span>Scroll</span>
-            <span className="scroll-cue block h-10 w-px overflow-hidden bg-cloud/15" />
+            <span className="line-mask">
+              <span data-cue-text className="block">Scroll</span>
+            </span>
+            <span data-cue-line className="scroll-cue block h-10 w-px overflow-hidden bg-cloud/15" />
           </div>
 
           <p data-f1-side className="hero-open__line">
-            <span data-intro className="block">
+            <span data-line-text className="block">
               Start from a photo, a sketch or a few words. Venty turns it into a sewing pattern drafted from your measurements, ready to print.
             </span>
           </p>

@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { VOTE_LINKS } from "@/lib/site";
+import { DUR, EASE, afterLoader } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -101,21 +102,6 @@ function Arrow() {
       </svg>
     </span>
   );
-}
-
-/** Calls back once the loading screen has left the page (or at once if there is none) */
-function afterLoader(cb: () => void) {
-  if (!document.querySelector(".loader")) {
-    cb();
-    return () => {};
-  }
-  const mo = new MutationObserver(() => {
-    if (document.querySelector(".loader")) return;
-    mo.disconnect();
-    cb();
-  });
-  mo.observe(document.body, { childList: true, subtree: true });
-  return () => mo.disconnect();
 }
 
 export function VoteTab() {
@@ -240,7 +226,7 @@ export function VoteTab() {
 
       const entrance = gsap
         .timeline({ paused: true, onComplete: () => (ready = true) })
-        .to(".vote__strip", { x: 0, duration: 1.1, ease: "expo.out" }, 0)
+        .to(".vote__strip", { x: 0, duration: DUR.reveal, ease: EASE.out }, 0)
         .to(
           ".vote__label",
           {
@@ -252,7 +238,8 @@ export function VoteTab() {
         )
         .add(mark, 0.45);
 
-      stop = afterLoader(() => entrance.play());
+      // joins the hero's opening once its title is up (Hero.tsx)
+      stop = afterLoader(() => entrance.delay(0.6).restart(true));
     }, el);
 
     // Hover: the bars pull up into the top edge, then drop again, in the

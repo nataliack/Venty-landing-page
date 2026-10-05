@@ -65,7 +65,7 @@ function Roller() {
   }, []);
 
   return (
-    <p className="announce__roll">
+    <p data-bar-item className="announce__roll">
       {/* screen readers get the first line once; the roll is decoration */}
       <span className="sr-only">{LINES[0]}</span>
       {LINES.map((line, n) => (
@@ -80,17 +80,18 @@ function Roller() {
 export function AnnounceBar() {
   return (
     <div data-bar className="announce">
+      <span data-bar-line aria-hidden="true" className="announce__line" />
       <div className="announce__row">
-        <a href={MAKER_URL} target="_blank" rel="noopener" className="announce__maker">
+        <a data-bar-item href={MAKER_URL} target="_blank" rel="noopener" className="announce__maker">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/hero/natalia-chamon-face.webp" alt="" width={20} height={20} className="announce__face" />
+          <img src="/hero/natalia-chamon.webp" alt="" width={20} height={20} className="announce__face" />
           <span className="announce__who">
             <span className="announce__label">Made by:</span>
             <span>Natalia Chamon</span>
           </span>
         </a>
 
-        <p className="announce__count">
+        <p data-bar-item className="announce__count">
           <span className="announce__count-label">QUT Festival:</span>
           <Countdown />
         </p>

@@ -48,7 +48,7 @@ to `hero/archive/` if you want to keep them.
 ## People
 
 `people/natalia-chamon.webp` is the master portrait of Natalia Chamon
-(1396 x 1396). The announcement bar's avatar is cut from it:
-`public/hero/natalia-chamon-face.webp`, cropped to her face (x 130 to 1070,
-y 190 to 1130) and saved at 60 x 60 (three times its 20px on screen), WebP
-quality 88. Give a new crop a new file name so browsers fetch it fresh.
+(1396 x 1396), framed as it should show. The announcement bar's avatar is
+the whole portrait, no crop: `public/hero/natalia-chamon.webp`, saved at
+60 x 60 (three times its 20px on screen), WebP quality 88. Give a new
+version a new file name so browsers fetch it fresh.
