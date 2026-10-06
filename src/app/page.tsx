@@ -2,6 +2,7 @@ import { SectionNav } from "@/components/SectionNav";
 import { VoteTab } from "@/components/VoteTab";
 import { SiteLogo } from "@/components/SiteLogo";
 import { ThemeZones } from "@/components/ThemeZones";
+import { PauseOffscreen } from "@/components/PauseOffscreen";
 import { MeasureLoader } from "@/components/MeasureLoader";
 import { Hero } from "@/components/Hero";
 import { MadeToMeasure } from "@/components/MadeToMeasure";
@@ -22,6 +23,7 @@ export default function Home() {
       <SectionNav />
       <VoteTab />
       <ThemeZones />
+      <PauseOffscreen />
       <main>
         <Hero />
         <MadeToMeasure />

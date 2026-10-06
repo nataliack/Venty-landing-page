@@ -11,6 +11,7 @@ gsap.registerPlugin(ScrollTrigger);
    away from the pointer. A small photo is enough: it is sampled at one dot
    every few px. (From the earlier Meet the maker section.) */
 
+const COLOURS = ["#eff4ff", "#9daccd", "#687ef5"]; // light, mid, dark
 const STEP = 5; // px between dot centres
 const RADIUS = 60; // pointer influence
 const PUSH = 18;
@@ -74,7 +75,7 @@ export function Halftone({ src, label }: { src: string; label: string }) {
           if (r < 0.6) continue;
           const hx = i * STEP + STEP / 2;
           const hy = j * STEP + STEP / 2;
-          const c = lum > 0.6 ? "#eff4ff" : lum > 0.35 ? "#9daccd" : "#687ef5";
+          const c = lum > 0.6 ? COLOURS[0] : lum > 0.35 ? COLOURS[1] : COLOURS[2];
           const p = prev[dots.length];
           dots.push({ hx, hy, x: p ? p.x : hx, y: p ? p.y : hy, vx: 0, vy: 0, r, c });
         }
@@ -86,12 +87,17 @@ export function Halftone({ src, label }: { src: string; label: string }) {
       draw();
     };
 
+    // one path per colour (three fills a frame, not one per dot)
     const draw = () => {
       g.clearRect(0, 0, w, h);
-      for (const d of dots) {
-        g.fillStyle = d.c;
+      for (const c of COLOURS) {
+        g.fillStyle = c;
         g.beginPath();
-        g.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+        for (const d of dots) {
+          if (d.c !== c) continue;
+          g.moveTo(d.x + d.r, d.y);
+          g.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+        }
         g.fill();
       }
     };

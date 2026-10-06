@@ -24,18 +24,27 @@ export function ScrollBar() {
 
     let size = MIN_THUMB;
     let idle = 0;
-    const range = () => Math.max(1, sc.scrollHeight - sc.clientHeight);
-    const room = () => Math.max(1, tr.clientHeight - size);
-
-    const place = () => {
+    // the sizes are measured when they change (resize, the page growing),
+    // never while scrolling: a scroll frame only moves the thumb
+    let scrollRange = 1;
+    let trackRoom = 1;
+    const range = () => scrollRange;
+    const room = () => trackRoom;
+    const measure = () => {
       const view = tr.clientHeight;
       size = Math.max(MIN_THUMB, (view * sc.clientHeight) / sc.scrollHeight);
+      scrollRange = Math.max(1, sc.scrollHeight - sc.clientHeight);
+      trackRoom = Math.max(1, view - size);
       th.style.height = `${size}px`;
-      th.style.transform = `translate3d(0, ${(sc.scrollTop / range()) * room()}px, 0)`;
-      tr.dataset.hidden = String(sc.scrollHeight <= sc.clientHeight + 1);
+      const hidden = String(sc.scrollHeight <= sc.clientHeight + 1);
+      if (tr.dataset.hidden !== hidden) tr.dataset.hidden = hidden;
+      place();
+    };
+    const place = () => {
+      th.style.transform = `translate3d(0, ${(sc.scrollTop / scrollRange) * trackRoom}px, 0)`;
     };
     const wake = () => {
-      tr.dataset.active = "true";
+      if (tr.dataset.active !== "true") tr.dataset.active = "true";
       clearTimeout(idle);
       idle = window.setTimeout(() => (tr.dataset.active = "false"), IDLE_MS);
     };
@@ -68,9 +77,10 @@ export function ScrollBar() {
       tr.dataset.dragging = "false";
     };
 
-    place();
+    measure();
     sc.addEventListener("scroll", onScroll, { passive: true });
-    const ro = new ResizeObserver(place);
+    const ro = new ResizeObserver(measure);
+    ro.observe(tr);
     ro.observe(sc);
     for (const child of sc.children) ro.observe(child); // the page content grows as sections lay out
     tr.addEventListener("pointerdown", onDown);

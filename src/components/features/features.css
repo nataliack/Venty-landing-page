@@ -73,31 +73,49 @@
 }
 @media (min-width: 1100px) {
   .ft-grid { grid-template-columns: repeat(12, 1fr); grid-auto-rows: clamp(350px, 27vw, 410px); }
-  .ft-c--mark, .ft-c--refine, .ft-dial, .ft-c--bodies { grid-column: span 3; }
+  .ft-c--mark, .ft-c--refine, .ft-cell--dial, .ft-c--bodies { grid-column: span 3; }
   .ft-c--body { grid-column: span 7; }
   .ft-c--lib { grid-column: span 5; }
 }
-/* the light behind the cards, showing through the gaps */
-.ft-grid::before {
-  --o: calc(var(--reach) * 1.5);
-  content: "";
+/* a cell: the card, and the halo it throws when the light is near */
+.ft-cell { position: relative; display: flex; flex-direction: column; }
+.ft-cell > .ft-card { flex: 1; }
+.ft-cell--dial { display: grid; place-items: center; }
+.ft-halo {
   position: absolute;
-  inset: calc(var(--o) * -1);
+  inset: 0;
   z-index: -1;
+  border-radius: 28px;
+  box-shadow: 0 0 60px rgb(104 126 245 / 0.28);
+  opacity: 0;
   pointer-events: none;
+  will-change: opacity;
+}
+.ft-dial > .ft-halo { border-radius: 50%; }
+
+/* the light behind the cards, showing through the gaps: one soft disc,
+   moved by useGlow with a transform (never repainted) */
+.ft-bloom {
+  --o: calc(var(--reach) * 1.5);
+  position: absolute;
+  left: calc(var(--o) * -1);
+  top: calc(var(--o) * -1);
+  z-index: -1;
+  width: calc(var(--o) * 2);
+  height: calc(var(--o) * 2);
+  pointer-events: none;
+  border-radius: 50%;
   background: radial-gradient(
-    circle var(--o) at calc(var(--px) + var(--o)) calc(var(--py) + var(--o)),
+    circle closest-side,
     rgb(104 126 245 / 0.34) 0%,
     rgb(104 126 245 / 0.1) 45%,
     transparent 100%
   );
+  will-change: transform;
 }
 
 /* ---- a card: backlit glass ----------------------------------------- */
 .ft-card {
-  --g: 0;
-  --lx: -999px;
-  --ly: -999px;
   position: relative;
   isolation: isolate;
   display: flex;
@@ -107,33 +125,72 @@
   overflow: hidden;
   border-radius: 28px;
   background:
-    radial-gradient(circle calc(var(--reach) * 0.9) at var(--lx) var(--ly), rgb(104 126 245 / calc(var(--g) * 0.3)), transparent 100%),
     radial-gradient(rgb(239 244 255 / 0.07) 0.8px, transparent 1.1px) 0 0 / 5px 5px,
     linear-gradient(165deg, #191c2d 0%, #10121c 55%, #0c0d16 100%);
   box-shadow:
-    inset 0 0 calc(4px + 40px * var(--g)) rgb(104 126 245 / calc(0.12 + var(--g) * 0.4)),
+    inset 0 0 4px rgb(104 126 245 / 0.12),
     inset 0 1px 0 rgb(239 244 255 / 0.1),
-    0 30px 60px -32px rgb(0 0 0 / 0.9),
-    0 0 calc(60px * var(--g)) rgb(104 126 245 / calc(var(--g) * 0.28));
+    0 30px 60px -32px rgb(0 0 0 / 0.9);
   transition: scale 0.6s var(--expo);
 }
 @media (min-width: 1100px) { .ft-card { min-height: 0; } }
-@media (hover: hover) { .ft-card:hover { scale: 0.992; } }
-/* the rim: a ring lit on the side facing the light */
-.ft-card::before {
-  content: "";
+@media (hover: hover) { .ft-cell:hover > .ft-card { scale: 0.992; } }
+
+/* the light's pieces (Fx in Features.tsx). Their sizes come from --reach
+   (set on the grid once); useGlow moves the discs to the light with a
+   transform and fades the glows with opacity */
+.ft-fx {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.ft-fx__light,
+.ft-fx__rimlight {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  will-change: transform, opacity;
+}
+.ft-fx__light {
+  --r: calc(var(--reach) * 0.9);
+  width: calc(var(--r) * 2);
+  height: calc(var(--r) * 2);
+  margin: calc(var(--r) * -1) 0 0 calc(var(--r) * -1);
+  background: radial-gradient(closest-side, rgb(104 126 245 / 0.3), transparent);
+  opacity: 0;
+}
+/* the inner edge glow at full strength, faded in with the light */
+.ft-fx__glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 44px rgb(104 126 245 / 0.4);
+  opacity: 0;
+  will-change: opacity;
+}
+/* the rim: a 1.5px ring; the disc of light inside it moves */
+.ft-fx__rim {
   position: absolute;
   inset: 0;
   z-index: 3;
-  pointer-events: none;
+  overflow: hidden;
   border-radius: inherit;
   padding: 1.5px;
-  background:
-    radial-gradient(circle calc(var(--reach) * 1.1) at var(--lx) var(--ly), rgb(239 244 255 / 0.9) 0%, rgb(104 126 245 / 0.6) 35%, transparent 100%),
-    linear-gradient(180deg, rgb(239 244 255 / 0.14), rgb(239 244 255 / 0.04));
+  background: linear-gradient(180deg, rgb(239 244 255 / 0.14), rgb(239 244 255 / 0.04));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.ft-fx__rimlight {
+  --r: calc(var(--reach) * 1.1);
+  width: calc(var(--r) * 2);
+  height: calc(var(--r) * 2);
+  margin: calc(var(--r) * -1) 0 0 calc(var(--r) * -1);
+  background: radial-gradient(closest-side, rgb(239 244 255 / 0.9) 0%, rgb(104 126 245 / 0.6) 35%, transparent 100%);
 }
 .ft-card__copy {
   position: relative;
@@ -383,9 +440,9 @@ button.ft-chip { cursor: pointer; }
 .ft-body__go { width: 14px; height: 14px; opacity: 0.5; }
 
 /* ---- See it on your body --------------------------------------------- */
-.ft-c--body { padding-right: 0; }
+.ft-c--body > .ft-card { padding-right: 0; }
 @media (min-width: 768px) {
-  .ft-c--body { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: 20px; }
+  .ft-c--body > .ft-card { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: 20px; }
   .ft-c--body .ft-card__copy { grid-column: 1; }
 }
 .ft-view { display: contents; }

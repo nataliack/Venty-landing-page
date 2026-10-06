@@ -156,7 +156,7 @@ function Phone({ on }: { on: boolean }) {
         <p className="hw-phone__bar">Venty</p>
         <div className="hw-phone__refs">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/how/ref.webp" alt="" />
+          <img src="/how/ref.webp" alt="" loading="lazy" decoding="async" />
           <span className="hw-phone__sk" />
         </div>
         <p className="hw-phone__prompt" aria-label={PROMPT}>
@@ -215,7 +215,7 @@ function Table({ crop, phoneOn, cards }: { crop?: (typeof CROPS)[number]; phoneO
   const table = (
     <div className="hw-table" style={{ ...inner, "--light": `url(${LIGHT})` } as CSSProperties}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={TABLE.src} alt="" draggable={false} className="hw-table__img" />
+      <img src={TABLE.src} alt="" draggable={false} className="hw-table__img" loading="lazy" decoding="async" />
       <div className="hw-on" data-drop style={at(NOTE, 1)}>
         <Note />
       </div>

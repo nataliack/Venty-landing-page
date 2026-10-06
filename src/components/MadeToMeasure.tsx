@@ -175,7 +175,7 @@ export function MadeToMeasure() {
         <div className="mm2-rig" style={rigStyle} aria-hidden="true">
           <div className="mm2-sway">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={RIG.src} srcSet={RIG.srcSet} sizes="(max-width: 639px) 284vw, 137vw" alt="" draggable={false} decoding="async" />
+            <img src={RIG.src} srcSet={RIG.srcSet} sizes="(max-width: 639px) 284vw, 137vw" alt="" draggable={false} loading="lazy" decoding="async" />
             {/* the drafting scan, kept to the jacket's own silhouette */}
             {scan > 0 && <span key={scan} className="mm2-scan" style={{ WebkitMaskImage: `url(${RIG.src})`, maskImage: `url(${RIG.src})` }} />}
           </div>
@@ -212,7 +212,7 @@ export function MadeToMeasure() {
           <div className="mm2-sway">
             <div className="mm2-sleeve">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={RIG.src} srcSet={RIG.srcSet} sizes="(max-width: 639px) 284vw, 137vw" alt="" draggable={false} decoding="async" style={{ clipPath: sleeveClip }} />
+              <img src={RIG.src} srcSet={RIG.srcSet} sizes="(max-width: 639px) 284vw, 137vw" alt="" draggable={false} loading="lazy" decoding="async" style={{ clipPath: sleeveClip }} />
             </div>
           </div>
         </div>

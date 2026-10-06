@@ -118,3 +118,29 @@ A pinned section that something rises over holds one extra screen, still, at
 its end. Without a pin (phones, the FAQ), the band rises through empty room
 left at the foot of the section before (about 42svh), never over content.
 Night meets night with a stitched seam instead (Features → What you can make).
+
+## Keeping it fast
+
+Measured with a headless Chrome profile (top-to-bottom scroll, frame times
+per section, long tasks, bytes before the page opens). Rules that came out
+of it:
+
+- Nothing animates off screen. JS loops start and stop with an
+  IntersectionObserver (`useGlow`, `DitherEdge`, the Made with line);
+  CSS loops pause under `[data-off]` (`PauseOffscreen.tsx`).
+- Move and fade with `transform` and `opacity` only. A light that follows
+  the pointer is a disc moved by a transform, not a gradient redrawn at a
+  new position (the Features cards). Custom properties inherit: writing
+  one on a big element restyles everything inside it, every frame.
+- No `filter: blur()` on things that move or animate: draw the soft light
+  as a radial gradient instead (Meet the maker, the closing glow).
+- A scroll-scrubbed SVG scene is a stack of SVG layers, each moved as a
+  whole with a CSS transform (the closing scene), not one SVG whose
+  insides are animated.
+- Write to the DOM only when a value changes (the scrollbar, the glow).
+- Heavy setup (a WebGL context, a shader compile) never runs at load: it
+  waits for idle time after the loader, or for its section to come near.
+- The hero sequence keeps every frame at full quality; the loader waits
+  for a ready set (the opening, every 16th frame) and the rest stream in
+  behind it, the frames nearest the playhead first.
+- Images below the first screen are `loading="lazy"`; fonts are WOFF2.

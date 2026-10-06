@@ -8,8 +8,11 @@
 
    Two parts:
    - preloadHero() downloads every frame once, as compressed blobs (tens of
-     MB). The loader calls it so the loading screen covers the download; the
-     hero calls it too, and both share the same download.
+     MB), at full quality. The loading screen only waits for a ready set (the
+     opening frames, and every 16th frame through the whole film, so a
+     scrub anywhere already has a frame close by); the rest keep coming in
+     behind it, the frames nearest the playhead first. The loader and the
+     hero share the one download.
    - createHeroPlayer() draws onto a canvas. Only a short window of frames
      around the playhead is decoded at a time, because hundreds of decoded
      full-size frames would take gigabytes, more than any browser allows. */
@@ -65,25 +68,67 @@ export const cameraTrack = (masterKeys: CameraKeys) => {
 const blobs: (Blob | null)[] = new Array(manifest.frames).fill(null);
 const waiting = new Map<number, (() => void)[]>();
 const listeners = new Set<(done: number, total: number) => void>();
-let loaded = 0;
 let preload: Promise<void> | null = null;
 
-/** Downloads every frame. Safe to call many times; progress reports per frame. */
+/** The frames the loading screen waits for: the opening (what the first
+    scroll plays) and every 16th frame through the rest. */
+const OPENING = 48;
+const READY: number[] = (() => {
+  const s = new Set<number>();
+  for (let i = 0; i < Math.min(OPENING, manifest.frames); i++) s.add(i);
+  for (let i = 0; i < manifest.frames; i += 16) s.add(i);
+  s.add(manifest.frames - 1);
+  return [...s];
+})();
+const isReady = new Set(READY);
+
+/** Where the hero's playhead is: the background download follows it */
+let playhead = 0;
+let headDir = 1;
+export const heroPlayhead = (frame: number, dir: number) => {
+  playhead = frame;
+  headDir = dir;
+};
+
+/** Downloads every frame (safe to call many times). Progress and the promise
+    cover the ready set, which is what the loading screen waits for; the rest
+    carry on downloading after it resolves. */
 export function preloadHero(onProgress?: (done: number, total: number) => void) {
   if (onProgress) listeners.add(onProgress);
   if (preload) return preload;
-  // coarse to fine: every 16th frame first, so scrubbing works from the start
-  const order: number[] = [];
-  const seen = new Set<number>();
-  for (const step of [16, 4, 1]) {
-    for (let i = 0; i < manifest.frames; i += step) {
-      if (seen.has(i)) continue;
-      seen.add(i);
-      order.push(i);
+  const N = manifest.frames;
+  const state = new Uint8Array(N); // 0 waiting, 1 fetching, 2 done
+  let readyDone = 0;
+  let resolveReady = () => {};
+  preload = new Promise<void>((ok) => (resolveReady = ok));
+  // after the ready set, coarse to fine: every 4th frame, then the rest
+  const rest: number[] = [];
+  for (const step of [4, 1]) for (let i = 0; i < N; i += step) if (!isReady.has(i) && !rest.includes(i)) rest.push(i);
+  let readyNext = 0;
+  let restNext = 0;
+
+  // the next frame to fetch: the ready set first, then whatever is just
+  // ahead of the playhead (where the scroll is going), then coarse to fine
+  const pick = () => {
+    while (readyNext < READY.length) {
+      const i = READY[readyNext++];
+      if (state[i] === 0) return i;
     }
-  }
-  let next = 0;
+    for (let d = 0; d < 72; d++) {
+      const i = playhead + d * headDir;
+      if (i >= 0 && i < N && state[i] === 0) return i;
+      const j = playhead - Math.min(d, 12) * headDir; // and a little behind
+      if (d <= 12 && j >= 0 && j < N && state[j] === 0) return j;
+    }
+    while (restNext < rest.length) {
+      const i = rest[restNext++];
+      if (state[i] === 0) return i;
+    }
+    return -1;
+  };
+
   const fetchFrame = async (i: number) => {
+    state[i] = 1;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
         const res = await fetch(frameUrl(i));
@@ -94,17 +139,22 @@ export function preloadHero(onProgress?: (done: number, total: number) => void) 
         /* retried, then left empty: the nearest frame stands in */
       }
     }
-    loaded++;
+    state[i] = 2;
     waiting.get(i)?.forEach((f) => f());
     waiting.delete(i);
-    listeners.forEach((l) => l(loaded, manifest.frames));
+    if (isReady.has(i)) {
+      readyDone++;
+      listeners.forEach((l) => l(readyDone, READY.length));
+      if (readyDone === READY.length) {
+        listeners.clear();
+        resolveReady();
+      }
+    }
   };
   const worker = async () => {
-    while (next < order.length) await fetchFrame(order[next++]);
+    for (let i = pick(); i >= 0; i = pick()) await fetchFrame(i);
   };
-  preload = Promise.all(Array.from({ length: 6 }, worker)).then(() => {
-    listeners.clear();
-  });
+  for (let k = 0; k < 6; k++) worker();
   return preload;
 }
 
@@ -242,6 +292,7 @@ export function createHeroPlayer(canvas: HTMLCanvasElement, camera: (frame: numb
   };
 
   const update = () => {
+    heroPlayhead(target, dir);
     wanted.clear();
     want(target);
     for (let d = 1; d <= AHEAD; d++) want(target + d * dir);

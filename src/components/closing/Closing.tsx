@@ -106,7 +106,7 @@ export function Closing() {
         .to(lines(".is-2"), OUT, 4.4)
         // beat 3: the cut
         .to(lines(".is-3"), IN, 4.75)
-        .fromTo(q(".cl-cut"), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 2 }, 4.8)
+        .fromTo(q("[data-cut]"), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 2 }, 4.8)
         .fromTo(q(".cl-sc"), { opacity: 0 }, { opacity: 1, duration: 0.1 }, 4.8)
         .to(
           q(".cl-sc"),
@@ -138,9 +138,14 @@ export function Closing() {
         <h2 id="cl-title" className="sr-only">
           The table
         </h2>
+        {/* The scene is a stack of layers, one SVG each, sharing one 400 x 500
+            frame. What moves as a whole (the cloth, the paper) moves its own
+            layer with a CSS transform, so the GPU slides it without
+            repainting; only a layer whose insides change (pins dropping, the
+            cut being drawn) repaints, and only while it changes. */}
         <div className="cl-scene" aria-hidden="true">
           <span className="cl-glow" />
-          <svg viewBox="0 0 400 500" className="cl-svg">
+          <svg width="0" height="0" className="absolute">
             <defs>
               {/* twill: the cloth's diagonal weave */}
               <pattern id="cl-twill" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-32)">
@@ -157,54 +162,60 @@ export function Closing() {
                 <feDropShadow dx="-6" dy="10" stdDeviation="10" floodColor="#000" floodOpacity="0.55" />
               </filter>
             </defs>
+          </svg>
 
-            <g className="cl-cloth">
-              <g className="cl-cloth-full" filter="url(#cl-shadow)">
+          <div className="cl-layer cl-cloth">
+            <svg viewBox="0 0 400 500" className="cl-layer cl-cloth-full">
+              <g filter="url(#cl-shadow)">
                 <rect x="24" y="36" width="352" height="428" rx="3" fill="url(#cl-twill)" />
                 <rect x="24" y="36" width="352" height="428" rx="3" fill="url(#cl-light)" />
                 {/* the selvedge */}
                 <rect x="24" y="36" width="6" height="428" fill="#eff4ff" opacity="0.12" />
               </g>
-              <g className="cl-cloth-cut" transform={place} filter="url(#cl-shadow)">
+            </svg>
+            <svg viewBox="0 0 400 500" className="cl-layer cl-cloth-cut">
+              <g transform={place} filter="url(#cl-shadow)">
                 <path d={PIECE} fill="url(#cl-twill)" />
                 <path d={PIECE} fill="url(#cl-light)" />
                 <path d={PIECE} fill="none" stroke="#9daccd" strokeWidth="1.2" opacity="0.6" />
               </g>
-            </g>
+            </svg>
+          </div>
 
-            <g className="cl-paper">
-              <g transform={place}>
-                <path d={PIECE} className="cl-paper__sheet" />
-                <path d={PIECE} className="cl-paper__seam" transform="translate(150 220) scale(0.92) translate(-150 -220)" />
-                <path d="M150 120 V330 M144 130 L150 120 L156 130 M144 320 L150 330 L156 320" className="cl-paper__grain" />
-                {/* notches */}
-                <path d="M74 214 l8 -3 l0 6 Z M226 214 l-8 -3 l0 6 Z" className="cl-paper__notch" />
-                <text x="150" y="232" className="cl-paper__t">SKIRT FRONT</text>
-                <text x="150" y="248" className="cl-paper__t is-sm">CUT 1 ON THE BIAS</text>
-                <text x="150" y="262" className="cl-paper__t is-sm">VENTY 001</text>
-                {/* a tape laid along its long edge (the edge leans 11.7deg) */}
-                <g transform="translate(200 30) rotate(-11.68)">
-                  <g className="cl-rule">
-                    <rect x="0" y="0" width="16" height="366" rx="1.5" />
-                    {Array.from({ length: 37 }, (_, i) => (
-                      <line key={i} x1="0" x2={i % 5 ? 4 : 8} y1={3 + i * 10} y2={3 + i * 10} />
-                    ))}
-                    {[0, 10, 20, 30].map((n) => (
-                      <text key={n} x="11.5" y={3 + n * 10 + 3}>
-                        {n}
-                      </text>
-                    ))}
-                  </g>
-                </g>
-                <g className="cl-stamp">
-                  <circle cx="98" cy="96" r="22" />
-                  <text x="98" y="101">1:1</text>
+          <svg viewBox="0 0 400 500" className="cl-layer cl-paper">
+            <g transform={place}>
+              <path d={PIECE} className="cl-paper__sheet" />
+              <path d={PIECE} className="cl-paper__seam" transform="translate(150 220) scale(0.92) translate(-150 -220)" />
+              <path d="M150 120 V330 M144 130 L150 120 L156 130 M144 320 L150 330 L156 320" className="cl-paper__grain" />
+              {/* notches */}
+              <path d="M74 214 l8 -3 l0 6 Z M226 214 l-8 -3 l0 6 Z" className="cl-paper__notch" />
+              <text x="150" y="232" className="cl-paper__t">SKIRT FRONT</text>
+              <text x="150" y="248" className="cl-paper__t is-sm">CUT 1 ON THE BIAS</text>
+              <text x="150" y="262" className="cl-paper__t is-sm">VENTY 001</text>
+              {/* a tape laid along its long edge (the edge leans 11.7deg) */}
+              <g transform="translate(200 30) rotate(-11.68)">
+                <g className="cl-rule">
+                  <rect x="0" y="0" width="16" height="366" rx="1.5" />
+                  {Array.from({ length: 37 }, (_, i) => (
+                    <line key={i} x1="0" x2={i % 5 ? 4 : 8} y1={3 + i * 10} y2={3 + i * 10} />
+                  ))}
+                  {[0, 10, 20, 30].map((n) => (
+                    <text key={n} x="11.5" y={3 + n * 10 + 3}>
+                      {n}
+                    </text>
+                  ))}
                 </g>
               </g>
+              <g className="cl-stamp">
+                <circle cx="98" cy="96" r="22" />
+                <text x="98" y="101">1:1</text>
+              </g>
             </g>
+          </svg>
 
-            {/* each pin is placed by its outer group; GSAP moves the inner one
-                (it would take over an SVG transform it animates) */}
+          {/* each pin is placed by its outer group; GSAP moves the inner one
+              (it would take over an SVG transform it animates) */}
+          <svg viewBox="0 0 400 500" className="cl-layer cl-pins">
             {PINS.map(([x, y], i) => (
               <g key={i} transform={`translate(${200 - 150 * s + x * s} ${250 - 222 * s + y * s})`}>
                 <g className="cl-pin">
@@ -214,8 +225,13 @@ export function Closing() {
                 </g>
               </g>
             ))}
+          </svg>
 
-            <path d={PIECE} transform={`${place} translate(150 222) scale(1.035) translate(-150 -222)`} className="cl-cut" pathLength={1} />
+          <svg viewBox="0 0 400 500" className="cl-layer cl-cuts">
+            {/* the glow under the cut is a wider, fainter line (a filter here
+                would be redrawn on every frame of the cut) */}
+            <path d={PIECE} transform={`${place} translate(150 222) scale(1.035) translate(-150 -222)`} className="cl-cut-halo" pathLength={1} data-cut />
+            <path d={PIECE} transform={`${place} translate(150 222) scale(1.035) translate(-150 -222)`} className="cl-cut" pathLength={1} data-cut />
             <g className="cl-sc">
               <g transform="translate(-12 -12)">
                 <circle cx="6" cy="6" r="3.4" />

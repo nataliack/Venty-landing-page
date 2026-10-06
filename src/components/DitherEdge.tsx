@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { afterLoader } from "@/lib/motion";
 
 /* A dithered edge for a section rising over the one before it (the hand-off
    in docs/motion.md). Above the section's top edge, a band of the section's
@@ -150,101 +151,160 @@ export function DitherEdge({
     const canvas = ref.current;
     const section = canvas?.parentElement;
     if (!canvas || !section) return;
-    const gl = canvas.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false });
-    if (!gl) return; // no WebGL: the section simply rises with a clean edge
+    let dead = false;
+    let started = false;
+    let teardown = () => {};
 
-    const shader = (type: number, src: string) => {
-      const s = gl.createShader(type)!;
-      gl.shaderSource(s, src);
-      gl.compileShader(s);
-      return s;
+    // Setting up costs a WebGL context and a shader compile (well over 100ms
+    // each, five edges on the page): never at load, where it would stall the
+    // loading screen. It happens in idle time once the loader has gone, or at
+    // once if its section comes near first; and the compile runs in the
+    // background where the browser can (KHR_parallel_shader_compile), the
+    // edge starting the frame it is ready.
+    const start = () => {
+      if (started || dead) return;
+      started = true;
+      const gl = canvas.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false });
+      if (!gl) return; // no WebGL: the section simply rises with a clean edge
+      const shader = (type: number, src: string) => {
+        const s = gl.createShader(type)!;
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        return s;
+      };
+      const prog = gl.createProgram()!;
+      gl.attachShader(prog, shader(gl.VERTEX_SHADER, VERT));
+      gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, FRAG));
+      gl.linkProgram(prog);
+      const parallel = gl.getExtension("KHR_parallel_shader_compile");
+      let poll = 0;
+      const ready = () => {
+        if (dead) return;
+        if (parallel && !gl.getProgramParameter(prog, parallel.COMPLETION_STATUS_KHR)) {
+          poll = requestAnimationFrame(ready);
+          return;
+        }
+        if (gl.isContextLost() || !gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+        gl.useProgram(prog);
+
+        const buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+        const loc = gl.getAttribLocation(prog, "a_pos");
+        gl.enableVertexAttribArray(loc);
+        gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+        const u = (name: string) => gl.getUniformLocation(prog, name);
+        const uRes = u("u_res");
+        const uScale = u("u_scale");
+        const uOffset = u("u_offset");
+        const uView = u("u_view");
+        const uEdge = u("u_edge");
+        const uBand = u("u_band");
+        const uTime = u("u_time");
+        gl.uniform3fv(u("u_color"), hexToRgb(color));
+        gl.uniform1f(u("u_pattern"), PATTERNS[pattern]);
+        gl.uniform1f(u("u_wave"), edge === "wave" ? 1 : 0);
+
+        const moving = edge === "wave";
+
+        let scale = 1;
+        let vw = 0;
+        let vh = 0;
+        let stripH = 0;
+        let shown = false;
+        let lastTop = NaN;
+
+        const size = () => {
+          scale = Math.min(2, window.devicePixelRatio || 1);
+          vw = window.innerWidth;
+          vh = window.innerHeight;
+          // the strip: the band, plus room for the edge's shape above it, plus
+          // OVERLAP px tucked into the section (solid) so no hairline shows at
+          // the seam when the edge lands between pixels
+          stripH = Math.ceil(band * vh * 1.3) + OVERLAP;
+          canvas.style.height = `${stripH}px`;
+          const w = Math.round(vw * scale);
+          const h = Math.round(stripH * scale);
+          if (canvas.width !== w || canvas.height !== h) {
+            canvas.width = w;
+            canvas.height = h;
+            gl.viewport(0, 0, w, h);
+          }
+          gl.uniform2f(uRes, w, h);
+          gl.uniform1f(uScale, scale);
+          gl.uniform2f(uView, vw, vh);
+          gl.uniform1f(uBand, band * vh);
+          lastTop = NaN;
+        };
+
+        const draw = (time: number) => {
+          const top = section.getBoundingClientRect().top;
+          const at = top - stripH + OVERLAP; // the strip's top on screen
+          // only while the strip is on screen
+          const visible = top > 0 && at < vh;
+          if (visible !== shown) {
+            shown = visible;
+            canvas.style.visibility = visible ? "visible" : "hidden";
+          }
+          if (!visible || (top === lastTop && !moving)) return;
+          lastTop = top;
+          gl.uniform1f(uOffset, at);
+          gl.uniform1f(uEdge, top);
+          gl.uniform1f(uTime, time);
+          gl.clearColor(0, 0, 0, 0);
+          gl.clear(gl.COLOR_BUFFER_BIT);
+          gl.drawArrays(gl.TRIANGLES, 0, 3);
+        };
+
+        size();
+        window.addEventListener("resize", size);
+        // it only runs while its section's top is within a screen of the view;
+        // the rest of the time it costs nothing (not even a measurement a frame)
+        let ticking = false;
+        const io = new IntersectionObserver(
+          (entries) => {
+            const near = entries[entries.length - 1].isIntersecting;
+            if (near && !ticking) gsap.ticker.add(draw);
+            if (!near && ticking) {
+              gsap.ticker.remove(draw);
+              shown = false;
+              canvas.style.visibility = "hidden";
+            }
+            ticking = near;
+          },
+          { rootMargin: "100% 0px 100% 0px" },
+        );
+        io.observe(canvas);
+
+        teardown = () => {
+          io.disconnect();
+          gsap.ticker.remove(draw);
+          window.removeEventListener("resize", size);
+          // the program and buffer go; the context stays with the canvas (losing
+          // it here would leave a remount, as in React's dev double run, without one)
+          gl.deleteBuffer(buf);
+          gl.deleteProgram(prog);
+        };
+      };
+      teardown = () => cancelAnimationFrame(poll);
+      ready();
     };
-    const prog = gl.createProgram()!;
-    gl.attachShader(prog, shader(gl.VERTEX_SHADER, VERT));
-    gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, FRAG));
-    gl.linkProgram(prog);
-    if (gl.isContextLost() || !gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
-    gl.useProgram(prog);
 
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-    const loc = gl.getAttribLocation(prog, "a_pos");
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    const u = (name: string) => gl.getUniformLocation(prog, name);
-    const uRes = u("u_res");
-    const uScale = u("u_scale");
-    const uOffset = u("u_offset");
-    const uView = u("u_view");
-    const uEdge = u("u_edge");
-    const uBand = u("u_band");
-    const uTime = u("u_time");
-    gl.uniform3fv(u("u_color"), hexToRgb(color));
-    gl.uniform1f(u("u_pattern"), PATTERNS[pattern]);
-    gl.uniform1f(u("u_wave"), edge === "wave" ? 1 : 0);
-
-    const moving = edge === "wave";
-
-    let scale = 1;
-    let vw = 0;
-    let vh = 0;
-    let stripH = 0;
-    let shown = false;
-    let lastTop = NaN;
-
-    const size = () => {
-      scale = Math.min(2, window.devicePixelRatio || 1);
-      vw = window.innerWidth;
-      vh = window.innerHeight;
-      // the strip: the band, plus room for the edge's shape above it, plus
-      // OVERLAP px tucked into the section (solid) so no hairline shows at
-      // the seam when the edge lands between pixels
-      stripH = Math.ceil(band * vh * 1.3) + OVERLAP;
-      canvas.style.height = `${stripH}px`;
-      const w = Math.round(vw * scale);
-      const h = Math.round(stripH * scale);
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w;
-        canvas.height = h;
-        gl.viewport(0, 0, w, h);
-      }
-      gl.uniform2f(uRes, w, h);
-      gl.uniform1f(uScale, scale);
-      gl.uniform2f(uView, vw, vh);
-      gl.uniform1f(uBand, band * vh);
-      lastTop = NaN;
-    };
-
-    const draw = (time: number) => {
-      const top = section.getBoundingClientRect().top;
-      const at = top - stripH + OVERLAP; // the strip's top on screen
-      // only while the strip is on screen
-      const visible = top > 0 && at < vh;
-      if (visible !== shown) {
-        shown = visible;
-        canvas.style.visibility = visible ? "visible" : "hidden";
-      }
-      if (!visible || (top === lastTop && !moving)) return;
-      lastTop = top;
-      gl.uniform1f(uOffset, at);
-      gl.uniform1f(uEdge, top);
-      gl.uniform1f(uTime, time);
-      gl.clearColor(0, 0, 0, 0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-    };
-
-    size();
-    window.addEventListener("resize", size);
-    gsap.ticker.add(draw);
+    const near = new IntersectionObserver((e) => e[e.length - 1].isIntersecting && start(), {
+      rootMargin: "150% 0px 150% 0px",
+    });
+    near.observe(section);
+    let idle = 0;
+    const idleCb = (fn: () => void) =>
+      "requestIdleCallback" in window ? window.requestIdleCallback(fn, { timeout: 4000 }) : (globalThis.setTimeout(fn, 400) as unknown as number);
+    const cancelLoader = afterLoader(() => (idle = idleCb(start)));
     return () => {
-      gsap.ticker.remove(draw);
-      window.removeEventListener("resize", size);
-      // the program and buffer go; the context stays with the canvas (losing
-      // it here would leave a remount, as in React's dev double run, without one)
-      gl.deleteBuffer(buf);
-      gl.deleteProgram(prog);
+      dead = true;
+      near.disconnect();
+      cancelLoader();
+      if ("cancelIdleCallback" in window) window.cancelIdleCallback(idle);
+      else clearTimeout(idle);
+      teardown();
     };
   }, [color, pattern, edge, band]);
 

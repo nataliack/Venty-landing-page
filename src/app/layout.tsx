@@ -2,23 +2,22 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { SmoothScroll } from "@/components/SmoothScroll";
-import { Wings } from "@/components/Wings";
 import { ScrollBar } from "@/components/ScrollBar";
 import { SITE_URL } from "@/lib/site";
 
+// WOFF2, Latin with accents, punctuation and arrows, every OpenType feature
+// kept (public/fonts: the .ttf/.otf originals stay for tools/workbench). No
+// italic face: nothing on the page sets Familjen in italic.
 const familjen = localFont({
-  src: [
-    { path: "../../public/fonts/FamiljenGrotesk-Variable.ttf", style: "normal" },
-    { path: "../../public/fonts/FamiljenGrotesk-Italic-Variable.ttf", style: "italic" },
-  ],
+  src: [{ path: "../../public/fonts/FamiljenGrotesk-Variable.woff2", style: "normal" }],
   variable: "--font-familjen",
   display: "swap",
 });
 
 const bigilla = localFont({
   src: [
-    { path: "../../public/fonts/Bigilla.otf", weight: "400" },
-    { path: "../../public/fonts/Bigilla-Bold.otf", weight: "700" },
+    { path: "../../public/fonts/Bigilla.woff2", weight: "400" },
+    { path: "../../public/fonts/Bigilla-Bold.woff2", weight: "700" },
   ],
   variable: "--font-bigilla",
   display: "swap",
@@ -56,8 +55,6 @@ export default function RootLayout({
       <body className="grain">
         {/* the page scrolls in here, never the window: see SmoothScroll */}
         <div id="scroller" className="scroller">
-          <div className="dotgrid" aria-hidden="true" />
-          <Wings />
           <SmoothScroll>{children}</SmoothScroll>
         </div>
         <ScrollBar />

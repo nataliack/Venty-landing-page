@@ -24,15 +24,17 @@
   overflow: hidden;
   pointer-events: none;
 }
+/* two soft lights drifting: gradient discs (the light of a blurred circle,
+   without a blur for the GPU to redo on every frame of the drift) */
 .mk-glow::before,
 .mk-glow::after {
   content: "";
   position: absolute;
   border-radius: 50%;
-  filter: blur(90px);
+  will-change: transform;
 }
-.mk-glow::before { left: -10%; top: 20%; width: 60vw; aspect-ratio: 1; background: rgb(104 126 245 / 0.18); animation: mk-drift 16s ease-in-out infinite alternate; }
-.mk-glow::after { right: -15%; bottom: -10%; width: 50vw; aspect-ratio: 1; background: rgb(79 99 224 / 0.14); animation: mk-drift 19s ease-in-out infinite alternate-reverse; }
+.mk-glow::before { left: -16%; top: 12%; width: 72vw; aspect-ratio: 1; background: radial-gradient(closest-side, rgb(104 126 245 / 0.18) 0%, rgb(104 126 245 / 0.15) 45%, rgb(104 126 245 / 0.05) 78%, transparent 100%); animation: mk-drift 16s ease-in-out infinite alternate; }
+.mk-glow::after { right: -21%; bottom: -18%; width: 62vw; aspect-ratio: 1; background: radial-gradient(closest-side, rgb(79 99 224 / 0.14) 0%, rgb(79 99 224 / 0.11) 45%, rgb(79 99 224 / 0.04) 78%, transparent 100%); animation: mk-drift 19s ease-in-out infinite alternate-reverse; }
 @keyframes mk-drift { from { translate: 0 0; } to { translate: 12% -10%; } }
 
 .mk-grid { display: grid; gap: 56px; max-width: 1344px; margin: 0 auto; align-items: center; }

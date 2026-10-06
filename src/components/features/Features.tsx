@@ -40,14 +40,42 @@ const VERSIONS = [
   { v: "v3", note: "Lower back, wider strap" },
 ];
 
+/* The light on a card, in pieces the GPU moves and fades (useGlow writes
+   only their transform and opacity, so nothing is repainted as it moves):
+   a soft disc inside, a glow along the inner edge, the rim lit on the side
+   facing the light, and (from the cell) a halo outside the card. */
+function Fx() {
+  return (
+    <span className="ft-fx" aria-hidden="true">
+      <span className="ft-fx__light" data-fx="light" />
+      <span className="ft-fx__glow" data-fx="glow" />
+      <span className="ft-fx__rim">
+        <span className="ft-fx__rimlight" data-fx="rim" />
+      </span>
+    </span>
+  );
+}
+
+function Cell({ className, halo = true, children }: { className: string; halo?: boolean; children: React.ReactNode }) {
+  return (
+    <div data-up className={`ft-cell ${className}`}>
+      {halo && <span className="ft-halo" data-fx="halo" aria-hidden="true" />}
+      {children}
+    </div>
+  );
+}
+
 function Card({ title, body, className = "", children }: { title: string; body: string; className?: string; children: React.ReactNode }) {
   return (
-    <article data-glow data-up className={`ft-card ${className}`}>
-      <p className="ft-card__copy">
-        <b>{title}</b> {body}
-      </p>
-      {children}
-    </article>
+    <Cell className={className}>
+      <article data-glow className="ft-card">
+        <Fx />
+        <p className="ft-card__copy">
+          <b>{title}</b> {body}
+        </p>
+        {children}
+      </article>
+    </Cell>
   );
 }
 
@@ -98,7 +126,11 @@ function Dial() {
   const [seam, setSeam] = useState(true);
   const ticks = Array.from({ length: 72 }, (_, i) => i);
   return (
-    <article data-glow data-up className="ft-card ft-dial">
+    <Cell className="ft-cell--dial" halo={false}>
+    <article data-glow className="ft-card ft-dial">
+      {/* round, so its halo sits inside it (it draws outside its own edge) */}
+      <span className="ft-halo" data-fx="halo" aria-hidden="true" />
+      <Fx />
       <p className="sr-only">
         Print options. A4 at home or A0 at a print shop. Seam allowance on or off, a page map for taping, and a label on every piece.
       </p>
@@ -130,6 +162,7 @@ function Dial() {
         </svg>
       </button>
     </article>
+    </Cell>
   );
 }
 
@@ -327,6 +360,7 @@ export function Features() {
         </header>
 
         <div ref={field} className="ft-grid" data-reveal="top 82%">
+          <span className="ft-bloom" data-glow-bloom aria-hidden="true" />
           <Card className="ft-c--mark" title="Mark up your references." body="Draw on a photo or pin a note to it: this neckline, shorter than this. Venty reads your marks along with the rest of your brief.">
             <MarkUp />
           </Card>
