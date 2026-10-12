@@ -3,7 +3,7 @@ import { VoteTab } from "@/components/VoteTab";
 import { SiteLogo } from "@/components/SiteLogo";
 import { ThemeZones } from "@/components/ThemeZones";
 import { PauseOffscreen } from "@/components/PauseOffscreen";
-import { MeasureLoader } from "@/components/MeasureLoader";
+import { FilamentLoader } from "@/components/FilamentLoader";
 import { Hero } from "@/components/Hero";
 import { MadeToMeasure } from "@/components/MadeToMeasure";
 import { HowItWorks } from "@/components/how/HowItWorks";
@@ -18,7 +18,7 @@ import { Footer } from "@/components/footer/Footer";
 export default function Home() {
   return (
     <>
-      <MeasureLoader />
+      <FilamentLoader />
       <SiteLogo />
       <SectionNav />
       <VoteTab />

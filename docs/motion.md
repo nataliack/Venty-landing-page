@@ -92,11 +92,19 @@ Once the loader has gone (`Hero.tsx`):
 | 0.65s | Line under the title | `linesIn` |
 | 0.8s | Scroll | `textIn`, then its hairline `drawLine` downward |
 
-Before all of it, the loading screen (`MeasureLoader.tsx`) ends by growing
-the hero's first frame to fill the screen, landing exactly on the hero, so
-the footage never moves or fades in: the glow rising along the bottom and
-the dots fading up are the first moves of the opening. The Vote for Venty
-tab arrives with the loading screen, above it, and is already in.
+Before all of it, the loading screen (`FilamentLoader.tsx`): the night with
+the cornflower filament at dead centre, the logo above it, a rolling word on
+the left (Loading, Measuring, Drafting, Fitting, Ready) and the percentage on
+the right. It leaves in two moves: the words and logo clear (`EASE.in`,
+0.45s) as the filament draws in to a bright point, then a dithered burst
+opens from that point to the corners (1.7s, `power2.inOut`): the section
+hand-off's squares (2px on an 8px Bayer grid) with a band of cornflower,
+periwinkle and cloud glitter on its edge, opening onto the hero's first
+frame, so the footage never moves or fades in. The glow rising along the
+bottom and the dots fading up are the first moves of the opening. The Vote
+for Venty tab arrives with the loading screen, above it, and is already in.
+The lab's "Loader · Filament" runs it on a bench and can hold the burst at
+any point.
 
 ## Section hand-offs
 

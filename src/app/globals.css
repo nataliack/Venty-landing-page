@@ -1260,7 +1260,185 @@ html[data-theme="light"] .section-nav__icon path { stroke: var(--color-navy); }
 }
 
 /* ------------------------------------------------------------------
-   The loading screen (MeasureLoader.tsx): Strip and Tape from the lab.
+   The loading screen (FilamentLoader.tsx): the first loader's night,
+   held still, with the cornflower filament. One line across the middle:
+   the word on the left, the logo over the bar in the centre, the
+   percentage on the right. It leaves through a dithered burst.
+   ------------------------------------------------------------------ */
+.fl {
+  color: var(--color-cloud);
+  background: transparent; /* the night is its own layer, so it can be cut open */
+}
+/* the zipper loader's sky (.sky-loader) without its drifting lights: still,
+   so the burst's shader can paint the same colours stop for stop */
+.fl-night {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(26% 40% at -4% 104%, rgb(104 126 245 / 0.16) 0%, transparent 70%),
+    radial-gradient(26% 40% at 104% 104%, rgb(104 126 245 / 0.16) 0%, transparent 70%),
+    linear-gradient(90deg, rgb(18 21 36 / 0.9) 0%, rgb(13 15 26 / 0.6) 22%, #0b0c15 40%, #0b0c15 60%, rgb(13 15 26 / 0.6) 78%, rgb(18 21 36 / 0.9) 100%),
+    linear-gradient(180deg, #0c0d18 0%, #0b0c15 100%);
+}
+.fl-burst {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  visibility: hidden;
+  pointer-events: none;
+  image-rendering: pixelated;
+}
+.fl-hud {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  padding-inline: clamp(20px, 5vw, 80px);
+}
+.fl-side { will-change: transform, opacity; }
+.fl-left {
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+/* a small live light before the word */
+.fl-dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--color-cornflower);
+  box-shadow: 0 0 8px var(--color-cornflower);
+  animation: fl-live 1.6s ease-in-out infinite;
+}
+@keyframes fl-live {
+  50% { opacity: 0.35; box-shadow: 0 0 2px var(--color-cornflower); }
+}
+.fl-roll {
+  display: grid;
+  overflow: clip;
+  padding-block: 2px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  line-height: 1.7;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--color-cloud) 78%, transparent);
+}
+@media (min-width: 768px) {
+  .fl-roll { font-size: 12px; }
+}
+.fl-roll > [aria-hidden] {
+  grid-area: 1 / 1;
+  translate: 0 110%;
+  opacity: 0;
+  transition: translate 0.8s var(--ease-out-expo), opacity 0.5s ease;
+}
+.fl-roll > [data-state="in"] { translate: 0 0; opacity: 1; }
+.fl-roll > [data-state="out"] { translate: 0 -110%; opacity: 0; }
+.fl-right {
+  justify-self: end;
+  /* clear of the Vote for Venty tab (42px, on the right edge at the same height,
+     over the loader); only phones need it. A margin, not padding on the row, so
+     the bar stays dead centre */
+  margin-right: max(0px, calc(56px - clamp(20px, 5vw, 80px)));
+  font-size: clamp(1.5rem, 2.4vw, 2.2rem);
+  line-height: 1;
+  color: color-mix(in srgb, var(--color-cloud) 88%, transparent);
+}
+.fl-pctsign {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: 0.45em;
+  margin-left: 0.15em;
+  color: var(--color-periwinkle);
+}
+/* the centre: a 1px line at the screen's exact middle; the logo sits above it */
+.fl-centre {
+  position: relative;
+  width: clamp(104px, 30vw, 360px);
+  height: 1px;
+}
+.fl-logo {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + clamp(30px, 6vh, 56px));
+  translate: -50% 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(8px, 1vw, 12px);
+  color: var(--color-cloud);
+}
+.fl-logo__mark { width: clamp(30px, 2.8vw, 42px); height: auto; color: var(--color-cornflower); }
+.fl-logo__word { width: clamp(64px, 5.6vw, 88px); height: auto; }
+/* the filament: a 1px track; the lit part runs from faint to full cornflower
+   at its head, with a tight glow that follows the line */
+.fl-bar {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--color-cloud) 8%, transparent);
+  transform-origin: 50% 50%;
+}
+.fl-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 1px;
+  overflow: visible;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--color-cornflower) 10%, transparent) 0%,
+    color-mix(in srgb, var(--color-cornflower) 55%, transparent) 55%,
+    var(--color-cornflower) 100%);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--color-cornflower) 35%, transparent);
+}
+.fl-pulse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, transparent 60%, color-mix(in srgb, var(--color-cornflower) 40%, var(--color-cloud)) 88%, transparent 100%);
+  will-change: transform, opacity;
+}
+.fl-head {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 28px;
+  height: 1px;
+  translate: 10% 0;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-cornflower) 30%, var(--color-cloud)) 70%, color-mix(in srgb, var(--color-cloud) 80%, transparent));
+  box-shadow: 0 0 8px color-mix(in srgb, var(--color-cornflower) 70%, transparent), 0 0 2px color-mix(in srgb, var(--color-cloud) 60%, transparent);
+  pointer-events: none;
+}
+/* where the filament draws in to: the point the burst opens from */
+.fl-spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  opacity: 0;
+  background: var(--color-cloud);
+  box-shadow: 0 0 10px 3px var(--color-cornflower), 0 0 40px 12px color-mix(in srgb, var(--color-cornflower) 45%, transparent);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fl-dot { animation: none; }
+  .fl-roll > [aria-hidden] { translate: none !important; }
+}
+
+/* ------------------------------------------------------------------
+   The previous loading screen (MeasureLoader.tsx): Strip and Tape.
    The Crown sky behind, images along the top, the reading and the
    measuring tape along the bottom.
    ------------------------------------------------------------------ */

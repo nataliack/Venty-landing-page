@@ -28,6 +28,16 @@ export type Experiment = {
 
 export const EXPERIMENTS: Experiment[] = [
   {
+    group: "loaders",
+    slug: "loader-filament",
+    no: 27,
+    title: "Loader · Filament",
+    note: "The page's loading screen: the first loader's night with its cornflower filament, the word on the left, the logo over the bar, the percentage on the right. It leaves through a dithered burst with glitter at its edge, opening onto the hero. Hold the burst to look at any point of it.",
+    tag: "Loader · Current",
+    date: "12 Oct",
+    kind: "native",
+  },
+  {
     group: "sections",
     slug: "section-how-it-works-desk",
     no: 26,
@@ -52,7 +62,7 @@ export const EXPERIMENTS: Experiment[] = [
     slug: "loader-zipper",
     no: 24,
     title: "Loader · Zipper",
-    note: "The previous main loader, kept here: the zipper opens over the dark sky cloth while the hero frames load. Replaced on the page by Strip and Tape together.",
+    note: "The previous main loader, kept here: the zipper opens over the dark sky cloth while the hero frames load. Replaced on the page by Strip and Tape, then by Filament (its night and filament came back).",
     tag: "Loader · Previous",
     date: "05 Oct",
     kind: "frame",

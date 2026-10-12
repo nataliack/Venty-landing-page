@@ -113,9 +113,9 @@ export function Hero() {
     };
 
     const ctx = gsap.context(() => {
-      // The footage sits still from the start: the loading screen's last move
-      // is the hero's first frame growing to fill the screen, landing on this
-      // exact frame, so nothing here may move or appear before it has gone.
+      // The footage sits still from the start: the loading screen leaves
+      // through a dithered burst that opens onto this exact frame
+      // (FilamentLoader), so nothing here may move or appear before it has gone.
 
       // 1.1 builds once the loader has gone, top to bottom, every object
       // with a motion from src/lib/motion (see docs/motion.md):
