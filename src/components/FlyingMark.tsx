@@ -18,7 +18,7 @@ type Props = Omit<SVGProps<SVGSVGElement>, "children"> &
     rate?: number;
   };
 
-export function FlyingMark({ flying = true, rate = 2.4, depth, trail, lift, sweep, viewBox = "0 0 2132 1786", ...rest }: Props) {
+export function FlyingMark({ flying = true, rate = 2.4, depth, trail, lift, sweep, roll, head, viewBox = "0 0 2132 1786", ...rest }: Props) {
   const whole = useRef<SVGPathElement>(null);
   const body = useRef<SVGPathElement>(null);
   const near = useRef<SVGPathElement>(null);
@@ -27,8 +27,8 @@ export function FlyingMark({ flying = true, rate = 2.4, depth, trail, lift, swee
   const opts = useRef<FlightOptions>({});
   // the beat's settings, read by the running loop without restarting it
   useEffect(() => {
-    opts.current = { depth, trail, lift, sweep };
-  }, [depth, trail, lift, sweep]);
+    opts.current = { depth, trail, lift, sweep, roll, head };
+  }, [depth, trail, lift, sweep, roll, head]);
 
   useEffect(() => {
     const parts = [whole.current!, body.current!, near.current!, far.current!];

@@ -101,15 +101,17 @@ and wordmark clear (`EASE.in`, 0.4s) as the night settles to one flat colour;
 then the screen breaks into squares (12 across on phones, 20 on desktop) that
 clear row by row from the top with a little jitter (0.6s), uncovering the
 hero's first frame, so the footage never moves or fades in. Meanwhile the
-mark, cloud while it loads, turns cornflower (0.4s) and flies alone from the
-centre to the top left (1.15s, `EASE.inOut`), beating its wings three times
-on the way (`src/lib/markFlight.ts`: the mark cut into a body and two wings
-that fill it exactly at rest, each wing turning about its hinge in 3D, the
-tip trailing the root, the body lifting on each downstroke; the beat grows
-on take-off and dies away before landing). It lands, wings at rest, exactly
-on the site's logo, which takes over (the hero's opening no longer animates
-the logo). `FlyingMark` is the same flight as a component; the lab's
-"Mark · Flight" runs it with its settings.
+mark, cloud while it loads, turns cornflower (0.4s) and flies alone to the
+top left (`src/lib/markFlight.ts`, `flightRoute`). The mark is a bird facing
+right (its head the long piece up to the right), cut into a body, a wing and
+the head, which fill it exactly at rest. It turns over like paper to face
+the way (0.42s), flies head first along a low arc (1.15s, ease in-out), its
+wing and head beating three times, rolling over rather than creasing, the
+head tilted along the arc; it touches down exactly on the site's logo, wings
+still, and turns back to face right (0.5s), as the logo, which takes over
+(the hero's opening no longer animates the logo). `FlyingMark` beats its
+wings on the spot; the lab's "Mark · Flight" runs both, the journey with slow
+motion and the beat with its settings.
 Phones lay the line out as a column: the word at the top, the logo and the
 filament dead centre, the number at the foot (they leave up and down). The glow rising along the bottom and the dots
 fading up are the first moves of the opening. The Vote for Venty tab arrives

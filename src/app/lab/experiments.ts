@@ -32,7 +32,7 @@ export const EXPERIMENTS: Experiment[] = [
     slug: "mark-flight",
     no: 28,
     title: "Mark · Flight",
-    note: "The Venty mark beating its wings: cut into a body and two wings that fill the mark exactly at rest, each wing turning about its hinge in 3D, the tip trailing the root, the body lifting on each downstroke. Fly and Land, and the settings of the beat.",
+    note: "The Venty mark in flight. Journey: the loading screen's flight, big: it turns over like paper to face the way, flies head first along a low arc, its wing and head beating, touches down on the logo's spot and turns back. Hover: the beat on the spot, with its settings. The mark is cut into a body, a wing and the head, which fill it exactly at rest; the folds roll over like paper rather than creasing.",
     tag: "Logo",
     date: "12 Oct",
     kind: "native",

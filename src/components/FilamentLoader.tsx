@@ -5,7 +5,7 @@ import { gsap } from "gsap";
 import { Sky } from "./Sky";
 import { HERO, preloadHero } from "@/lib/heroSequence";
 import { EASE } from "@/lib/motion";
-import { MARK, flightPose } from "@/lib/markFlight";
+import { MARK, MARK_CENTRE, flightRoute } from "@/lib/markFlight";
 
 /* The loading screen: Edge, the locked dark sky (a cornflower glow roaming the
    lower two thirds), with the cornflower filament, its growing tip the one that
@@ -23,9 +23,10 @@ import { MARK, flightPose } from "@/lib/markFlight";
    number, the filament and the wordmark clear; the night settles to one flat
    colour; then the screen breaks into squares that clear row by row from the
    top (each with a little jitter), uncovering the hero. Meanwhile the mark
-   alone flies from the centre to the top left, beating its wings
-   (markFlight), and lands exactly on the site's own logo, wings at rest,
-   which takes over from it.
+   alone flies to the top left (markFlight): it turns over like paper to
+   face the way, flies head first along a low arc beating its wings, touches
+   down exactly on the site's own logo, wings still, and turns back to face
+   right, as the logo, which takes over from it.
 
    The hero's opening waits for this screen to leave (afterLoader). */
 
@@ -35,7 +36,7 @@ const CLEAR_S = 0.4; // words, number, filament and wordmark leave
 const TILES_S = 0.6; // the squares clear from the top row to the bottom
 const JITTER_S = 0.16; // each square's own scatter within its row
 const FLIGHT_S = 1.15; // the mark's flight to the corner
-const BEATS = 3; // its wingbeats on the way
+const BACK_S = 0.5; // having touched down, it turns back to face right, as the logo
 const TINT_S = 0.4; // the mark turns from cloud to cornflower before it leaves
 
 const still = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -253,7 +254,7 @@ export function FilamentLoader({
       const column = window.matchMedia("(max-width: 767px)").matches;
 
       // the mark: cloud while it loads; on Ready it turns cornflower (the site
-      // logo's colour), then glides to exactly over the site's logo
+      // logo's colour), then flies to exactly over the site's logo
       const m = mark.current!;
       const corn = getComputedStyle(document.documentElement).getPropertyValue("--color-cornflower").trim() || "#687ef5";
       tweens.push(gsap.to(m, { color: corn, duration: TINT_S * pace, ease: EASE.soft }));
@@ -266,32 +267,38 @@ export function FilamentLoader({
         const box = m.getBoundingClientRect();
         const s = b.width / a.width;
         gsap.set(m, { transformOrigin: "0 0" });
-        // its wings beat on the way: the beat grows as it takes off and dies
-        // away before it lands, so it touches down as the mark, exactly
+        // the mark's middle inside its svg, in px (the path's box, in the
+        // logo's units, against the same box on screen)
+        const unit = path.getBBox();
+        const u = a.width / unit.width;
+        const centre: [number, number] = [a.left - box.left + (MARK_CENTRE[0] - unit.x) * u, a.top - box.top + (MARK_CENTRE[1] - unit.y) * u];
+        const route = flightRoute(
+          { x: 0, y: 0, scale: 1 },
+          { x: b.left - box.left - (a.left - box.left) * s, y: b.top - box.top - (a.top - box.top) * s, scale: s },
+          centre,
+          { flight: FLIGHT_S, back: BACK_S },
+        );
+        // drawn in pieces (body, wing, head) while it moves, then the mark again
         const [body, far, near] = ["body", "far", "near"].map((k) => m.querySelector<SVGPathElement>(`[data-piece="${k}"]`)!);
-        const wings = (on: boolean) => {
+        const pieces = (on: boolean) => {
           path.style.display = on ? "none" : "";
           for (const p of [body, far, near]) p.style.display = on ? "" : "none";
         };
-        const ramp = (x: number) => 0.5 - 0.5 * Math.cos(Math.PI * Math.min(1, Math.max(0, x)));
-        flight = gsap.to(m, {
-          x: b.left - box.left - (a.left - box.left) * s,
-          y: b.top - box.top - (a.top - box.top) * s,
-          scale: s,
-          duration: FLIGHT_S * pace,
-          ease: EASE.inOut,
+        const clock = { t: 0 };
+        flight = gsap.to(clock, {
+          t: route.total,
+          duration: route.total * pace,
+          ease: "none",
           delay: (TINT_S - 0.05) * pace, // once it has turned
           onUpdate() {
-            const t = this.progress();
-            const amp = ramp(t / 0.18) * (1 - ramp((t - 0.6) / 0.36));
-            if (amp <= 0.002) return wings(false);
-            const pose = flightPose(t * BEATS, amp);
-            body.setAttribute("d", pose.body);
-            far.setAttribute("d", pose.far);
-            near.setAttribute("d", pose.near);
-            wings(true);
+            const at = route.at(clock.t);
+            gsap.set(m, { x: at.x, y: at.y, scale: at.scale });
+            body.setAttribute("d", at.pose.body);
+            far.setAttribute("d", at.pose.far);
+            near.setAttribute("d", at.pose.near);
+            pieces(!at.done);
           },
-          onComplete: () => wings(false),
+          onComplete: () => pieces(false),
         });
         tweens.push(flight);
       }
