@@ -144,7 +144,7 @@ export function MadeWith() {
       className="mw"
       aria-labelledby="mw-title"
     >
-      <DitherEdge color="#eff4ff" pattern="stitch" />
+      <DitherEdge color="#eff4ff" />
       <div className="mw-dots" aria-hidden="true" />
       <header className="mw-head" data-reveal>
         <p className="mw-eyebrow">

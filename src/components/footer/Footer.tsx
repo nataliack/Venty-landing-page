@@ -70,7 +70,7 @@ export function Footer() {
 
   return (
     <footer ref={root} id="footer" data-theme-zone="light" data-theme-at="top 35%" className="fo">
-      <DitherEdge color="#eff4ff" pattern="squares" edge="wave" />
+      <DitherEdge color="#eff4ff" />
       <div className="fo-top" data-reveal>
         <p className="fo-line">
           <span className="line-mask">

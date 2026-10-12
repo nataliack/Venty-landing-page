@@ -30,7 +30,7 @@ export function Maker() {
 
   return (
     <section ref={root} id="maker" data-nav="Meet the maker" data-wing="spread" data-theme-zone="dark" data-theme-at="top 35%" className="mk" aria-labelledby="mk-title">
-      <DitherEdge color="#0b0c15" pattern="cross" />
+      <DitherEdge color="#0b0c15" />
       <div className="mk-glow" aria-hidden="true" />
       <div className="mk-grid">
         <div className="mk-portrait" data-reveal="top 75%">

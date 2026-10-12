@@ -23,14 +23,21 @@ import { afterLoader } from "@/lib/motion";
    The edge itself either wobbles in soft lumps ("noise", still) or drifts as
    a slow wave ("wave", like a hem moving).
 
+   The site uses one edge everywhere, for consistency: squares on a moving
+   wave (the defaults), in the colour of the section rising (cloud for light
+   sections, night for dark ones). The other patterns stay for the lab's
+   Dither rise comparison.
+
    The strip is part of the section (absolute, just above its top edge), so
    the browser scrolls the two together and they can never come apart; the
    shader is told where the strip is on screen each frame, so the pattern
    still sits on the screen's grid.
 
-   Cost: one fragment shader, drawn only on that strip (not the whole
-   screen), at up to 2 canvas px per CSS px, and only on frames where the
-   edge has moved (every frame while a wave is on screen).
+   Cost: one WebGL context and one compiled shader for the whole page, shared
+   by every edge (getRenderer), set up after the loader in idle time. Each
+   edge draws only its strip (not the whole screen), at up to 2 canvas px per
+   CSS px, only while its strip is on screen, and copies the frame into its
+   own 2D canvas.
 
    Put it inside the rising section (position: relative, above the section
    before it). */
@@ -133,14 +140,77 @@ function hexToRgb(hex: string): [number, number, number] {
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
 }
 
+/* One renderer for every edge on the page: a single WebGL context and a single
+   compiled shader, on a canvas that is never shown. Each edge draws its frame
+   there and copies it into its own strip (a plain 2D canvas). Only one edge or
+   two are ever on screen at once, so this costs one setup instead of one per
+   section. Made lazily, the first time an edge needs it. */
+type Renderer = {
+  gl: WebGLRenderingContext;
+  canvas: HTMLCanvasElement;
+  u: Record<"res" | "scale" | "offset" | "view" | "edge" | "band" | "pattern" | "wave" | "time" | "color", WebGLUniformLocation | null>;
+};
+let renderer: Promise<Renderer | null> | null = null;
+function getRenderer(): Promise<Renderer | null> {
+  renderer ??= new Promise((ok) => {
+    const canvas = document.createElement("canvas");
+    const gl = canvas.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false });
+    if (!gl) return ok(null); // no WebGL: the sections simply rise with a clean edge
+    const shader = (type: number, src: string) => {
+      const s = gl.createShader(type)!;
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      return s;
+    };
+    const prog = gl.createProgram()!;
+    gl.attachShader(prog, shader(gl.VERTEX_SHADER, VERT));
+    gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, FRAG));
+    gl.linkProgram(prog);
+    // the compile runs in the background where the browser can
+    // (KHR_parallel_shader_compile); the renderer is ready the frame it is done
+    const parallel = gl.getExtension("KHR_parallel_shader_compile");
+    const ready = () => {
+      if (parallel && !gl.getProgramParameter(prog, parallel.COMPLETION_STATUS_KHR)) return void requestAnimationFrame(ready);
+      if (gl.isContextLost() || !gl.getProgramParameter(prog, gl.LINK_STATUS)) return ok(null);
+      gl.useProgram(prog);
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      const loc = gl.getAttribLocation(prog, "a_pos");
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      const at = (name: string) => gl.getUniformLocation(prog, name);
+      ok({
+        gl,
+        canvas,
+        u: {
+          res: at("u_res"),
+          scale: at("u_scale"),
+          offset: at("u_offset"),
+          view: at("u_view"),
+          edge: at("u_edge"),
+          band: at("u_band"),
+          pattern: at("u_pattern"),
+          wave: at("u_wave"),
+          time: at("u_time"),
+          color: at("u_color"),
+        },
+      });
+    };
+    ready();
+  });
+  return renderer;
+}
+
 export function DitherEdge({
   color,
   pattern = "squares",
-  edge = "noise",
+  edge = "wave",
   band = 0.32,
 }: {
   color: string;
+  /** the site uses squares everywhere; the lab compares the others */
   pattern?: DitherPattern;
+  /** the site uses the moving wave everywhere */
   edge?: DitherEdgeMode;
   /** the band's reach above the edge, as a share of the screen's height */
   band?: number;
@@ -151,61 +221,24 @@ export function DitherEdge({
     const canvas = ref.current;
     const section = canvas?.parentElement;
     if (!canvas || !section) return;
+    const ctx2d = canvas.getContext("2d");
+    if (!ctx2d) return;
     let dead = false;
     let started = false;
     let teardown = () => {};
+    const rgb = hexToRgb(color);
+    const moving = edge === "wave";
 
-    // Setting up costs a WebGL context and a shader compile (well over 100ms
-    // each, five edges on the page): never at load, where it would stall the
-    // loading screen. It happens in idle time once the loader has gone, or at
-    // once if its section comes near first; and the compile runs in the
-    // background where the browser can (KHR_parallel_shader_compile), the
-    // edge starting the frame it is ready.
+    // Setting up the renderer costs a WebGL context and a shader compile (well
+    // over 100ms): never at load, where it would stall the loading screen. It
+    // happens in idle time once the loader has gone, or at once if a section
+    // with an edge comes near first. Every edge shares it.
     const start = () => {
       if (started || dead) return;
       started = true;
-      const gl = canvas.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false });
-      if (!gl) return; // no WebGL: the section simply rises with a clean edge
-      const shader = (type: number, src: string) => {
-        const s = gl.createShader(type)!;
-        gl.shaderSource(s, src);
-        gl.compileShader(s);
-        return s;
-      };
-      const prog = gl.createProgram()!;
-      gl.attachShader(prog, shader(gl.VERTEX_SHADER, VERT));
-      gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, FRAG));
-      gl.linkProgram(prog);
-      const parallel = gl.getExtension("KHR_parallel_shader_compile");
-      let poll = 0;
-      const ready = () => {
-        if (dead) return;
-        if (parallel && !gl.getProgramParameter(prog, parallel.COMPLETION_STATUS_KHR)) {
-          poll = requestAnimationFrame(ready);
-          return;
-        }
-        if (gl.isContextLost() || !gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
-        gl.useProgram(prog);
-
-        const buf = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-        const loc = gl.getAttribLocation(prog, "a_pos");
-        gl.enableVertexAttribArray(loc);
-        gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-        const u = (name: string) => gl.getUniformLocation(prog, name);
-        const uRes = u("u_res");
-        const uScale = u("u_scale");
-        const uOffset = u("u_offset");
-        const uView = u("u_view");
-        const uEdge = u("u_edge");
-        const uBand = u("u_band");
-        const uTime = u("u_time");
-        gl.uniform3fv(u("u_color"), hexToRgb(color));
-        gl.uniform1f(u("u_pattern"), PATTERNS[pattern]);
-        gl.uniform1f(u("u_wave"), edge === "wave" ? 1 : 0);
-
-        const moving = edge === "wave";
+      getRenderer().then((r) => {
+        if (!r || dead) return;
+        const { gl, u } = r;
 
         let scale = 1;
         let vw = 0;
@@ -228,12 +261,7 @@ export function DitherEdge({
           if (canvas.width !== w || canvas.height !== h) {
             canvas.width = w;
             canvas.height = h;
-            gl.viewport(0, 0, w, h);
           }
-          gl.uniform2f(uRes, w, h);
-          gl.uniform1f(uScale, scale);
-          gl.uniform2f(uView, vw, vh);
-          gl.uniform1f(uBand, band * vh);
           lastTop = NaN;
         };
 
@@ -246,14 +274,32 @@ export function DitherEdge({
             shown = visible;
             canvas.style.visibility = visible ? "visible" : "hidden";
           }
-          if (!visible || (top === lastTop && !moving)) return;
+          if (!visible || (top === lastTop && !moving) || gl.isContextLost()) return;
           lastTop = top;
-          gl.uniform1f(uOffset, at);
-          gl.uniform1f(uEdge, top);
-          gl.uniform1f(uTime, time);
+          // the shared renderer takes this edge's size and settings, draws, and
+          // the frame is copied straight into this edge's strip
+          const w = canvas.width;
+          const h = canvas.height;
+          if (r.canvas.width !== w || r.canvas.height !== h) {
+            r.canvas.width = w;
+            r.canvas.height = h;
+          }
+          gl.viewport(0, 0, w, h);
+          gl.uniform2f(u.res, w, h);
+          gl.uniform1f(u.scale, scale);
+          gl.uniform2f(u.view, vw, vh);
+          gl.uniform1f(u.band, band * vh);
+          gl.uniform3fv(u.color, rgb);
+          gl.uniform1f(u.pattern, PATTERNS[pattern]);
+          gl.uniform1f(u.wave, moving ? 1 : 0);
+          gl.uniform1f(u.offset, at);
+          gl.uniform1f(u.edge, top);
+          gl.uniform1f(u.time, time);
           gl.clearColor(0, 0, 0, 0);
           gl.clear(gl.COLOR_BUFFER_BIT);
           gl.drawArrays(gl.TRIANGLES, 0, 3);
+          ctx2d.clearRect(0, 0, w, h);
+          ctx2d.drawImage(r.canvas, 0, 0);
         };
 
         size();
@@ -280,14 +326,8 @@ export function DitherEdge({
           io.disconnect();
           gsap.ticker.remove(draw);
           window.removeEventListener("resize", size);
-          // the program and buffer go; the context stays with the canvas (losing
-          // it here would leave a remount, as in React's dev double run, without one)
-          gl.deleteBuffer(buf);
-          gl.deleteProgram(prog);
         };
-      };
-      teardown = () => cancelAnimationFrame(poll);
-      ready();
+      });
     };
 
     const near = new IntersectionObserver((e) => e[e.length - 1].isIntersecting && start(), {

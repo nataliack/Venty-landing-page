@@ -21,7 +21,7 @@ import "./features.css";
      See it on your body       3D and flat pieces, in turn (or pick one)
      Pattern library           a pattern with its versions and notes
 
-   It rises over the end of How it works with a dark dithered edge (weave),
+   It rises over the end of How it works with a dark dithered edge (the site's one edge: squares on a moving wave),
    the reverse of the light that rose over the hero.
 
    IMAGES (replace the files, keep the names):
@@ -335,7 +335,7 @@ export function Features() {
       className="ft"
       aria-labelledby="ft-title"
     >
-      <DitherEdge color="#0b0c15" pattern="weave" />
+      <DitherEdge color="#0b0c15" />
       <div className="ft-inner">
         <header className="ft-head" data-reveal>
           <p className="ft-eyebrow">

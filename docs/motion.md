@@ -116,15 +116,18 @@ Filament" runs it on a bench, with slow motion.
 | --- | --- | --- |
 | Dither rise | The next section is pulled up over the last screen of the one before (`margin-top: -100svh`, higher `z-index`), so it scrolls up over the pinned, still section 1:1 with the scroll. Above its top edge its colour dithers in (`DitherEdge`): an 8px screen grid, each cell 4 x 4 squares of 2px switching on in Bayer order, denser toward the edge, over a band 32% of the screen tall with a soft noise wobble. The grid is fixed to the screen, so squares flip on in place as the edge rises. Its copy reveals once it has arrived (`top 20%`). Overlapping theme zones resolve to the later one (`ThemeZones`); a zone can switch at its own point with `data-theme-at` | Hero to Made to measure |
 
-Every hand-off is a different textile, in the colour of the section rising:
+Every hand-off uses the same edge (12 Oct: one edge, for consistency): the
+2px squares with the slow moving wave, the one from the closing scene into the
+footer, in the colour of the section rising. All edges share one WebGL context
+and one shader (`DitherEdge`, `getRenderer`).
 
-| From → to | Rising | Pattern | Over |
-| --- | --- | --- | --- |
-| Hero → Made to measure | cloud | squares, lumps | the pinned video |
-| How it works → Features | night | weave | the held end of the table (desktop) |
-| What you can make → Made with Venty | cloud | stitch | the held last garment (desktop) |
-| FAQ → Meet the maker | night | cross-stitch | the FAQ's empty foot |
-| Closing scene → footer | cloud | squares, wave | the held last line |
+| From → to | Rising | Over |
+| --- | --- | --- |
+| Hero → Made to measure | cloud | the pinned video |
+| How it works → Features | night | the held end of the table (desktop) |
+| What you can make → Made with Venty | cloud | the held last garment (desktop) |
+| FAQ → Meet the maker | night | the FAQ's empty foot |
+| Closing scene → footer | cloud | the held last line |
 
 A pinned section that something rises over holds one extra screen, still, at
 its end. Without a pin (phones, the FAQ), the band rises through empty room
