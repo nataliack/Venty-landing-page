@@ -109,8 +109,10 @@ first (0.6s): the head swings round on its neck towards you, then the body
 follows it from the neck to the tail, carrying the head, which settles
 straight again. It flies head first along a low arc (1.15s, ease in-out), its
 wing and head beating three times, rolling over rather than creasing, the
-head tilted along the arc; it touches down exactly on the site's logo, wings
-still, and turns back to face right the same way, head first (0.6s), as the logo, which takes over
+head tilted along the arc. Coming in to land it turns back to face right,
+head first, in one movement with the landing (the turn starts on the
+approach, 0.6s, and settles 0.14s after it touches down exactly on the
+site's logo, wings still), as the logo, which takes over
 (the hero's opening no longer animates the logo). `FlyingMark` beats its
 wings on the spot; the lab's "Mark · Flight" runs both, the journey with slow
 motion and the beat with its settings.

@@ -24,9 +24,9 @@ import { MARK, MARK_CENTRE, flightRoute } from "@/lib/markFlight";
    colour; then the screen breaks into squares that clear row by row from the
    top (each with a little jitter), uncovering the hero. Meanwhile the mark
    alone flies to the top left (markFlight): it turns head first to
-   face the way, flies head first along a low arc beating its wings, touches
-   down exactly on the site's own logo, wings still, and turns back to face
-   right, as the logo, which takes over from it.
+   face the way, flies head first along a low arc beating its wings, and
+   coming in to land turns back to face right, touching down exactly on the
+   site's own logo, wings still, as the logo, which takes over from it.
 
    The hero's opening waits for this screen to leave (afterLoader). */
 
@@ -36,7 +36,7 @@ const CLEAR_S = 0.4; // words, number, filament and wordmark leave
 const TILES_S = 0.6; // the squares clear from the top row to the bottom
 const JITTER_S = 0.16; // each square's own scatter within its row
 const FLIGHT_S = 1.15; // the mark's flight to the corner
-const BACK_S = 0.6; // having touched down, it turns back to face right (head first), as the logo
+const BACK_S = 0.6; // coming in to land it turns back to face right (head first), as the logo
 const TINT_S = 0.4; // the mark turns from cloud to cornflower before it leaves
 
 const still = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;

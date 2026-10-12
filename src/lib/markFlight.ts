@@ -335,8 +335,11 @@ export type Place = { x: number; y: number; scale: number };
 export type RouteOptions = {
   /** seconds in the air, from take-off to touching down */
   flight?: number;
-  /** seconds to turn back to the mark after touching down */
+  /** seconds to turn back to the mark: it starts on the approach, so it
+      turns as it comes in to land */
   back?: number;
+  /** seconds the turn back runs on after touching down, as it settles */
+  settle?: number;
   /** seconds to turn to face the way, at take-off */
   away?: number;
   /** wingbeats on the way */
@@ -352,10 +355,12 @@ const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
  * A flight from one place to another. `centre` is the mark's middle inside
  * the svg, in px at scale 1. If the way is to the left, the bird turns to face
  * it as it takes off (it faces right at rest); on the way its head leads,
- * tilting along the arc; it touches down exactly on `to`, wings still, and
- * turns back to the mark. at(seconds) gives the place and the pose.
+ * tilting along the arc. Coming in to land it turns back, head first, in one
+ * movement with the landing: it touches down exactly on `to`, wings still,
+ * and settles as the mark a moment later. at(seconds) gives the place and
+ * the pose.
  */
-export function flightRoute(from: Place, to: Place, centre: Pt, { flight = 1.15, back = 0.6, away = 0.6, beats = 3, arc = 0.14 }: RouteOptions = {}) {
+export function flightRoute(from: Place, to: Place, centre: Pt, { flight = 1.15, back = 0.6, away = 0.6, settle = 0.14, beats = 3, arc = 0.14 }: RouteOptions = {}) {
   const c0: Pt = [from.x + from.scale * centre[0], from.y + from.scale * centre[1]];
   const c1: Pt = [to.x + to.scale * centre[0], to.y + to.scale * centre[1]];
   const dx = c1[0] - c0[0];
@@ -371,14 +376,16 @@ export function flightRoute(from: Place, to: Place, centre: Pt, { flight = 1.15,
   const left = dx < 0;
   const turnTo = left ? 180 : 0;
   const ahead = left ? Math.PI - HEAD_ANGLE : HEAD_ANGLE; // where the head points once turned
-  const backS = left ? back : 0;
+  // the turn back starts on the approach and ends a moment after touchdown
+  const end = left ? flight + settle : flight;
+  const backFrom = end - back;
   const centreAt = (p: number): Pt => {
     const bow = arc * len * Math.sin(Math.PI * p);
     return [c0[0] + dx * p + nx * bow, c0[1] + dy * p + ny * bow];
   };
 
   return {
-    total: flight + backS,
+    total: end,
     at(time: number) {
       const u = clamp01(time / flight);
       const p = inOut(u);
@@ -386,9 +393,9 @@ export function flightRoute(from: Place, to: Place, centre: Pt, { flight = 1.15,
       const c = centreAt(p);
       // the beat grows on take-off and dies away before touching down
       const amp = smooth(u / 0.16) * (1 - smooth((u - 0.62) / 0.34));
-      // the turn, head first: to face the way as it takes off, and back once
-      // it is down
-      const turn: Turn = time < flight ? { from: 0, to: turnTo, t: clamp01(time / away) } : { from: turnTo, to: 0, t: clamp01((time - flight) / backS) };
+      // the turn, head first: to face the way as it takes off, and back as it
+      // comes in to land
+      const turn: Turn = time < backFrom ? { from: 0, to: turnTo, t: clamp01(time / away) } : { from: turnTo, to: 0, t: clamp01((time - backFrom) / back) };
       // the head leads: tilted towards the way it is going, most in mid-air
       const a = centreAt(Math.min(1, p + 0.01));
       const b = centreAt(Math.max(0, p - 0.01));
@@ -396,7 +403,7 @@ export function flightRoute(from: Place, to: Place, centre: Pt, { flight = 1.15,
       const cruise = smooth(u / 0.22) * (1 - smooth((u - 0.66) / 0.3));
       const tilt = Math.max(-0.5, Math.min(0.5, 0.75 * wrap(way - ahead))) * cruise;
       const pose = flightPose(u * beats, amp, { turn, heading: (tilt * 180) / Math.PI, head: 0.45 });
-      return { x: c[0] - scale * centre[0], y: c[1] - scale * centre[1], scale, pose, done: time >= flight + backS };
+      return { x: c[0] - scale * centre[0], y: c[1] - scale * centre[1], scale, pose, done: time >= end };
     },
   };
 }
