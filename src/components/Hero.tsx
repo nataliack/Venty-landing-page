@@ -112,9 +112,10 @@ export function Hero() {
     };
 
     const ctx = gsap.context(() => {
-      // The footage sits still from the start: the loading screen leaves
-      // through a dithered burst that opens onto this exact frame
-      // (FilamentLoader), so nothing here may move or appear before it has gone.
+      // The footage sits still from the start: the loading screen leaves in
+      // squares that uncover this exact frame (FilamentLoader), so nothing here
+      // may move or appear before it has gone. Everything below starts hidden:
+      // the squares show the hero while the loader is still on the page.
 
       // 1.1 builds once the loader has gone, top to bottom, every object
       // with a motion from src/lib/motion (see docs/motion.md):
@@ -137,9 +138,15 @@ export function Hero() {
       wipeIn(opening, "[data-cta] .btn-primary", 0.55);
       textIn(opening, "[data-cue-text]", 0.8);
       drawLine(opening, "[data-cue-line]", 0.9, "50% 0%", "y");
+      // the line below the title is split into lines only once the loader has
+      // gone (with the fonts in, so the breaks are right); until then it waits
+      // hidden, or it would show through the clearing squares, then vanish and rise
+      const lineText = el.querySelector("[data-line-text]");
+      if (lineText) gsap.set(lineText, { autoAlpha: 0 });
       stopOpening = afterLoader(() => {
-        // split into lines only now, with the fonts in, so the breaks are right
-        linesIn(opening, el.querySelector("[data-line-text]"), 0.65);
+        // shown and split in the same moment: its lines start below their masks
+        if (lineText) gsap.set(lineText, { autoAlpha: 1 });
+        linesIn(opening, lineText, 0.65);
         opening.play();
       });
 

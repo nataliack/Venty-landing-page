@@ -812,12 +812,13 @@ html[data-announce="off"] .announce {
   transition-duration: 0.6s; /* lighting up: quicker */
 }
 @media (hover: hover) {
+  /* hover: a light touch of glow, far softer than the arrival */
   .vote__tab:hover {
     box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--color-cloud) 32%, transparent),
-      0 0 20px 4px color-mix(in srgb, var(--color-cornflower) 90%, transparent),
-      0 0 56px 14px color-mix(in srgb, var(--color-cornflower) 55%, transparent),
-      0 0 110px 30px color-mix(in srgb, var(--color-cornflower) 28%, transparent);
+      inset 0 0 0 1px color-mix(in srgb, var(--color-cloud) 28%, transparent),
+      0 0 10px 1px color-mix(in srgb, var(--color-cornflower) 45%, transparent),
+      0 0 24px 4px color-mix(in srgb, var(--color-cornflower) 18%, transparent),
+      0 0 0 0 transparent;
     transition-duration: var(--dur-quick);
   }
 }
