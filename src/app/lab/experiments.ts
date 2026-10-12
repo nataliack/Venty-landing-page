@@ -32,7 +32,7 @@ export const EXPERIMENTS: Experiment[] = [
     slug: "loader-filament",
     no: 27,
     title: "Loader · Filament",
-    note: "The page's loading screen: the first loader's night with its cornflower filament, the word on the left, the logo over the bar, the percentage on the right. It leaves through a dithered burst with glitter at its edge, opening onto the hero. Hold the burst to look at any point of it.",
+    note: "The page's loading screen: the first loader's night, its lights drifting, with the cornflower filament; the word on the left, the logo over the filament, the percentage on the right. It leaves in squares, row by row from the top, while the mark glides to the logo's place at the top left.",
     tag: "Loader · Current",
     date: "12 Oct",
     kind: "native",

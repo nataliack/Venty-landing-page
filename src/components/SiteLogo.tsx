@@ -5,8 +5,9 @@ import { scrollToElement } from "./SmoothScroll";
 
 /* The Venty mark, top left on every section (fixed). It sits under the
    hero's announcement bar while that shows and level with the section menu
-   opposite (.site-logo in globals.css). Takes you back to the top. The hero
-   animates it in on load (data-logo). */
+   opposite (.site-logo in globals.css). Takes you back to the top. On load
+   it waits hidden under the loading screen, whose mark glides here and hands
+   over to it (FilamentLoader finds it by data-logo). */
 export function SiteLogo() {
   return (
     <a

@@ -2,19 +2,19 @@
 
 import { useState } from "react";
 import { FilamentLoader } from "@/components/FilamentLoader";
+import { LogoMark } from "@/components/Logo";
 import { heroPoster } from "@/lib/heroSequence";
 import "./loaders.css";
 
 /* The page's loading screen, on the bench: the hero's first frame behind
-   (what the burst opens onto), a simulated load, Replay, and Hold to stop
-   the burst at any point and look at the squares and the glitter. */
+   (what the squares clear to), a stand-in of the site's logo at the top left
+   (where the mark lands), a simulated load, and Replay. */
 export function FilamentLab() {
   const [run, setRun] = useState(1);
   const [gone, setGone] = useState(false);
-  const [hold, setHold] = useState<number | null>(null);
+  const [slow, setSlow] = useState(false);
 
   const replay = () => {
-    setHold(null);
     setGone(false);
     setRun((r) => r + 1);
   };
@@ -25,36 +25,27 @@ export function FilamentLab() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={heroPoster} alt="" draggable={false} />
       </div>
-      {!gone && <FilamentLoader key={`${run}-${hold === null ? "run" : "hold"}`} contained sim={3.2} scrub={hold} onDone={() => setGone(true)} />}
+      {/* the logo the mark lands on, shown once it has */}
+      <span className="absolute left-[clamp(16px,2.5vw,36px)] top-[clamp(16px,3vh,32px)]" style={{ visibility: gone ? "visible" : "hidden" }}>
+        <LogoMark data-lab-logo className="w-[clamp(32px,3.4vw,49px)] text-[var(--cornflower)]" />
+      </span>
+      {!gone && <FilamentLoader key={`${run}-${slow}`} contained sim={3.2} pace={slow ? 4 : 1} target={() => document.querySelector("[data-lab-logo]")} onDone={() => setGone(true)} />}
 
       <div
-        className="lab-glass absolute left-1/2 top-[max(12px,env(safe-area-inset-top))] z-[80] flex -translate-x-1/2 items-center gap-2 rounded-full p-1 pl-3 text-[13px]"
+        className="lab-glass absolute left-1/2 top-[max(12px,env(safe-area-inset-top))] z-[80] flex -translate-x-1/2 items-center gap-1 rounded-full p-1 text-[13px]"
         style={{ background: "color-mix(in oklab, var(--night) 55%, transparent)" }}
       >
-        <label className="flex items-center gap-2 text-[var(--periwinkle)]">
-          <input
-            type="checkbox"
-            checked={hold !== null}
-            onChange={(e) => {
-              setGone(false);
-              setHold(e.target.checked ? 0.35 : null);
-              if (!e.target.checked) setRun((r) => r + 1);
-            }}
-          />
-          Hold the burst
-        </label>
-        {hold !== null && (
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.005}
-            value={hold}
-            onChange={(e) => setHold(Number(e.target.value))}
-            aria-label="Where the burst is held"
-            className="w-[min(220px,40vw)]"
-          />
-        )}
+        <button
+          type="button"
+          aria-pressed={slow}
+          onClick={() => {
+            setSlow((s) => !s);
+            replay();
+          }}
+          className={`lab-focus h-9 rounded-full px-3 transition-colors ${slow ? "bg-[color-mix(in_oklab,var(--cloud)_16%,transparent)]" : "text-[var(--periwinkle)]"}`}
+        >
+          Slow motion
+        </button>
         <button type="button" onClick={replay} className="lab-focus h-9 rounded-full bg-[var(--cornflower)] px-4">
           Replay
         </button>

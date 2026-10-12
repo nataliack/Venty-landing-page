@@ -96,8 +96,7 @@ export function Hero() {
     if (!el) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const player = createHeroPlayer(el.querySelector<HTMLCanvasElement>("[data-seq]")!, cameraTrack(CAMERA));
-    // fixed, outside the hero: the logo (SiteLogo) and the section menu
-    const logo = document.querySelector<HTMLElement>("[data-logo]");
+    // fixed, outside the hero: the section menu (the logo arrives with the loader)
     const nav = document.querySelector<HTMLElement>(".section-nav");
     let stopOpening = () => {};
 
@@ -121,7 +120,7 @@ export function Hero() {
       // with a motion from src/lib/motion (see docs/motion.md):
       //   the glow rises along the bottom edge and the dots fade up
       //   the bar's rule draws out from the centre, its three items drop in
-      //   the logo and the section menu drop in at the corners
+      //   the section menu drops in at the corner (the logo is already there)
       //   the title rises line by line; the button wipes open; the line
       //   below rises line by line; Scroll rises and its hairline grows
       //   (the Vote for Venty tab is already in, from the loading screen)
@@ -131,7 +130,8 @@ export function Hero() {
         .from("[data-dots]", { opacity: 0, duration: DUR.reveal, ease: EASE.soft }, 0.1);
       drawLine(opening, "[data-bar-line]", 0);
       fadeDown(opening, "[data-bar-item]", 0.15);
-      if (logo) fadeDown(opening, logo, 0.25);
+      // the logo is already in place: the loading screen's mark glides to it
+      // and hands over (FilamentLoader)
       if (nav) fadeDown(opening, nav, 0.32);
       textIn(opening, "[data-h1] [data-w]", 0.35);
       wipeIn(opening, "[data-cta] .btn-primary", 0.55);

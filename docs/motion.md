@@ -92,19 +92,21 @@ Once the loader has gone (`Hero.tsx`):
 | 0.65s | Line under the title | `linesIn` |
 | 0.8s | Scroll | `textIn`, then its hairline `drawLine` downward |
 
-Before all of it, the loading screen (`FilamentLoader.tsx`): the night with
-the cornflower filament at dead centre, the logo above it, a rolling word on
-the left (Loading, Measuring, Drafting, Fitting, Ready) and the percentage on
-the right. It leaves in two moves: the words and logo clear (`EASE.in`,
-0.45s) as the filament draws in to a bright point, then a dithered burst
-opens from that point to the corners (1.7s, `power2.inOut`): the section
-hand-off's squares (2px on an 8px Bayer grid) with a band of cornflower,
-periwinkle and cloud glitter on its edge, opening onto the hero's first
-frame, so the footage never moves or fades in. The glow rising along the
-bottom and the dots fading up are the first moves of the opening. The Vote
-for Venty tab arrives with the loading screen, above it, and is already in.
-The lab's "Loader · Filament" runs it on a bench and can hold the burst at
-any point.
+Before all of it, the loading screen (`FilamentLoader.tsx`): the first
+loader's night (its lights drifting) with the cornflower filament at dead
+centre, the Venty lockup above it, a rolling word on the left (Loading,
+Measuring, Drafting, Fitting, Ready) and the percentage on the right in the
+same type. It leaves simply, like a page change: the words, number, filament
+and wordmark clear (`EASE.in`, 0.4s) as the night settles to one flat colour;
+then the screen breaks into squares (12 across on phones, 20 on desktop) that
+clear row by row from the top with a little jitter (0.6s), uncovering the
+hero's first frame, so the footage never moves or fades in. Meanwhile the
+mark alone glides from the centre to the top left (1.15s, `EASE.inOut`) and
+lands exactly on the site's logo, which takes over (the hero's opening no
+longer animates the logo). The glow rising along the bottom and the dots
+fading up are the first moves of the opening. The Vote for Venty tab arrives
+with the loading screen, above it, and is already in. The lab's "Loader ·
+Filament" runs it on a bench, with slow motion.
 
 ## Section hand-offs
 
