@@ -19,8 +19,9 @@ gsap.registerPlugin(ScrollTrigger);
    Entrance, once the loader has gone: the strip slides in from off screen,
    the label writes itself in, and the QUT mark builds: the four bars drop
    in from the top, left to right; halfway through, the square fades in;
-   then Q, U and T rise into place. Hovering the tab replays the bars (they
-   pull up, then drop again). */
+   then Q, U and T rise into place. It arrives glowing cornflower and the
+   glow settles away once it is in. Hovering the tab glows again and replays
+   the bars (they pull up, then drop again). */
 
 /* Where the tab tucks away off the right edge, by element (any selector)
    and screen: "phone" (under 768px), "desktop" (768px and up) or "all".
@@ -224,8 +225,10 @@ export function VoteTab() {
           barsEnd / 2 + 0.35,
         );
 
+      // it arrives glowing, then the glow settles away (.vote__tab[data-glow])
       const entrance = gsap
         .timeline({ paused: true, onComplete: () => (ready = true) })
+        .call(() => tab.setAttribute("data-glow", "on"), [], 0)
         .to(".vote__strip", { x: 0, duration: DUR.reveal, ease: EASE.out }, 0)
         .to(
           ".vote__label",
@@ -236,7 +239,8 @@ export function VoteTab() {
           },
           0.35,
         )
-        .add(mark, 0.45);
+        .add(mark, 0.45)
+        .call(() => tab.removeAttribute("data-glow"), [], ">+0.4");
 
       // it arrives with the loading screen, above it, and stays (z-index in
       // .vote), so it is already there when the hero opens

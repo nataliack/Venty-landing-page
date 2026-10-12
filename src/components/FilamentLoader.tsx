@@ -32,6 +32,7 @@ const CLEAR_S = 0.4; // words, number, filament and wordmark leave
 const TILES_S = 0.6; // the squares clear from the top row to the bottom
 const JITTER_S = 0.16; // each square's own scatter within its row
 const FLIGHT_S = 1.15; // the mark's glide to the corner
+const TINT_S = 0.4; // the mark turns from cloud to cornflower before it leaves
 
 const still = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -165,6 +166,7 @@ export function FilamentLoader({
   sim = 0,
   contained = false,
   pace = 1,
+  sky: skyVariant = "loader",
   target,
   onDone,
 }: {
@@ -174,6 +176,8 @@ export function FilamentLoader({
   contained?: boolean;
   /** the lab: slow motion (2: half speed) */
   pace?: number;
+  /** the night behind: the zipper loader's ("loader") or the locked dark sky, Edge ("dark") */
+  sky?: "loader" | "dark";
   /** where the mark lands (default: the site's logo, top left) */
   target?: () => Element | null;
   onDone?: () => void;
@@ -243,9 +247,14 @@ export function FilamentLoader({
         return;
       }
       const q = gsap.utils.selector(root);
+      // phones lay the line out as a column (word on top, number at the foot), so those leave up and down
+      const column = window.matchMedia("(max-width: 767px)").matches;
 
-      // the mark: from where it sits in the lockup to exactly over the site's logo
+      // the mark: cloud while it loads; on Ready it turns cornflower (the site
+      // logo's colour), then glides to exactly over the site's logo
       const m = mark.current!;
+      const corn = getComputedStyle(document.documentElement).getPropertyValue("--color-cornflower").trim() || "#687ef5";
+      tweens.push(gsap.to(m, { color: corn, duration: TINT_S * pace, ease: EASE.soft }));
       const path = m.querySelector("path")!;
       const to = landing()?.querySelector("path") ?? landing();
       let flight: gsap.core.Tween | null = null;
@@ -261,7 +270,7 @@ export function FilamentLoader({
           scale: s,
           duration: FLIGHT_S * pace,
           ease: EASE.inOut,
-          delay: 0.1 * pace,
+          delay: (TINT_S - 0.05) * pace, // once it has turned
         });
         tweens.push(flight);
       }
@@ -271,8 +280,8 @@ export function FilamentLoader({
         gsap
           .timeline()
           .to(q("[data-clear]"), { opacity: 0, duration: CLEAR_S, ease: EASE.in }, 0)
-          .to(q("[data-clear='left']"), { x: -14, duration: CLEAR_S, ease: EASE.in }, 0)
-          .to(q("[data-clear='right']"), { x: 14, duration: CLEAR_S, ease: EASE.in }, 0)
+          .to(q("[data-clear='left']"), { [column ? "y" : "x"]: -14, duration: CLEAR_S, ease: EASE.in }, 0)
+          .to(q("[data-clear='right']"), { [column ? "y" : "x"]: 14, duration: CLEAR_S, ease: EASE.in }, 0)
           .to(q("[data-clear='bar']"), { scaleX: 0, duration: CLEAR_S, ease: EASE.in }, 0)
           .to(sky.current, { opacity: 0, duration: CLEAR_S + 0.1, ease: EASE.soft }, 0)
           .timeScale(1 / pace),
@@ -313,7 +322,7 @@ export function FilamentLoader({
         </div>
       )}
       <div ref={sky} className="fl-sky" aria-hidden="true">
-        <Sky variant="loader" />
+        <Sky variant={skyVariant} />
       </div>
 
       <div className="fl-hud">

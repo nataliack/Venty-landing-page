@@ -101,9 +101,11 @@ and wordmark clear (`EASE.in`, 0.4s) as the night settles to one flat colour;
 then the screen breaks into squares (12 across on phones, 20 on desktop) that
 clear row by row from the top with a little jitter (0.6s), uncovering the
 hero's first frame, so the footage never moves or fades in. Meanwhile the
-mark alone glides from the centre to the top left (1.15s, `EASE.inOut`) and
-lands exactly on the site's logo, which takes over (the hero's opening no
-longer animates the logo). The glow rising along the bottom and the dots
+mark, cloud while it loads, turns cornflower (0.4s) and glides alone from the
+centre to the top left (1.15s, `EASE.inOut`), landing exactly on the site's
+logo, which takes over (the hero's opening no longer animates the logo).
+Phones lay the line out as a column: the word at the top, the logo and the
+filament dead centre, the number at the foot (they leave up and down). The glow rising along the bottom and the dots
 fading up are the first moves of the opening. The Vote for Venty tab arrives
 with the loading screen, above it, and is already in. The lab's "Loader ·
 Filament" runs it on a bench, with slow motion.

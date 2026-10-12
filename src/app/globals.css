@@ -793,14 +793,23 @@ html[data-announce="off"] .announce {
   line-height: 20px;
   letter-spacing: -0.04em;
   color: var(--color-cloud);
-  /* plain cornflower, glowing out into the page: no texture, no inner light */
+  /* plain cornflower, no texture or inner light. At rest it does not glow: it
+     glows as it arrives, then settles (VoteTab sets data-glow), and on hover */
   background: var(--color-cornflower);
   box-shadow:
     inset 0 0 0 1px color-mix(in srgb, var(--color-cloud) 22%, transparent),
-    0 0 16px 2px color-mix(in srgb, var(--color-cornflower) 80%, transparent),
-    0 0 44px 10px color-mix(in srgb, var(--color-cornflower) 45%, transparent),
-    0 0 90px 24px color-mix(in srgb, var(--color-cornflower) 22%, transparent);
-  transition: box-shadow var(--dur-quick) ease;
+    0 0 0 0 transparent,
+    0 0 0 0 transparent,
+    0 0 0 0 transparent;
+  transition: box-shadow 1.6s ease; /* settling: slow */
+}
+.vote__tab[data-glow="on"] {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--color-cloud) 32%, transparent),
+    0 0 20px 4px color-mix(in srgb, var(--color-cornflower) 90%, transparent),
+    0 0 56px 14px color-mix(in srgb, var(--color-cornflower) 55%, transparent),
+    0 0 110px 30px color-mix(in srgb, var(--color-cornflower) 28%, transparent);
+  transition-duration: 0.6s; /* lighting up: quicker */
 }
 @media (hover: hover) {
   .vote__tab:hover {
@@ -809,6 +818,7 @@ html[data-announce="off"] .announce {
       0 0 20px 4px color-mix(in srgb, var(--color-cornflower) 90%, transparent),
       0 0 56px 14px color-mix(in srgb, var(--color-cornflower) 55%, transparent),
       0 0 110px 30px color-mix(in srgb, var(--color-cornflower) 28%, transparent);
+    transition-duration: var(--dur-quick);
   }
 }
 /* simple: just the glow, none of the primary button's swirl */
@@ -1342,8 +1352,8 @@ html[data-theme="light"] .section-nav__icon path { stroke: var(--color-navy); }
 .fl-right {
   justify-self: end;
   /* clear of the Vote for Venty tab (42px, on the right edge at the same height,
-     over the loader); only phones need it. A margin, not padding on the row, so
-     the filament stays dead centre */
+     over the loader). A margin, not padding on the row, so the filament stays
+     dead centre */
   margin-right: max(0px, calc(56px - clamp(20px, 5vw, 80px)));
 }
 /* the centre: a 1px line at the screen's exact middle; the logo sits above it */
@@ -1351,6 +1361,21 @@ html[data-theme="light"] .section-nav__icon path { stroke: var(--color-navy); }
   position: relative;
   width: clamp(104px, 30vw, 360px);
   height: 1px;
+}
+/* phones: a column. The word at the top, the logo and the filament dead centre,
+   the number at the foot (the Vote tab keeps the right edge). The top and bottom
+   space match, so the centre stays the screen's exact middle. */
+@media (max-width: 767px) {
+  .fl-hud {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+    justify-items: center;
+    padding-block: max(32px, calc(env(safe-area-inset-top) + 20px), calc(env(safe-area-inset-bottom) + 20px));
+  }
+  .fl-left { justify-self: center; align-self: start; }
+  .fl-left .fl-roll { justify-items: center; }
+  .fl-right { justify-self: center; align-self: end; margin-right: 0; }
+  .fl-centre { width: clamp(160px, 56vw, 260px); }
 }
 /* the vertical lockup: the wordmark and the mark, two svgs laid over each other */
 .fl-logo {
@@ -1370,7 +1395,8 @@ html[data-theme="light"] .section-nav__icon path { stroke: var(--color-navy); }
   overflow: visible;
 }
 .fl-logo__word { color: var(--color-cloud); }
-.fl-logo__mark { color: var(--color-cornflower); will-change: transform; }
+/* the mark is cloud while it loads; on Ready it turns cornflower (FilamentLoader), then glides to the logo */
+.fl-logo__mark { color: var(--color-cloud); will-change: transform; }
 /* the filament: a 1px track; the lit part runs from faint to full cornflower
    at its head, with a tight glow that follows the line */
 .fl-bar {
@@ -1386,10 +1412,14 @@ html[data-theme="light"] .section-nav__icon path { stroke: var(--color-navy); }
   height: 1px;
   overflow: visible;
   background: linear-gradient(90deg,
-    color-mix(in srgb, var(--color-cornflower) 10%, transparent) 0%,
-    color-mix(in srgb, var(--color-cornflower) 55%, transparent) 55%,
+    color-mix(in srgb, var(--color-cornflower) 30%, transparent) 0%,
+    color-mix(in srgb, var(--color-cornflower) 75%, transparent) 50%,
     var(--color-cornflower) 100%);
-  box-shadow: 0 0 6px color-mix(in srgb, var(--color-cornflower) 35%, transparent);
+  /* the glowing one: cornflower light pooling round the lit part */
+  box-shadow:
+    0 0 4px 1px var(--color-cornflower),
+    0 0 14px 3px color-mix(in srgb, var(--color-cornflower) 70%, transparent),
+    0 0 36px 8px color-mix(in srgb, var(--color-cornflower) 38%, transparent);
 }
 .fl-pulse {
   position: absolute;
@@ -1408,7 +1438,10 @@ html[data-theme="light"] .section-nav__icon path { stroke: var(--color-navy); }
   height: 1px;
   translate: 10% 0;
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-cornflower) 30%, var(--color-cloud)) 70%, color-mix(in srgb, var(--color-cloud) 80%, transparent));
-  box-shadow: 0 0 8px color-mix(in srgb, var(--color-cornflower) 70%, transparent), 0 0 2px color-mix(in srgb, var(--color-cloud) 60%, transparent);
+  box-shadow:
+    0 0 10px 2px var(--color-cornflower),
+    0 0 26px 6px color-mix(in srgb, var(--color-cornflower) 60%, transparent),
+    0 0 3px color-mix(in srgb, var(--color-cloud) 80%, transparent);
   pointer-events: none;
 }
 @media (prefers-reduced-motion: reduce) {
