@@ -14,8 +14,11 @@
      paper rather than creasing (the bend spreads over a band next to the
      hinge, so the corner between them stays round). The tip trails the root.
      The body lifts on each downstroke and settles on the upstroke.
-   - A turn: the whole bird turns about an upright axis (180 faces it left),
-     one side leading a little, like a sheet of paper turning over.
+   - A turn: the bird turns about an upright axis (180 faces it left), head
+     first. The head turns on its neck to look the new way while the body
+     still faces the old one; then the body comes round after it, from the
+     neck down to the tail, carrying the head, which settles back straight on
+     its neck as the body catches up. The way a real bird follows its face.
    - A heading: the bird tilts in the picture, so its head can lead the way.
 
    Any pose with no beat, no turn and no tilt is the mark, exactly. All
@@ -159,8 +162,10 @@ export type FlightOptions = {
   /** The head's share of the beat (1 = it beats like the far wing; less
       holds it steadier, leading the way) */
   head?: number;
-  /** The turn about the upright axis, in degrees (180: facing left) */
-  turn?: number;
+  /** The turn about the upright axis, in degrees (180: facing left). As a
+      turn under way, { from, to, t } (t 0..1): the head goes first and the
+      rest follows it, down to the tail. */
+  turn?: number | Turn;
   /** The tilt in the picture, in degrees, clockwise */
   heading?: number;
 };
@@ -175,6 +180,27 @@ const beat = (phase: number) => {
 };
 
 type P3 = [number, number, number];
+export type Turn = { from: number; to: number; t: number };
+
+/* For the turn. The neck: from the middle of the head's hinge to the tip of
+   the beak; the head turns about an upright axis through the neck's base.
+   The spine: from the neck's base (0) to the tip of the tail (1); the body
+   comes round in a wave along it. */
+const BEAK = anchor(28);
+const TAIL = anchor(60);
+const NECK: Pt = [(FH.a[0] + FH.b[0]) / 2, (FH.a[1] + FH.b[1]) / 2];
+const along = (from: Pt, to: Pt) => {
+  const v: Pt = [to[0] - from[0], to[1] - from[1]];
+  const v2 = v[0] * v[0] + v[1] * v[1];
+  return (p: Pt) => Math.min(1, Math.max(0, ((p[0] - from[0]) * v[0] + (p[1] - from[1]) * v[1]) / v2));
+};
+const upNeck = along(NECK, BEAK);
+const downSpine = along(NECK, TAIL);
+/** How much of the head's own turn a point takes: none at the neck's base,
+    all of it a third of the way up */
+const headShare = (p: Pt) => smooth(upNeck(p) / 0.34);
+/** How far the head turns ahead of the body, as a share of the turn still to come */
+const HEAD_LEAD = 0.62;
 
 /** The pose `beats` beats in (any real number), at `amp` of full depth
     (amp 0, turn 0, heading 0: the mark at rest, exactly). */
@@ -187,7 +213,9 @@ export function flightPose(
   const swing = (sweep * Math.PI) / 180;
   const [cx, cy] = MARK_CENTRE;
 
-  if (amp === 0 && turn === 0 && heading === 0) {
+  const turning = typeof turn === "number" ? null : turn;
+  const still = typeof turn === "number" ? turn === 0 : turn.from === 0 && turn.to === 0;
+  if (amp === 0 && still && heading === 0) {
     const id = (p: Pt) => p;
     return { body: draw(PIECES.body, id), near: draw(PIECES.near, id), far: draw(PIECES.far, id) };
   }
@@ -199,26 +227,42 @@ export function flightPose(
   const pc = Math.cos(pitch);
   const ps = Math.sin(pitch);
 
-  // the turn about the upright axis through the middle; one side leads it a
-  // little (the head's), so it bends like paper on the way round, and is flat
-  // again square on or turned right round
-  const th = (turn * Math.PI) / 180;
-  const lead = 0.38 * Math.sin(th);
-  const half = 680; // about half the bird's width
+  // the turn: one angle for the whole bird, or under way, head first. The
+  // head swings round on its neck towards you (it would vanish into the wing
+  // if it went right round on its own: HEAD_LEAD of what the body has still
+  // to turn, at most); the body follows from 12%, the neck first and the tail
+  // last, carrying the head, all square by the end, the head straight on its
+  // neck again.
+  const deg = Math.PI / 180;
+  const bodyAt = (k: number) => {
+    if (!turning) return (turn as number) * deg;
+    return (turning.from + (turning.to - turning.from) * smooth((turning.t - 0.12 - 0.25 * k) / 0.6)) * deg;
+  };
+  const headTurn = turning ? HEAD_LEAD * (turning.to - turning.from) * (smooth(turning.t / 0.4) - smooth((turning.t - 0.12) / 0.6)) * deg : 0;
   // the tilt in the picture
   const hd = (heading * Math.PI) / 180;
   const hc = Math.cos(hd);
   const hs = Math.sin(hd);
 
-  /** a point of the bird in its own 3D space (z towards you), on screen */
-  const show = ([x0, y0, z0]: P3): Pt => {
+  /** a point of the bird in its own 3D space (z towards you), on screen;
+      rest is where the point sits in the mark, for the turn; neck: whether
+      it is on the head (which turns on its neck) */
+  const show = ([x0, y0, z0]: P3, rest: Pt, neck = false): Pt => {
     // the body's lift and pitch
     let x = cx + (x0 - cx) * pc - (y0 - cy) * ps;
     let y = cy + (x0 - cx) * ps + (y0 - cy) * pc + rise;
     let z = z0;
-    // the turn
-    if (th !== 0) {
-      const a = th + lead * Math.max(-1, Math.min(1, (x - cx) / half));
+    // the head's own turn, on its neck
+    const h = neck && headTurn !== 0 ? headTurn * headShare(rest) : 0;
+    if (h !== 0) {
+      const bx = cx + (NECK[0] - cx) * pc - (NECK[1] - cy) * ps; // the neck's base, after the lift and pitch
+      const dx = x - bx;
+      x = bx + dx * Math.cos(h) - z * Math.sin(h);
+      z = dx * Math.sin(h) + z * Math.cos(h);
+    }
+    // the body's turn, carrying the head
+    const a = bodyAt(downSpine(rest));
+    if (a !== 0) {
       const dx = x - cx;
       x = cx + dx * Math.cos(a) - z * Math.sin(a);
       z = dx * Math.sin(a) + z * Math.cos(a);
@@ -241,13 +285,13 @@ export function flightPose(
   // down (more towards the tip, so the root stays put). towards = +1: it comes
   // towards you as it goes down; side = +1: it swings clockwise; share: how
   // much of the beat it takes.
-  const wing = (h: Hinge, towards: number, side: number, share: number) => {
+  const wing = (h: Hinge, towards: number, side: number, share: number, neck = false) => {
     const mx = (h.a[0] + h.b[0]) / 2;
     const my = (h.a[1] + h.b[1]) / 2;
     const band = roll * h.reach;
     return (p: Pt): Pt => {
       const d = across(h, p);
-      if (d <= 0 || amp * share === 0) return show([p[0], p[1], 0]);
+      if (d <= 0 || amp * share === 0) return show([p[0], p[1], 0], p, neck && d > 0);
       const w = d / h.reach;
       const down = amp * share * beat(beats - trail * w * w);
       const phi = rad * down;
@@ -271,14 +315,14 @@ export function flightPose(
       const fx = along[0] + h.n[0] * flat - mx;
       const fy = along[1] + h.n[1] * flat - my;
       const a = side * swing * down * w;
-      return show([mx + fx * Math.cos(a) - fy * Math.sin(a), my + fx * Math.sin(a) + fy * Math.cos(a), towards * deep]);
+      return show([mx + fx * Math.cos(a) - fy * Math.sin(a), my + fx * Math.sin(a) + fy * Math.cos(a), towards * deep], p, neck);
     };
   };
 
   return {
-    body: draw(PIECES.body, (p) => show([p[0], p[1], 0])),
+    body: draw(PIECES.body, (p) => show([p[0], p[1], 0], p)),
     near: draw(PIECES.near, wing(NH, 1, 1, 1)),
-    far: draw(PIECES.far, wing(FH, -1, -1, head)),
+    far: draw(PIECES.far, wing(FH, -1, -1, head, true)),
   };
 }
 
@@ -293,6 +337,8 @@ export type RouteOptions = {
   flight?: number;
   /** seconds to turn back to the mark after touching down */
   back?: number;
+  /** seconds to turn to face the way, at take-off */
+  away?: number;
   /** wingbeats on the way */
   beats?: number;
   /** how high the path arcs, as a share of its length */
@@ -309,7 +355,7 @@ const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
  * tilting along the arc; it touches down exactly on `to`, wings still, and
  * turns back to the mark. at(seconds) gives the place and the pose.
  */
-export function flightRoute(from: Place, to: Place, centre: Pt, { flight = 1.15, back = 0.5, beats = 3, arc = 0.14 }: RouteOptions = {}) {
+export function flightRoute(from: Place, to: Place, centre: Pt, { flight = 1.15, back = 0.6, away = 0.6, beats = 3, arc = 0.14 }: RouteOptions = {}) {
   const c0: Pt = [from.x + from.scale * centre[0], from.y + from.scale * centre[1]];
   const c1: Pt = [to.x + to.scale * centre[0], to.y + to.scale * centre[1]];
   const dx = c1[0] - c0[0];
@@ -340,8 +386,9 @@ export function flightRoute(from: Place, to: Place, centre: Pt, { flight = 1.15,
       const c = centreAt(p);
       // the beat grows on take-off and dies away before touching down
       const amp = smooth(u / 0.16) * (1 - smooth((u - 0.62) / 0.34));
-      // the turn: to face the way as it takes off, and back once it is down
-      const turn = time < flight ? turnTo * smooth(time / 0.42) : turnTo * (1 - smooth((time - flight) / backS));
+      // the turn, head first: to face the way as it takes off, and back once
+      // it is down
+      const turn: Turn = time < flight ? { from: 0, to: turnTo, t: clamp01(time / away) } : { from: turnTo, to: 0, t: clamp01((time - flight) / backS) };
       // the head leads: tilted towards the way it is going, most in mid-air
       const a = centreAt(Math.min(1, p + 0.01));
       const b = centreAt(Math.max(0, p - 0.01));

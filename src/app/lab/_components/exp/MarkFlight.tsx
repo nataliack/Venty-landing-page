@@ -6,7 +6,7 @@ import { MARK, MARK_CENTRE, flightRoute } from "@/lib/markFlight";
 
 /* The mark in flight, on the bench. Two views:
    - Journey: the loading screen's flight, big enough to see. The bird turns
-     over like paper to face the way, flies head first along a low arc, touches
+     head first to face the way (the head, then the body after it), flies along a low arc, touches
      down on the outline at the top left and turns back to face right.
    - Hover: big in the middle, beating its wings on the spot, and at the
      sizes it is used at. Fly and Land, and the beat's settings. */

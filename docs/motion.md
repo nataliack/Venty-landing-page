@@ -104,11 +104,13 @@ hero's first frame, so the footage never moves or fades in. Meanwhile the
 mark, cloud while it loads, turns cornflower (0.4s) and flies alone to the
 top left (`src/lib/markFlight.ts`, `flightRoute`). The mark is a bird facing
 right (its head the long piece up to the right), cut into a body, a wing and
-the head, which fill it exactly at rest. It turns over like paper to face
-the way (0.42s), flies head first along a low arc (1.15s, ease in-out), its
+the head, which fill it exactly at rest. It turns to face the way head
+first (0.6s): the head swings round on its neck towards you, then the body
+follows it from the neck to the tail, carrying the head, which settles
+straight again. It flies head first along a low arc (1.15s, ease in-out), its
 wing and head beating three times, rolling over rather than creasing, the
 head tilted along the arc; it touches down exactly on the site's logo, wings
-still, and turns back to face right (0.5s), as the logo, which takes over
+still, and turns back to face right the same way, head first (0.6s), as the logo, which takes over
 (the hero's opening no longer animates the logo). `FlyingMark` beats its
 wings on the spot; the lab's "Mark · Flight" runs both, the journey with slow
 motion and the beat with its settings.
