@@ -13,8 +13,8 @@ export function FilamentLab() {
   const [run, setRun] = useState(1);
   const [gone, setGone] = useState(false);
   const [slow, setSlow] = useState(false);
-  // the night: the zipper loader's (on the page) or the locked dark sky, Edge
-  const [sky, setSky] = useState<"loader" | "dark">("loader");
+  // the night: Edge, the locked dark sky (on the page), or the zipper loader's
+  const [sky, setSky] = useState<"loader" | "dark">("dark");
 
   const replay = () => {
     setGone(false);
@@ -46,7 +46,7 @@ export function FilamentLab() {
               setSky(k);
               replay();
             }}
-            title={k === "loader" ? "The zipper loader's night (on the page now)" : "Edge, the locked dark sky: a cornflower glow roaming the lower two thirds"}
+            title={k === "loader" ? "The zipper loader's night" : "Edge, the locked dark sky (on the page now): a cornflower glow roaming the lower two thirds"}
             className={`lab-focus h-9 rounded-full px-3 transition-colors ${sky === k ? "bg-[color-mix(in_oklab,var(--cloud)_16%,transparent)]" : "text-[var(--periwinkle)]"}`}
           >
             {k === "loader" ? "Zipper night" : "Edge"}

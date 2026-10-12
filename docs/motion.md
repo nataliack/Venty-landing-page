@@ -92,9 +92,9 @@ Once the loader has gone (`Hero.tsx`):
 | 0.65s | Line under the title | `linesIn` |
 | 0.8s | Scroll | `textIn`, then its hairline `drawLine` downward |
 
-Before all of it, the loading screen (`FilamentLoader.tsx`): the first
-loader's night (its lights drifting) with the cornflower filament at dead
-centre, the Venty lockup above it, a rolling word on the left (Loading,
+Before all of it, the loading screen (`FilamentLoader.tsx`): Edge, the locked
+dark sky (a cornflower glow roaming the lower two thirds), with the cornflower
+filament at dead centre (quiet along its length, glowing at its growing tip), the Venty lockup above it, a rolling word on the left (Loading,
 Measuring, Drafting, Fitting, Ready) and the percentage on the right in the
 same type. It leaves simply, like a page change: the words, number, filament
 and wordmark clear (`EASE.in`, 0.4s) as the night settles to one flat colour;

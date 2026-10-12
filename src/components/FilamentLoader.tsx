@@ -6,8 +6,9 @@ import { Sky } from "./Sky";
 import { HERO, preloadHero } from "@/lib/heroSequence";
 import { EASE } from "@/lib/motion";
 
-/* The loading screen: the first loader's night (its lights slowly drifting)
-   with the cornflower filament. One line across the middle of the screen:
+/* The loading screen: Edge, the locked dark sky (a cornflower glow roaming the
+   lower two thirds), with the cornflower filament, its growing tip the one that
+   glows. One line across the middle of the screen:
 
      left    a word for what it is doing (Loading, Measuring, Drafting,
              Fitting, then Ready), rising from its mask as it changes
@@ -166,7 +167,7 @@ export function FilamentLoader({
   sim = 0,
   contained = false,
   pace = 1,
-  sky: skyVariant = "loader",
+  sky: skyVariant = "dark",
   target,
   onDone,
 }: {
