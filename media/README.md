@@ -31,7 +31,11 @@ from 0 as in After Effects, so they stay right when repeats are dropped.
 
 For a smooth scrub, export at the source clips' own frame rate (24 fps) and
 without speed changes: pacing comes from the scroll, so speeding a part up
-only throws frames away, and slowing it down only repeats them.
+only throws frames away, and slowing it down only repeats them. The player
+blends neighbouring frames by the exact scroll position, so a slow stretch
+glides rather than steps; still, keep every stretch of `PACE` near the
+film's own speed (the hero's end runs at about 0.4 frames per 1% of a
+screen), or it reads as slow motion.
 
 To change the video, replace `hero/hero-master.mp4` (same name) and run
 

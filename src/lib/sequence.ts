@@ -15,7 +15,9 @@
      playhead first.
    - createPlayer() draws onto a canvas. Only a short window of frames around
      the playhead is decoded at a time, because hundreds of decoded full-size
-     frames would take gigabytes, more than any browser allows. */
+     frames would take gigabytes, more than any browser allows.
+     Between two frames it blends them by the scroll's exact position, so a
+     slow scroll glides through the film instead of stepping frame by frame. */
 
 export type SequenceManifest = {
   version: string;
@@ -186,33 +188,54 @@ export function createSequence(manifest: SequenceManifest, base: string, { openi
     const pending = new Set<number>();
     const wanted = new Set<number>();
     let target = 0;
+    let pos = 0; // the exact (fractional) position; target is the nearest frame
     let focus = camera(0);
     let dir = 1;
     let drawn = -1;
+    let drawnOver = -1;
+    let drawnMix = 0;
     let drawnX = NaN;
     let destroyed = false;
 
     const draw = (force = false) => {
-      // the target if it is ready, otherwise the nearest decoded frame
+      // between two decoded frames: the earlier one, and the next over it by
+      // how far the scroll has gone between them (in 32 steps, so a still
+      // scroll draws nothing). Otherwise the target if it is ready, or the
+      // nearest decoded frame.
+      const a = Math.floor(pos);
+      const mix = Math.round((pos - a) * 32) / 32;
       let k = -1;
+      let over = -1;
+      if (mix > 0 && mix < 1 && frames.has(a) && frames.has(a + 1)) {
+        k = a;
+        over = a + 1;
+      }
       for (let d = 0; d < N && k < 0; d++) {
         if (frames.has(target - d * dir)) k = target - d * dir;
         else if (frames.has(target + d * dir)) k = target + d * dir;
       }
       if (k < 0) return;
-      if (k === drawn && !force && !moved()) return;
-      const img = frames.get(k)!;
+      const m = over < 0 ? 0 : mix;
+      if (k === drawn && over === drawnOver && m === drawnMix && !force && !moved()) return;
       const cw = canvas.width;
       const ch = canvas.height;
       const s = Math.max(cw / FW, ch / FH);
       // the focus point goes to the middle of the screen, without ever
       // pulling an edge of the frame into view
       const x = Math.round(Math.min(0, Math.max(cw - FW * s, cw / 2 - focus * FW * s)));
+      const y = (ch - FH * s) / 2;
       g.imageSmoothingEnabled = true;
       g.imageSmoothingQuality = "high";
-      g.drawImage(img, x, (ch - FH * s) / 2, FW * s, FH * s);
+      g.drawImage(frames.get(k)!, x, y, FW * s, FH * s);
+      if (over >= 0) {
+        g.globalAlpha = m;
+        g.drawImage(frames.get(over)!, x, y, FW * s, FH * s);
+        g.globalAlpha = 1;
+      }
       if (drawn < 0) canvas.style.opacity = "1"; // the poster underneath until now
       drawn = k;
+      drawnOver = over;
+      drawnMix = m;
       drawnX = x;
     };
 
@@ -250,7 +273,7 @@ export function createSequence(manifest: SequenceManifest, base: string, { openi
               return;
             }
             frames.set(i, img);
-            if (drawn < 0 || Math.abs(i - target) < Math.abs(drawn - target)) draw();
+            draw(); // a closer frame, or the other half of a blend (draw skips if nothing changes)
           })
           .catch(() => {})
           .finally(() => {
@@ -301,7 +324,7 @@ export function createSequence(manifest: SequenceManifest, base: string, { openi
       for (const [i, img] of frames) {
         const ahead = (i - target) * dir;
         if (ahead > AHEAD || ahead < -BEHIND) {
-          if (i === drawn) continue;
+          if (i === drawn || i === drawnOver) continue;
           if ("close" in img) img.close();
           frames.delete(i);
         }
@@ -334,7 +357,7 @@ export function createSequence(manifest: SequenceManifest, base: string, { openi
       },
       /** A web frame position, fractional */
       setPosition(position: number) {
-        const pos = Math.min(N - 1, Math.max(0, position));
+        pos = Math.min(N - 1, Math.max(0, position));
         // the camera follows the exact scroll position, so it glides between frames
         focus = camera(pos);
         const f = Math.round(pos);

@@ -32,25 +32,33 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 
 const LAST = HERO.masterFrames - 1;
 
-/* Pacing: scroll fraction of the section, to master frame. The video slows
-   where there is something to read and runs through the close-ups. It never
-   holds still at the end: the last frames play out slowly into the hand-off. */
+/** The hero's height, in screens; it scrolls for one less */
+const SCREENS = 8;
+const RUN = SCREENS - 1;
+/** A point of the hero's scroll, given in screens from its top */
+const down = (screens: number) => screens / RUN;
+
+/* Pacing: scroll to master frame. The video slows where there is something to
+   read and runs through the close-ups. From the dress forming to the end it
+   plays at one even pace, close to the film's own speed at an easy scroll:
+   the pull-back keeps moving under the line and on into the hand-off. (It
+   used to crawl here, a frame for every 8% of a screen, which read as lag.)
+   The player blends between frames, so the slower parts glide too. */
 const PACE = [
   [0, 0],
-  [0.04, 0], // 1.1 holds
-  [0.09, 55],
-  [0.18, 185], // the rise
-  [0.27, 236], // she stands
-  [0.34, 318], // the drop
-  [0.44, 520], // the dress forms
-  [0.62, 606], // it fits: the line reads
-  [0.92, LAST], // the final pose, slowly, on into the hand-off
+  [down(0.32), 0], // 1.1 holds
+  [down(0.72), 55],
+  [down(1.44), 185], // the rise
+  [down(2.16), 236], // she stands
+  [down(2.72), 318], // the drop
+  [down(3.6), 520], // the dress forms
+  [down(6.5), LAST], // it fits, the line reads; the pull-back, on into the hand-off
 ] as const;
 const PLAY_END = PACE[PACE.length - 1][0];
 /** Where the hand-off starts: the next section is pulled up over the last
     screen of the hero (MadeToMeasure, -100svh), so it starts to rise one
-    screen before the hero's end, at (900 - 200) / (900 - 100) of its scroll. */
-const OUT = 7 / 8;
+    screen before the hero's end. */
+const OUT = down(RUN - 1);
 
 const frameAt = (p: number) => {
   for (let k = 1; k < PACE.length; k++) {
@@ -211,11 +219,11 @@ export function Hero() {
   }, []);
 
   return (
-    <section ref={ref} id="top" data-wing="hero" data-nav="Introduction" data-theme-zone="dark" className="relative h-[900vh]">
+    <section ref={ref} id="top" data-wing="hero" data-nav="Introduction" data-theme-zone="dark" className="relative h-[800vh]">
       {/* where the sequence ends and the hand-off begins: the Vote for Venty
           tab tucks away on phones from here (VoteTab). Placed where the
           middle of the screen is when the hand-off starts. */}
-      <div id="hero-end" aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0" style={{ top: `${OUT * 800 + 50}vh` }} />
+      <div id="hero-end" aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0" style={{ top: `${OUT * RUN * 100 + 50}vh` }} />
 
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
         {/* the night behind the scene lives on a child: a sticky element with a

@@ -28,6 +28,16 @@ export type Experiment = {
 
 export const EXPERIMENTS: Experiment[] = [
   {
+    group: "playground",
+    slug: "mark-flight",
+    no: 28,
+    title: "Mark · Flight",
+    note: "The Venty mark beating its wings: cut into a body and two wings that fill the mark exactly at rest, each wing turning about its hinge in 3D, the tip trailing the root, the body lifting on each downstroke. Fly and Land, and the settings of the beat.",
+    tag: "Logo",
+    date: "12 Oct",
+    kind: "native",
+  },
+  {
     group: "loaders",
     slug: "loader-filament",
     no: 27,
