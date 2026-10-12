@@ -1,0 +1,362 @@
+/* A video as a scroll-scrubbed image sequence: the engine behind the hero
+   (heroSequence.ts) and the table (tableSequence.ts).
+
+   Frames come from tools/sequence/encode.mjs (the hero's from
+   tools/hero/encode.mjs, the same pipeline): full frames at the source's own
+   pixels, WebP, with a manifest. Every screen gets the same frames; a narrow
+   (portrait) screen sees a slice of each one, and a camera picks which: a
+   horizontal focus per frame, so the slice can glide to follow the action.
+
+   Two parts per sequence:
+   - preload() downloads every frame once, as compressed blobs, at full
+     quality. It resolves on a ready set (the opening frames, and every 16th
+     frame through the whole film, so a scrub anywhere already has a frame
+     close by); the rest keep coming in behind it, the frames nearest the
+     playhead first.
+   - createPlayer() draws onto a canvas. Only a short window of frames around
+     the playhead is decoded at a time, because hundreds of decoded full-size
+     frames would take gigabytes, more than any browser allows. */
+
+export type SequenceManifest = {
+  version: string;
+  frames: number;
+  width: number;
+  height: number;
+  sourceFrames: number[];
+};
+
+/** A camera track: [master frame, focus] keys, focus 0 to 1 across the frame
+    width. Between keys the focus eases (smoothstep), so the slice glides. */
+export type CameraKeys = readonly (readonly [number, number])[];
+
+type Decoded = ImageBitmap | HTMLImageElement;
+const decode = (blob: Blob): Promise<Decoded> =>
+  "createImageBitmap" in window
+    ? createImageBitmap(blob)
+    : new Promise((ok, fail) => {
+        const im = new Image();
+        im.onload = () => ok(im);
+        im.onerror = fail;
+        im.src = URL.createObjectURL(blob);
+      });
+
+export function createSequence(manifest: SequenceManifest, base: string, { opening = 48 }: { opening?: number } = {}) {
+  const N = manifest.frames;
+  const frameUrl = (i: number) => `${base}/frames/${String(i + 1).padStart(4, "0")}.webp?v=${manifest.version}`;
+
+  /** The web frame showing a given master frame (0-based, as numbered in the
+      edit). Repeated master frames are dropped by the encoder, so the two
+      numberings drift apart; talk in master frames and convert here. */
+  const frameOf = (master: number) => {
+    const src = manifest.sourceFrames;
+    let k = 0;
+    while (k + 1 < src.length && src[k + 1] <= master) k++;
+    return k;
+  };
+
+  /** Fractional web position of a master frame, for smooth scrubbing */
+  const positionOf = (master: number) => {
+    const src = manifest.sourceFrames;
+    if (master <= src[0]) return 0;
+    for (let k = 1; k < src.length; k++) {
+      if (src[k] >= master) return k - 1 + (master - src[k - 1]) / (src[k] - src[k - 1]);
+    }
+    return src.length - 1;
+  };
+
+  const cameraTrack = (masterKeys: CameraKeys) => {
+    const keys = masterKeys.map(([f, x]) => [frameOf(f), x] as const);
+    return (f: number) => {
+      if (f <= keys[0][0]) return keys[0][1];
+      for (let k = 1; k < keys.length; k++) {
+        const [f0, x0] = keys[k - 1];
+        const [f1, x1] = keys[k];
+        if (f <= f1) {
+          const t = (f - f0) / (f1 - f0);
+          return x0 + (x1 - x0) * t * t * (3 - 2 * t);
+        }
+      }
+      return keys[keys.length - 1][1];
+    };
+  };
+
+  const blobs: (Blob | null)[] = new Array(N).fill(null);
+  const waiting = new Map<number, (() => void)[]>();
+  const listeners = new Set<(done: number, total: number) => void>();
+  let preloading: Promise<void> | null = null;
+
+  /** The frames preload() resolves on: the opening (what the first scroll
+      plays) and every 16th frame through the rest. */
+  const READY: number[] = (() => {
+    const s = new Set<number>();
+    for (let i = 0; i < Math.min(opening, N); i++) s.add(i);
+    for (let i = 0; i < N; i += 16) s.add(i);
+    s.add(N - 1);
+    return [...s];
+  })();
+  const isReady = new Set(READY);
+
+  /** Where the playhead is: the background download follows it */
+  let playhead = 0;
+  let headDir = 1;
+  const setPlayhead = (frame: number, dir: number) => {
+    playhead = frame;
+    headDir = dir;
+  };
+
+  /** Downloads every frame (safe to call many times). Progress and the promise
+      cover the ready set; the rest carry on downloading after it resolves. */
+  function preload(onProgress?: (done: number, total: number) => void) {
+    if (onProgress) listeners.add(onProgress);
+    if (preloading) return preloading;
+    const state = new Uint8Array(N); // 0 waiting, 1 fetching, 2 done
+    let readyDone = 0;
+    let resolveReady = () => {};
+    preloading = new Promise<void>((ok) => (resolveReady = ok));
+    // after the ready set, coarse to fine: every 4th frame, then the rest
+    const rest: number[] = [];
+    for (const step of [4, 1]) for (let i = 0; i < N; i += step) if (!isReady.has(i) && !rest.includes(i)) rest.push(i);
+    let readyNext = 0;
+    let restNext = 0;
+
+    // the next frame to fetch: the ready set first, then whatever is just
+    // ahead of the playhead (where the scroll is going), then coarse to fine
+    const pick = () => {
+      while (readyNext < READY.length) {
+        const i = READY[readyNext++];
+        if (state[i] === 0) return i;
+      }
+      for (let d = 0; d < 72; d++) {
+        const i = playhead + d * headDir;
+        if (i >= 0 && i < N && state[i] === 0) return i;
+        const j = playhead - Math.min(d, 12) * headDir; // and a little behind
+        if (d <= 12 && j >= 0 && j < N && state[j] === 0) return j;
+      }
+      while (restNext < rest.length) {
+        const i = rest[restNext++];
+        if (state[i] === 0) return i;
+      }
+      return -1;
+    };
+
+    const fetchFrame = async (i: number) => {
+      state[i] = 1;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const res = await fetch(frameUrl(i));
+          if (!res.ok) throw new Error(String(res.status));
+          blobs[i] = await res.blob();
+          break;
+        } catch {
+          /* retried, then left empty: the nearest frame stands in */
+        }
+      }
+      state[i] = 2;
+      waiting.get(i)?.forEach((f) => f());
+      waiting.delete(i);
+      if (isReady.has(i)) {
+        readyDone++;
+        listeners.forEach((l) => l(readyDone, READY.length));
+        if (readyDone === READY.length) {
+          listeners.clear();
+          resolveReady();
+        }
+      }
+    };
+    const worker = async () => {
+      for (let i = pick(); i >= 0; i = pick()) await fetchFrame(i);
+    };
+    for (let k = 0; k < 6; k++) worker();
+    return preloading;
+  }
+
+  function createPlayer(canvas: HTMLCanvasElement, camera: (frame: number) => number = () => 0.5) {
+    const { width: FW, height: FH } = manifest;
+    // decoded ahead of the playhead in the direction of travel, and behind it;
+    // a smaller window on touch screens, where memory is tighter
+    const touch = window.matchMedia("(pointer: coarse)").matches;
+    const AHEAD = touch ? 8 : 10;
+    const BEHIND = touch ? 3 : 4;
+    // decodes running at once. A full-HD decode takes a phone tens of ms and
+    // cannot be cancelled, so the queue below is what keeps a fast scroll from
+    // piling up a backlog the landing frame then has to wait behind
+    const PARALLEL = touch ? 2 : 3;
+    const g = canvas.getContext("2d", { alpha: false })!;
+    const frames = new Map<number, Decoded>();
+    const pending = new Set<number>();
+    const wanted = new Set<number>();
+    let target = 0;
+    let focus = camera(0);
+    let dir = 1;
+    let drawn = -1;
+    let drawnX = NaN;
+    let destroyed = false;
+
+    const draw = (force = false) => {
+      // the target if it is ready, otherwise the nearest decoded frame
+      let k = -1;
+      for (let d = 0; d < N && k < 0; d++) {
+        if (frames.has(target - d * dir)) k = target - d * dir;
+        else if (frames.has(target + d * dir)) k = target + d * dir;
+      }
+      if (k < 0) return;
+      if (k === drawn && !force && !moved()) return;
+      const img = frames.get(k)!;
+      const cw = canvas.width;
+      const ch = canvas.height;
+      const s = Math.max(cw / FW, ch / FH);
+      // the focus point goes to the middle of the screen, without ever
+      // pulling an edge of the frame into view
+      const x = Math.round(Math.min(0, Math.max(cw - FW * s, cw / 2 - focus * FW * s)));
+      g.imageSmoothingEnabled = true;
+      g.imageSmoothingQuality = "high";
+      g.drawImage(img, x, (ch - FH * s) / 2, FW * s, FH * s);
+      if (drawn < 0) canvas.style.opacity = "1"; // the poster underneath until now
+      drawn = k;
+      drawnX = x;
+    };
+
+    const inWindow = (i: number) => {
+      const ahead = (i - target) * dir;
+      return ahead <= AHEAD && ahead >= -BEHIND;
+    };
+
+    // Starts decodes, nearest the playhead first, never more than PARALLEL at
+    // a time. Requests that have fallen out of the window are dropped here, so
+    // only frames still worth showing are ever decoded.
+    const pump = () => {
+      while (pending.size < PARALLEL && !destroyed) {
+        let next = -1;
+        let best = Infinity;
+        for (const i of wanted) {
+          if (!inWindow(i) || frames.has(i)) {
+            wanted.delete(i);
+            continue;
+          }
+          const d = Math.abs(i - target) + ((i - target) * dir < 0 ? 0.5 : 0); // ahead before behind
+          if (d < best) {
+            best = d;
+            next = i;
+          }
+        }
+        if (next < 0) return;
+        wanted.delete(next);
+        const i = next;
+        pending.add(i);
+        decode(blobs[i]!)
+          .then((img) => {
+            if (destroyed || !inWindow(i)) {
+              if ("close" in img) img.close();
+              return;
+            }
+            frames.set(i, img);
+            if (drawn < 0 || Math.abs(i - target) < Math.abs(drawn - target)) draw();
+          })
+          .catch(() => {})
+          .finally(() => {
+            pending.delete(i);
+            pump();
+          });
+      }
+    };
+
+    const want = (i: number) => {
+      if (i < 0 || i >= N || frames.has(i) || pending.has(i)) return;
+      if (blobs[i]) {
+        wanted.add(i);
+        return;
+      }
+      // not downloaded yet: queue it as soon as it lands
+      const list = waiting.get(i) ?? [];
+      list.push(() => {
+        if (destroyed || !inWindow(i)) return;
+        want(i);
+        pump();
+      });
+      waiting.set(i, list);
+    };
+
+    // where the frame sits in the canvas box, in CSS px: scale and offset
+    const view = () => {
+      const cw = canvas.clientWidth;
+      const ch = canvas.clientHeight;
+      const s = Math.max(cw / FW, ch / FH);
+      return { s, x: Math.min(0, Math.max(cw - FW * s, cw / 2 - focus * FW * s)), y: (ch - FH * s) / 2 };
+    };
+
+    // whether the camera has moved the frame by a pixel since the last draw
+    const moved = () => {
+      const s = Math.max(canvas.width / FW, canvas.height / FH);
+      const x = Math.round(Math.min(0, Math.max(canvas.width - FW * s, canvas.width / 2 - focus * FW * s)));
+      return x !== drawnX;
+    };
+
+    const update = () => {
+      setPlayhead(target, dir);
+      wanted.clear();
+      want(target);
+      for (let d = 1; d <= AHEAD; d++) want(target + d * dir);
+      for (let d = 1; d <= BEHIND; d++) want(target - d * dir);
+      // free what has fallen out of the window
+      for (const [i, img] of frames) {
+        const ahead = (i - target) * dir;
+        if (ahead > AHEAD || ahead < -BEHIND) {
+          if (i === drawn) continue;
+          if ("close" in img) img.close();
+          frames.delete(i);
+        }
+      }
+      pump();
+      draw();
+    };
+
+    // the backing store matches the screen's real pixels, so the frame is
+    // resampled once, by drawImage, and never again by the compositor
+    const size = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 3);
+      const w = Math.round(canvas.clientWidth * dpr);
+      const h = Math.round(canvas.clientHeight * dpr);
+      if (w === canvas.width && h === canvas.height) return;
+      canvas.width = w;
+      canvas.height = h;
+      draw(true);
+    };
+    const ro = new ResizeObserver(size);
+    ro.observe(canvas);
+    size();
+    preload();
+    update();
+
+    return {
+      /** 0 is the first frame, 1 the last */
+      set(progress: number) {
+        this.setPosition(Math.min(1, Math.max(0, progress)) * (N - 1));
+      },
+      /** A web frame position, fractional */
+      setPosition(position: number) {
+        const pos = Math.min(N - 1, Math.max(0, position));
+        // the camera follows the exact scroll position, so it glides between frames
+        focus = camera(pos);
+        const f = Math.round(pos);
+        if (f === target) return draw();
+        dir = f > target ? 1 : -1;
+        target = f;
+        update();
+      },
+      /** A point of the video frame (source px) on screen, CSS px from the
+          canvas's top left: what an overlay needs to stay stuck to it */
+      project(fx: number, fy: number) {
+        const v = view();
+        return { x: v.x + fx * v.s, y: v.y + fy * v.s, s: v.s };
+      },
+      destroy() {
+        destroyed = true;
+        ro.disconnect();
+        frames.forEach((img) => "close" in img && img.close());
+        frames.clear();
+      },
+    };
+  }
+
+  return { manifest, frameUrl, frameOf, positionOf, cameraTrack, setPlayhead, preload, createPlayer, poster: frameUrl(0) };
+}

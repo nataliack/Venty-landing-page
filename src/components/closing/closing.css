@@ -1,4 +1,5 @@
-/* 9. The closing scene (closing/Closing.tsx). Night. Scoped to .cl. */
+/* 9. The closing scene (closing/Closing.tsx): the table, on film. Night.
+   Scoped to .cl. */
 
 .cl {
   --night: #0b0c15;
@@ -8,6 +9,8 @@
   --peri: #9daccd;
   --corn: #687ef5;
   --cloud: #eff4ff;
+  /* the focus bars: short, like a film's letterbox */
+  --bar: clamp(44px, 9svh, 96px);
   position: relative;
   z-index: 10;
   /* the scene (RUN screens), a screen to stand in, and the screen the
@@ -21,82 +24,85 @@
   top: 0;
   height: 100svh;
   overflow: hidden;
-  background: radial-gradient(60% 50% at 50% 55%, rgb(104 126 245 / 0.12), transparent 70%);
+  background: var(--night);
 }
 
-/* ---- the scene ------------------------------------------------------- */
-.cl-scene {
+/* ---- the film: the full screen, cover ------------------------------- */
+.cl-film {
   position: absolute;
-  left: 50%;
-  top: 8svh;
-  width: min(80vw, 46svh);
-  aspect-ratio: 4 / 5;
-  translate: -50% 0;
+  inset: 0;
 }
-@media (min-width: 1024px) {
-  .cl-scene { left: auto; right: 9vw; top: 50%; width: min(38vw, 66svh); translate: 0 -50%; }
-}
-/* each layer fills the scene; the ones that move are kept on the GPU */
-.cl-layer {
+.cl-film__poster,
+.cl-film__canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  overflow: visible;
-  will-change: transform, opacity;
 }
-/* the glow behind the cut piece: a soft disc drawn as a gradient (the
-   same light as a blurred one, without a blur to compute) */
-.cl-glow {
+.cl-film__poster { object-fit: cover; object-position: 42% 50%; }
+/* shown once the player has drawn (it sets opacity), over the poster */
+.cl-film__canvas { opacity: 0; }
+/* a soft shade low on the left, where the captions sit, and a light vignette */
+.cl-shade {
   position: absolute;
-  inset: -12%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(104 126 245 / 0.5) 0%, rgb(104 126 245 / 0.42) 38%, rgb(104 126 245 / 0.16) 68%, transparent 100%);
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(80% 70% at 0% 100%, rgb(11 12 21 / 0.72) 0%, rgb(11 12 21 / 0.35) 45%, transparent 75%),
+    radial-gradient(130% 110% at 50% 50%, transparent 55%, rgb(11 12 21 / 0.55) 100%);
+}
+/* the night closing in as the film ends, under the final line */
+.cl-dim {
+  position: absolute;
+  inset: 0;
+  background: var(--night);
   opacity: 0;
+  pointer-events: none;
 }
-.cl-paper__sheet { fill: #f7f9fe; stroke: rgb(18 21 36 / 0.25); stroke-width: 1; filter: url(#cl-shadow); }
-.cl-paper__seam { fill: none; stroke: var(--corn); stroke-width: 1.4; stroke-dasharray: 5 5; }
-.cl-paper__grain { fill: none; stroke: var(--steel); stroke-width: 1.3; }
-.cl-paper__notch { fill: var(--ink); }
-.cl-paper__t { font-family: var(--font-familjen), sans-serif; font-size: 13px; letter-spacing: 0.04em; text-anchor: middle; fill: var(--navy); }
-.cl-paper__t.is-sm { font-size: 9px; }
-.cl-rule rect { fill: #eff4ff; stroke: rgb(18 21 36 / 0.2); stroke-width: 0.6; filter: drop-shadow(-2px 3px 3px rgb(0 0 0 / 0.45)); }
-.cl-rule line { stroke: var(--ink); stroke-width: 0.8; }
-.cl-rule text { font-family: var(--font-bigilla), Georgia, serif; font-size: 7px; text-anchor: middle; fill: var(--corn); }
-.cl-stamp circle { fill: none; stroke: var(--corn); stroke-width: 1.6; }
-.cl-stamp text { font-family: var(--font-bigilla), Georgia, serif; font-size: 15px; text-anchor: middle; fill: var(--corn); }
-.cl-pin line { stroke: #c0c8db; stroke-width: 1; }
-.cl-pin circle { fill: var(--corn); filter: drop-shadow(-2px 3px 2px rgb(0 0 0 / 0.5)); }
-.cl-pin .cl-pin__hi { fill: #fff; opacity: 0.7; filter: none; }
-.cl-cut {
-  fill: none;
-  stroke: var(--cloud);
-  stroke-width: 1.6;
-  stroke-linejoin: round;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-}
-.cl-cut-halo {
-  fill: none;
-  stroke: rgb(104 126 245 / 0.55);
-  stroke-width: 6;
-  stroke-linejoin: round;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-}
-.cl-sc { opacity: 0; }
-.cl-sc circle,
-.cl-sc path { fill: none; stroke: var(--cloud); stroke-width: 1.6; stroke-linecap: round; }
 
-/* ---- the beats ------------------------------------------------------- */
-.cl-beat {
+/* ---- the focus bars ---------------------------------------------------- */
+.cl-bar {
+  position: absolute;
+  inset-inline: 0;
+  z-index: 2;
+  height: var(--bar);
+  background: #05060b;
+  transform: scaleY(0);
+  will-change: transform;
+}
+.cl-bar.is-top { top: 0; transform-origin: 50% 0%; box-shadow: 0 1px 0 rgb(239 244 255 / 0.05); }
+.cl-bar.is-bottom { bottom: 0; transform-origin: 50% 100%; box-shadow: 0 -1px 0 rgb(239 244 255 / 0.05); }
+
+/* the caption, inside the bottom bar */
+.cl-cap {
   position: absolute;
   left: 16px;
   right: 16px;
-  bottom: calc(env(safe-area-inset-bottom) + 80px);
+  bottom: 0;
+  z-index: 3;
+  height: var(--bar);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--steel);
+  opacity: 0;
+}
+@media (min-width: 1024px) { .cl-cap { left: 48px; right: 48px; } }
+.cl-cap [data-count] { font-family: var(--font-bigilla), Georgia, serif; font-size: 14px; letter-spacing: 0; text-transform: none; color: var(--peri); }
+
+/* ---- the beats: captions low on the left, above the bottom bar --------- */
+.cl-beat {
+  position: absolute;
+  z-index: 3;
+  left: 16px;
+  right: 16px;
+  bottom: calc(var(--bar) + 6svh);
 }
 @media (min-width: 1024px) {
-  .cl-beat { left: 7vw; right: auto; top: 50%; bottom: auto; width: 46vw; translate: 0 -50%; }
+  .cl-beat { left: 6vw; right: auto; width: 46vw; bottom: calc(var(--bar) + 7svh); }
 }
 .cl-beat__k { font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--peri); }
 .cl-beat__h {
@@ -106,12 +112,14 @@
   font-size: clamp(2rem, 3.9vw, 4.2rem);
   line-height: 1.04;
   letter-spacing: -0.05em;
+  text-shadow: 0 2px 24px rgb(11 12 21 / 0.45);
 }
 
-/* ---- the final line -------------------------------------------------- */
+/* ---- the final line, on the dark -------------------------------------- */
 .cl-final {
   position: absolute;
   inset: 0;
+  z-index: 3;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -129,18 +137,3 @@
 }
 .cl-final__h em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--corn); }
 .cl-final__cta { visibility: hidden; }
-
-.cl-cap {
-  position: absolute;
-  left: 16px;
-  right: 16px;
-  bottom: calc(env(safe-area-inset-bottom) + 20px);
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--steel);
-}
-@media (min-width: 1024px) { .cl-cap { left: 48px; right: 48px; bottom: 28px; } }
-.cl-cap [data-count] { font-family: var(--font-bigilla), Georgia, serif; font-size: 14px; letter-spacing: 0; text-transform: none; color: var(--peri); }

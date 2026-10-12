@@ -7,6 +7,7 @@ the site only ships what the tools in `tools/` produce into `public/`.
 | --- | --- | --- |
 | `hero/hero-master.mp4` (1920×1080, 25 fps, 636 frames) | `node tools/hero/encode.mjs` | `public/hero/sequence/` |
 | `hero/archive/v1/` (first cut, 608 frames, with its encoded frames) | not used by the site | kept for reference |
+| `table/table-master.mp4` (1920×1080, 24 fps, 145 frames) | `node tools/sequence/encode.mjs --name table` | `public/table/sequence/` |
 
 ## Hero video
 
@@ -44,6 +45,23 @@ master's resolution. If the new cut changes when the dress has formed, update
 `DRESSED` in `src/components/Hero.tsx` (the frame where 1.2 appears) and the
 `CAMERA` keys. Before replacing it, move the current master and its frames
 to `hero/archive/` if you want to keep them.
+
+## Table film (the closing scene)
+
+The table is played by scroll the same way (the engine is
+`src/lib/sequence.ts`, shared with the hero): every frame of
+`table/table-master.mp4`, WebP quality 92, at 1920×1080. It loads after the
+page is up (after the loader, in idle time) or when the table comes near.
+Which slice a phone sees is `CAMERA` in `src/components/closing/Closing.tsx`.
+To change it, replace `table/table-master.mp4` and run
+
+```bash
+node tools/sequence/encode.mjs --name table
+```
+
+The same tool turns any `media/<name>/<name>-master.mp4` into
+`public/<name>/sequence/`; add the name to the cache headers in
+`next.config.ts`.
 
 ## People
 
