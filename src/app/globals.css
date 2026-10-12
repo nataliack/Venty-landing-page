@@ -1356,11 +1356,11 @@ html[data-theme="light"] .section-nav__icon path { stroke: var(--color-navy); }
      dead centre */
   margin-right: max(0px, calc(56px - clamp(20px, 5vw, 80px)));
 }
-/* the centre: a 1px line at the screen's exact middle; the logo sits above it */
+/* the centre: a 2px line at the screen's exact middle; the logo sits above it */
 .fl-centre {
   position: relative;
   width: clamp(104px, 30vw, 360px);
-  height: 1px;
+  height: 2px;
 }
 /* phones: a column. The word at the top, the logo and the filament dead centre,
    the number at the foot (the Vote tab keeps the right edge). The top and bottom
@@ -1397,12 +1397,13 @@ html[data-theme="light"] .section-nav__icon path { stroke: var(--color-navy); }
 .fl-logo__word { color: var(--color-cloud); }
 /* the mark is cloud while it loads; on Ready it turns cornflower (FilamentLoader), then glides to the logo */
 .fl-logo__mark { color: var(--color-cloud); will-change: transform; }
-/* the filament: a 1px track; the lit part runs from faint to full cornflower
+/* the filament: a 2px track; the lit part runs from faint to full cornflower
    at its head, and its glow runs the whole lit length, fading in the same way:
    barely there at the start, strongest at the head */
 .fl-bar {
   position: absolute;
   inset: 0;
+  border-radius: 999px;
   background: color-mix(in srgb, var(--color-cloud) 8%, transparent);
   transform-origin: 50% 50%;
 }
@@ -1410,7 +1411,8 @@ html[data-theme="light"] .section-nav__icon path { stroke: var(--color-navy); }
   position: absolute;
   left: 0;
   top: 0;
-  height: 1px;
+  height: 100%;
+  border-radius: 999px;
   overflow: visible;
   background: linear-gradient(90deg,
     color-mix(in srgb, var(--color-cornflower) 25%, transparent) 0%,
@@ -1446,12 +1448,20 @@ html[data-theme="light"] .section-nav__icon path { stroke: var(--color-navy); }
     color-mix(in srgb, var(--color-cornflower) 85%, transparent) 100%);
   filter: blur(2px);
 }
+/* the sweep of light travels in from the left (FilamentLoader); this keeps it
+   inside the lit part, so none of it ever shows past the line's start */
+.fl-sweep {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
 .fl-pulse {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 1px;
+  height: 100%;
   background: linear-gradient(90deg, transparent 0%, transparent 60%, color-mix(in srgb, var(--color-cornflower) 40%, var(--color-cloud)) 88%, transparent 100%);
   will-change: transform, opacity;
 }
@@ -1460,7 +1470,8 @@ html[data-theme="light"] .section-nav__icon path { stroke: var(--color-navy); }
   right: 0;
   top: 0;
   width: 28px;
-  height: 1px;
+  height: 100%;
+  border-radius: 999px;
   translate: 10% 0;
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-cornflower) 30%, var(--color-cloud)) 70%, color-mix(in srgb, var(--color-cloud) 80%, transparent));
   /* a touch brighter where the line ends; the glow itself belongs to the whole line */

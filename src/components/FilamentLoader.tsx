@@ -344,7 +344,10 @@ export function FilamentLoader({
           </div>
           <div data-clear="bar" className="fl-bar" aria-hidden="true">
             <div className="fl-fill" style={{ width: `${Math.min(1, shown) * 100}%` }}>
-              <span data-pulse className="fl-pulse" />
+              {/* the sweep of light runs inside the lit part only: clipped, so it never shows past the line's start */}
+              <span className="fl-sweep">
+                <span data-pulse className="fl-pulse" />
+              </span>
               <span data-head className="fl-head" />
             </div>
           </div>
