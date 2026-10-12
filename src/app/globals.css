@@ -1398,7 +1398,8 @@ html[data-theme="light"] .section-nav__icon path { stroke: var(--color-navy); }
 /* the mark is cloud while it loads; on Ready it turns cornflower (FilamentLoader), then glides to the logo */
 .fl-logo__mark { color: var(--color-cloud); will-change: transform; }
 /* the filament: a 1px track; the lit part runs from faint to full cornflower
-   at its head, with a tight glow that follows the line */
+   at its head, and its glow runs the whole lit length, fading in the same way:
+   barely there at the start, strongest at the head */
 .fl-bar {
   position: absolute;
   inset: 0;
@@ -1411,26 +1412,39 @@ html[data-theme="light"] .section-nav__icon path { stroke: var(--color-navy); }
   top: 0;
   height: 1px;
   overflow: visible;
-  /* quiet at the start, full cornflower at the tip; the light gathers at the tip
-     (the haze below and the head), not along the whole line */
   background: linear-gradient(90deg,
-    color-mix(in srgb, var(--color-cornflower) 12%, transparent) 0%,
-    color-mix(in srgb, var(--color-cornflower) 40%, transparent) 60%,
+    color-mix(in srgb, var(--color-cornflower) 25%, transparent) 0%,
+    color-mix(in srgb, var(--color-cornflower) 70%, transparent) 60%,
     var(--color-cornflower) 100%);
-  box-shadow: 0 0 3px color-mix(in srgb, var(--color-cornflower) 25%, transparent);
 }
-/* a soft haze along the last stretch before the tip, fading out to the left */
+/* the glow: two blurred copies of the lit line, the length of it, each fading
+   from faint at the start to fullest at the head. A wide soft one... */
+.fl-fill::before,
 .fl-fill::after {
   content: "";
   position: absolute;
-  right: 0;
+  inset-inline: 0;
   top: 50%;
-  width: min(120px, 70%);
-  height: 8px;
   translate: 0 -50%;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-cornflower) 55%, transparent));
-  filter: blur(5px);
+  border-radius: 999px;
   pointer-events: none;
+}
+.fl-fill::before {
+  height: 14px;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--color-cornflower) 6%, transparent) 0%,
+    color-mix(in srgb, var(--color-cornflower) 22%, transparent) 55%,
+    color-mix(in srgb, var(--color-cornflower) 42%, transparent) 100%);
+  filter: blur(8px);
+}
+/* ...and a tight bright one hugging the line */
+.fl-fill::after {
+  height: 4px;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--color-cornflower) 14%, transparent) 0%,
+    color-mix(in srgb, var(--color-cornflower) 45%, transparent) 55%,
+    color-mix(in srgb, var(--color-cornflower) 85%, transparent) 100%);
+  filter: blur(2px);
 }
 .fl-pulse {
   position: absolute;
@@ -1449,23 +1463,9 @@ html[data-theme="light"] .section-nav__icon path { stroke: var(--color-navy); }
   height: 1px;
   translate: 10% 0;
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-cornflower) 30%, var(--color-cloud)) 70%, color-mix(in srgb, var(--color-cloud) 80%, transparent));
-  box-shadow:
-    0 0 6px 1px var(--color-cornflower),
-    0 0 3px color-mix(in srgb, var(--color-cloud) 80%, transparent);
+  /* a touch brighter where the line ends; the glow itself belongs to the whole line */
+  box-shadow: 0 0 4px color-mix(in srgb, var(--color-cornflower) 70%, transparent);
   pointer-events: none;
-}
-/* the tip is the one that glows: a round bloom of cornflower on the growing point */
-.fl-head::after {
-  content: "";
-  position: absolute;
-  right: -12px;
-  top: 50%;
-  width: 30px;
-  height: 30px;
-  translate: 0 -50%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--color-cornflower) 75%, var(--color-cloud)) 0%, color-mix(in srgb, var(--color-cornflower) 45%, transparent) 40%, transparent 100%);
-  filter: blur(2px);
 }
 @media (prefers-reduced-motion: reduce) {
   .fl-roll > [aria-hidden] { translate: none !important; }
