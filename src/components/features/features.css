@@ -480,15 +480,17 @@ button.ft-chip { cursor: pointer; }
 .ft-body__go { width: 14px; height: 14px; opacity: 0.5; }
 
 /* ---- See it on your body --------------------------------------------- */
-/* phones: copy, the switch, the stage, the slider. Wider: the copy, the
-   switch and the slider down the left, the stage filling the right */
-.ft-c--body > .ft-card { padding-right: 0; }
-@media (min-width: 768px) {
+/* Phones and tablets: the copy and the switch, the stage the card's full
+   width, the slider centred under it. Desktop: the copy, the switch and
+   the slider down the left, the stage filling the right */
+.ft-c--body > .ft-card { padding-bottom: 0; }
+@media (min-width: 1100px) {
   .ft-c--body > .ft-card {
     display: grid;
-    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
     grid-template-rows: auto 1fr auto auto;
     column-gap: 20px;
+    padding-right: 0;
   }
   .ft-c--body .ft-card__copy { grid-column: 1; grid-row: 1; }
 }
@@ -505,7 +507,7 @@ button.ft-chip { cursor: pointer; }
   background: rgb(239 244 255 / 0.06);
   box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.1);
 }
-@media (min-width: 768px) { .ft-seg { grid-column: 1; grid-row: 3; margin: 0 0 16px; } }
+@media (min-width: 1100px) { .ft-seg { grid-column: 1; grid-row: 3; margin: 0 0 14px; } }
 .ft-seg button {
   position: relative;
   z-index: 1;
@@ -531,12 +533,16 @@ button.ft-chip { cursor: pointer; }
   transition: translate 0.7s var(--spring);
 }
 .ft-seg__thumb[data-flat="true"] { translate: 112px 0; }
+
+/* the stage: edge to edge across the card (phones square, tablets wide);
+   on desktop the right of the card, from its top edge */
 .ft-stage {
   position: relative;
-  min-height: 340px;
-  margin: 14px 0 0 -24px;
+  aspect-ratio: 1 / 1.04;
+  margin: 16px -24px 0;
 }
-@media (min-width: 768px) { .ft-stage { grid-column: 2; grid-row: 1 / -1; min-height: 0; margin: -24px 0 0; } }
+@media (min-width: 640px) { .ft-stage { aspect-ratio: 3 / 2; } }
+@media (min-width: 1100px) { .ft-stage { grid-column: 2; grid-row: 1 / -1; aspect-ratio: auto; margin: -24px 0 0; } }
 .ft-stage__3d,
 .ft-stage__flat {
   position: absolute;
@@ -545,32 +551,43 @@ button.ft-chip { cursor: pointer; }
   height: 100%;
   transition: opacity 0.9s var(--expo), scale 1.2s var(--expo), filter 0.9s var(--expo);
 }
-/* the body: drag it to turn it */
+/* the body: drag it to turn it. Her frames are bigger than the stage and
+   cropped by it, more at the bottom than the top, so her head always has
+   room; the backdrop melts into the card at the edges */
 .ft-stage__3d {
+  overflow: hidden;
   cursor: grab;
   touch-action: pan-y;
-  /* its backdrop melts into the card on every side but the right */
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 24%), linear-gradient(0deg, transparent 0%, #000 18%), linear-gradient(180deg, transparent 0%, #000 12%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 90%, transparent 100%), linear-gradient(0deg, transparent 0%, #000 20%), linear-gradient(180deg, transparent 0%, #000 8%);
   -webkit-mask-composite: source-in, source-in;
-  mask-image: linear-gradient(90deg, transparent 0%, #000 24%), linear-gradient(0deg, transparent 0%, #000 18%), linear-gradient(180deg, transparent 0%, #000 12%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 90%, transparent 100%), linear-gradient(0deg, transparent 0%, #000 20%), linear-gradient(180deg, transparent 0%, #000 8%);
   mask-composite: intersect;
+}
+@media (min-width: 1100px) {
+  .ft-stage__3d {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 20%), linear-gradient(0deg, transparent 0%, #000 18%), linear-gradient(180deg, transparent 0%, #000 8%);
+    mask-image: linear-gradient(90deg, transparent 0%, #000 20%), linear-gradient(0deg, transparent 0%, #000 18%), linear-gradient(180deg, transparent 0%, #000 8%);
+  }
 }
 .ft-stage__3d:active { cursor: grabbing; }
 /* the first frame as a poster, the canvas over it once it has drawn. The
-   frames are square: shown whole, the stage's full height, centred (so a
-   wide stage never crops her head or her feet), their sides fading into
-   the card */
+   frames are square: on phones and tablets the stage's full width (a
+   little more on phones), on desktop well over its height; lifted so the
+   crop falls mostly below her */
 .ft-stage__3d img,
 .ft-stage__3d canvas {
   position: absolute;
-  top: 0;
+  top: -6%;
   left: 50%;
-  width: auto;
-  height: 100%;
+  width: 100%;
+  height: auto;
   aspect-ratio: 1;
   translate: -50% 0;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
+}
+@media (max-width: 639px) { .ft-stage__3d img, .ft-stage__3d canvas { width: 110%; top: -5%; } }
+@media (min-width: 1100px) {
+  .ft-stage__3d img,
+  .ft-stage__3d canvas { top: -11%; width: auto; height: 138%; }
 }
 .ft-stage__3d img {
   object-fit: cover;
@@ -579,65 +596,73 @@ button.ft-chip { cursor: pointer; }
 }
 .ft-stage__3d canvas { opacity: 0; }
 .ft-stage[data-flat="true"] .ft-stage__3d { opacity: 0; scale: 0.94; filter: blur(8px); pointer-events: none; }
-.ft-stage__flat { opacity: 0; scale: 1.05; filter: blur(8px); padding: 8% 6% 6% 0; pointer-events: none; }
+.ft-stage__flat { opacity: 0; scale: 1.05; filter: blur(8px); padding: 8% 6% 6%; pointer-events: none; }
 .ft-stage[data-flat="true"] .ft-stage__flat { opacity: 1; scale: 1; filter: none; }
 
-/* the turn: a slider. A native range lies over it, invisible, for the
-   pointer, the keys and screen readers; this is what shows */
-.ft-turnwrap { position: relative; z-index: 2; padding: 14px 24px 22px 0; transition: opacity 0.5s var(--expo), translate 0.7s var(--expo); }
-@media (min-width: 768px) { .ft-turnwrap { grid-column: 1; grid-row: 4; padding: 0 0 24px; } }
-.ft-turnwrap[data-flat="true"] { opacity: 0; translate: 0 8px; pointer-events: none; }
-.ft-turnbar { max-width: 300px; }
-.ft-turnbar__top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; font-size: 12px; letter-spacing: -0.01em; color: var(--steel); }
-.ft-turnbar__marks {
+/* ---- the turn: a slider ----------------------------------------------
+   A glass panel: what it does and the angle on top; a rail with the part
+   turned through lit, a thumb to hold, ticks every 30 degrees with Front,
+   Back, Front under them. A native range lies over the rail, invisible,
+   for the pointer, the keys and screen readers. Centred under the stage on
+   phones and tablets. */
+.ft-turnwrap {
+  position: relative;
+  z-index: 2;
   display: flex;
-  justify-content: space-between;
-  margin: 8px calc(var(--thumb, 34px) / 2 - 14px) 0;
-  font-size: 11px;
-  letter-spacing: -0.01em;
-  color: var(--steel);
+  justify-content: center;
+  padding: 14px 0 24px;
+  transition: opacity 0.5s var(--expo), translate 0.7s var(--expo);
 }
-.ft-turnbar__marks span { width: 28px; text-align: center; }
-.ft-turnbar__top b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: 20px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--cloud); }
+@media (min-width: 1100px) { .ft-turnwrap { grid-column: 1; grid-row: 4; justify-content: flex-start; padding: 0 0 24px; } }
+.ft-turnwrap[data-flat="true"] { opacity: 0; translate: 0 8px; pointer-events: none; }
+.ft-turnbar {
+  width: min(100%, 340px);
+  padding: 12px 16px 10px;
+  border-radius: var(--r);
+  background: linear-gradient(180deg, rgb(239 244 255 / 0.07), rgb(239 244 255 / 0.025));
+  box-shadow:
+    inset 0 0 0 1px rgb(239 244 255 / 0.09),
+    inset 0 1px 0 rgb(239 244 255 / 0.1),
+    0 18px 34px -20px rgb(0 0 0 / 0.95);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.ft-turnbar__top { display: flex; align-items: center; justify-content: space-between; font-size: 12px; letter-spacing: -0.01em; color: var(--peri); }
+.ft-turnbar__hint { display: inline-flex; align-items: center; gap: 6px; }
+.ft-turnbar__hint svg { width: 14px; height: 14px; color: var(--corn); }
+.ft-turnbar__top b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: 22px; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--cloud); }
+.ft-turnbar__top b small { font-size: 0.6em; color: var(--peri); }
 .ft-turnbar__track {
   --p: 0;
-  --thumb: 34px;
+  --thumb: 24px;
   position: relative;
   height: var(--thumb);
+  margin-top: 10px;
 }
-/* the line, and its ticks every 30 degrees */
+/* the rail */
 .ft-turnbar__track::before {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
   top: 50%;
-  height: 2px;
+  height: 6px;
   translate: 0 -50%;
   border-radius: 999px;
-  background: rgb(239 244 255 / 0.1);
+  background: rgb(5 6 11 / 0.6);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.7), 0 1px 0 rgb(239 244 255 / 0.06);
 }
-.ft-turnbar__ticks {
-  position: absolute;
-  inset: 0 calc(var(--thumb) / 2);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  pointer-events: none;
-}
-.ft-turnbar__ticks i { width: 1px; height: 6px; background: rgb(239 244 255 / 0.18); }
-.ft-turnbar__ticks i:nth-child(3n + 1) { height: 10px; background: rgb(239 244 255 / 0.3); }
 /* the part turned through, lit */
 .ft-turnbar__fill {
   position: absolute;
   left: 0;
   top: 50%;
   width: calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--p));
-  height: 2px;
+  height: 6px;
   translate: 0 -50%;
   border-radius: 999px;
-  background: linear-gradient(90deg, rgb(104 126 245 / 0.2), var(--corn));
-  box-shadow: 0 0 10px rgb(104 126 245 / 0.7);
+  background: linear-gradient(90deg, rgb(104 126 245 / 0.35), var(--corn));
+  box-shadow: 0 0 12px rgb(104 126 245 / 0.65);
   pointer-events: none;
 }
 .ft-turnbar__thumb {
@@ -649,25 +674,52 @@ button.ft-chip { cursor: pointer; }
   width: var(--thumb);
   height: var(--thumb);
   border-radius: 50%;
-  color: var(--ink);
-  background: linear-gradient(180deg, #fff, #d9dff4);
-  box-shadow: 0 0 0 4px rgb(104 126 245 / 0.18), 0 6px 18px -4px rgb(104 126 245 / 0.9);
+  background: linear-gradient(180deg, #fff, #dfe5f6);
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.7), 0 0 0 5px rgb(104 126 245 / 0.22), 0 4px 14px -2px rgb(104 126 245 / 0.95);
   pointer-events: none;
   transition: scale 0.4s var(--spring), box-shadow 0.4s var(--expo);
 }
-.ft-turnbar__thumb svg { width: 18px; height: 18px; }
+/* its grip: two short lines */
+.ft-turnbar__thumb::before {
+  content: "";
+  width: 5px;
+  height: 9px;
+  border-inline: 1.5px solid rgb(56 76 101 / 0.55);
+}
+/* the ticks, under the rail; Front, Back and Front (0, 180, 360) longer */
+.ft-turnbar__ticks {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: calc(var(--thumb) / 2);
+  right: calc(var(--thumb) / 2);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+}
+.ft-turnbar__ticks i { width: 1px; height: 4px; background: rgb(239 244 255 / 0.18); }
+.ft-turnbar__ticks i:nth-child(6n + 1) { height: 7px; background: rgb(239 244 255 / 0.4); }
+.ft-turnbar__marks {
+  display: flex;
+  justify-content: space-between;
+  margin: 13px calc(var(--thumb, 24px) / 2 - 18px) 0;
+  font-size: 11px;
+  letter-spacing: -0.01em;
+  color: var(--steel);
+}
+.ft-turnbar__marks span { width: 36px; text-align: center; }
 .ft-turnbar__track input {
   position: absolute;
-  inset: 0;
+  inset: -8px 0;
   width: 100%;
-  height: 100%;
+  height: calc(100% + 16px);
   margin: 0;
   opacity: 0;
   cursor: grab;
 }
 .ft-turnbar__track input:active { cursor: grabbing; }
-@media (hover: hover) { .ft-turnbar__track:hover .ft-turnbar__thumb { scale: 1.08; } }
-.ft-turnbar__track:has(input:active) .ft-turnbar__thumb { scale: 0.94; box-shadow: 0 0 0 7px rgb(104 126 245 / 0.22), 0 6px 18px -4px rgb(104 126 245 / 0.9); }
+@media (hover: hover) { .ft-turnbar__track:hover .ft-turnbar__thumb { scale: 1.1; } }
+.ft-turnbar__track:has(input:active) .ft-turnbar__thumb { scale: 1.18; box-shadow: 0 0 0 1px rgb(255 255 255 / 0.8), 0 0 0 8px rgb(104 126 245 / 0.25), 0 4px 16px -2px rgb(104 126 245 / 1); }
 .ft-turnbar__track:has(input:focus-visible) .ft-turnbar__thumb { box-shadow: 0 0 0 2px var(--night), 0 0 0 4px var(--cloud); }
 .ft-pc { fill: rgb(239 244 255 / 0.05); stroke: var(--cloud); stroke-width: 1.4; stroke-linejoin: round; }
 .ft-pc__seam { fill: none; stroke: var(--corn); stroke-width: 1; stroke-dasharray: 4 4; }

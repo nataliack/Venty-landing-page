@@ -283,8 +283,16 @@ function Turn({ deg, onDeg }: { deg: number; onDeg: (d: number) => void }) {
   return (
     <div className="ft-turnbar">
       <div className="ft-turnbar__top" aria-hidden="true">
-        <span>Drag to turn</span>
-        <b>{Math.round(deg)}°</b>
+        <span className="ft-turnbar__hint">
+          <svg viewBox="0 0 16 16" fill="none">
+            <path d="M13 8a5 5 0 1 1-1.6-3.7M13 2.5v2.8h-2.8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Drag to turn
+        </span>
+        <b>
+          {Math.round(deg)}
+          <small>°</small>
+        </b>
       </div>
       <div className="ft-turnbar__track" style={{ "--p": p } as React.CSSProperties}>
         <span className="ft-turnbar__ticks" aria-hidden="true">
@@ -293,11 +301,7 @@ function Turn({ deg, onDeg }: { deg: number; onDeg: (d: number) => void }) {
           ))}
         </span>
         <span className="ft-turnbar__fill" aria-hidden="true" />
-        <span className="ft-turnbar__thumb" aria-hidden="true">
-          <svg viewBox="0 0 20 20" fill="none">
-            <path d="M6.5 6.5 3.5 10l3 3.5M13.5 6.5l3 3.5-3 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </span>
+        <span className="ft-turnbar__thumb" aria-hidden="true" />
         <input type="range" min={0} max={359} step={1} value={Math.round(deg)} onChange={(e) => onDeg(+e.target.value)} aria-label="Turn her round" aria-valuetext={`${Math.round(deg)} degrees`} />
       </div>
       <div className="ft-turnbar__marks" aria-hidden="true">
