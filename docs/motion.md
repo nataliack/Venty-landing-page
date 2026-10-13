@@ -97,8 +97,12 @@ dark sky (a cornflower glow roaming the lower two thirds), with the cornflower
 filament at dead centre (quiet along its length, glowing at its growing tip), the Venty lockup above it, a rolling word on the left (Loading,
 Measuring, Drafting, Fitting, Ready) and the percentage on the right in the
 same type. On the way in, everything reveals itself instead of appearing at once: the
-wordmark rises and fades up, the filament draws out from the middle, the word
-and the number slide in from their sides (`REVEAL_S` 1.1s, `EASE.out`); as
+wordmark's letters (V, e, n and the ty ligature) rise and lean into place
+one after another from the right, under the bird as it comes in over them
+along the top (and a small ripple runs through them from under it as it
+touches down; on the way out they go one after another from the right as it
+curls away), the filament draws out from the middle, the word and the number
+slide in from their sides (`REVEAL_S` 1.1s, `EASE.out`); as
 served, they wait hidden (`.is-pre`). The way in waits for the page to settle
 (six smooth frames in a row, at most 1.2s): the rest of the page mounts in
 long blocks as it starts, and a flight begun then would stutter. While it

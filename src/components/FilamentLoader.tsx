@@ -293,6 +293,10 @@ export function FilamentLoader({
     });
   };
 
+  /** The wordmark's letters, left to right (V, e, n, and the ty ligature) */
+  const letters = () =>
+    [...(root.current?.querySelectorAll<SVGPathElement>("[data-letter]") ?? [])].sort((a, b) => a.getBBox().x - b.getBBox().x);
+
   // on the way in: everything reveals itself, and the mark flies in
   const entered = useRef<Promise<unknown>>(Promise.resolve());
   useLayoutEffect(() => {
@@ -317,10 +321,17 @@ export function FilamentLoader({
       const rest = { x: 0, y: 0, scale: 1 };
       // off the screen (its first frame) until it flies in
       flight = fly((g) => flightRoute({ ...g, from: rest, to: rest, start: ENTER_PATH[0], via: ENTER_PATH.slice(1), duration: ENTER_S, ease: "out", facing: 180 }), 0.1 * pace);
-      flight.then(done);
+      flight.then(() => {
+        done();
+        // it touches down over the wordmark: a small ripple runs out through
+        // the letters from under it
+        gsap.to(letters(), { yPercent: 7, duration: 0.2 * pace, ease: "sine.out", yoyo: true, repeat: 1, stagger: { each: 0.05 * pace, from: 1 } });
+      });
       reveal = gsap
         .timeline({ defaults: { ease: EASE.out } })
-        .from(q(".fl-logo__word"), { opacity: 0, yPercent: 14, duration: REVEAL_S }, 0)
+        // the letters rise and lean into place one after another, from the
+        // right, under the bird as it comes in over them along the top
+        .from(letters(), { opacity: 0, yPercent: 36, rotation: 9, transformOrigin: "50% 100%", duration: REVEAL_S, stagger: { each: 0.08, from: "end" } }, 0)
         .from(q("[data-clear='bar']"), { scaleX: 0, duration: REVEAL_S * 1.1 }, 0.1)
         .from(q("[data-clear='left']"), { opacity: 0, [column ? "y" : "x"]: -24, duration: REVEAL_S * 0.8 }, 0.25)
         .from(q("[data-clear='right']"), { opacity: 0, [column ? "y" : "x"]: 24, duration: REVEAL_S * 0.8 }, 0.25)
@@ -428,7 +439,10 @@ export function FilamentLoader({
       tweens.push(
         gsap
           .timeline()
-          .to(q("[data-clear]"), { opacity: 0, duration: CLEAR_S, ease: EASE.in }, 0)
+          .to(q("[data-clear]:not([data-clear='word'])"), { opacity: 0, duration: CLEAR_S, ease: EASE.in }, 0)
+          // the letters go one after another, from the right, as the bird
+          // curls away over them
+          .to(letters(), { opacity: 0, yPercent: 30, rotation: -7, transformOrigin: "50% 100%", duration: CLEAR_S, ease: EASE.in, stagger: { each: 0.04, from: "end" } }, 0)
           .to(q("[data-clear='left']"), { [column ? "y" : "x"]: -14, duration: CLEAR_S, ease: EASE.in }, 0)
           .to(q("[data-clear='right']"), { [column ? "y" : "x"]: 14, duration: CLEAR_S, ease: EASE.in }, 0)
           .to(q("[data-clear='bar']"), { scaleX: 0, duration: CLEAR_S, ease: EASE.in }, 0)
@@ -475,9 +489,9 @@ export function FilamentLoader({
 
         <div className="fl-centre">
           <div className="fl-logo" role="img" aria-label="Venty">
-            <svg data-clear="" viewBox={LOCKUP} className="fl-logo__word" aria-hidden="true" fill="currentColor">
+            <svg data-clear="word" viewBox={LOCKUP} className="fl-logo__word" aria-hidden="true" fill="currentColor">
               {WORD.map((d) => (
-                <path key={d.slice(0, 12)} d={d} />
+                <path key={d.slice(0, 12)} data-letter="" d={d} />
               ))}
             </svg>
             <svg ref={mark} viewBox={LOCKUP} className="fl-logo__mark" aria-hidden="true" fill="currentColor" overflow="visible">

@@ -85,7 +85,7 @@
   align-items: center;
   justify-content: space-between;
   font-size: 11px;
-  letter-spacing: 0.06em;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
   color: var(--steel);
   opacity: 0;
