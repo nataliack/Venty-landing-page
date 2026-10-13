@@ -20,8 +20,9 @@ gsap.registerPlugin(ScrollTrigger);
 
    The hand-off from the hero: the section is pulled up over the hero's last
    screen (.measure, -100svh), so it rises over the still video, its cloud
-   colour dithering in above its edge (DitherEdge). Once it has arrived
-   (its top at 20% of the screen) the entrance plays, once.
+   colour dithering in above its edge (DitherEdge). The entrance plays once,
+   as it comes into view: the headline as soon as it is on screen, the rig
+   and the composer once the section's top is halfway up.
 
    The puffer hangs on its cables above the composer. The composer's top
    edge cuts the jacket where only the right sleeve keeps going, and that
@@ -54,10 +55,12 @@ export function MadeToMeasure() {
   const [body, setBody] = useState<Body>(BODIES[0]);
   const [fit, setFit] = useState<Fit>("Easy");
 
-  // The entrance waits for the section to arrive, not just to show: it
-  // rises over the hero first. The headline waits hidden in its masks (so it
-  // never shows before it rises), then rises with the rest (the hero's text
-  // reveal).
+  // The entrance plays as the section comes up over the hero, in two parts,
+  // each as it comes into view (it used to wait for the section's top to
+  // reach 20% of the screen, by when, on a phone, the headline had nearly
+  // scrolled past). The headline waits hidden in its masks (so it never shows
+  // before it rises) and rises as soon as it is on screen (its top at 85%);
+  // the rig and the composer play once the section's top is halfway up.
   useEffect(() => {
     const el = root.current;
     const h = head.current;
@@ -65,15 +68,8 @@ export function MadeToMeasure() {
     const ctx = gsap.context(() => {
       const rise = gsap.timeline({ paused: true });
       textIn(rise, h.querySelectorAll("[data-rise]"), 0);
-      ScrollTrigger.create({
-        trigger: el,
-        start: "top 20%",
-        once: true,
-        onEnter: () => {
-          setPlay(true);
-          rise.play();
-        },
-      });
+      ScrollTrigger.create({ trigger: h, start: "top 85%", once: true, onEnter: () => rise.play() });
+      ScrollTrigger.create({ trigger: el, start: "top 50%", once: true, onEnter: () => setPlay(true) });
     }, el);
     return () => ctx.revert();
   }, []);
