@@ -113,10 +113,13 @@ mark, cloud while it loads, turns cornflower (0.4s) and flies alone to the
 top left. The mark is a bird facing right (its head the long piece up to the
 right), cut into a body, a wing and the head, which fill it exactly at rest
 (`src/lib/markFlight.ts`). Both of its flights follow paths Jose drew,
-smooth curves through waypoints (`ENTER_PATH`, `EXIT_PATH`), its head
-tilted along them and its wings beating; wherever the way turns back it
-turns head first (0.6s: the head swings round on its neck towards you, then
-the body follows from the neck to the tail). On the way in (2.3s, already
+smooth curves through waypoints (`ENTER_PATH`, `EXIT_PATH`), its wings
+beating. It points along its path all the way: its body (tail to beak) on
+the line it is flying, nose up as it climbs, nose down as it dives, turning
+with every bend. Where the path bends back on itself it would end up upside
+down, so there it rolls over along its line of flight, head first, like a
+bird banking (0.6s: the head rolls first on its neck, then the body after
+it from the neck to the tail). On the way in (2.3s, already
 flying, slowing in) it comes from beyond the right edge, high along the top
 facing left, then loops down round its place and curls up into it, turning
 to face right; it settles there while the filament fills. On the way out
