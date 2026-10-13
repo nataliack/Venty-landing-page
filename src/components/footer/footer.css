@@ -1,34 +1,65 @@
-/* The footer (footer/Footer.tsx). Cloud above, a band of media below.
-   Scoped to .fo. */
+/* The footer (footer/Footer.tsx): a sky that ends in a meadow. Scoped to .fo. */
 
 .fo {
   --ink: #121524;
   --navy: #384c65;
   --steel: #485f88;
+  --peri: #9daccd;
   --corn: #687ef5;
   --cloud: #eff4ff;
+  --paper: #fdfdff;
   --expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --gutter: 16px;
+  /* paper lying on something, as on the table in How it works */
+  --lie:
+    0 0 0 0.5px rgb(18 21 36 / 0.06),
+    -1px 1.5px 1.5px rgb(18 21 36 / 0.14),
+    -6px 8px 10px -4px rgb(30 44 78 / 0.22),
+    -24px 28px 38px -18px rgb(30 44 78 / 0.34);
   position: relative;
   z-index: 10;
   /* it rises over the last (held) screen of the closing scene */
   margin-top: -100svh;
-  padding: clamp(96px, 16svh, 170px) 16px 16px;
+  padding-top: clamp(96px, 16svh, 170px);
+  overflow-x: clip;
   color: var(--ink);
   background: var(--cloud);
 }
-@media (min-width: 768px) { .fo { padding-left: 32px; padding-right: 32px; } }
-@media (min-width: 1280px) { .fo { padding-left: 48px; padding-right: 48px; padding-bottom: 24px; } }
+@media (min-width: 768px) { .fo { --gutter: 32px; } }
+@media (min-width: 1280px) { .fo { --gutter: 48px; } }
 
-.fo-top { display: grid; gap: 48px; max-width: 1344px; margin: 0 auto; }
-@media (min-width: 1024px) { .fo-top { grid-template-columns: 6fr 6fr; align-items: end; } }
+/* the sky's dot grid, as over Made to measure, fading out before the hills */
+.fo-dots {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 70%;
+  pointer-events: none;
+  background-image: radial-gradient(rgb(11 12 21 / 0.16) 1px, transparent 1.3px);
+  background-size: 18px 18px;
+  -webkit-mask-image: radial-gradient(ellipse 60% 55% at 50% 28%, #000 20%, transparent 100%);
+  mask-image: radial-gradient(ellipse 60% 55% at 50% 28%, #000 20%, transparent 100%);
+}
+
+/* ---- the sky --------------------------------------------------------- */
+.fo-sky {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 48px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+@media (min-width: 1024px) { .fo-sky { grid-template-columns: 7fr 5fr; align-items: end; } }
 .fo-line {
   display: flex;
   flex-direction: column;
-  font-size: clamp(2.2rem, 4.8vw, 4.8rem);
-  line-height: 1.02;
-  letter-spacing: -0.05em;
+  font-size: clamp(2.6rem, 6.2vw, 6.4rem);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
 }
 .fo-line em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--corn); }
+.fo-cta { margin-top: 32px; }
 .fo-cols { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px 24px; }
 @media (min-width: 640px) { .fo-cols { grid-template-columns: repeat(3, 1fr); } }
 .fo-h { font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--steel); }
@@ -49,43 +80,245 @@
 .fo-link:focus-visible { outline: 2px solid var(--corn); outline-offset: 3px; border-radius: 2px; }
 .fo-link.is-off { color: var(--steel); cursor: default; }
 
-/* ---- the band -------------------------------------------------------- */
-.fo-band {
+/* ---- the land: the meadow ------------------------------------------- */
+/* Its top fades into the sky (the still's own transparency; a video gets
+   the same fade from the mask). Phones see a tall middle of it, the valley
+   and the stream. */
+/* phones and tablets: in order down the meadow, the label, the ticket, the
+   lockup over the flowers and the bottom line; desktop: the label and the
+   ticket on the horizon either side, the lockup between them */
+.fo-land {
   position: relative;
-  isolation: isolate;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  min-height: clamp(380px, 62svh, 720px);
-  max-width: 1344px;
-  margin: clamp(56px, 10svh, 120px) auto 0;
-  padding: 24px;
-  overflow: hidden;
-  border-radius: 28px;
-  color: var(--cloud);
+  margin-top: clamp(40px, 8vw, 72px);
 }
-@media (min-width: 768px) { .fo-band { padding: 32px; } }
-.fo-media { position: absolute; inset: 0; z-index: -1; background: #131523; }
-.fo-media video,
-.fo-media img { width: 100%; height: 100%; object-fit: cover; }
-.fo-media__dots {
+@media (min-width: 1024px) { .fo-land { display: block; min-height: max(680px, 50vw); margin-top: -2vw; } }
+.fo-media {
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(rgb(239 244 255 / 0.18) 1px, transparent 1.3px);
-  background-size: 18px 18px;
-  -webkit-mask-image: linear-gradient(180deg, transparent 20%, #000 100%);
-  mask-image: linear-gradient(180deg, transparent 20%, #000 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 30%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 30%);
 }
-.fo-mark__svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 10px 40px rgb(11 12 21 / 0.35)); }
+.fo-media img,
+.fo-media video { width: 100%; height: 100%; object-fit: cover; object-position: 54% 100%; }
+/* a shade over the low flowers, so the lockup and the bottom line read */
+.fo-land::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 52%, rgb(18 21 36 / 0.32) 82%, rgb(11 12 21 / 0.55) 100%);
+}
+
+/* Venty's phrases along a curve over the hills, drifting (SVG animate) */
+.fo-drift {
+  position: absolute;
+  left: 0;
+  top: 4%;
+  z-index: 1;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: var(--font-familjen), sans-serif;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  fill: var(--steel);
+  opacity: 0.8;
+  pointer-events: none;
+}
+@media (max-width: 1023px) { .fo-drift { display: none; } }
+
+/* ---- on the horizon: the label and the ticket ----------------------- */
+.fo-horizon {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+  padding: 0 var(--gutter);
+}
+@media (min-width: 1024px) {
+  .fo-horizon {
+    position: absolute;
+    inset: 9% 0 auto;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+}
+
+/* Made by Natalia: a woven label, sewn on at both ends */
+.fo-label {
+  position: relative;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  width: min(100%, 400px);
+  padding: 18px 30px;
+  rotate: -3deg;
+  color: var(--ink);
+  /* the weave: fine threads across */
+  background:
+    repeating-linear-gradient(0deg, rgb(18 21 36 / 0.035) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #f6f8ff, #e7ecfa);
+  box-shadow: var(--lie);
+  transition: rotate 0.8s var(--expo), translate 0.8s var(--expo);
+}
+@media (min-width: 1024px) { .fo-label { margin-top: 13vw; } }
+@media (hover: hover) { .fo-label:hover { rotate: -1.5deg; translate: 0 -4px; } }
+.fo-label:focus-visible { outline: 2px solid var(--corn); outline-offset: 4px; }
+/* the stitches: the pattern pieces' stitching line, down each end */
+.fo-label__stitch {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  width: 0;
+  border-left: 1.5px dashed var(--corn);
+  opacity: 0.8;
+}
+.fo-label__stitch.is-l { left: 11px; }
+.fo-label__stitch.is-r { right: 11px; }
+.fo-label__face {
+  position: relative;
+  display: block;
+  height: 112px;
+  overflow: hidden;
+  border-radius: 46px 46px 4px 4px;
+  background: #0b0c15;
+  box-shadow: inset 0 0 0 1px rgb(18 21 36 / 0.2);
+}
+.fo-label__face > * { position: absolute; inset: 0; }
+.fo-label__text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.fo-label__k { font-size: 11px; letter-spacing: -0.01em; text-transform: uppercase; color: var(--steel); }
+.fo-label__name { font-size: 26px; line-height: 1; letter-spacing: -0.045em; }
+.fo-label__name em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--corn); }
+.fo-label__role { font-size: 12px; letter-spacing: -0.01em; color: var(--steel); }
+.fo-label__url { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; font-size: 13px; letter-spacing: -0.01em; color: var(--corn); }
+.fo-label__url svg { width: 13px; height: 13px; }
+
+/* Vote for Venty: a ticket, taped on */
+.fo-vote {
+  position: relative;
+  width: min(100%, 380px);
+  padding: 30px 24px 22px;
+  border-radius: 4px;
+  rotate: 2.5deg;
+  background: var(--paper);
+  box-shadow: var(--lie);
+}
+.fo-tape {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 104px;
+  height: 26px;
+  translate: -50% 0;
+  rotate: -4deg;
+  background: rgb(104 126 245 / 0.34);
+  box-shadow: -1px 1px 1px rgb(30 44 78 / 0.12);
+  clip-path: polygon(3% 0, 97% 4%, 100% 100%, 0 94%);
+}
+.fo-vote__head { display: flex; align-items: center; gap: 12px; }
+.fo-vote__head .vote__mark { flex: none; width: 22px; height: auto; }
+.fo-vote__head p { display: flex; flex-direction: column; gap: 2px; font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--ink); }
+.fo-vote__head p span { text-transform: none; color: var(--steel); }
+/* the QUT mark builds as it arrives: the bars drop in, left to right, then
+   the square and the letters */
+.fo-vote [data-qut-bar],
+.fo-vote [data-square],
+.fo-vote [data-letter] { opacity: 0; translate: 0 -6px; transition: opacity 0.5s var(--expo), translate 0.8s var(--expo); }
+.fo-horizon.is-in .fo-vote [data-qut-bar],
+.fo-horizon.is-in .fo-vote [data-square],
+.fo-horizon.is-in .fo-vote [data-letter] { opacity: 1; translate: 0 0; }
+.fo-vote [data-qut-bar]:nth-of-type(1) { transition-delay: 0.5s; }
+.fo-vote [data-qut-bar]:nth-of-type(2) { transition-delay: 0.58s; }
+.fo-vote [data-qut-bar]:nth-of-type(3) { transition-delay: 0.66s; }
+.fo-vote [data-qut-bar]:nth-of-type(4) { transition-delay: 0.74s; }
+.fo-vote [data-square] { transition-delay: 0.8s; }
+.fo-vote [data-letter] { transition-delay: 0.95s; }
+.fo-vote__title { margin-top: 18px; font-weight: 400; font-size: clamp(2.4rem, 3.4vw, 3rem); line-height: 1; letter-spacing: -0.055em; }
+.fo-vote__title em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--corn); }
+/* the days to the festival: the numbers in Bigilla, between stitching lines */
+.fo-count { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 18px; }
+.fo-count span { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 0; }
+.fo-count span + span { border-left: 1.5px dashed rgb(104 126 245 / 0.45); }
+.fo-count b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: 30px; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.fo-count small { font-size: 11px; letter-spacing: -0.01em; color: var(--steel); }
+.fo-vote__when { margin-top: 12px; font-size: 13px; letter-spacing: -0.01em; color: var(--steel); }
+.fo-vote__go { display: flex; gap: 8px; margin-top: 18px; list-style: none; }
+.fo-vote__go li { flex: 1; }
+.fo-go {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 42px;
+  border-radius: 999px;
+  font-size: 14px;
+  letter-spacing: -0.02em;
+  color: var(--cloud);
+  background: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.35s var(--expo), translate 0.5s var(--expo);
+}
+.fo-go svg { width: 14px; height: 14px; }
+@media (hover: hover) { .fo-go:hover { background: var(--corn); translate: 0 -2px; } }
+.fo-go:focus-visible { outline: 2px solid var(--corn); outline-offset: 3px; }
+@media (min-width: 1024px) { .fo-vote { margin-top: 4vw; } }
+
+/* ---- the lockup over the flowers, and its bird ----------------------- */
+.fo-lockup {
+  position: absolute;
+  left: 50%;
+  bottom: max(96px, 13%);
+  z-index: 3;
+  width: clamp(200px, 26vw, 420px);
+  aspect-ratio: 2132 / 1786;
+  translate: -50% 0;
+  color: var(--cloud);
+}
+@media (max-width: 1023px) {
+  .fo-lockup { position: relative; left: auto; bottom: auto; translate: none; width: min(62vw, 320px); margin: clamp(120px, 34vw, 260px) auto 48px; }
+}
+.fo-lockup svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 10px 30px rgb(11 12 21 / 0.35));
+}
+.fo-lockup__mark { will-change: transform; }
+/* the bird waits off stage until it flies in (useLanding) */
+.fo-lockup.is-waiting .fo-lockup__mark { opacity: 0; }
+
 .fo-bottom {
+  position: relative;
+  margin: 0 var(--gutter);
+  z-index: 3;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid rgb(239 244 255 / 0.2);
+  padding: 16px 0 20px;
+  border-top: 1px solid rgb(239 244 255 / 0.25);
   font-size: 13px;
   letter-spacing: -0.01em;
-  color: rgb(239 244 255 / 0.8);
+  color: rgb(239 244 255 / 0.85);
 }
 @media (min-width: 768px) { .fo-bottom { flex-direction: row; justify-content: space-between; } }
+@media (min-width: 1024px) { .fo-bottom { position: absolute; left: var(--gutter); right: var(--gutter); bottom: 0; margin: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .fo *,
+  .fo *::before,
+  .fo *::after {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+}

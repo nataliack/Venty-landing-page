@@ -38,12 +38,12 @@ const HIDE: [selector: string, on: "phone" | "desktop" | "all"][] = [
   ["#faq", "phone"],
   ["#maker", "phone"],
   ["#table", "phone"],
-  ["footer", "phone"],
+  ["footer", "all"], // the footer has its own, bigger Vote for Venty
 ];
 
 /* The QUT mark, in parts so it can build: four bars, the square, and the
    letters Q, U and T (the original artwork, with Q and T split apart) */
-function QutMark() {
+export function QutMark() {
   return (
     <svg
       width="26"

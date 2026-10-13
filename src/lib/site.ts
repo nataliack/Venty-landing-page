@@ -20,8 +20,10 @@ export const VOTE_LINKS: { label: string; href: string }[] = [
   { label: "VisCom", href: "" },
 ];
 
-/* The footer's media band: a video (or an image) behind the wordmark. Empty
-   until it is made; the light sky (Crown) stands in. e.g. "/footer/loop.mp4" */
+/* The footer's meadow: Jose's field of cornflowers moving in the wind, as a
+   video, once it is made (e.g. "/footer/meadow.mp4"); its top fades into
+   the sky by a mask, so it needs no transparency. Until then the still
+   (public/footer/meadow.webp) stands in. */
 export const FOOTER_MEDIA = "";
 
 /* The footer's About and Legal links. Empty until the pages exist; they

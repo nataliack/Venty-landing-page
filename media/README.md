@@ -91,6 +91,15 @@ even pace with no frame shown twice, bridges the two joints with blended
 frames, and writes 720 × 720 WebP frames on her, with a manifest
 (`back` is the frame of her back), into `public/features/turn/`.
 
+## Footer
+
+`footer/meadow-master.webp` (2000 × 866, transparent above the hills) is
+the footer's meadow; the site's copies are `public/footer/meadow.webp`
+(2000) and `meadow-1200.webp`, WebP with alpha. The video of the flowers
+in the wind, when it exists, goes in `public/footer/` and its path in
+`FOOTER_MEDIA` (`src/lib/site.ts`). `footer/mockup.webp` is Jose's
+mockup of the idea.
+
 ## People
 
 `people/natalia-chamon.webp` is the master portrait of Natalia Chamon

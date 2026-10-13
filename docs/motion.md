@@ -162,6 +162,8 @@ and one shader (`DitherEdge`, `getRenderer`).
 | FAQ → Meet the maker | night | the FAQ's empty foot |
 | Closing scene → footer | cloud | the held last line |
 
+The footer ends the bird's journey: when its lockup (white, over the meadow) comes into view, the mark flies in from beyond the right edge along the loading screen's way in (`ENTER_PATH`, 2.6s) and lands in its place, where at the top of the page it flew out of the loader's lockup. Venty's phrases drift along a curve over the hills (an SVG `animate` on the text's start, 60s a loop); the Vote ticket's QUT mark builds as the horizon reveals.
+
 A pinned section that something rises over holds one extra screen, still, at
 its end. Without a pin (phones, the FAQ), the band rises through empty room
 left at the foot of the section before (about 42svh), never over content.

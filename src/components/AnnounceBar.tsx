@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FESTIVAL_AT, MAKER_URL } from "@/lib/site";
+import { useCountdown } from "@/lib/useCountdown";
 
 /* The announcement bar across the top of the hero: who made Venty (to her
    site), a countdown to the QUT Design Festival, and a line that rolls
@@ -24,25 +25,13 @@ const ROLL_MS = 3600;
 const pad = (n: number) => String(n).padStart(2, "0");
 
 function Countdown() {
-  // empty until mounted: the server cannot know the visitor's clock
-  const [left, setLeft] = useState<number | null>(null);
-
-  useEffect(() => {
-    const at = new Date(FESTIVAL_AT).getTime();
-    const tick = () => setLeft(Math.max(0, at - Date.now()));
-    tick();
-    const id = window.setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  if (left === 0) return <span className="announce__time">Now on</span>;
-
-  const s = left === null ? null : Math.floor(left / 1000);
+  const left = useCountdown();
+  if (left?.over) return <span className="announce__time">Now on</span>;
   const parts: [number | null, string][] = [
-    [s === null ? null : Math.floor(s / 86400), "d"],
-    [s === null ? null : Math.floor(s / 3600) % 24, "h"],
-    [s === null ? null : Math.floor(s / 60) % 60, "m"],
-    [s === null ? null : s % 60, "s"],
+    [left?.d ?? null, "d"],
+    [left?.h ?? null, "h"],
+    [left?.m ?? null, "m"],
+    [left?.s ?? null, "s"],
   ];
   return (
     <time className="announce__time" dateTime={FESTIVAL_AT}>
