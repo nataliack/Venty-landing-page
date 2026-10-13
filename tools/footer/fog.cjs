@@ -46,7 +46,7 @@ for (let y = 0; y < H; y++) {
     n /= total;
     // soft threshold: wisps, with clear sky between them
     const t = Math.min(1, Math.max(0, (n - 0.33) / 0.44));
-    const a = t * t * (3 - 2 * t) * band;
+    const a = Math.min(1, t * t * (3 - 2 * t) * band * 1.5);
     const p = (y * W + x) * 4;
     out[p] = 246;
     out[p + 1] = 248;

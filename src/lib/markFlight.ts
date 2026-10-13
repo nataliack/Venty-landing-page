@@ -486,8 +486,9 @@ export type RouteOptions = {
   start?: Waypoint;
   /** seconds from start to touching down */
   duration: number;
-  /** "out": already flying as it starts (an entrance) and slowing in; "in-out": from rest to rest */
-  ease?: "out" | "in-out";
+  /** "out": already flying as it starts (an entrance) and slowing in; "in-out": from rest to rest;
+      "land": flying in at full speed, a short flare at the end; "launch": slow off the ground, building */
+  ease?: "out" | "in-out" | "land" | "launch";
   /** which way it faces at the start: 0 right (the mark), 180 left */
   facing?: number;
   /** wingbeats per second */
@@ -564,7 +565,26 @@ export function flightRoute(o: RouteOptions) {
     const b = pointAt(Math.max(0, s - 0.004));
     return Math.atan2(a[1] - b[1], a[0] - b[0]);
   };
-  const progress = (u: number) => (ease === "out" ? outEase(u) : inOut(u));
+  // land: already flying, at full speed until the last fifth, then a short
+  // flare down to a soft touchdown; launch: from rest, slow off the ground,
+  // building to full speed. Both from a speed profile, integrated.
+  const profile = ease === "land" ? (u: number) => 1 - 0.88 * smooth((u - 0.8) / 0.2) : ease === "launch" ? (u: number) => 0.22 + 0.78 * smooth(u / 0.42) : null;
+  const table: number[] = [];
+  if (profile) {
+    let sum = 0;
+    for (let i = 0; i <= 400; i++) {
+      table.push(sum);
+      sum += profile((i + 0.5) / 400);
+    }
+    for (let i = 0; i < table.length; i++) table[i] /= table[400];
+  }
+  const fromTable = (u: number) => {
+    const x = clamp01(u) * 400;
+    const i = Math.min(399, Math.floor(x));
+    return table[i] + (table[i + 1] - table[i]) * (x - i);
+  };
+  const inFlight = ease === "out" || ease === "land"; // already flying as it starts
+  const progress = (u: number) => (profile ? fromTable(u) : ease === "out" ? outEase(u) : inOut(u));
 
   // the turns: wherever the way across flips (with some give, so a wobble
   // does not set one off), starting a little before; the last must leave it
@@ -607,9 +627,10 @@ export function flightRoute(o: RouteOptions) {
       // off it head first: the head finds the new angle and the body follows
       const line = (wrap(way - BODY_ANGLE) * 180) / Math.PI;
       const heading: number | Turn =
-        ease !== "out" && u < 0.12 ? { from: 0, to: line, t: u / 0.12 } : u > 0.84 ? (u >= 1 ? 0 : { from: line, to: 0, t: (u - 0.84) / 0.16 }) : line;
+        !inFlight && u < 0.12 ? { from: 0, to: line, t: u / 0.12 } : u > 0.84 ? (u >= 1 ? 0 : { from: line, to: 0, t: (u - 0.84) / 0.16 }) : line;
       // the wings: beating from the start (or growing from rest), still before it touches down
-      const amp = (ease === "out" ? 1 : smooth(u / 0.12)) * (1 - smooth((u - 0.72) / 0.26));
+      // (landing, they beat on through the flare and fold as it touches down)
+      const amp = (inFlight ? 1 : smooth(u / 0.12)) * (1 - (ease === "land" ? smooth((u - 0.86) / 0.14) : smooth((u - 0.72) / 0.26)));
       const pose = flightPose(time * rate, amp, { turn, heading, axis: (way * 180) / Math.PI, head: 0.45 });
       return { x: c[0] - origin[0] - scale * centre[0], y: c[1] - origin[1] - scale * centre[1], scale, pose, done: time >= end };
     },

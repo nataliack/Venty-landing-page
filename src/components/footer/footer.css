@@ -63,7 +63,7 @@
 .fo-line em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; }
 .fo-sections { margin-top: clamp(48px, 8svh, 88px); }
 .fo-sections ul { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 28px; list-style: none; }
-.fo-social { display: flex; justify-content: center; gap: 10px; margin-top: 20px; list-style: none; }
+.fo-social { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 20px; list-style: none; }
 .fo-cta { margin-top: clamp(36px, 5svh, 52px); }
 .fo-link {
   position: relative;
@@ -79,13 +79,16 @@
   .fo-link:hover span { background-size: 100% 1px; }
 }
 .fo-link:focus-visible { outline: 2px solid var(--corn); outline-offset: 3px; border-radius: 2px; }
-/* the socials: round glass buttons, the icon in ink */
+/* the socials: glass pills, the icon and its name */
 .fo-icon {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px 0 13px;
+  border-radius: 999px;
+  font-size: 14px;
+  letter-spacing: -0.02em;
   color: var(--ink);
   background: rgb(255 255 255 / 0.62);
   border: 1px solid var(--line);
@@ -95,9 +98,9 @@
   cursor: pointer;
   transition: color 0.35s var(--expo), translate 0.5s var(--expo);
 }
-.fo-icon svg { width: 18px; height: 18px; }
+.fo-icon svg { width: 16px; height: 16px; color: var(--steel); transition: color 0.35s var(--expo); }
 .fo-icon[aria-disabled="true"] { cursor: default; }
-@media (hover: hover) { .fo-icon:not([aria-disabled="true"]):hover { color: var(--corn); translate: 0 -2px; } }
+@media (hover: hover) { .fo-icon:not([aria-disabled="true"]):hover { color: var(--corn); translate: 0 -2px; } .fo-icon:not([aria-disabled="true"]):hover svg { color: var(--corn); } }
 .fo-icon:focus-visible { outline: 2px solid var(--corn); outline-offset: 3px; }
 
 /* ---- the land: the meadow ------------------------------------------- */
@@ -153,7 +156,7 @@
    by side, slid by one width, forever) */
 .fo-fog {
   position: absolute;
-  inset: 6% 0 auto;
+  inset: 16% 0 auto;
   z-index: 1;
   height: 46%;
   overflow: hidden;
@@ -167,11 +170,14 @@
   will-change: transform;
   animation: fo-drift linear infinite;
 }
-.fo-fog__bank.is-far { top: 8%; height: 60%; opacity: 0.55; animation-duration: 140s; }
-.fo-fog__bank.is-near { top: 34%; height: 70%; opacity: 0.42; transform: scaleY(-1); animation-duration: 90s; animation-direction: reverse; }
+/* high over the far hills, across their middle, and lying low over the far
+   meadow and the stream */
+.fo-fog__bank.is-far { top: 0; height: 52%; opacity: 0.85; animation-duration: 150s; }
+.fo-fog__bank.is-mid { top: 22%; height: 56%; opacity: 0.9; transform: scaleY(-1); animation-duration: 100s; animation-direction: reverse; }
+.fo-fog__bank.is-near { top: 52%; height: 44%; opacity: 0.7; animation-duration: 70s; }
 @keyframes fo-drift { from { translate: 0 0; } to { translate: -50% 0; } }
 @media (max-width: 1023px) {
-  .fo-fog { inset: 22% 0 auto; height: 34%; }
+  .fo-fog { inset: 26% 0 auto; height: 30%; }
 }
 @media (prefers-reduced-motion: reduce) { .fo-fog__bank { animation: none; } }
 

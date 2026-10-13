@@ -21,7 +21,7 @@ import "./footer.css";
    of the closing scene with the site's edge.
 
    In the sky, one centred column: the line, the page's sections, Natalia's
-   socials (as icons), then the button.
+   socials (each with its icon), then the button.
    On the horizon, level, two panels of frosted glass (the Made to measure
    composer's): Made by Natalia (her portrait in dots in a night arch, as in
    The designer) and Vote for Venty (the QUT mark, its bars coming down from
@@ -70,7 +70,7 @@ function Arrow() {
   );
 }
 
-/* ---- Natalia's socials, as icons ---------------------------------------- */
+/* ---- Natalia's socials, each with its icon -------------------------------- */
 const ICONS: Record<(typeof SOCIAL_LINKS)[number]["icon"], React.ReactNode> = {
   linkedin: (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -101,13 +101,15 @@ function Socials() {
       {SOCIAL_LINKS.map((s) => (
         <li key={s.label}>
           {s.href ? (
-            <a href={s.href} className="fo-icon" aria-label={s.label} title={s.label} {...(/^(mailto|tel):/.test(s.href) ? {} : { target: "_blank", rel: "noopener noreferrer" })}>
+            <a href={s.href} className="fo-icon" {...(/^(mailto|tel):/.test(s.href) ? {} : { target: "_blank", rel: "noopener noreferrer" })}>
               {ICONS[s.icon]}
+              <span>{s.label}</span>
             </a>
           ) : (
             // not given yet: shows, goes nowhere
-            <a role="link" aria-disabled="true" aria-label={`${s.label} (coming soon)`} title={`${s.label} (coming soon)`} className="fo-icon">
+            <a role="link" aria-disabled="true" title="Coming soon" className="fo-icon">
               {ICONS[s.icon]}
+              <span>{s.label}</span>
             </a>
           )}
         </li>
@@ -167,13 +169,14 @@ function Meadow() {
   );
 }
 
-/* the fog over the hills: two banks of mist (one texture, tools/footer/fog.cjs,
+/* the fog over the hills: three banks of mist (one texture, tools/footer/fog.cjs,
    seamless left to right), drifting at different heights, sizes and speeds,
    each band faded out above and below */
 function Fog() {
   return (
     <div className="fo-fog" aria-hidden="true">
       <span className="fo-fog__bank is-far" />
+      <span className="fo-fog__bank is-mid" />
       <span className="fo-fog__bank is-near" />
     </div>
   );
@@ -264,8 +267,10 @@ function Vote() {
 /* ---- the bird -------------------------------------------------------------- */
 /* While the lockup is on screen the bird comes and goes, always left to
    right, the way it faces (so it never turns round): it glides in from
-   beyond the left edge (FOOTER_IN) onto its place in the lockup, rests,
-   lifts away beyond the right edge (FOOTER_OUT), and after a while comes in
+   beyond the left edge (FOOTER_IN) onto its place in the lockup, keeping
+   its speed until a short flare at the end, as a bird lands; rests; lifts
+   away beyond the right edge (FOOTER_OUT), slow off the ground and
+   building speed, and after a while comes in
    from the left again. It flies over the sky's words and behind the panels.
    Cornflower in the air; as it settles it turns the wordmark's white, and
    back to cornflower as it lifts off. Each flight is planned from where
@@ -308,13 +313,13 @@ function useBird(box: React.RefObject<HTMLDivElement | null>, mark: React.RefObj
     const rest: Place = { x: 0, y: 0, scale: 1 };
     const flyIn = () => {
       const { g } = geometry();
-      return flightRoute({ ...g, from: rest, to: rest, start: FOOTER_IN[0], via: FOOTER_IN.slice(1), duration: 2.8, ease: "out", facing: 0 });
+      return flightRoute({ ...g, from: rest, to: rest, start: FOOTER_IN[0], via: FOOTER_IN.slice(1), duration: 2.4, ease: "land", facing: 0 });
     };
     const flyOut = () => {
       const { r, g } = geometry();
       // away: beyond the right edge, high in the sky
       const to: Place = { x: window.innerWidth + g.width - r.left - g.centre[0], y: window.innerHeight * 0.1 - r.top - g.centre[1], scale: 1 };
-      return flightRoute({ ...g, from: rest, to, via: FOOTER_OUT, duration: 2.6, facing: 0 });
+      return flightRoute({ ...g, from: rest, to, via: FOOTER_OUT, duration: 2.6, ease: "launch", facing: 0 });
     };
 
     let dead = false;
