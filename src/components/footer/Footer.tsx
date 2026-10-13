@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { DitherEdge } from "../DitherEdge";
 import { PrimaryButton } from "../PrimaryButton";
 import { QutMark } from "../VoteTab";
 import { Halftone } from "../maker/Halftone";
 import { scrollToElement } from "../SmoothScroll";
-import { APP_URL, CTA_LABEL, FESTIVAL_AT, MAKER_URL, VOTE_LINKS } from "@/lib/site";
-import { ENTER_PATH, LEAVE_PATH, MARK, MARK_BOUNDS, MARK_CENTRE, flightRoute } from "@/lib/markFlight";
+import { APP_URL, CTA_LABEL, FESTIVAL_AT, MAKER_URL, SOCIAL_LINKS, VOTE_LINKS } from "@/lib/site";
+import { FOOTER_IN, FOOTER_OUT, MARK, MARK_BOUNDS, MARK_CENTRE, flightRoute, type Place } from "@/lib/markFlight";
 import { LOCKUP, WORD } from "@/lib/lockup";
 import { useCountdown } from "@/lib/useCountdown";
 import { useReveals } from "@/lib/useReveals";
@@ -16,47 +16,29 @@ import "./footer.css";
 
 /* The footer (light). A sky that ends in a meadow: Jose's field of
    cornflowers under misty hills, the grass moving in the wind (a video, on
-   a seamless loop; Meadow below), its top fading into the cloud above. It rises over the held end of the closing scene with
-   the site's edge.
+   a seamless loop; Meadow below), its top fading into the cloud above. It
+   rises over the held end of the closing scene with the site's edge.
 
-   In the sky: the line and the button, the page's sections, and a line of
-   Venty's own phrases running along a curve over the hills (the way type
-   runs round Natalia's portrait).
-   On the horizon, half in the sky and half over the hills, two things on
-   paper, in the language of the pieces and the table:
-     Vote for Venty   a ticket taped on: the QUT mark building in, the
-                      People's Choice Award, the days to the festival, a
-                      link to vote per discipline
-     Made by Natalia  a woven label sewn on (stitched at both ends): her
-                      portrait in dots in a night arch, as in Meet the
-                      maker, and her name
-   Over the flowers: the Venty lockup in white. Its bird is not there at
-   first: when the lockup comes into view, it flies in from beyond the right
-   edge along the loading screen's way in (ENTER_PATH) and lands in its
-   place, the end of the journey it started at the top of the page; then it
-   keeps coming and going (useBird). */
+   In the sky, one centred column: the line, the button, the page's sections
+   in a row and Natalia's socials under them; and a line of Venty's own
+   phrases running along a curve over the hills.
+   On the horizon, level, two panels of frosted glass (the Made to measure
+   composer's): Made by Natalia (her portrait in dots in a night arch, as in
+   The designer) and Vote for Venty (the QUT mark building in, the People's
+   Choice Award, the days to the festival, a link to vote per discipline).
+   Over the flowers: the Venty lockup in white, its bird in cornflower. The
+   bird comes and goes, flying over the sky's words and behind the panels;
+   tap it while it rests and it bursts into a flock that scatters into the
+   distance (useBird). */
 
 type L = { label: string; href: string };
-const COLS: { h: string; items: L[] }[] = [
-  {
-    h: "Explore",
-    items: [
-      { label: "Made to measure", href: "#measure" },
-      { label: "How it works", href: "#how" },
-      { label: "Features", href: "#features" },
-      { label: "What you can make", href: "#make" },
-      { label: "On the line", href: "#made" },
-      { label: "FAQ", href: "#faq" },
-    ],
-  },
-  {
-    // who made it, and how to reach her (her site is the way in)
-    h: "Natalia Chamon",
-    items: [
-      { label: "The designer", href: "#maker" },
-      { label: "nataliachamon.com", href: MAKER_URL },
-    ],
-  },
+const SECTIONS: L[] = [
+  { label: "Made to measure", href: "#measure" },
+  { label: "How it works", href: "#how" },
+  { label: "Features", href: "#features" },
+  { label: "What you can make", href: "#make" },
+  { label: "On the line", href: "#made" },
+  { label: "FAQ", href: "#faq" },
 ];
 
 /* along the curve over the hills: the announcement bar's lines */
@@ -67,11 +49,12 @@ const pad = (n: number) => String(n).padStart(2, "0");
 function FLink({ label, href }: L) {
   if (!href)
     return (
-      <a role="link" aria-disabled="true" className="fo-link is-off">
-        {label}
+      <a role="link" aria-disabled="true" title="Coming soon" className="fo-link is-off">
+        <span>{label}</span>
       </a>
     );
   const inPage = href.startsWith("#");
+  const mail = href.startsWith("mailto:");
   return (
     <a
       href={href}
@@ -83,7 +66,7 @@ function FLink({ label, href }: L) {
         e.preventDefault();
         scrollToElement(t);
       }}
-      {...(inPage ? {} : { target: "_blank", rel: "noopener noreferrer" })}
+      {...(inPage || mail ? {} : { target: "_blank", rel: "noopener noreferrer" })}
     >
       <span>{label}</span>
     </a>
@@ -149,7 +132,30 @@ function Meadow() {
   );
 }
 
-/* ---- Vote for Venty: a ticket, taped on -------------------------------- */
+/* ---- Made by Natalia --------------------------------------------------- */
+function Maker() {
+  return (
+    <a data-up href={MAKER_URL} target="_blank" rel="noopener noreferrer" className="fo-panel fo-maker">
+      <span className="fo-maker__face">
+        <Halftone src="/maker/natalia.webp" label="Portrait of Natalia Chamon, drawn in dots" />
+      </span>
+      <span className="fo-maker__text">
+        <span className="fo-k">Made by</span>
+        <span className="fo-maker__name">
+          Natalia <em>Chamon</em>
+        </span>
+        <span className="fo-maker__role">Designer of Venty · QUT, Brisbane</span>
+        <span className="fo-maker__url">
+          nataliachamon.com
+          <Arrow />
+        </span>
+      </span>
+      <span className="sr-only">(opens in a new tab)</span>
+    </a>
+  );
+}
+
+/* ---- Vote for Venty ---------------------------------------------------- */
 function Vote() {
   const left = useCountdown();
   const parts: [string, number | undefined][] = [
@@ -159,8 +165,7 @@ function Vote() {
     ["sec", left?.s],
   ];
   return (
-    <section data-up className="fo-vote" aria-labelledby="fo-vote-title">
-      <span className="fo-tape" aria-hidden="true" />
+    <section data-up className="fo-panel fo-vote" aria-labelledby="fo-vote-title">
       <div className="fo-vote__head">
         <QutMark />
         <p>
@@ -208,60 +213,77 @@ function Vote() {
   );
 }
 
-/* ---- Made by Natalia: a woven label, sewn on ----------------------------- */
-function Label() {
-  return (
-    <a data-up href={MAKER_URL} target="_blank" rel="noopener noreferrer" className="fo-label">
-      <span className="fo-label__stitch is-l" aria-hidden="true" />
-      <span className="fo-label__stitch is-r" aria-hidden="true" />
-      <span className="fo-label__face">
-        <Halftone src="/maker/natalia.webp" label="Portrait of Natalia Chamon, drawn in dots" />
-      </span>
-      <span className="fo-label__text">
-        <span className="fo-label__k">Made by</span>
-        <span className="fo-label__name">
-          Natalia <em>Chamon</em>
-        </span>
-        <span className="fo-label__role">Designer of Venty · QUT, Brisbane</span>
-        <span className="fo-label__url">
-          nataliachamon.com
-          <Arrow />
-        </span>
-      </span>
-      <span className="sr-only">(opens in a new tab)</span>
-    </a>
-  );
+/* ---- the bird -------------------------------------------------------------- */
+/* While the lockup is on screen the bird comes and goes: it glides in from
+   beyond the right edge (FOOTER_IN) onto its place in the lockup, rests,
+   lifts away beyond the left edge (FOOTER_OUT), and after a while comes in
+   again. It flies over the sky's words and behind the panels. Each flight is
+   planned from where everything is as it starts.
+   Tap it while it rests and it bursts into a flock: it and FLOCK more birds
+   scatter from its place across the sky, each shrinking into the distance
+   and fading as it goes; then, as always, it comes home. */
+const REST_S = 7; // resting in the lockup
+const AWAY_S = 4; // gone, before it comes back
+const FLOCK = 9;
+
+type Route = ReturnType<typeof flightRoute>;
+type Bird = { svg: SVGSVGElement; whole: SVGPathElement; parts: SVGPathElement[] };
+
+/** a bird's svg: the whole mark at rest, its pieces in flight */
+function bird(svg: SVGSVGElement): Bird {
+  return {
+    svg,
+    whole: svg.querySelector<SVGPathElement>("[data-whole]")!,
+    parts: ["body", "far", "near"].map((k) => svg.querySelector<SVGPathElement>(`[data-piece="${k}"]`)!),
+  };
+}
+/** draws a bird at a moment of its route */
+function drawBird(b: Bird, at: ReturnType<Route["at"]>) {
+  gsap.set(b.svg, { x: at.x, y: at.y, scale: at.scale });
+  b.parts[0].setAttribute("d", at.pose.body);
+  b.parts[1].setAttribute("d", at.pose.far);
+  b.parts[2].setAttribute("d", at.pose.near);
+  b.whole.style.display = at.done ? "" : "none";
+  for (const p of b.parts) p.style.display = at.done ? "none" : "";
+}
+/** flies a bird along a route; resolves when it is there */
+function fly(b: Bird, route: Route, track: (t: gsap.core.Tween) => void, onFrame?: (time: number) => void) {
+  return new Promise<void>((ok) => {
+    drawBird(b, route.at(0));
+    const clock = { t: 0 };
+    track(
+      gsap.to(clock, {
+        t: route.total,
+        duration: route.total,
+        ease: "none",
+        onUpdate: () => {
+          drawBird(b, route.at(clock.t));
+          onFrame?.(clock.t);
+        },
+        onComplete: () => {
+          drawBird(b, route.at(route.total));
+          ok();
+        },
+      }),
+    );
+  });
 }
 
-/* ---- the lockup, and its bird coming and going --------------------------- */
-/* While the lockup is on screen, the bird keeps coming home: it flies in
-   from beyond the right edge (the loading screen's way in) and lands in its
-   place; rests a while; takes off, curls up over the lockup and flies out
-   beyond the left edge; and a little later comes in from the right again.
-   Each flight is planned from where everything is as it starts. It flies in
-   steel, so it shows against the light sky, and settles to the lockup's
-   cloud as it lands (and back to steel as it takes off). */
-const REST_S = 3.5; // resting in the lockup
-const AWAY_S = 1.4; // gone, before it comes back
-const STEEL = "#485f88";
-const CLOUD = "#eff4ff";
+function useBird(box: React.RefObject<HTMLDivElement | null>, mark: React.RefObject<SVGSVGElement | null>, flock: React.RefObject<HTMLDivElement | null>) {
+  const [resting, setResting] = useState(false);
+  const release = useRef<() => void>(() => {});
 
-function useBird(box: React.RefObject<HTMLDivElement | null>, mark: React.RefObject<SVGSVGElement | null>) {
   useEffect(() => {
     const b = box.current;
     const m = mark.current;
-    if (!b || !m) return;
+    const nest = flock.current;
+    if (!b || !m || !nest) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       b.classList.remove("is-waiting");
       return;
     }
-    const whole = m.querySelector<SVGPathElement>("[data-whole]")!;
-    const [body, far, near] = ["body", "far", "near"].map((k) => m.querySelector<SVGPathElement>(`[data-piece="${k}"]`)!);
-    const pieces = (on: boolean) => {
-      whole.style.display = on ? "none" : "";
-      for (const p of [body, far, near]) p.style.display = on ? "" : "none";
-    };
-    gsap.set(m, { transformOrigin: "0 0", color: STEEL });
+    const home = bird(m);
+    gsap.set(m, { transformOrigin: "0 0" });
 
     // its place in the lockup (the mark's svg fills the lockup's box exactly)
     const geometry = () => {
@@ -277,21 +299,24 @@ function useBird(box: React.RefObject<HTMLDivElement | null>, mark: React.RefObj
         },
       };
     };
-    const rest = { x: 0, y: 0, scale: 1 };
+    const rest: Place = { x: 0, y: 0, scale: 1 };
+    /** a place on the screen (px), as a place for the svg at a scale */
+    const at = (r: DOMRect, centre: [number, number], px: number, py: number, scale: number): Place => ({ x: px - r.left - centre[0] * scale, y: py - r.top - centre[1] * scale, scale });
     const flyIn = () => {
       const { g } = geometry();
-      return flightRoute({ ...g, from: rest, to: rest, start: ENTER_PATH[0], via: ENTER_PATH.slice(1), duration: 2.6, ease: "out", facing: 180 });
+      return flightRoute({ ...g, from: rest, to: rest, start: FOOTER_IN[0], via: FOOTER_IN.slice(1), duration: 2.8, ease: "out", facing: 180 });
     };
     const flyOut = () => {
       const { r, g } = geometry();
-      // away: beyond the left edge, high in the sky
-      const end: [number, number] = [-g.width, window.innerHeight * 0.14];
-      const to = { x: end[0] - r.left - g.centre[0], y: end[1] - r.top - g.centre[1], scale: 1 };
-      return flightRoute({ ...g, from: rest, to, via: LEAVE_PATH, duration: 2.4 });
+      return flightRoute({ ...g, from: rest, to: at(r, g.centre, -g.width, window.innerHeight * 0.1, 1), via: FOOTER_OUT, duration: 2.6 });
     };
 
     let dead = false;
-    let tween: gsap.core.Tween | null = null;
+    const tweens = new Set<gsap.core.Tween>();
+    const track = (t: gsap.core.Tween) => {
+      tweens.add(t);
+      t.eventCallback("onInterrupt", () => tweens.delete(t));
+    };
     let visible = false;
     let wake: (() => void) | null = null;
     const io = new IntersectionObserver(
@@ -306,46 +331,71 @@ function useBird(box: React.RefObject<HTMLDivElement | null>, mark: React.RefObj
     );
     io.observe(b);
     const onScreen = () => (visible ? Promise.resolve() : new Promise<void>((ok) => (wake = ok)));
-    const wait = (s: number) => new Promise<void>((ok) => (tween = gsap.delayedCall(s, ok) as unknown as gsap.core.Tween));
-    const play = (route: ReturnType<typeof flightRoute>) =>
+    /** a pause, which a tap can cut short */
+    let cut: (() => void) | null = null;
+    const pause = (s: number) =>
       new Promise<void>((ok) => {
-        const draw = (t: number) => {
-          const at = route.at(t);
-          gsap.set(m, { x: at.x, y: at.y, scale: at.scale });
-          body.setAttribute("d", at.pose.body);
-          far.setAttribute("d", at.pose.far);
-          near.setAttribute("d", at.pose.near);
-          pieces(!at.done);
-        };
-        draw(0);
-        const clock = { t: 0 };
-        tween = gsap.to(clock, {
-          t: route.total,
-          duration: route.total,
-          ease: "none",
-          onUpdate: () => draw(clock.t),
-          onComplete: () => {
-            pieces(false);
-            ok();
-          },
+        const call = gsap.delayedCall(s, () => {
+          cut = null;
+          ok();
         });
+        cut = () => {
+          call.kill();
+          cut = null;
+          ok();
+        };
       });
+
+    // the flock: birds made on the spot, each from its place in the lockup
+    // out into the distance, and gone
+    const scatter = () => {
+      const { r, g } = geometry();
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+      for (let i = 0; i < FLOCK; i++) {
+        const svg = m.cloneNode(true) as SVGSVGElement;
+        svg.removeAttribute("id");
+        svg.classList.add("fo-flock__bird");
+        if (i % 3 === 2) svg.classList.add("is-far");
+        nest.appendChild(svg);
+        gsap.set(svg, { transformOrigin: "0 0" });
+        const side = i % 2 ? 1 : -1;
+        const scale = gsap.utils.random(0.12, 0.32);
+        const end = at(r, g.centre, W * (0.5 + side * gsap.utils.random(0.15, 0.62)), H * gsap.utils.random(0.02, 0.3), scale);
+        const route = flightRoute({
+          ...g,
+          from: rest,
+          to: end,
+          via: [{ space: "from", x: side * gsap.utils.random(0.2, 1.4), y: -gsap.utils.random(0.5, 1.6) }],
+          duration: gsap.utils.random(2.2, 3.4),
+          rate: gsap.utils.random(2.4, 3.4),
+        });
+        const one = bird(svg);
+        // each fades as it reaches the distance
+        const fade = (t: number) => (svg.style.opacity = String(1 - gsap.utils.clamp(0, 1, (t / route.total - 0.7) / 0.3)));
+        fly(one, route, track, fade).then(() => svg.remove());
+      }
+    };
+    release.current = () => {
+      if (!cut) return; // only while it rests
+      scatter();
+      cut();
+    };
 
     (async () => {
       await onScreen();
       if (dead) return;
       b.classList.remove("is-waiting");
       while (!dead) {
-        const inn = flyIn();
-        gsap.set(m, { color: STEEL });
-        gsap.to(m, { color: CLOUD, duration: 0.7, delay: Math.max(0, inn.total - 0.8), ease: "sine.inOut" });
-        await play(inn);
-        await wait(REST_S);
+        await fly(home, flyIn(), track);
+        if (dead) return;
+        setResting(true);
+        await pause(REST_S);
+        setResting(false);
         await onScreen();
         if (dead) return;
-        gsap.to(m, { color: STEEL, duration: 0.5, ease: "sine.inOut" });
-        await play(flyOut());
-        await wait(AWAY_S);
+        await fly(home, flyOut(), track);
+        await pause(AWAY_S);
         await onScreen();
       }
     })();
@@ -353,57 +403,65 @@ function useBird(box: React.RefObject<HTMLDivElement | null>, mark: React.RefObj
     return () => {
       dead = true;
       io.disconnect();
-      tween?.kill();
-      gsap.killTweensOf(m);
+      tweens.forEach((t) => t.kill());
+      nest.replaceChildren();
+      release.current = () => {};
     };
-  }, [box, mark]);
+  }, [box, mark, flock]);
+
+  return { resting, release: () => release.current() };
 }
+
+/* ---- the footer -------------------------------------------------------- */
 
 export function Footer() {
   const root = useRef<HTMLElement>(null);
   const lockup = useRef<HTMLDivElement>(null);
   const mark = useRef<SVGSVGElement>(null);
+  const flock = useRef<HTMLDivElement>(null);
   useReveals(root);
-  useBird(lockup, mark);
+  const { resting, release } = useBird(lockup, mark, flock);
 
   return (
     <footer ref={root} id="footer" data-theme-zone="light" data-theme-at="top 35%" className="fo">
       <DitherEdge color="#eff4ff" />
       <span className="fo-dots" aria-hidden="true" />
 
-      {/* the sky */}
-      <div className="fo-sky">
-        <div className="fo-say" data-reveal>
-          <p className="fo-line">
-            <span className="line-mask">
-              <span data-rise className="block">
-                Sewing patterns
-              </span>
+      {/* the sky: one centred column */}
+      <div className="fo-sky" data-reveal>
+        <p className="fo-line">
+          <span className="line-mask">
+            <span data-rise className="block">
+              Sewing patterns
             </span>
-            <span className="line-mask">
-              <span data-rise className="block">
-                drafted <em>to your body.</em>
-              </span>
+          </span>
+          <span className="line-mask">
+            <span data-rise className="block">
+              drafted <em>to your body.</em>
             </span>
-          </p>
-          <div data-up className="fo-cta">
-            <PrimaryButton href={APP_URL}>{CTA_LABEL}</PrimaryButton>
-          </div>
+          </span>
+        </p>
+        <div data-up className="fo-cta">
+          <PrimaryButton href={APP_URL}>{CTA_LABEL}</PrimaryButton>
         </div>
-        <div className="fo-cols" data-reveal>
-          {COLS.map((c) => (
-            <nav key={c.h} aria-label={c.h} data-up>
-              <p className="fo-h">{c.h}</p>
-              <ul>
-                {c.items.map((it) => (
-                  <li key={it.label}>
-                    <FLink {...it} />
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          ))}
-        </div>
+        <nav data-up aria-label="Sections" className="fo-row">
+          <ul>
+            {SECTIONS.map((it) => (
+              <li key={it.label}>
+                <FLink {...it} />
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <nav data-up aria-label="Natalia's socials" className="fo-row is-social">
+          <ul>
+            {SOCIAL_LINKS.map((it) => (
+              <li key={it.label}>
+                <FLink {...it} />
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
 
       {/* the land: the meadow, and what is on the horizon and over it */}
@@ -424,7 +482,7 @@ export function Footer() {
         </svg>
 
         <div className="fo-horizon" data-reveal="top 85%">
-          <Label />
+          <Maker />
           <Vote />
         </div>
 
@@ -440,12 +498,25 @@ export function Footer() {
             <path data-piece="far" style={{ display: "none" }} />
             <path data-piece="near" style={{ display: "none" }} />
           </svg>
+          {/* the flock, when the bird is tapped */}
+          <div ref={flock} className="fo-flock" aria-hidden="true" />
+          {/* tap the bird while it rests */}
+          <button type="button" className="fo-tap" data-on={resting} disabled={!resting} onClick={release} aria-label="Let the bird fly">
+            <span className="fo-tap__hint" aria-hidden="true">
+              Tap the bird
+            </span>
+          </button>
         </div>
 
         <div className="fo-bottom">
-          {/* DRAFT: Natalia to confirm the wording */}
-          <p>Venty is a design concept by Natalia Chamon for the QUT Design Festival 2026. The app is a demo, and the patterns it shows are examples.</p>
-          <p>© 2026 Natalia Chamon</p>
+          <p>Venty is a concept for the QUT Design Festival 2026.</p>
+          <p>
+            Made by{" "}
+            <a href={MAKER_URL} target="_blank" rel="noopener noreferrer">
+              Natalia
+              <span className="sr-only"> (opens in a new tab)</span>
+            </a>
+          </p>
         </div>
       </div>
     </footer>

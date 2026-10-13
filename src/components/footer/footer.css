@@ -7,15 +7,9 @@
   --peri: #9daccd;
   --corn: #687ef5;
   --cloud: #eff4ff;
-  --paper: #fdfdff;
+  --line: rgb(18 21 36 / 0.1);
   --expo: cubic-bezier(0.16, 1, 0.3, 1);
   --gutter: 16px;
-  /* paper lying on something, as on the table in How it works */
-  --lie:
-    0 0 0 0.5px rgb(18 21 36 / 0.06),
-    -1px 1.5px 1.5px rgb(18 21 36 / 0.14),
-    -6px 8px 10px -4px rgb(30 44 78 / 0.22),
-    -24px 28px 38px -18px rgb(30 44 78 / 0.34);
   position: relative;
   z-index: 10;
   /* it rises over the last (held) screen of the closing scene */
@@ -40,30 +34,35 @@
   mask-image: radial-gradient(ellipse 60% 55% at 50% 28%, #000 20%, transparent 100%);
 }
 
-/* ---- the sky --------------------------------------------------------- */
+/* ---- the sky: one centred column --------------------------------------- */
 .fo-sky {
   position: relative;
   z-index: 2;
-  display: grid;
-  gap: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 62svh;
   max-width: 1440px;
   margin: 0 auto;
   padding: 0 var(--gutter);
+  text-align: center;
 }
-@media (min-width: 1024px) { .fo-sky { grid-template-columns: 7fr 5fr; align-items: end; } }
 .fo-line {
   display: flex;
   flex-direction: column;
-  font-size: clamp(2.6rem, 6.2vw, 6.4rem);
-  line-height: 0.98;
+  align-items: center;
+  font-size: clamp(2.8rem, 8vw, 8.4rem);
+  line-height: 0.95;
   letter-spacing: -0.055em;
 }
 .fo-line em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--corn); }
-.fo-cta { margin-top: 32px; }
-.fo-cols { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px 24px; }
-@media (min-width: 640px) { .fo-cols { grid-template-columns: repeat(3, 1fr); } }
-.fo-h { font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--steel); }
-.fo-cols ul { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; list-style: none; }
+.fo-cta { margin-top: clamp(28px, 4svh, 44px); }
+/* the sections in a row, and the socials under them */
+.fo-row { margin-top: clamp(36px, 6svh, 64px); }
+.fo-row.is-social { margin-top: 16px; }
+.fo-row ul { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 26px; list-style: none; }
+.fo-row.is-social ul { gap: 8px 20px; }
 .fo-link {
   position: relative;
   display: inline-block;
@@ -72,28 +71,26 @@
   color: var(--ink);
   cursor: pointer;
 }
+.fo-row.is-social .fo-link { font-size: 14px; color: var(--steel); }
 .fo-link span { background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size 0.6s var(--expo); }
 @media (hover: hover) {
   .fo-link:hover { color: var(--corn); }
   .fo-link:hover span { background-size: 100% 1px; }
 }
 .fo-link:focus-visible { outline: 2px solid var(--corn); outline-offset: 3px; border-radius: 2px; }
-.fo-link.is-off { color: var(--steel); cursor: default; }
+.fo-link.is-off { cursor: default; }
 
 /* ---- the land: the meadow ------------------------------------------- */
-/* Its top fades into the sky (the still's own transparency; a video gets
-   the same fade from the mask). Phones see a tall middle of it, the valley
-   and the stream. */
-/* phones and tablets: in order down the meadow, the label, the ticket, the
-   lockup over the flowers and the bottom line; desktop: the label and the
-   ticket on the horizon either side, the lockup between them */
+/* phones and tablets: in order down the meadow, Made by, the vote, the
+   lockup over the flowers and the bottom line; desktop: the two panels
+   level on the horizon either side, the lockup between them */
 .fo-land {
   position: relative;
   display: flex;
   flex-direction: column;
   margin-top: clamp(40px, 8vw, 72px);
 }
-@media (min-width: 1024px) { .fo-land { display: block; min-height: max(680px, 50vw); margin-top: -2vw; } }
+@media (min-width: 1024px) { .fo-land { display: block; min-height: max(680px, 50vw); margin-top: -4vw; } }
 .fo-media {
   position: absolute;
   inset: 0;
@@ -149,100 +146,71 @@
 }
 @media (max-width: 1023px) { .fo-drift { display: none; } }
 
-/* ---- on the horizon: the label and the ticket ----------------------- */
+/* ---- on the horizon: two panels of frosted glass, level -------------
+   The Made to measure composer's glass. Above the bird, which flies behind
+   them (and over the sky's words) */
 .fo-horizon {
   position: relative;
-  z-index: 2;
+  z-index: 4;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 36px;
+  gap: 16px;
   padding: 0 var(--gutter);
 }
 @media (min-width: 1024px) {
   .fo-horizon {
     position: absolute;
-    inset: 9% 0 auto;
+    inset: 14% 0 auto;
     flex-direction: row;
-    align-items: flex-start;
+    align-items: flex-end;
     justify-content: space-between;
     max-width: 1440px;
     margin: 0 auto;
   }
 }
-
-/* Made by Natalia: a woven label, sewn on at both ends */
-.fo-label {
-  position: relative;
-  display: grid;
-  grid-template-columns: 92px minmax(0, 1fr);
-  align-items: center;
-  gap: 18px;
-  width: min(100%, 400px);
-  padding: 18px 30px;
-  rotate: -3deg;
-  color: var(--ink);
-  /* the weave: fine threads across */
-  background:
-    repeating-linear-gradient(0deg, rgb(18 21 36 / 0.035) 0 1px, transparent 1px 3px),
-    linear-gradient(180deg, #f6f8ff, #e7ecfa);
-  box-shadow: var(--lie);
-  transition: rotate 0.8s var(--expo), translate 0.8s var(--expo);
-}
-@media (min-width: 1024px) { .fo-label { margin-top: 13vw; } }
-@media (hover: hover) { .fo-label:hover { rotate: -1.5deg; translate: 0 -4px; } }
-.fo-label:focus-visible { outline: 2px solid var(--corn); outline-offset: 4px; }
-/* the stitches: the pattern pieces' stitching line, down each end */
-.fo-label__stitch {
-  position: absolute;
-  top: 8px;
-  bottom: 8px;
-  width: 0;
-  border-left: 1.5px dashed var(--corn);
-  opacity: 0.8;
-}
-.fo-label__stitch.is-l { left: 11px; }
-.fo-label__stitch.is-r { right: 11px; }
-.fo-label__face {
-  position: relative;
-  display: block;
-  height: 112px;
-  overflow: hidden;
-  border-radius: 46px 46px 4px 4px;
-  background: #0b0c15;
-  box-shadow: inset 0 0 0 1px rgb(18 21 36 / 0.2);
-}
-.fo-label__face > * { position: absolute; inset: 0; }
-.fo-label__text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.fo-label__k { font-size: 11px; letter-spacing: -0.01em; text-transform: uppercase; color: var(--steel); }
-.fo-label__name { font-size: 26px; line-height: 1; letter-spacing: -0.045em; }
-.fo-label__name em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--corn); }
-.fo-label__role { font-size: 12px; letter-spacing: -0.01em; color: var(--steel); }
-.fo-label__url { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; font-size: 13px; letter-spacing: -0.01em; color: var(--corn); }
-.fo-label__url svg { width: 13px; height: 13px; }
-
-/* Vote for Venty: a ticket, taped on */
-.fo-vote {
+.fo-panel {
   position: relative;
   width: min(100%, 380px);
-  padding: 30px 24px 22px;
-  border-radius: 4px;
-  rotate: 2.5deg;
-  background: var(--paper);
-  box-shadow: var(--lie);
+  padding: 20px;
+  border-radius: 24px;
+  color: var(--ink);
+  background: rgb(255 255 255 / 0.62);
+  border: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 30px 80px -36px rgb(56 76 101 / 0.45), 0 2px 6px -2px rgb(56 76 101 / 0.12);
 }
-.fo-tape {
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  width: 104px;
-  height: 26px;
-  translate: -50% 0;
-  rotate: -4deg;
-  background: rgb(104 126 245 / 0.34);
-  box-shadow: -1px 1px 1px rgb(30 44 78 / 0.12);
-  clip-path: polygon(3% 0, 97% 4%, 100% 100%, 0 94%);
+.fo-k { font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--steel); }
+
+/* Made by Natalia */
+.fo-maker {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  transition: box-shadow 0.5s var(--expo), translate 0.6s var(--expo);
 }
+@media (hover: hover) { .fo-maker:hover { translate: 0 -3px; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 36px 80px -34px rgb(56 76 101 / 0.55), 0 2px 6px -2px rgb(56 76 101 / 0.12); } }
+.fo-maker:focus-visible { outline: 2px solid var(--corn); outline-offset: 4px; }
+/* her portrait in dots, in a night arch, as in The designer */
+.fo-maker__face {
+  position: relative;
+  display: block;
+  height: 118px;
+  overflow: hidden;
+  border-radius: 48px 48px 10px 10px;
+  background: #0b0c15;
+}
+.fo-maker__face > * { position: absolute; inset: 0; }
+.fo-maker__text { display: flex; flex-direction: column; gap: 4px; min-width: 0; text-align: left; }
+.fo-maker__name { margin-top: 2px; font-size: 28px; line-height: 1; letter-spacing: -0.045em; }
+.fo-maker__name em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--corn); }
+.fo-maker__role { font-size: 13px; letter-spacing: -0.01em; color: var(--steel); }
+.fo-maker__url { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; font-size: 13px; letter-spacing: -0.01em; color: var(--corn); }
+.fo-maker__url svg { width: 13px; height: 13px; }
+
+/* Vote for Venty */
 .fo-vote__head { display: flex; align-items: center; gap: 12px; }
 .fo-vote__head .vote__mark { flex: none; width: 22px; height: auto; }
 .fo-vote__head p { display: flex; flex-direction: column; gap: 2px; font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--ink); }
@@ -261,16 +229,16 @@
 .fo-vote [data-qut-bar]:nth-of-type(4) { transition-delay: 0.74s; }
 .fo-vote [data-square] { transition-delay: 0.8s; }
 .fo-vote [data-letter] { transition-delay: 0.95s; }
-.fo-vote__title { margin-top: 18px; font-weight: 400; font-size: clamp(2.4rem, 3.4vw, 3rem); line-height: 1; letter-spacing: -0.055em; }
+.fo-vote__title { margin-top: 16px; font-weight: 400; font-size: clamp(2.2rem, 3vw, 2.8rem); line-height: 1; letter-spacing: -0.055em; text-align: left; }
 .fo-vote__title em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--corn); }
-/* the days to the festival: the numbers in Bigilla, between stitching lines */
-.fo-count { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 18px; }
+/* the days to the festival, the numbers in Bigilla */
+.fo-count { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 16px; }
 .fo-count span { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 0; }
-.fo-count span + span { border-left: 1.5px dashed rgb(104 126 245 / 0.45); }
-.fo-count b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: 30px; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.fo-count span + span { border-left: 1px solid var(--line); }
+.fo-count b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: 28px; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--ink); }
 .fo-count small { font-size: 11px; letter-spacing: -0.01em; color: var(--steel); }
-.fo-vote__when { margin-top: 12px; font-size: 13px; letter-spacing: -0.01em; color: var(--steel); }
-.fo-vote__go { display: flex; gap: 8px; margin-top: 18px; list-style: none; }
+.fo-vote__when { margin-top: 10px; font-size: 13px; letter-spacing: -0.01em; color: var(--steel); text-align: left; }
+.fo-vote__go { display: flex; gap: 8px; margin-top: 16px; list-style: none; }
 .fo-vote__go li { flex: 1; }
 .fo-go {
   display: flex;
@@ -289,9 +257,10 @@
 .fo-go svg { width: 14px; height: 14px; }
 @media (hover: hover) { .fo-go:hover { background: var(--corn); translate: 0 -2px; } }
 .fo-go:focus-visible { outline: 2px solid var(--corn); outline-offset: 3px; }
-@media (min-width: 1024px) { .fo-vote { margin-top: 4vw; } }
 
 /* ---- the lockup over the flowers, and its bird ----------------------- */
+/* the wordmark in cloud, the bird in cornflower; the bird flies over the
+   sky's words (z 2) and behind the panels (z 4) */
 .fo-lockup {
   position: absolute;
   left: 50%;
@@ -303,7 +272,7 @@
   color: var(--cloud);
 }
 @media (max-width: 1023px) {
-  .fo-lockup { position: relative; left: auto; bottom: auto; translate: none; width: min(62vw, 320px); margin: clamp(120px, 34vw, 260px) auto 48px; }
+  .fo-lockup { position: relative; left: auto; bottom: auto; translate: none; width: min(62vw, 320px); margin: clamp(120px, 34vw, 260px) auto 56px; }
 }
 .fo-lockup svg {
   position: absolute;
@@ -312,26 +281,63 @@
   height: 100%;
   overflow: visible;
 }
-.fo-lockup__mark { will-change: transform; }
-/* the bird waits off stage until it flies in (useLanding) */
+.fo-lockup__mark,
+.fo-flock__bird { color: var(--corn); will-change: transform; }
+.fo-flock__bird.is-far { color: var(--peri); }
+.fo-flock { position: absolute; inset: 0; pointer-events: none; }
+/* the bird waits off stage until it flies in (useBird) */
 .fo-lockup.is-waiting .fo-lockup__mark { opacity: 0; }
+
+/* tap the bird (while it rests): the button sits over the mark's place */
+.fo-tap {
+  position: absolute;
+  left: calc(207 / 2132 * 100%);
+  top: 0;
+  width: calc(1334 / 2132 * 100%);
+  height: calc(797 / 1786 * 100%);
+  border-radius: 40%;
+  cursor: pointer;
+}
+.fo-tap:disabled { cursor: default; }
+.fo-tap:focus-visible { outline: 2px solid var(--cloud); outline-offset: 6px; }
+.fo-tap__hint {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  translate: -50% 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  color: var(--ink);
+  background: rgb(255 255 255 / 0.62);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 6px 18px -8px rgb(56 76 101 / 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s var(--expo), translate 0.6s var(--expo);
+}
+.fo-tap[data-on="true"] .fo-tap__hint { opacity: 1; translate: -50% 0; transition-delay: 1.2s; }
 
 .fo-bottom {
   position: relative;
-  margin: 0 var(--gutter);
   z-index: 3;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 var(--gutter);
   padding: 16px 0 20px;
   border-top: 1px solid rgb(239 244 255 / 0.25);
   font-size: 13px;
   letter-spacing: -0.01em;
   color: rgb(239 244 255 / 0.85);
 }
-.fo-bottom p:first-child { max-width: 62ch; }
-@media (min-width: 768px) { .fo-bottom { flex-direction: row; justify-content: space-between; } }
 @media (min-width: 1024px) { .fo-bottom { position: absolute; left: var(--gutter); right: var(--gutter); bottom: 0; margin: 0; } }
+.fo-bottom a { color: var(--cloud); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+@media (hover: hover) { .fo-bottom a:hover { color: #fff; } }
+.fo-bottom a:focus-visible { outline: 2px solid var(--cloud); outline-offset: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
   .fo *,
@@ -340,4 +346,5 @@
     transition-duration: 0.01ms !important;
     transition-delay: 0s !important;
   }
+  .fo-tap__hint { display: none; }
 }
