@@ -157,7 +157,7 @@ and one shader (`DitherEdge`, `getRenderer`).
 | From → to | Rising | Over |
 | --- | --- | --- |
 | Hero → Made to measure | cloud | the pinned video |
-| How it works → Features | night | the held end of the table (desktop) |
+| How it works → Features | night | the held end of the table (desktop), or of the last step (phones) |
 | What you can make → Made with Venty | cloud | the held last garment (desktop) |
 | FAQ → Meet the maker | night | the FAQ's empty foot |
 | Closing scene → footer | cloud | the held last line |
@@ -174,11 +174,12 @@ per section, long tasks, bytes before the page opens). Rules that came out
 of it:
 
 - Nothing animates off screen. JS loops start and stop with an
-  IntersectionObserver (`useGlow`, `DitherEdge`, the Made with line);
+  IntersectionObserver (`DitherEdge`, the Made with line);
   CSS loops pause under `[data-off]` (`PauseOffscreen.tsx`).
 - Move and fade with `transform` and `opacity` only. A light that follows
   the pointer is a disc moved by a transform, not a gradient redrawn at a
-  new position (the Features cards). Custom properties inherit: writing
+  new position (the Features cards, which light only under the pointer,
+  with a mouse, and run nothing otherwise). Custom properties inherit: writing
   one on a big element restyles everything inside it, every frame.
 - No `filter: blur()` on things that move or animate: draw the soft light
   as a radial gradient instead (Meet the maker, the closing glow).

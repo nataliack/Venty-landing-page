@@ -39,15 +39,22 @@
 
 /* ---- the stage and the travel ------------------------------------ */
 .hw-stage { position: relative; }
+/* phones: the stage scrolls, then holds still with its bottom on the
+   screen's bottom for one more screen, while Features rises over it (the
+   section is the stage plus that screen; --stage-h from HowItWorks) */
+@media (max-width: 1023px) {
+  .hw { height: calc(var(--stage-h, 0px) + 100svh); }
+  .hw-stage { position: sticky; top: min(0px, calc(100svh - var(--stage-h, 0px))); }
+}
 .hw-track {
   position: relative;
   z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 40px;
-  /* phones: room at the end for the dark edge of Features to rise through
-     cloud (DitherEdge's band) without covering the button */
-  padding: 0 16px calc(42svh + 72px);
+  /* phones: a little room under the button; the held screen (above) is
+     what Features rises over */
+  padding: 0 16px 88px;
 }
 @media (min-width: 1024px) {
   .hw-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }

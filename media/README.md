@@ -67,6 +67,20 @@ The same tool turns any `media/<name>/<name>-master.mp4` into
 `public/<name>/sequence/`; add the name to the cache headers in
 `next.config.ts`.
 
+## Features
+
+`features/ref-jersey-master.webp` (1314 × 2000, a cut-out, transparent,
+cropped at the skirt) is the model in Mark up your references; the site's
+copy is `public/features/ref-jersey.webp`, 880 wide, WebP 86 with its
+alpha. The marks on her are drawn in the master's units (1314 × 2000), so a
+new photo of another size needs them moved (`MarkUp` in
+`src/components/features/Features.tsx`).
+
+`features/on-body-master.webp` (2000 × 2000) is See it on your body's still,
+`public/features/on-body.webp` at 1200. When the turn's video exists, its
+frames go in `public/features/turn/` (0001.webp …) and `TURN.count` in
+Features.tsx becomes their number; the slider then plays them.
+
 ## People
 
 `people/natalia-chamon.webp` is the master portrait of Natalia Chamon

@@ -266,9 +266,25 @@ export function HowItWorks() {
     const tr = track.current;
     if (!sec || !tr) return;
     if (!wide) {
+      // phones: it scrolls as it is, then holds its last screen still while
+      // Features rises over it, as on desktop. The stage sticks with its
+      // bottom on the screen's bottom (how.css); the section is the stage
+      // plus that held screen.
       sec.style.height = "";
       tr.style.transform = "";
-      return;
+      const stage = sec.querySelector<HTMLElement>(".hw-stage");
+      if (!stage) return;
+      const hold = () => sec.style.setProperty("--stage-h", `${stage.offsetHeight}px`);
+      hold();
+      const ro = new ResizeObserver(() => {
+        hold();
+        ScrollTrigger.refresh();
+      });
+      ro.observe(stage);
+      return () => {
+        ro.disconnect();
+        sec.style.removeProperty("--stage-h");
+      };
     }
     let run = 0;
     let marks: number[] = [];
