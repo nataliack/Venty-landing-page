@@ -20,10 +20,10 @@ export const VOTE_LINKS: { label: string; href: string }[] = [
   { label: "VisCom", href: "" },
 ];
 
-/* Natalia's socials, in the footer. Empty until she gives the addresses;
-   they show, but go nowhere yet. Email as "mailto:...". */
-export const SOCIAL_LINKS: { label: string; href: string }[] = [
-  { label: "LinkedIn", href: "" },
-  { label: "Instagram", href: "" },
-  { label: "Email", href: "" },
+/* Natalia's socials, in the footer, as icons. Empty until she gives them;
+   they show, but go nowhere yet. Email as "mailto:...", phone as "tel:...". */
+export const SOCIAL_LINKS: { label: string; icon: "linkedin" | "email" | "phone"; href: string }[] = [
+  { label: "LinkedIn", icon: "linkedin", href: "" },
+  { label: "Email", icon: "email", href: "" },
+  { label: "Phone", icon: "phone", href: "" },
 ];

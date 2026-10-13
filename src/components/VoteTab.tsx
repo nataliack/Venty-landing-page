@@ -43,20 +43,23 @@ const HIDE: [selector: string, on: "phone" | "desktop" | "all"][] = [
 
 /* The QUT mark, in parts so it can build: four bars, the square, and the
    letters Q, U and T (the original artwork, with Q and T split apart) */
-export function QutMark() {
+/** reach: how far the four bars run on above the mark, in its own units
+    (26 wide), so they can come down from an edge (the footer's card) */
+export function QutMark({ reach = 0 }: { reach?: number }) {
+  const top = -reach;
   return (
     <svg
       width="26"
-      height="37"
-      viewBox="0 0 26 37"
+      height={37 + reach}
+      viewBox={`0 ${top} 26 ${37 + reach}`}
       fill="none"
       aria-hidden="true"
       className="vote__mark"
     >
-      <path data-qut-bar d="M0 0H5V9H0V0Z" fill="#121524" />
-      <path data-qut-bar d="M7 0H12V9H7V0Z" fill="#121524" />
-      <path data-qut-bar d="M14 0H19V9H14V0Z" fill="#121524" />
-      <path data-qut-bar d="M21 0H26V9H21V0Z" fill="#121524" />
+      <path data-qut-bar d={`M0 ${top}H5V9H0Z`} fill="#121524" />
+      <path data-qut-bar d={`M7 ${top}H12V9H7Z`} fill="#121524" />
+      <path data-qut-bar d={`M14 ${top}H19V9H14Z`} fill="#121524" />
+      <path data-qut-bar d={`M21 ${top}H26V9H21Z`} fill="#121524" />
       <path data-square d="M26 11H0V37H26V11Z" fill="#121524" />
       <path
         data-letter

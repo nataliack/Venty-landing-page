@@ -452,20 +452,21 @@ export const EXIT_PATH: Waypoint[] = [
   { space: "to", x: -0.5, y: 0.06 },
 ];
 
-/** The footer's way in: from beyond the right edge, high, gliding down in
-    one arc onto its place in the lockup (turning to face right, head first,
-    as it lands). */
+/** The footer's way in: from beyond the left edge, high, gliding down in
+    one arc onto its place in the lockup. It flies right all the way, the way
+    it faces at rest, so it never has to turn round. */
 export const FOOTER_IN: Waypoint[] = [
-  { space: "screen", x: 1, y: 0.16, ox: 0.9 },
-  { space: "screen", x: 0.74, y: 0.1 },
-  { space: "to", x: 1.1, y: -1.05 },
+  { space: "screen", x: 0, y: 0.16, ox: -0.9 },
+  { space: "screen", x: 0.26, y: 0.1 },
+  { space: "to", x: -1.1, y: -1.05 },
 ];
 
 /** The footer's way out: it lifts off its place and away in one arc beyond
-    the left edge (the end, off the screen, is the route's `to`). */
+    the right edge, still facing the way it flies (the end, off the screen,
+    is the route's `to`). */
 export const FOOTER_OUT: Waypoint[] = [
-  { space: "from", x: -0.35, y: -0.75 },
-  { space: "screen", x: 0.3, y: 0.12 },
+  { space: "from", x: 0.35, y: -0.75 },
+  { space: "screen", x: 0.7, y: 0.12 },
 ];
 
 export type RouteOptions = {
