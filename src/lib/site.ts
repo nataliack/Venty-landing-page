@@ -25,12 +25,3 @@ export const VOTE_LINKS: { label: string; href: string }[] = [
    the sky by a mask, so it needs no transparency. Until then the still
    (public/footer/meadow.webp) stands in. */
 export const FOOTER_MEDIA = "";
-
-/* The footer's About and Legal links. Empty until the pages exist; they
-   show, but go nowhere yet. */
-export const CONTACT_URL = "";
-export const LEGAL_LINKS: { label: string; href: string }[] = [
-  { label: "Privacy", href: "" },
-  { label: "Terms", href: "" },
-  { label: "Accessibility", href: "" },
-];

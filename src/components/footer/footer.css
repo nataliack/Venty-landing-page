@@ -292,7 +292,6 @@
   width: 100%;
   height: 100%;
   overflow: visible;
-  filter: drop-shadow(0 10px 30px rgb(11 12 21 / 0.35));
 }
 .fo-lockup__mark { will-change: transform; }
 /* the bird waits off stage until it flies in (useLanding) */
@@ -311,6 +310,7 @@
   letter-spacing: -0.01em;
   color: rgb(239 244 255 / 0.85);
 }
+.fo-bottom p:first-child { max-width: 62ch; }
 @media (min-width: 768px) { .fo-bottom { flex-direction: row; justify-content: space-between; } }
 @media (min-width: 1024px) { .fo-bottom { position: absolute; left: var(--gutter); right: var(--gutter); bottom: 0; margin: 0; } }
 

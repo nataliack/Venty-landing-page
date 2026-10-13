@@ -7,7 +7,7 @@ import { APP_URL, CTA_LABEL } from "@/lib/site";
 import { useReveals } from "@/lib/useReveals";
 import "./made.css";
 
-/* 6. Made with Venty (light). "Sewn by real people, on their own bodies."
+/* 6. On the line (light; it was Made with Venty). "Sewn by real people, on their own bodies."
    The makes hang on a line, pegged, swaying a little, drifting slowly past
    (drag the line to look along it; it pauses under the pointer). Each card
    says what was sewn, by whom, and the body it was drafted on.
@@ -137,7 +137,7 @@ export function MadeWith() {
     <section
       ref={root}
       id="made"
-      data-nav="Made with Venty"
+      data-nav="On the line"
       data-wing="story"
       data-theme-zone="light"
       data-theme-at="top 35%"
@@ -150,7 +150,7 @@ export function MadeWith() {
         <p className="mw-eyebrow">
           <span className="line-mask inline-block">
             <span data-rise className="inline-block">
-              Made with Venty
+              On the line
             </span>
           </span>
         </p>

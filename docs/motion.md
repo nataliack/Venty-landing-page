@@ -158,11 +158,11 @@ and one shader (`DitherEdge`, `getRenderer`).
 | --- | --- | --- |
 | Hero → Made to measure | cloud | the pinned video |
 | How it works → Features | night | the held end of the table (desktop), or of the last step (phones) |
-| What you can make → Made with Venty | cloud | the held last garment (desktop) |
-| FAQ → Meet the maker | night | the FAQ's empty foot |
+| What you can make → On the line | cloud | the held last garment (desktop) |
+| FAQ → The designer | night | the FAQ's empty foot |
 | Closing scene → footer | cloud | the held last line |
 
-The footer ends the bird's journey: when its lockup (white, over the meadow) comes into view, the mark flies in from beyond the right edge along the loading screen's way in (`ENTER_PATH`, 2.6s) and lands in its place, where at the top of the page it flew out of the loader's lockup. Venty's phrases drift along a curve over the hills (an SVG `animate` on the text's start, 60s a loop); the Vote ticket's QUT mark builds as the horizon reveals.
+The footer ends the bird's journey: when its lockup (white, over the meadow) comes into view, the mark flies in from beyond the right edge along the loading screen's way in (`ENTER_PATH`, 2.6s) and lands in its place, where at the top of the page it flew out of the loader's lockup. While the lockup is on screen it keeps coming and going: rests 3.5s, takes off over the lockup and out beyond the left edge (`LEAVE_PATH`, 2.4s), and 1.4s later comes in from the right again. It flies in steel, to show against the light sky, and settles to cloud as it lands. Venty's phrases drift along a curve over the hills (an SVG `animate` on the text's start, 60s a loop); the Vote ticket's QUT mark builds as the horizon reveals.
 
 A pinned section that something rises over holds one extra screen, still, at
 its end. Without a pin (phones, the FAQ), the band rises through empty room
@@ -184,7 +184,7 @@ of it:
   with a mouse, and run nothing otherwise). Custom properties inherit: writing
   one on a big element restyles everything inside it, every frame.
 - No `filter: blur()` on things that move or animate: draw the soft light
-  as a radial gradient instead (Meet the maker, the closing glow).
+  as a radial gradient instead (The designer, the closing glow).
 - A scroll-scrubbed SVG scene is a stack of SVG layers, each moved as a
   whole with a CSS transform (the closing scene), not one SVG whose
   insides are animated.

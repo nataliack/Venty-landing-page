@@ -18,9 +18,9 @@ const SECTIONS = [
   { id: "how", label: "How it works" },
   { id: "features", label: "Features" },
   { id: "make", label: "What you can make" },
-  ...(MAKES.length ? [{ id: "made", label: "Made with Venty" }] : []),
+  ...(MAKES.length ? [{ id: "made", label: "On the line" }] : []),
   { id: "faq", label: "FAQ" },
-  { id: "maker", label: "Meet the maker" },
+  { id: "maker", label: "The designer" },
   { id: "table", label: "The table" },
 ];
 

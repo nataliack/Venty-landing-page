@@ -452,6 +452,16 @@ export const EXIT_PATH: Waypoint[] = [
   { space: "to", x: -0.5, y: 0.06 },
 ];
 
+/** The footer's way out (the bird leaving its lockup): it lifts and curls up
+    over the lockup, then flies off across the sky beyond the left edge. The
+    end (off the screen) is the route's `to`. */
+export const LEAVE_PATH: Waypoint[] = [
+  { space: "from", x: 0.35, y: -0.45 },
+  { space: "from", x: -0.1, y: -0.95 },
+  { space: "screen", x: 0.42, y: 0.32 },
+  { space: "screen", x: 0.18, y: 0.2 },
+];
+
 export type RouteOptions = {
   /** where it starts and lands (from may be replaced by a start waypoint) */
   from: Place;

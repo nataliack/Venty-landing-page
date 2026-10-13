@@ -7,8 +7,8 @@ import { PrimaryButton } from "../PrimaryButton";
 import { QutMark } from "../VoteTab";
 import { Halftone } from "../maker/Halftone";
 import { scrollToElement } from "../SmoothScroll";
-import { APP_URL, CONTACT_URL, CTA_LABEL, FESTIVAL_AT, FOOTER_MEDIA, LEGAL_LINKS, MAKER_URL, VOTE_LINKS } from "@/lib/site";
-import { ENTER_PATH, MARK, MARK_BOUNDS, MARK_CENTRE, flightRoute } from "@/lib/markFlight";
+import { APP_URL, CTA_LABEL, FESTIVAL_AT, FOOTER_MEDIA, MAKER_URL, VOTE_LINKS } from "@/lib/site";
+import { ENTER_PATH, LEAVE_PATH, MARK, MARK_BOUNDS, MARK_CENTRE, flightRoute } from "@/lib/markFlight";
 import { LOCKUP, WORD } from "@/lib/lockup";
 import { useCountdown } from "@/lib/useCountdown";
 import { useReveals } from "@/lib/useReveals";
@@ -33,29 +33,30 @@ import "./footer.css";
    Over the flowers: the Venty lockup in white. Its bird is not there at
    first: when the lockup comes into view, it flies in from beyond the right
    edge along the loading screen's way in (ENTER_PATH) and lands in its
-   place, the end of the journey it started at the top of the page. */
+   place, the end of the journey it started at the top of the page; then it
+   keeps coming and going (useBird). */
 
 type L = { label: string; href: string };
 const COLS: { h: string; items: L[] }[] = [
   {
-    h: "The page",
+    h: "Explore",
     items: [
       { label: "Made to measure", href: "#measure" },
       { label: "How it works", href: "#how" },
       { label: "Features", href: "#features" },
       { label: "What you can make", href: "#make" },
-      { label: "Made with Venty", href: "#made" },
+      { label: "On the line", href: "#made" },
+      { label: "FAQ", href: "#faq" },
     ],
   },
   {
-    h: "More",
+    // who made it, and how to reach her (her site is the way in)
+    h: "Natalia Chamon",
     items: [
-      { label: "FAQ", href: "#faq" },
-      { label: "Meet the maker", href: "#maker" },
-      { label: "Contact", href: CONTACT_URL },
+      { label: "The designer", href: "#maker" },
+      { label: "nataliachamon.com", href: MAKER_URL },
     ],
   },
-  { h: "Legal", items: LEGAL_LINKS },
 ];
 
 /* along the curve over the hills: the announcement bar's lines */
@@ -182,8 +183,20 @@ function Label() {
   );
 }
 
-/* ---- the lockup, and the bird landing in it ------------------------------ */
-function useLanding(box: React.RefObject<HTMLDivElement | null>, mark: React.RefObject<SVGSVGElement | null>) {
+/* ---- the lockup, and its bird coming and going --------------------------- */
+/* While the lockup is on screen, the bird keeps coming home: it flies in
+   from beyond the right edge (the loading screen's way in) and lands in its
+   place; rests a while; takes off, curls up over the lockup and flies out
+   beyond the left edge; and a little later comes in from the right again.
+   Each flight is planned from where everything is as it starts. It flies in
+   steel, so it shows against the light sky, and settles to the lockup's
+   cloud as it lands (and back to steel as it takes off). */
+const REST_S = 3.5; // resting in the lockup
+const AWAY_S = 1.4; // gone, before it comes back
+const STEEL = "#485f88";
+const CLOUD = "#eff4ff";
+
+function useBird(box: React.RefObject<HTMLDivElement | null>, mark: React.RefObject<SVGSVGElement | null>) {
   useEffect(() => {
     const b = box.current;
     const m = mark.current;
@@ -198,52 +211,100 @@ function useLanding(box: React.RefObject<HTMLDivElement | null>, mark: React.Ref
       whole.style.display = on ? "none" : "";
       for (const p of [body, far, near]) p.style.display = on ? "" : "none";
     };
-    let tween: gsap.core.Tween | null = null;
-    const fly = () => {
-      // where it lands: its place in the lockup (the mark's svg fills the
-      // lockup's box exactly); the way in is the loading screen's, on this screen
+    gsap.set(m, { transformOrigin: "0 0", color: STEEL });
+
+    // its place in the lockup (the mark's svg fills the lockup's box exactly)
+    const geometry = () => {
       const r = b.getBoundingClientRect();
       const u = r.width / 2132;
-      const rest = { x: 0, y: 0, scale: 1 };
-      const route = flightRoute({
-        origin: [r.left, r.top],
-        centre: [MARK_CENTRE[0] * u, MARK_CENTRE[1] * u],
-        width: MARK_BOUNDS.width * u,
-        frame: { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight },
-        from: rest,
-        to: rest,
-        start: ENTER_PATH[0],
-        via: ENTER_PATH.slice(1),
-        duration: 2.6,
-        ease: "out",
-        facing: 180,
-      });
-      gsap.set(m, { transformOrigin: "0 0" });
-      const draw = (t: number) => {
-        const at = route.at(t);
-        gsap.set(m, { x: at.x, y: at.y, scale: at.scale });
-        body.setAttribute("d", at.pose.body);
-        far.setAttribute("d", at.pose.far);
-        near.setAttribute("d", at.pose.near);
-        pieces(!at.done);
+      return {
+        r,
+        g: {
+          origin: [r.left, r.top] as [number, number],
+          centre: [MARK_CENTRE[0] * u, MARK_CENTRE[1] * u] as [number, number],
+          width: MARK_BOUNDS.width * u,
+          frame: { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight },
+        },
       };
-      draw(0);
-      b.classList.remove("is-waiting");
-      const clock = { t: 0 };
-      tween = gsap.to(clock, { t: route.total, duration: route.total, ease: "none", onUpdate: () => draw(clock.t), onComplete: () => pieces(false) });
     };
+    const rest = { x: 0, y: 0, scale: 1 };
+    const flyIn = () => {
+      const { g } = geometry();
+      return flightRoute({ ...g, from: rest, to: rest, start: ENTER_PATH[0], via: ENTER_PATH.slice(1), duration: 2.6, ease: "out", facing: 180 });
+    };
+    const flyOut = () => {
+      const { r, g } = geometry();
+      // away: beyond the left edge, high in the sky
+      const end: [number, number] = [-g.width, window.innerHeight * 0.14];
+      const to = { x: end[0] - r.left - g.centre[0], y: end[1] - r.top - g.centre[1], scale: 1 };
+      return flightRoute({ ...g, from: rest, to, via: LEAVE_PATH, duration: 2.4 });
+    };
+
+    let dead = false;
+    let tween: gsap.core.Tween | null = null;
+    let visible = false;
+    let wake: (() => void) | null = null;
     const io = new IntersectionObserver(
       ([e]) => {
-        if (!e.isIntersecting) return;
-        io.disconnect();
-        fly();
+        visible = e.isIntersecting;
+        if (visible && wake) {
+          wake();
+          wake = null;
+        }
       },
       { threshold: 0.55 },
     );
     io.observe(b);
+    const onScreen = () => (visible ? Promise.resolve() : new Promise<void>((ok) => (wake = ok)));
+    const wait = (s: number) => new Promise<void>((ok) => (tween = gsap.delayedCall(s, ok) as unknown as gsap.core.Tween));
+    const play = (route: ReturnType<typeof flightRoute>) =>
+      new Promise<void>((ok) => {
+        const draw = (t: number) => {
+          const at = route.at(t);
+          gsap.set(m, { x: at.x, y: at.y, scale: at.scale });
+          body.setAttribute("d", at.pose.body);
+          far.setAttribute("d", at.pose.far);
+          near.setAttribute("d", at.pose.near);
+          pieces(!at.done);
+        };
+        draw(0);
+        const clock = { t: 0 };
+        tween = gsap.to(clock, {
+          t: route.total,
+          duration: route.total,
+          ease: "none",
+          onUpdate: () => draw(clock.t),
+          onComplete: () => {
+            pieces(false);
+            ok();
+          },
+        });
+      });
+
+    (async () => {
+      await onScreen();
+      if (dead) return;
+      b.classList.remove("is-waiting");
+      while (!dead) {
+        const inn = flyIn();
+        gsap.set(m, { color: STEEL });
+        gsap.to(m, { color: CLOUD, duration: 0.7, delay: Math.max(0, inn.total - 0.8), ease: "sine.inOut" });
+        await play(inn);
+        await wait(REST_S);
+        await onScreen();
+        if (dead) return;
+        gsap.to(m, { color: STEEL, duration: 0.5, ease: "sine.inOut" });
+        await play(flyOut());
+        await wait(AWAY_S);
+        await onScreen();
+      }
+    })();
+
     return () => {
+      dead = true;
       io.disconnect();
       tween?.kill();
+      gsap.killTweensOf(m);
     };
   }, [box, mark]);
 }
@@ -253,7 +314,7 @@ export function Footer() {
   const lockup = useRef<HTMLDivElement>(null);
   const mark = useRef<SVGSVGElement>(null);
   useReveals(root);
-  useLanding(lockup, mark);
+  useBird(lockup, mark);
 
   return (
     <footer ref={root} id="footer" data-theme-zone="light" data-theme-at="top 35%" className="fo">
@@ -346,8 +407,9 @@ export function Footer() {
         </div>
 
         <div className="fo-bottom">
-          <p>Brisbane, Australia. A QUT capstone project.</p>
-          <p>© 2026 Venty</p>
+          {/* DRAFT: Natalia to confirm the wording */}
+          <p>Venty is a design concept by Natalia Chamon for the QUT Design Festival 2026. The app is a demo, and the patterns it shows are examples.</p>
+          <p>© 2026 Natalia Chamon</p>
         </div>
       </div>
     </footer>

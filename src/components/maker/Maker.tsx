@@ -7,7 +7,7 @@ import { MAKER_URL } from "@/lib/site";
 import { useReveals } from "@/lib/useReveals";
 import "./maker.css";
 
-/* 8. Meet the maker (dark). Natalia's portrait in dots, in an arch, a line
+/* 8. The designer (dark; it was Meet the maker). Natalia's portrait in dots, in an arch, a line
    of type turning round it like a tape round a dress form; her name large,
    then the story.
 
@@ -29,7 +29,7 @@ export function Maker() {
   useReveals(root);
 
   return (
-    <section ref={root} id="maker" data-nav="Meet the maker" data-wing="spread" data-theme-zone="dark" data-theme-at="top 35%" className="mk" aria-labelledby="mk-title">
+    <section ref={root} id="maker" data-nav="The designer" data-wing="spread" data-theme-zone="dark" data-theme-at="top 35%" className="mk" aria-labelledby="mk-title">
       <DitherEdge color="#0b0c15" />
       <div className="mk-glow" aria-hidden="true" />
       <div className="mk-grid">
@@ -54,7 +54,7 @@ export function Maker() {
           <p className="mk-eyebrow">
             <span className="line-mask inline-block">
               <span data-rise className="inline-block">
-                Meet the maker
+                The designer
               </span>
             </span>
           </p>
