@@ -469,6 +469,15 @@ export const FOOTER_OUT: Waypoint[] = [
   { space: "screen", x: 0.7, y: 0.12 },
 ];
 
+/** Phones and tablets (the lockup low on a short screen, under the panels):
+    the same comings and goings, kept low and close to the lockup, in its
+    own mark widths, so the bird stays in the strip of meadow around it. */
+export const FOOTER_IN_NARROW: Waypoint[] = [
+  { space: "to", x: -2.6, y: -0.8 },
+  { space: "to", x: -1.3, y: -0.7 },
+];
+export const FOOTER_OUT_NARROW: Waypoint[] = [{ space: "from", x: 1.2, y: -0.65 }];
+
 export type RouteOptions = {
   /** where it starts and lands (from may be replaced by a start waypoint) */
   from: Place;
@@ -565,10 +574,10 @@ export function flightRoute(o: RouteOptions) {
     const b = pointAt(Math.max(0, s - 0.004));
     return Math.atan2(a[1] - b[1], a[0] - b[0]);
   };
-  // land: already flying, at full speed until the last fifth, then a short
-  // flare down to a soft touchdown; launch: from rest, slow off the ground,
+  // land: already flying, at full speed nearly all the way, then a short,
+  // late flare: it touches down still moving (as a bird does, not a bee); launch: from rest, slow off the ground,
   // building to full speed. Both from a speed profile, integrated.
-  const profile = ease === "land" ? (u: number) => 1 - 0.88 * smooth((u - 0.8) / 0.2) : ease === "launch" ? (u: number) => 0.22 + 0.78 * smooth(u / 0.42) : null;
+  const profile = ease === "land" ? (u: number) => 1 - 0.62 * smooth((u - 0.88) / 0.12) : ease === "launch" ? (u: number) => 0.22 + 0.78 * smooth(u / 0.42) : null;
   const table: number[] = [];
   if (profile) {
     let sum = 0;
@@ -630,7 +639,7 @@ export function flightRoute(o: RouteOptions) {
         !inFlight && u < 0.12 ? { from: 0, to: line, t: u / 0.12 } : u > 0.84 ? (u >= 1 ? 0 : { from: line, to: 0, t: (u - 0.84) / 0.16 }) : line;
       // the wings: beating from the start (or growing from rest), still before it touches down
       // (landing, they beat on through the flare and fold as it touches down)
-      const amp = (inFlight ? 1 : smooth(u / 0.12)) * (1 - (ease === "land" ? smooth((u - 0.86) / 0.14) : smooth((u - 0.72) / 0.26)));
+      const amp = (inFlight ? 1 : smooth(u / 0.12)) * (1 - (ease === "land" ? smooth((u - 0.9) / 0.1) : smooth((u - 0.72) / 0.26)));
       const pose = flightPose(time * rate, amp, { turn, heading, axis: (way * 180) / Math.PI, head: 0.45 });
       return { x: c[0] - origin[0] - scale * centre[0], y: c[1] - origin[1] - scale * centre[1], scale, pose, done: time >= end };
     },

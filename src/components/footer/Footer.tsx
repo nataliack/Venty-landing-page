@@ -8,7 +8,7 @@ import { QutMark } from "../VoteTab";
 import { Halftone } from "../maker/Halftone";
 import { scrollToElement } from "../SmoothScroll";
 import { APP_URL, CTA_LABEL, FESTIVAL_AT, MAKER_URL, SOCIAL_LINKS, VOTE_LINKS } from "@/lib/site";
-import { FOOTER_IN, FOOTER_OUT, MARK, MARK_BOUNDS, MARK_CENTRE, flightRoute, type Place } from "@/lib/markFlight";
+import { FOOTER_IN, FOOTER_IN_NARROW, FOOTER_OUT, FOOTER_OUT_NARROW, MARK, MARK_BOUNDS, MARK_CENTRE, flightRoute, type Place } from "@/lib/markFlight";
 import { LOCKUP, WORD } from "@/lib/lockup";
 import { useCountdown } from "@/lib/useCountdown";
 import { useReveals } from "@/lib/useReveals";
@@ -311,15 +311,21 @@ function useBird(box: React.RefObject<HTMLDivElement | null>, mark: React.RefObj
       };
     };
     const rest: Place = { x: 0, y: 0, scale: 1 };
+    // phones and tablets: the lockup sits low on a short screen, so the
+    // flights stay low and close to it
+    const narrow = () => window.innerWidth < 1024;
     const flyIn = () => {
       const { g } = geometry();
-      return flightRoute({ ...g, from: rest, to: rest, start: FOOTER_IN[0], via: FOOTER_IN.slice(1), duration: 2.4, ease: "land", facing: 0 });
+      const path = narrow() ? FOOTER_IN_NARROW : FOOTER_IN;
+      return flightRoute({ ...g, from: rest, to: rest, start: path[0], via: path.slice(1), duration: narrow() ? 1.7 : 2.1, ease: "land", facing: 0 });
     };
     const flyOut = () => {
       const { r, g } = geometry();
-      // away: beyond the right edge, high in the sky
-      const to: Place = { x: window.innerWidth + g.width - r.left - g.centre[0], y: window.innerHeight * 0.1 - r.top - g.centre[1], scale: 1 };
-      return flightRoute({ ...g, from: rest, to, via: FOOTER_OUT, duration: 2.6, ease: "launch", facing: 0 });
+      // away beyond the right edge: high in the sky, or just above the
+      // lockup on a narrow screen
+      const y = narrow() ? r.top + g.centre[1] - g.width * 0.9 : window.innerHeight * 0.1;
+      const to: Place = { x: window.innerWidth + g.width - r.left - g.centre[0], y: y - r.top - g.centre[1], scale: 1 };
+      return flightRoute({ ...g, from: rest, to, via: narrow() ? FOOTER_OUT_NARROW : FOOTER_OUT, duration: narrow() ? 2 : 2.6, ease: "launch", facing: 0 });
     };
 
     let dead = false;
