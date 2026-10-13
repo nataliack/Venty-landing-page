@@ -1398,6 +1398,9 @@ html[data-theme="light"] .section-nav__icon path { stroke: var(--color-navy); }
 .fl-logo__word { color: var(--color-cloud); }
 /* the mark is cloud while it loads; on Ready it turns cornflower (FilamentLoader), then glides to the logo */
 .fl-logo__mark { color: var(--color-cloud); will-change: transform; }
+/* as served, before the loader reveals them (FilamentLoader removes .is-pre) */
+.fl.is-pre [data-clear],
+.fl.is-pre .fl-logo__mark { opacity: 0; }
 /* the filament: a 2px track; the lit part runs from faint to full cornflower
    at its head, and its glow runs the whole lit length, fading in the same way:
    barely there at the start, strongest at the head */

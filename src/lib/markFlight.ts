@@ -326,84 +326,193 @@ export function flightPose(
   };
 }
 
-/* ---- a journey: take off, fly head first, touch down, turn back ------- */
+/* ---- a journey along a drawn path -------------------------------------- */
 
 /** Where the mark is: a translation (px) and scale of its svg, with the
     transform origin at the svg's top left */
 export type Place = { x: number; y: number; scale: number };
 
+/**
+ * A point the path passes through (a smooth curve runs through them all).
+ * space "screen": x and y as shares of the frame it flies in; "from" or
+ * "to": offsets from the mark's middle where it starts or lands, in widths of
+ * the mark there. ox: a further offset across, in mark widths (to start
+ * beyond an edge).
+ */
+export type Waypoint = { space: "screen" | "from" | "to"; x: number; y: number; ox?: number };
+
+/** The loading screen's entrance (drawn by Jose): in from the right edge, high
+    along the top, then down in a loop round its place, curling back up into
+    it from the lower left. Lands facing right, as the mark. */
+export const ENTER_PATH: Waypoint[] = [
+  { space: "screen", x: 1, y: 0.22, ox: 0.9 },
+  { space: "screen", x: 0.93, y: 0.27 },
+  { space: "screen", x: 0.84, y: 0.24 },
+  { space: "screen", x: 0.72, y: 0.16 },
+  { space: "screen", x: 0.6, y: 0.125 },
+  { space: "to", x: 0.3, y: -1.9 },
+  { space: "to", x: -0.6, y: -1.45 },
+  { space: "to", x: -1.0, y: -0.45 },
+  { space: "to", x: -0.72, y: 0.3 },
+  { space: "to", x: -0.3, y: 0.4 },
+];
+
+/** Its way out to the logo (drawn by Jose): it lifts and curls left over its
+    place, swoops down through the middle of the screen, rises to the top
+    left and hooks round onto the logo, facing right. */
+export const EXIT_PATH: Waypoint[] = [
+  { space: "from", x: 0.3, y: -0.35 },
+  { space: "from", x: -0.1, y: -0.52 },
+  { space: "from", x: -0.65, y: -0.42 },
+  { space: "screen", x: 0.39, y: 0.345 },
+  { space: "screen", x: 0.29, y: 0.42 },
+  { space: "screen", x: 0.2, y: 0.37 },
+  { space: "screen", x: 0.12, y: 0.255 },
+  { space: "screen", x: 0.055, y: 0.15 },
+  { space: "to", x: -0.7, y: 1.4 },
+  { space: "to", x: -0.75, y: 0.4 },
+  { space: "to", x: -0.45, y: -0.15 },
+];
+
 export type RouteOptions = {
-  /** seconds in the air, from take-off to touching down */
-  flight?: number;
-  /** seconds to turn back to the mark: it starts on the approach, so it
-      turns as it comes in to land */
-  back?: number;
-  /** seconds the turn back runs on after touching down, as it settles */
+  /** where it starts and lands (from may be replaced by a start waypoint) */
+  from: Place;
+  to: Place;
+  /** the svg's own top left on screen, untransformed */
+  origin: Pt;
+  /** the mark's middle inside the svg, px at scale 1 */
+  centre: Pt;
+  /** the mark's width, px at scale 1 */
+  width: number;
+  /** the frame screen waypoints are shares of */
+  frame: { left: number; top: number; width: number; height: number };
+  /** the points between; and a waypoint to start from instead of `from` */
+  via: Waypoint[];
+  start?: Waypoint;
+  /** seconds from start to touching down */
+  duration: number;
+  /** "out": already flying as it starts (an entrance) and slowing in; "in-out": from rest to rest */
+  ease?: "out" | "in-out";
+  /** which way it faces at the start: 0 right (the mark), 180 left */
+  facing?: number;
+  /** wingbeats per second */
+  rate?: number;
+  /** seconds per turn, and how long the last one may run on after touching down */
+  turnS?: number;
   settle?: number;
-  /** seconds to turn to face the way, at take-off */
-  away?: number;
-  /** wingbeats on the way */
-  beats?: number;
-  /** how high the path arcs, as a share of its length */
-  arc?: number;
 };
 
 const inOut = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const outEase = (x: number) => 1 - Math.pow(1 - x, 3);
 const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
 
 /**
- * A flight from one place to another. `centre` is the mark's middle inside
- * the svg, in px at scale 1. If the way is to the left, the bird turns to face
- * it as it takes off (it faces right at rest); on the way its head leads,
- * tilting along the arc. Coming in to land it turns back, head first, in one
- * movement with the landing: it touches down exactly on `to`, wings still,
- * and settles as the mark a moment later. at(seconds) gives the place and
- * the pose.
+ * A flight along a path. The path is a smooth curve (centripetal
+ * Catmull-Rom) through the start, the waypoints and the landing; the bird
+ * keeps to it at an eased speed. Wherever the path turns back on itself the
+ * bird turns to face the new way, head first, starting just before; its head
+ * tilts along the path; its wings beat. It touches down exactly on `to`, at
+ * rest and facing right (a last turn, if needed, lands with it). at(seconds)
+ * gives the place and the pose.
  */
-export function flightRoute(from: Place, to: Place, centre: Pt, { flight = 1.15, back = 0.6, away = 0.6, settle = 0.14, beats = 3, arc = 0.14 }: RouteOptions = {}) {
-  const c0: Pt = [from.x + from.scale * centre[0], from.y + from.scale * centre[1]];
-  const c1: Pt = [to.x + to.scale * centre[0], to.y + to.scale * centre[1]];
-  const dx = c1[0] - c0[0];
-  const dy = c1[1] - c0[1];
-  const len = Math.hypot(dx, dy) || 1;
-  // the arc bows upwards, whichever way the flight goes
-  let nx = -dy / len;
-  let ny = dx / len;
-  if (ny > 0) {
-    nx = -nx;
-    ny = -ny;
-  }
-  const left = dx < 0;
-  const turnTo = left ? 180 : 0;
-  const ahead = left ? Math.PI - HEAD_ANGLE : HEAD_ANGLE; // where the head points once turned
-  // the turn back starts on the approach and ends a moment after touchdown
-  const end = left ? flight + settle : flight;
-  const backFrom = end - back;
-  const centreAt = (p: number): Pt => {
-    const bow = arc * len * Math.sin(Math.PI * p);
-    return [c0[0] + dx * p + nx * bow, c0[1] + dy * p + ny * bow];
+export function flightRoute(o: RouteOptions) {
+  const { from, to, origin, centre, width, frame, via, duration, ease = "in-out", facing = 0, rate = 2.6, turnS = 0.6, settle = 0.14 } = o;
+  const c0: Pt = [origin[0] + from.x + from.scale * centre[0], origin[1] + from.y + from.scale * centre[1]];
+  const c1: Pt = [origin[0] + to.x + to.scale * centre[0], origin[1] + to.y + to.scale * centre[1]];
+  const resolve = (w: Waypoint): Pt => {
+    const ox = (w.ox ?? 0) * width * from.scale;
+    if (w.space === "screen") return [frame.left + w.x * frame.width + ox, frame.top + w.y * frame.height];
+    const [c, s] = w.space === "from" ? [c0, from.scale] : [c1, to.scale];
+    return [c[0] + w.x * width * s + ox, c[1] + w.y * width * s];
   };
+  const pts: Pt[] = [o.start ? resolve(o.start) : c0, ...via.map(resolve), c1];
+
+  // the curve, sampled, measured along its length
+  const line: Pt[] = [];
+  const ext = (a: Pt, b: Pt): Pt => [2 * a[0] - b[0], 2 * a[1] - b[1]];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] ?? ext(pts[0], pts[1]);
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] ?? ext(pts[pts.length - 1], pts[pts.length - 2]);
+    const tj = (a: Pt, b: Pt) => Math.max(1e-3, Math.sqrt(Math.hypot(b[0] - a[0], b[1] - a[1])));
+    const t1 = tj(p0, p1);
+    const t2 = t1 + tj(p1, p2);
+    const t3 = t2 + tj(p2, p3);
+    for (let k = 0; k < 48; k++) {
+      const t = t1 + ((t2 - t1) * k) / 48;
+      const mix = (a: Pt, b: Pt, ta: number, tb: number): Pt => [((tb - t) * a[0] + (t - ta) * b[0]) / (tb - ta), ((tb - t) * a[1] + (t - ta) * b[1]) / (tb - ta)];
+      const a1 = mix(p0, p1, 0, t1);
+      const a2 = mix(p1, p2, t1, t2);
+      const a3 = mix(p2, p3, t2, t3);
+      line.push(mix(mix(a1, a2, 0, t2), mix(a2, a3, t1, t3), t1, t2));
+    }
+  }
+  line.push(c1);
+  const len = [0];
+  for (let i = 1; i < line.length; i++) len.push(len[i - 1] + Math.hypot(line[i][0] - line[i - 1][0], line[i][1] - line[i - 1][1]));
+  const total = len[len.length - 1] || 1;
+  const pointAt = (s: number): Pt => {
+    const d = clamp01(s) * total;
+    let lo = 0;
+    let hi = len.length - 1;
+    while (hi - lo > 1) {
+      const mid = (lo + hi) >> 1;
+      if (len[mid] < d) lo = mid;
+      else hi = mid;
+    }
+    const k = (d - len[lo]) / (len[hi] - len[lo] || 1);
+    return [line[lo][0] + (line[hi][0] - line[lo][0]) * k, line[lo][1] + (line[hi][1] - line[lo][1]) * k];
+  };
+  const wayAt = (s: number) => {
+    const a = pointAt(Math.min(1, s + 0.004));
+    const b = pointAt(Math.max(0, s - 0.004));
+    return Math.atan2(a[1] - b[1], a[0] - b[0]);
+  };
+  const progress = (u: number) => (ease === "out" ? outEase(u) : inOut(u));
+
+  // the turns: wherever the way across flips (with some give, so a wobble
+  // does not set one off), starting a little before; the last must leave it
+  // facing right by the time it has settled
+  const turns: { start: number; from: number; to: number }[] = [];
+  let face = facing;
+  for (let i = 1; i <= 400; i++) {
+    const time = (duration * i) / 400;
+    const across = Math.cos(wayAt(progress(time / duration)));
+    const want = across < -0.3 ? 180 : across > 0.3 ? 0 : face;
+    if (want !== face) {
+      const prev = turns[turns.length - 1];
+      turns.push({ start: Math.max(time - 0.12, prev ? prev.start + turnS : 0), from: face, to: want });
+      face = want;
+    }
+  }
+  if (face !== 0) turns.push({ start: duration + settle - turnS, from: face, to: 0 });
+  const last = turns[turns.length - 1];
+  if (last && last.to === 0) last.start = Math.min(last.start, duration + settle - turnS);
+  const end = Math.max(duration, last ? last.start + turnS : 0);
 
   return {
     total: end,
     at(time: number) {
-      const u = clamp01(time / flight);
-      const p = inOut(u);
-      const scale = from.scale + (to.scale - from.scale) * p;
-      const c = centreAt(p);
-      // the beat grows on take-off and dies away before touching down
-      const amp = smooth(u / 0.16) * (1 - smooth((u - 0.62) / 0.34));
-      // the turn, head first: to face the way as it takes off, and back as it
-      // comes in to land
-      const turn: Turn = time < backFrom ? { from: 0, to: turnTo, t: clamp01(time / away) } : { from: turnTo, to: 0, t: clamp01((time - backFrom) / back) };
-      // the head leads: tilted towards the way it is going, most in mid-air
-      const a = centreAt(Math.min(1, p + 0.01));
-      const b = centreAt(Math.max(0, p - 0.01));
-      const way = Math.atan2(a[1] - b[1], a[0] - b[0]);
-      const cruise = smooth(u / 0.22) * (1 - smooth((u - 0.66) / 0.3));
-      const tilt = Math.max(-0.5, Math.min(0.5, 0.75 * wrap(way - ahead))) * cruise;
-      const pose = flightPose(u * beats, amp, { turn, heading: (tilt * 180) / Math.PI, head: 0.45 });
-      return { x: c[0] - scale * centre[0], y: c[1] - scale * centre[1], scale, pose, done: time >= end };
+      const u = clamp01(time / duration);
+      const s = progress(u);
+      const c = pointAt(s);
+      const scale = from.scale + (to.scale - from.scale) * s;
+      let turn: number | Turn = facing;
+      let faced = facing / 180;
+      for (const t of turns) {
+        if (time < t.start) break;
+        turn = { from: t.from, to: t.to, t: clamp01((time - t.start) / turnS) };
+        faced = (t.from + (t.to - t.from) * smooth((time - t.start) / turnS)) / 180;
+      }
+      // the head leads: tilted towards the way it is going
+      const ahead = HEAD_ANGLE + (Math.PI - 2 * HEAD_ANGLE) * faced;
+      const lead = (ease === "out" ? 1 : smooth(u / 0.12)) * (1 - smooth((u - 0.8) / 0.2));
+      const tilt = Math.max(-0.55, Math.min(0.55, 0.7 * wrap(wayAt(Math.min(s, 0.985)) - ahead))) * lead;
+      // the wings: beating from the start (or growing from rest), still before it touches down
+      const amp = (ease === "out" ? 1 : smooth(u / 0.12)) * (1 - smooth((u - 0.72) / 0.26));
+      const pose = flightPose(time * rate, amp, { turn, heading: (tilt * 180) / Math.PI, head: 0.45 });
+      return { x: c[0] - origin[0] - scale * centre[0], y: c[1] - origin[1] - scale * centre[1], scale, pose, done: time >= end };
     },
   };
 }

@@ -5,7 +5,7 @@ import { gsap } from "gsap";
 import { Sky } from "./Sky";
 import { HERO, preloadHero } from "@/lib/heroSequence";
 import { EASE } from "@/lib/motion";
-import { MARK, MARK_CENTRE, flightRoute } from "@/lib/markFlight";
+import { ENTER_PATH, EXIT_PATH, MARK, MARK_CENTRE, flightRoute, type RouteOptions } from "@/lib/markFlight";
 
 /* The loading screen: Edge, the locked dark sky (a cornflower glow roaming the
    lower two thirds), with the cornflower filament, its growing tip the one that
@@ -19,14 +19,23 @@ import { MARK, MARK_CENTRE, flightRoute } from "@/lib/markFlight";
 
    Progress is real: the hero's opening frames and the fonts.
 
+   On the way in, the word, the number, the filament and the wordmark reveal
+   themselves (the wordmark rises, the filament draws out from the middle,
+   the word and the number slide in from their sides), and the mark flies in
+   (markFlight, ENTER_PATH): in from the right edge, high along the top,
+   facing left, then down in a loop round its place, turning head first to
+   face right as it curls back up into it. It settles there while the
+   filament fills.
+
    The way out is simple, in the spirit of a page change: the words, the
    number, the filament and the wordmark clear; the night settles to one flat
    colour; then the screen breaks into squares that clear row by row from the
    top (each with a little jitter), uncovering the hero. Meanwhile the mark
-   alone flies to the top left (markFlight): it turns head first to
-   face the way, flies head first along a low arc beating its wings, and
-   coming in to land turns back to face right, touching down exactly on the
-   site's own logo, wings still, as the logo, which takes over from it.
+   alone flies to the top left (EXIT_PATH): it lifts and curls left over its
+   place, turning head first to face the way, swoops down through the middle,
+   rises to the top left and hooks round, turning back to face right as it
+   comes in, to touch down exactly on the site's own logo, wings still, as
+   the logo, which takes over from it.
 
    The hero's opening waits for this screen to leave (afterLoader). */
 
@@ -35,8 +44,9 @@ const HOLD_MS = 500; // the beat on Ready before it clears
 const CLEAR_S = 0.4; // words, number, filament and wordmark leave
 const TILES_S = 0.6; // the squares clear from the top row to the bottom
 const JITTER_S = 0.16; // each square's own scatter within its row
-const FLIGHT_S = 1.15; // the mark's flight to the corner
-const BACK_S = 0.6; // coming in to land it turns back to face right (head first), as the logo
+const ENTER_S = 2.3; // the mark's flight in, to its place over the wordmark
+const EXIT_S = 1.9; // its flight out, to the logo at the top left
+const REVEAL_S = 1.1; // the word, number, filament and wordmark reveal themselves
 const TINT_S = 0.4; // the mark turns from cloud to cornflower before it leaves
 
 const still = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -207,6 +217,83 @@ export function FilamentLoader({
     if (r) setTiles(makeTiles(r.width, r.height, pace));
   }, [pace]);
 
+  // the mark flies its paths in pieces (body, wing, head), drawn here; at
+  // rest it is the one outline again
+  const fly = (route: ReturnType<typeof flightRoute>, delay: number) => {
+    const m = mark.current!;
+    const path = m.querySelector<SVGPathElement>("path")!;
+    const [body, far, near] = ["body", "far", "near"].map((k) => m.querySelector<SVGPathElement>(`[data-piece="${k}"]`)!);
+    const pieces = (on: boolean) => {
+      path.style.display = on ? "none" : "";
+      for (const p of [body, far, near]) p.style.display = on ? "" : "none";
+    };
+    const draw = (t: number) => {
+      const at = route.at(t);
+      gsap.set(m, { x: at.x, y: at.y, scale: at.scale });
+      body.setAttribute("d", at.pose.body);
+      far.setAttribute("d", at.pose.far);
+      near.setAttribute("d", at.pose.near);
+      pieces(!at.done);
+    };
+    const clock = { t: 0 };
+    return gsap.to(clock, { t: route.total, duration: route.total * pace, ease: "none", delay, onStart: () => draw(0), onUpdate: () => draw(clock.t), onComplete: () => pieces(false) });
+  };
+  /** Where the mark sits at rest, for a route: its svg, its middle, its width, and the frame */
+  const restGeometry = () => {
+    const m = mark.current!;
+    const path = m.querySelector<SVGPathElement>("path")!;
+    const a = path.getBoundingClientRect();
+    const box = m.getBoundingClientRect();
+    const unit = path.getBBox();
+    const u = a.width / unit.width;
+    const r = root.current!.getBoundingClientRect();
+    return {
+      a,
+      geometry: {
+        origin: [box.left, box.top],
+        centre: [a.left - box.left + (MARK_CENTRE[0] - unit.x) * u, a.top - box.top + (MARK_CENTRE[1] - unit.y) * u],
+        width: a.width,
+        frame: { left: r.left, top: r.top, width: r.width, height: r.height },
+      } satisfies Pick<RouteOptions, "origin" | "centre" | "width" | "frame">,
+    };
+  };
+
+  // on the way in: everything reveals itself, and the mark flies in
+  const entered = useRef<Promise<unknown>>(Promise.resolve());
+  useLayoutEffect(() => {
+    if (!root.current || !mark.current) return;
+    // until now (the page as served) all of it waits hidden (.is-pre), so
+    // nothing shows at rest before it can reveal itself
+    root.current.classList.remove("is-pre");
+    if (still()) return;
+    const m = mark.current;
+    const q = gsap.utils.selector(root);
+    const column = window.matchMedia("(max-width: 767px)").matches;
+    // measured at rest (a second run, in development, finds it moved)
+    gsap.set(m, { transformOrigin: "0 0", x: 0, y: 0, scale: 1 });
+    const { geometry } = restGeometry();
+    const rest = { x: 0, y: 0, scale: 1 };
+    const route = flightRoute({ ...geometry, from: rest, to: rest, start: ENTER_PATH[0], via: ENTER_PATH.slice(1), duration: ENTER_S, ease: "out", facing: 180 });
+    // off the screen until it flies in
+    const first = route.at(0);
+    gsap.set(m, { x: first.x, y: first.y, scale: first.scale });
+    const flight = fly(route, 0.25 * pace);
+    entered.current = flight.then();
+    const reveal = gsap
+      .timeline({ defaults: { ease: EASE.out } })
+      .from(q(".fl-logo__word"), { opacity: 0, yPercent: 14, duration: REVEAL_S }, 0.1)
+      .from(q("[data-clear='bar']"), { scaleX: 0, duration: REVEAL_S * 1.1 }, 0.2)
+      .from(q("[data-clear='left']"), { opacity: 0, [column ? "y" : "x"]: -24, duration: REVEAL_S * 0.8 }, 0.35)
+      .from(q("[data-clear='right']"), { opacity: 0, [column ? "y" : "x"]: 24, duration: REVEAL_S * 0.8 }, 0.35)
+      .timeScale(1 / pace);
+    return () => {
+      flight.kill();
+      reveal.revert();
+    };
+    // the way in runs once, on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // the site's logo waits under the screen, hidden, until the mark lands on it
   useEffect(() => {
     if (contained) return;
@@ -242,6 +329,7 @@ export function FilamentLoader({
       onDone?.();
     };
     const leave = async () => {
+      await entered.current; // it has flown in and settled
       await wait(HOLD_MS * pace);
       if (dead) return;
       if (still()) {
@@ -258,48 +346,21 @@ export function FilamentLoader({
       const m = mark.current!;
       const corn = getComputedStyle(document.documentElement).getPropertyValue("--color-cornflower").trim() || "#687ef5";
       tweens.push(gsap.to(m, { color: corn, duration: TINT_S * pace, ease: EASE.soft }));
-      const path = m.querySelector("path")!;
       const to = landing()?.querySelector("path") ?? landing();
       let flight: gsap.core.Tween | null = null;
       if (to) {
-        const a = path.getBoundingClientRect();
+        const { a, geometry } = restGeometry();
         const b = to.getBoundingClientRect();
         const box = m.getBoundingClientRect();
         const s = b.width / a.width;
-        gsap.set(m, { transformOrigin: "0 0" });
-        // the mark's middle inside its svg, in px (the path's box, in the
-        // logo's units, against the same box on screen)
-        const unit = path.getBBox();
-        const u = a.width / unit.width;
-        const centre: [number, number] = [a.left - box.left + (MARK_CENTRE[0] - unit.x) * u, a.top - box.top + (MARK_CENTRE[1] - unit.y) * u];
-        const route = flightRoute(
-          { x: 0, y: 0, scale: 1 },
-          { x: b.left - box.left - (a.left - box.left) * s, y: b.top - box.top - (a.top - box.top) * s, scale: s },
-          centre,
-          { flight: FLIGHT_S, back: BACK_S },
-        );
-        // drawn in pieces (body, wing, head) while it moves, then the mark again
-        const [body, far, near] = ["body", "far", "near"].map((k) => m.querySelector<SVGPathElement>(`[data-piece="${k}"]`)!);
-        const pieces = (on: boolean) => {
-          path.style.display = on ? "none" : "";
-          for (const p of [body, far, near]) p.style.display = on ? "" : "none";
-        };
-        const clock = { t: 0 };
-        flight = gsap.to(clock, {
-          t: route.total,
-          duration: route.total * pace,
-          ease: "none",
-          delay: (TINT_S - 0.05) * pace, // once it has turned
-          onUpdate() {
-            const at = route.at(clock.t);
-            gsap.set(m, { x: at.x, y: at.y, scale: at.scale });
-            body.setAttribute("d", at.pose.body);
-            far.setAttribute("d", at.pose.far);
-            near.setAttribute("d", at.pose.near);
-            pieces(!at.done);
-          },
-          onComplete: () => pieces(false),
+        const route = flightRoute({
+          ...geometry,
+          from: { x: 0, y: 0, scale: 1 },
+          to: { x: b.left - box.left - (a.left - box.left) * s, y: b.top - box.top - (a.top - box.top) * s, scale: s },
+          via: EXIT_PATH,
+          duration: EXIT_S,
         });
+        flight = fly(route, (TINT_S - 0.05) * pace); // once it has turned
         tweens.push(flight);
       }
 
@@ -336,7 +397,7 @@ export function FilamentLoader({
 
   return (
     // .loader is what the page's openings wait for (afterLoader); the lab's copy has no part in that
-    <div ref={root} className={`fl inset-0 overflow-hidden ${contained ? "absolute z-[40]" : "loader fixed z-[100]"}`}>
+    <div ref={root} className={`fl is-pre inset-0 overflow-hidden ${contained ? "absolute z-[40]" : "loader fixed z-[100]"}`}>
       <div role="progressbar" aria-label="Loading Venty" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} className="sr-only">
         {pct}%
       </div>

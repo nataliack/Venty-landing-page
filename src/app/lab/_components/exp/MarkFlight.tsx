@@ -2,12 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { FlyingMark } from "@/components/FlyingMark";
-import { MARK, MARK_CENTRE, flightRoute } from "@/lib/markFlight";
+import { ENTER_PATH, EXIT_PATH, MARK, MARK_CENTRE, flightRoute } from "@/lib/markFlight";
 
 /* The mark in flight, on the bench. Two views:
-   - Journey: the loading screen's flight, big enough to see. The bird turns
-     head first to face the way (the head, then the body after it), flies along a low arc, touches
-     down on the outline at the top left and turns back to face right.
+   - Journey: the loading screen's two flights. In from the right edge along
+     the top, a loop down round its place and up into it; a moment at rest;
+     then out, curling left over its place, down through the middle and up to
+     the outline at the top left, hooking round onto it. It turns head first
+     wherever the way turns back (the head, then the body after it).
    - Hover: big in the middle, beating its wings on the spot, and at the
      sizes it is used at. Fly and Land, and the beat's settings. */
 
@@ -27,8 +29,9 @@ function Slider({ label, value, min, max, step, onChange, unit = "" }: { label: 
   );
 }
 
-/** The flight from the middle to the outline at the top left, run again for each `run` */
+/** Both flights, run again for each `run`: in, a moment at rest, out to the outline */
 function Journey({ run, slow }: { run: number; slow: boolean }) {
+  const stage = useRef<HTMLDivElement>(null);
   const bird = useRef<SVGSVGElement>(null);
   const spot = useRef<SVGPathElement>(null);
 
@@ -45,37 +48,47 @@ function Journey({ run, slow }: { run: number; slow: boolean }) {
     const a = path.getBoundingClientRect();
     const b = spot.current!.getBoundingClientRect();
     const box = m.getBoundingClientRect();
+    const r = stage.current!.getBoundingClientRect();
     const s = b.width / a.width;
     const unit = path.getBBox();
     const u = a.width / unit.width;
-    const centre: [number, number] = [a.left - box.left + (MARK_CENTRE[0] - unit.x) * u, a.top - box.top + (MARK_CENTRE[1] - unit.y) * u];
-    const route = flightRoute({ x: 0, y: 0, scale: 1 }, { x: b.left - box.left - (a.left - box.left) * s, y: b.top - box.top - (a.top - box.top) * s, scale: s }, centre);
+    const geometry = {
+      origin: [box.left, box.top] as [number, number],
+      centre: [a.left - box.left + (MARK_CENTRE[0] - unit.x) * u, a.top - box.top + (MARK_CENTRE[1] - unit.y) * u] as [number, number],
+      width: a.width,
+      frame: { left: r.left, top: r.top, width: r.width, height: r.height },
+    };
+    const rest = { x: 0, y: 0, scale: 1 };
+    const enter = flightRoute({ ...geometry, from: rest, to: rest, start: ENTER_PATH[0], via: ENTER_PATH.slice(1), duration: 2.3, ease: "out", facing: 180 });
+    const exit = flightRoute({ ...geometry, from: rest, to: { x: b.left - box.left - (a.left - box.left) * s, y: b.top - box.top - (a.top - box.top) * s, scale: s }, via: EXIT_PATH, duration: 1.9 });
+    const HOLD = 1.2; // at rest between them, as while the filament fills
     const pace = slow ? 4 : 1;
     let raf = 0;
     let t0 = 0;
     const tick = (now: number) => {
-      if (!t0) t0 = now + 600; // a moment still before take-off
+      if (!t0) t0 = now + 400;
       const t = Math.max(0, (now - t0) / 1000 / pace);
-      const at = route.at(Math.min(t, route.total));
+      const out = t > enter.total + HOLD;
+      const at = out ? exit.at(Math.min(t - enter.total - HOLD, exit.total)) : enter.at(Math.min(t, enter.total));
       m.style.transform = `translate(${at.x}px, ${at.y}px) scale(${at.scale})`;
       body.setAttribute("d", at.pose.body);
       far.setAttribute("d", at.pose.far);
       near.setAttribute("d", at.pose.near);
       pieces(!at.done);
-      if (!at.done) raf = requestAnimationFrame(tick);
+      if (!(out && at.done)) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [run, slow]);
 
   return (
-    <div className="absolute inset-0">
+    <div ref={stage} className="absolute inset-0">
       {/* where it lands: the mark's outline, where the logo sits */}
       <svg viewBox="207 0 1334 797" className="absolute left-[clamp(16px,2.5vw,36px)] top-[132px]" style={{ width: LANDING }} overflow="visible" aria-hidden="true">
         <path ref={spot} d={MARK} fill="none" stroke="var(--steel)" strokeWidth={14} strokeDasharray="40 30" />
       </svg>
       <div className="absolute inset-0 grid place-items-center">
-        <svg ref={bird} viewBox={MARK_BOX} className="w-[min(60vw,440px)] text-[var(--cornflower)]" style={{ transformOrigin: "0 0" }} fill="currentColor" overflow="visible" aria-hidden="true">
+        <svg ref={bird} viewBox={MARK_BOX} className="w-[clamp(120px,16vw,200px)] text-[var(--cornflower)]" style={{ transformOrigin: "0 0" }} fill="currentColor" overflow="visible" aria-hidden="true">
           <path data-whole d={MARK} />
           <path data-piece="body" style={{ display: "none" }} />
           <path data-piece="far" style={{ display: "none" }} />

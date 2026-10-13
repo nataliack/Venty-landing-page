@@ -96,23 +96,29 @@ Before all of it, the loading screen (`FilamentLoader.tsx`): Edge, the locked
 dark sky (a cornflower glow roaming the lower two thirds), with the cornflower
 filament at dead centre (quiet along its length, glowing at its growing tip), the Venty lockup above it, a rolling word on the left (Loading,
 Measuring, Drafting, Fitting, Ready) and the percentage on the right in the
-same type. It leaves simply, like a page change: the words, number, filament
+same type. On the way in, everything reveals itself instead of appearing at once: the
+wordmark rises and fades up, the filament draws out from the middle, the word
+and the number slide in from their sides (`REVEAL_S` 1.1s, `EASE.out`); as
+served, they wait hidden (`.is-pre`). It leaves simply, like a page change: the words, number, filament
 and wordmark clear (`EASE.in`, 0.4s) as the night settles to one flat colour;
 then the screen breaks into squares (12 across on phones, 20 on desktop) that
 clear row by row from the top with a little jitter (0.6s), uncovering the
 hero's first frame, so the footage never moves or fades in. Meanwhile the
 mark, cloud while it loads, turns cornflower (0.4s) and flies alone to the
-top left (`src/lib/markFlight.ts`, `flightRoute`). The mark is a bird facing
-right (its head the long piece up to the right), cut into a body, a wing and
-the head, which fill it exactly at rest. It turns to face the way head
-first (0.6s): the head swings round on its neck towards you, then the body
-follows it from the neck to the tail, carrying the head, which settles
-straight again. It flies head first along a low arc (1.15s, ease in-out), its
-wing and head beating three times, rolling over rather than creasing, the
-head tilted along the arc. Coming in to land it turns back to face right,
-head first, in one movement with the landing (the turn starts on the
-approach, 0.6s, and settles 0.14s after it touches down exactly on the
-site's logo, wings still), as the logo, which takes over
+top left. The mark is a bird facing right (its head the long piece up to the
+right), cut into a body, a wing and the head, which fill it exactly at rest
+(`src/lib/markFlight.ts`). Both of its flights follow paths Jose drew,
+smooth curves through waypoints (`ENTER_PATH`, `EXIT_PATH`), its head
+tilted along them and its wings beating; wherever the way turns back it
+turns head first (0.6s: the head swings round on its neck towards you, then
+the body follows from the neck to the tail). On the way in (2.3s, already
+flying, slowing in) it comes from beyond the right edge, high along the top
+facing left, then loops down round its place and curls up into it, turning
+to face right; it settles there while the filament fills. On the way out
+(1.9s, ease in-out) it lifts and curls left over its place, swoops down
+through the middle, rises to the top left and hooks round onto the site's
+logo, turning back to face right as it comes in and touching down exactly
+on it, wings still, as the logo, which takes over
 (the hero's opening no longer animates the logo). `FlyingMark` beats its
 wings on the spot; the lab's "Mark · Flight" runs both, the journey with slow
 motion and the beat with its settings.
