@@ -556,15 +556,28 @@ button.ft-chip { cursor: pointer; }
   mask-composite: intersect;
 }
 .ft-stage__3d:active { cursor: grabbing; }
-.ft-stage__3d img {
-  width: 100%;
+/* the first frame as a poster, the canvas over it once it has drawn. The
+   frames are square: shown whole, the stage's full height, centred (so a
+   wide stage never crops her head or her feet), their sides fading into
+   the card */
+.ft-stage__3d img,
+.ft-stage__3d canvas {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: auto;
   height: 100%;
+  aspect-ratio: 1;
+  translate: -50% 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
+}
+.ft-stage__3d img {
   object-fit: cover;
-  object-position: 50% 26%;
   user-select: none;
   -webkit-user-drag: none;
-  transition: transform 0.25s var(--expo);
 }
+.ft-stage__3d canvas { opacity: 0; }
 .ft-stage[data-flat="true"] .ft-stage__3d { opacity: 0; scale: 0.94; filter: blur(8px); pointer-events: none; }
 .ft-stage__flat { opacity: 0; scale: 1.05; filter: blur(8px); padding: 8% 6% 6% 0; pointer-events: none; }
 .ft-stage[data-flat="true"] .ft-stage__flat { opacity: 1; scale: 1; filter: none; }
@@ -576,6 +589,15 @@ button.ft-chip { cursor: pointer; }
 .ft-turnwrap[data-flat="true"] { opacity: 0; translate: 0 8px; pointer-events: none; }
 .ft-turnbar { max-width: 300px; }
 .ft-turnbar__top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; font-size: 12px; letter-spacing: -0.01em; color: var(--steel); }
+.ft-turnbar__marks {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px calc(var(--thumb, 34px) / 2 - 14px) 0;
+  font-size: 11px;
+  letter-spacing: -0.01em;
+  color: var(--steel);
+}
+.ft-turnbar__marks span { width: 28px; text-align: center; }
 .ft-turnbar__top b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: 20px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--cloud); }
 .ft-turnbar__track {
   --p: 0;

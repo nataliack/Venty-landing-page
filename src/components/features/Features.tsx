@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { DitherEdge } from "../DitherEdge";
 import { useReveals } from "@/lib/useReveals";
+import { turn, turnPosition } from "@/lib/turnSequence";
 import "./features.css";
 
 /* 4. Features (dark). "Everything a pattern needs." Six cards of backlit
@@ -17,8 +18,8 @@ import "./features.css";
      Print options             a dial: A4 at home or A0 at a print shop
                                (press +), seam allowance on or off
      Body library              the bodies you've measured, dated
-     See it on your body       the garment on a body, turned with a slider
-                               (or by dragging it); or its flat pieces
+     See it on your body       Jose's model turning a full 360°, played by a
+                               slider (or by dragging her); or the flat pieces
      Pattern library           a pattern with its versions and notes
 
    The light: a card lights where the pointer is over it, and only that
@@ -32,18 +33,14 @@ import "./features.css";
    IMAGES (replace the files, keep the names):
      /features/ref-jersey.webp   Mark up: the model, a cut-out (transparent),
                                  cropped at the skirt; master in media/features
-     /features/on-body.webp      See it on your body: the still shown until
-                                 the turn's frames exist (TURN below), 1:1
-   PENDING: the second reference photo (SECOND_REF), and the turn's frames. */
+     /features/turn/             See it on your body: the turn's frames, from
+                                 tools/turn/build.cjs (src/lib/turnSequence)
+   PENDING: the second reference photo (SECOND_REF). */
 
 /** The second reference in Mark up: a photo with its background, to come.
     Until then the card shows an empty slot in its place. */
 const SECOND_REF: string | null = null;
 
-/** The turn in See it on your body: a camera circling a body, as an image
-    sequence (frames/0001.webp ...), played by the slider. Until it exists,
-    one still (count 1) and the slider leans the still a little instead. */
-const TURN = { count: 1, frame: (i: number) => (i === 0 ? "/features/on-body.webp" : `/features/turn/${String(i).padStart(4, "0")}.webp`) };
 
 const BODIES = [
   { who: "Me", when: "Oct 2026", m: "Bust 92 · Waist 74 · Hip 98" },
@@ -271,11 +268,16 @@ function Bodies() {
 }
 
 /* ---- See it on your body: turn it, or see the flat pieces ------------ */
-/* The turn is a slider (a native range underneath, so keys and screen
+/* She turns a full 360°: an image sequence (src/lib/turnSequence) drawn on
+   a canvas, the first frame as a poster until it has drawn. The frames load
+   when the card comes near, and the player (with its few decoded frames)
+   lives only while it is near.
+   The turn is a slider (a native range underneath, so keys and screen
    readers work; drawn over it, a track with a tick every 30 degrees, the
-   travelled part lit, a thumb with the turn's arrows, the angle above).
-   Dragging the body itself turns it too. The first time it comes into view
-   it turns a little and back, so you can see it does. */
+   turned part lit, a thumb with the turn's arrows, the angle above, and
+   Front, Back, Front under it). Dragging her turns her too, round and round.
+   The first time it comes into view it turns a little and back, so you can
+   see it does. */
 function Turn({ deg, onDeg }: { deg: number; onDeg: (d: number) => void }) {
   const p = deg / 359;
   return (
@@ -296,18 +298,59 @@ function Turn({ deg, onDeg }: { deg: number; onDeg: (d: number) => void }) {
             <path d="M6.5 6.5 3.5 10l3 3.5M13.5 6.5l3 3.5-3 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </span>
-        <input type="range" min={0} max={359} step={1} value={Math.round(deg)} onChange={(e) => onDeg(+e.target.value)} aria-label="Turn the garment" aria-valuetext={`${Math.round(deg)} degrees`} />
+        <input type="range" min={0} max={359} step={1} value={Math.round(deg)} onChange={(e) => onDeg(+e.target.value)} aria-label="Turn her round" aria-valuetext={`${Math.round(deg)} degrees`} />
+      </div>
+      <div className="ft-turnbar__marks" aria-hidden="true">
+        <span>Front</span>
+        <span>Back</span>
+        <span>Front</span>
       </div>
     </div>
   );
 }
 
 function OnBody() {
+  // the stage (the view itself is display: contents, with no box to watch)
   const ref = useRef<HTMLDivElement>(null);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const player = useRef<ReturnType<typeof turn.createPlayer> | null>(null);
   const [flat, setFlat] = useState(false);
   const [deg, setDeg] = useState(0);
+  const at = useRef(0); // the angle, for a player made later
   const drag = useRef<{ x: number; d: number } | null>(null);
   const hinted = useRef(false);
+
+  // the frames load, and the player lives, while the card is near
+  useEffect(() => {
+    const el = ref.current;
+    const cv = canvas.current;
+    if (!el || !cv) return;
+    const near = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting && !player.current) {
+          turn.preload();
+          player.current = turn.createPlayer(cv);
+          player.current.setPosition(turnPosition(at.current));
+        } else if (!e.isIntersecting && player.current) {
+          player.current.destroy();
+          player.current = null;
+          cv.style.opacity = "0";
+        }
+      },
+      { rootMargin: "100% 0px 100% 0px" },
+    );
+    near.observe(el);
+    return () => {
+      near.disconnect();
+      player.current?.destroy();
+      player.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    at.current = deg;
+    player.current?.setPosition(turnPosition(deg));
+  }, [deg]);
 
   // the first time it is on screen: a little turn and back, to show it turns
   useEffect(() => {
@@ -337,12 +380,8 @@ function OnBody() {
     };
   }, []);
 
-  const frame = TURN.count > 1 ? Math.round((deg / 360) * TURN.count) % TURN.count : 0;
-  // one still for now: it leans with the turn, a hint of the real thing
-  const lean = TURN.count > 1 ? 0 : Math.sin((deg * Math.PI) / 180) * 7;
-
   return (
-    <div ref={ref} className="ft-view">
+    <div className="ft-view">
       <div className="ft-seg" role="group" aria-label="View">
         <button type="button" aria-pressed={!flat} onClick={() => setFlat(false)}>
           On the body
@@ -352,7 +391,7 @@ function OnBody() {
         </button>
         <span className="ft-seg__thumb" data-flat={flat} aria-hidden="true" />
       </div>
-      <div className="ft-stage" data-flat={flat}>
+      <div ref={ref} className="ft-stage" data-flat={flat}>
         <figure
           className="ft-stage__3d"
           aria-hidden="true"
@@ -368,7 +407,8 @@ function OnBody() {
           onPointerCancel={() => (drag.current = null)}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={TURN.frame(frame)} alt="" loading="lazy" decoding="async" draggable={false} style={{ transform: `perspective(900px) rotateY(${lean}deg)` }} />
+          <img src={turn.poster} alt="" loading="lazy" decoding="async" draggable={false} />
+          <canvas ref={canvas} />
         </figure>
         <svg viewBox="0 0 420 320" className="ft-stage__flat" aria-hidden="true">
           {/* the jacket, flat: front, back and a sleeve */}

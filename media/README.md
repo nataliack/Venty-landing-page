@@ -76,10 +76,20 @@ alpha. The marks on her are drawn in the master's units (1314 × 2000), so a
 new photo of another size needs them moved (`MarkUp` in
 `src/components/features/Features.tsx`).
 
-`features/on-body-master.webp` (2000 × 2000) is See it on your body's still,
-`public/features/on-body.webp` at 1200. When the turn's video exists, its
-frames go in `public/features/turn/` (0001.webp …) and `TURN.count` in
-Features.tsx becomes their number; the slider then plays them.
+`features/turn/` holds See it on your body's turn: Jose's two clips
+(`front-to-back.mp4`, `back-to-front.mp4`, 1280 × 720, 24 fps, AI video)
+and `turn-master.mp4`, the two joined into one 360° turn. To change it,
+replace the clips and run
+
+```bash
+node tools/turn/build.cjs media/features/turn/front-to-back.mp4 media/features/turn/back-to-front.mp4
+```
+
+It matches the second clip's colour to the first (on the frames where both
+show the same pose), drops the still holds and slow ends so she turns at an
+even pace with no frame shown twice, bridges the two joints with blended
+frames, and writes 720 × 720 WebP frames on her, with a manifest
+(`back` is the frame of her back), into `public/features/turn/`.
 
 ## People
 
