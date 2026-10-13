@@ -7,7 +7,7 @@ import { PrimaryButton } from "../PrimaryButton";
 import { QutMark } from "../VoteTab";
 import { Halftone } from "../maker/Halftone";
 import { scrollToElement } from "../SmoothScroll";
-import { APP_URL, CTA_LABEL, FESTIVAL_AT, FOOTER_MEDIA, MAKER_URL, VOTE_LINKS } from "@/lib/site";
+import { APP_URL, CTA_LABEL, FESTIVAL_AT, MAKER_URL, VOTE_LINKS } from "@/lib/site";
 import { ENTER_PATH, LEAVE_PATH, MARK, MARK_BOUNDS, MARK_CENTRE, flightRoute } from "@/lib/markFlight";
 import { LOCKUP, WORD } from "@/lib/lockup";
 import { useCountdown } from "@/lib/useCountdown";
@@ -15,8 +15,8 @@ import { useReveals } from "@/lib/useReveals";
 import "./footer.css";
 
 /* The footer (light). A sky that ends in a meadow: Jose's field of
-   cornflowers under misty hills (FOOTER_MEDIA, or the still), its top fading
-   into the cloud above. It rises over the held end of the closing scene with
+   cornflowers under misty hills, the grass moving in the wind (a video, on
+   a seamless loop; Meadow below), its top fading into the cloud above. It rises over the held end of the closing scene with
    the site's edge.
 
    In the sky: the line and the button, the page's sections, and a line of
@@ -62,7 +62,6 @@ const COLS: { h: string; items: L[] }[] = [
 /* along the curve over the hills: the announcement bar's lines */
 const DRIFT = "Your body is the pattern · No sizes, just measurements · Sketch it. Say it. Sew it. · From screen to scissors · Pin it. Cut it. Wear it. · ";
 
-const isVideo = (s: string) => /\.(mp4|webm|mov)$/i.test(s);
 const pad = (n: number) => String(n).padStart(2, "0");
 
 function FLink({ label, href }: L) {
@@ -96,6 +95,57 @@ function Arrow() {
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <path d="M5 11 11 5M6 5h5v5" stroke="currentColor" strokeWidth="1.4" />
     </svg>
+  );
+}
+
+/* ---- the meadow -------------------------------------------------------- */
+/* Jose's video of the meadow in the wind (media/footer/: the master, and
+   the loop made from it, its end cross-faded into its start so it never
+   jumps). Over it, the shape of the hills' mist: the still's own
+   transparency, laid where the still sits in the video's frame
+   (/footer/meadow-mask.png), positioned exactly as the video is (cover,
+   from the bottom), so the sky melts into the page above.
+   The first frame shows at once (an image, sized to the screen); the
+   video loads only when the footer is near (full HD on desktop, 1280 on
+   smaller screens), fades in over it once it is really playing, and pauses
+   when it is off screen. With reduced motion, the first frame stays. */
+function Meadow() {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let loaded = false;
+    const shown = () => v.classList.add("is-playing");
+    v.addEventListener("playing", shown);
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          if (!loaded) {
+            loaded = true;
+            v.preload = "auto";
+            v.load();
+          }
+          v.play().catch(() => {});
+        } else if (loaded) v.pause();
+      },
+      { rootMargin: "50% 0px 50% 0px" },
+    );
+    io.observe(v);
+    return () => {
+      io.disconnect();
+      v.removeEventListener("playing", shown);
+      v.pause();
+    };
+  }, []);
+  return (
+    <div className="fo-media" aria-hidden="true">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/footer/meadow-poster.webp" srcSet="/footer/meadow-poster-1280.webp 1280w, /footer/meadow-poster.webp 1920w" sizes="100vw" alt="" loading="lazy" decoding="async" />
+      <video ref={ref} muted loop playsInline preload="none" disablePictureInPicture>
+        <source media="(min-width: 1024px)" src="/footer/meadow.mp4" type="video/mp4" />
+        <source src="/footer/meadow-1280.mp4" type="video/mp4" />
+      </video>
+    </div>
   );
 }
 
@@ -358,21 +408,7 @@ export function Footer() {
 
       {/* the land: the meadow, and what is on the horizon and over it */}
       <div className="fo-land">
-        <div className="fo-media" aria-hidden="true">
-          {FOOTER_MEDIA && isVideo(FOOTER_MEDIA) ? (
-            <video src={FOOTER_MEDIA} autoPlay muted loop playsInline />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={FOOTER_MEDIA || "/footer/meadow.webp"}
-              srcSet={FOOTER_MEDIA ? undefined : "/footer/meadow-1200.webp 1200w, /footer/meadow.webp 2000w"}
-              sizes="100vw"
-              alt=""
-              loading="lazy"
-              decoding="async"
-            />
-          )}
-        </div>
+        <Meadow />
 
         {/* Venty's phrases, drifting along a curve over the hills */}
         <svg viewBox="0 0 1440 220" className="fo-drift" aria-hidden="true">

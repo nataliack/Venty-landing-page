@@ -93,12 +93,31 @@ frames, and writes 720 × 720 WebP frames on her, with a manifest
 
 ## Footer
 
-`footer/meadow-master.webp` (2000 × 866, transparent above the hills) is
-the footer's meadow; the site's copies are `public/footer/meadow.webp`
-(2000) and `meadow-1200.webp`, WebP with alpha. The video of the flowers
-in the wind, when it exists, goes in `public/footer/` and its path in
-`FOOTER_MEDIA` (`src/lib/site.ts`). `footer/mockup.webp` is Jose's
-mockup of the idea.
+The meadow in the footer is Jose's video of the field in the wind,
+`footer/meadow-video-master.mp4` (1920 × 1080, 24 fps, 5 s, 121 frames).
+
+- The loop: `footer/meadow-loop-master.mp4` (105 frames). The master's last
+  frame does not lead back into its first, so its last 16 frames are
+  cross-faded into its first 16 and the loop starts after them:
+
+  ```bash
+  ffmpeg -i media/footer/meadow-video-master.mp4 -filter_complex "[0:v]split=3[a][b][c];[a]trim=start_frame=105:end_frame=121,setpts=PTS-STARTPTS[tail];[b]trim=start_frame=0:end_frame=16,setpts=PTS-STARTPTS[head];[tail][head]blend=all_expr='A*(1-(T+0.02083)/0.66667)+B*((T+0.02083)/0.66667)'[mix];[c]trim=start_frame=16:end_frame=105,setpts=PTS-STARTPTS[body];[mix][body]concat=n=2:v=1[out]" -map "[out]" -an -c:v libx264 -preset slow -crf 10 -pix_fmt yuv420p media/footer/meadow-loop-master.mp4
+  ```
+
+- For the site, from the loop: `public/footer/meadow.mp4` (1920, H.264 CRF
+  24, faststart, no sound, 1.9 MB) for desktop and `meadow-1280.mp4` (CRF 25,
+  0.8 MB) for smaller screens; the first frame as `meadow-poster.webp`
+  (1920) and `meadow-poster-1280.webp`.
+- The mask, `public/footer/meadow-mask.png`: the hills' mist. It is the
+  alpha of `footer/meadow-master.webp` (the still, 2000 × 866, transparent
+  above the hills), which is the bottom of the video's frame (rows 248 to
+  1080 at 1920 wide, found by matching the two), laid there on a 1920 × 1080
+  frame with nothing above it, at 960 × 540. CSS sizes and places it as the
+  video is (cover, from the bottom).
+
+A new video with the same framing only needs the loop and the encodes; a
+new framing needs a new mask too. `footer/mockup.webp` is Jose's mockup of
+the idea.
 
 ## People
 

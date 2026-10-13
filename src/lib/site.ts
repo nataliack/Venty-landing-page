@@ -19,9 +19,3 @@ export const VOTE_LINKS: { label: string; href: string }[] = [
   { label: "IxD", href: "" },
   { label: "VisCom", href: "" },
 ];
-
-/* The footer's meadow: Jose's field of cornflowers moving in the wind, as a
-   video, once it is made (e.g. "/footer/meadow.mp4"); its top fades into
-   the sky by a mask, so it needs no transparency. Until then the still
-   (public/footer/meadow.webp) stands in. */
-export const FOOTER_MEDIA = "";
