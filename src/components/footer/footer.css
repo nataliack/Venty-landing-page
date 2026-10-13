@@ -62,7 +62,8 @@
 /* only "body" in Bigilla, in the line's own ink */
 .fo-line em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; }
 .fo-sections { margin-top: clamp(48px, 8svh, 88px); }
-.fo-sections ul { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 28px; list-style: none; }
+/* the sections in a column, centred */
+.fo-sections ul { display: flex; flex-direction: column; align-items: center; gap: 12px; list-style: none; }
 .fo-social { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 20px; list-style: none; }
 .fo-cta { margin-top: clamp(36px, 5svh, 52px); }
 .fo-link {
@@ -162,19 +163,24 @@
   overflow: hidden;
   pointer-events: none;
 }
+/* the mist is a colour (a pale blue-grey, the hills' own, so it reads on the
+   white sky and on the hills alike) seen through the fog texture */
 .fo-fog__bank {
+  --mist: #c3cce4;
   position: absolute;
   left: 0;
   width: 200%;
-  background: url(/footer/fog.webp) repeat-x 0 0 / 50% 100%;
+  background: var(--mist);
+  -webkit-mask: url(/footer/fog.webp) repeat-x 0 0 / 50% 100%;
+  mask: url(/footer/fog.webp) repeat-x 0 0 / 50% 100%;
   will-change: transform;
   animation: fo-drift linear infinite;
 }
 /* high over the far hills, across their middle, and lying low over the far
    meadow and the stream */
-.fo-fog__bank.is-far { top: 0; height: 52%; opacity: 0.85; animation-duration: 150s; }
-.fo-fog__bank.is-mid { top: 22%; height: 56%; opacity: 0.9; transform: scaleY(-1); animation-duration: 100s; animation-direction: reverse; }
-.fo-fog__bank.is-near { top: 52%; height: 44%; opacity: 0.7; animation-duration: 70s; }
+.fo-fog__bank.is-far { top: 0; height: 52%; opacity: 0.9; animation-duration: 150s; }
+.fo-fog__bank.is-mid { --mist: #b4bfdc; top: 22%; height: 56%; opacity: 0.85; transform: scaleY(-1); animation-duration: 100s; animation-direction: reverse; }
+.fo-fog__bank.is-near { --mist: #d2d9ec; top: 52%; height: 44%; opacity: 0.8; animation-duration: 70s; }
 @keyframes fo-drift { from { translate: 0 0; } to { translate: -50% 0; } }
 @media (max-width: 1023px) {
   .fo-fog { inset: 26% 0 auto; height: 30%; }
