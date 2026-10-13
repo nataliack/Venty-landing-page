@@ -119,7 +119,10 @@ the line it is flying, nose up as it climbs, nose down as it dives, turning
 with every bend. Where the path bends back on itself it would end up upside
 down, so there it rolls over along its line of flight, head first, like a
 bird banking (0.6s: the head rolls first on its neck, then the body after
-it from the neck to the tail). On the way in (2.3s, already
+it from the neck to the tail). Coming onto its line as it takes off, and off it as
+it settles, it bends into the new angle head first (the beak first, the tail
+last) rather than turning stiffly; and the last bend of each path meets the
+mark nearly level, so there is little left to straighten as it lands. On the way in (2.3s, already
 flying, slowing in) it comes from beyond the right edge, high along the top
 facing left, then loops down round its place and curls up into it, turning
 to face right; it settles there while the filament fills. On the way out
