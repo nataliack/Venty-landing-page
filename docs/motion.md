@@ -99,7 +99,12 @@ Measuring, Drafting, Fitting, Ready) and the percentage on the right in the
 same type. On the way in, everything reveals itself instead of appearing at once: the
 wordmark rises and fades up, the filament draws out from the middle, the word
 and the number slide in from their sides (`REVEAL_S` 1.1s, `EASE.out`); as
-served, they wait hidden (`.is-pre`). It leaves simply, like a page change: the words, number, filament
+served, they wait hidden (`.is-pre`). The way in waits for the page to settle
+(six smooth frames in a row, at most 1.2s): the rest of the page mounts in
+long blocks as it starts, and a flight begun then would stutter. While it
+flies, its path is worked out from the logo's box every frame, so a layout
+that settles late (styles or fonts arriving on a first load) carries the
+path with it. It leaves simply, like a page change: the words, number, filament
 and wordmark clear (`EASE.in`, 0.4s) as the night settles to one flat colour;
 then the screen breaks into squares (12 across on phones, 20 on desktop) that
 clear row by row from the top with a little jitter (0.6s), uncovering the

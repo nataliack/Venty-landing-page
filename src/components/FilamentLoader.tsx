@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { Sky } from "./Sky";
 import { HERO, preloadHero } from "@/lib/heroSequence";
 import { EASE } from "@/lib/motion";
-import { ENTER_PATH, EXIT_PATH, MARK, MARK_CENTRE, flightRoute, type RouteOptions } from "@/lib/markFlight";
+import { ENTER_PATH, EXIT_PATH, MARK, MARK_BOUNDS, MARK_CENTRE, flightRoute } from "@/lib/markFlight";
 
 /* The loading screen: Edge, the locked dark sky (a cornflower glow roaming the
    lower two thirds), with the cornflower filament, its growing tip the one that
@@ -47,6 +47,7 @@ const JITTER_S = 0.16; // each square's own scatter within its row
 const ENTER_S = 2.3; // the mark's flight in, to its place over the wordmark
 const EXIT_S = 1.9; // its flight out, to the logo at the top left
 const REVEAL_S = 1.1; // the word, number, filament and wordmark reveal themselves
+const SETTLE_MS = 1200; // the longest the way in waits for the page to settle before it starts
 const TINT_S = 0.4; // the mark turns from cloud to cornflower before it leaves
 
 const still = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -207,6 +208,20 @@ export function FilamentLoader({
   const mark = useRef<SVGSVGElement>(null);
 
   const pct = Math.round(Math.min(1, shown) * 100);
+  // the number re-renders this every frame while it counts; the squares (a
+  // few hundred) and the sky stay as they are
+  const tileGrid = useMemo(
+    () =>
+      tiles && (
+        <div className={`fl-tiles ${out ? "is-out" : ""}`} style={{ gridTemplateColumns: `repeat(${tiles.cols}, 1fr)`, gridTemplateRows: `repeat(${tiles.rows}, ${tiles.size}px)` }} aria-hidden="true">
+          {tiles.delays.map((d, i) => (
+            <span key={i} style={{ transitionDelay: `${d.toFixed(3)}s` }} />
+          ))}
+        </div>
+      ),
+    [tiles, out],
+  );
+  const night = useMemo(() => <Sky variant={skyVariant} />, [skyVariant]);
   const loaded = shown >= 1;
   const word = loaded ? WORDS.length - 1 : Math.min(WORDS.length - 2, Math.floor(shown * (WORDS.length - 1)));
   const landing = () => (target ? target() : document.querySelector("[data-logo] svg"));
@@ -217,9 +232,30 @@ export function FilamentLoader({
     if (r) setTiles(makeTiles(r.width, r.height, pace));
   }, [pace]);
 
+  /** Where the mark sits at rest, worked out from the logo's box (which
+      the mark's svg fills exactly, untransformed) rather than from the mark,
+      which may be anywhere in flight; and the frame it flies in. Cheap: read
+      every frame, so a layout that settles late (styles or fonts still
+      arriving on a first load) moves the path with it. */
+  const restGeometry = () => {
+    const box = root.current!.querySelector(".fl-logo")!.getBoundingClientRect();
+    const r = root.current!.getBoundingClientRect();
+    const u = box.width / 2132; // the lockup's viewBox width
+    return {
+      key: [box.left, box.top, box.width, r.left, r.top, r.width, r.height].map((v) => Math.round(v * 2)).join(),
+      u,
+      origin: [box.left, box.top] as [number, number],
+      centre: [MARK_CENTRE[0] * u, MARK_CENTRE[1] * u] as [number, number],
+      width: MARK_BOUNDS.width * u,
+      frame: { left: r.left, top: r.top, width: r.width, height: r.height },
+    };
+  };
+  type Geometry = ReturnType<typeof restGeometry>;
+
   // the mark flies its paths in pieces (body, wing, head), drawn here; at
-  // rest it is the one outline again
-  const fly = (route: ReturnType<typeof flightRoute>, delay: number) => {
+  // rest it is the one outline again. The route is made from where things
+  // are, and made again if the layout moves under it.
+  const fly = (make: (g: Geometry) => ReturnType<typeof flightRoute>, delay: number) => {
     const m = mark.current!;
     const path = m.querySelector<SVGPathElement>("path")!;
     const [body, far, near] = ["body", "far", "near"].map((k) => m.querySelector<SVGPathElement>(`[data-piece="${k}"]`)!);
@@ -227,68 +263,89 @@ export function FilamentLoader({
       path.style.display = on ? "none" : "";
       for (const p of [body, far, near]) p.style.display = on ? "" : "none";
     };
+    let g = restGeometry();
+    let route = make(g);
     const draw = (t: number) => {
-      const at = route.at(t);
+      const now = restGeometry();
+      if (now.key !== g.key) {
+        g = now;
+        route = make(g);
+      }
+      const at = route.at(Math.min(t, route.total));
       gsap.set(m, { x: at.x, y: at.y, scale: at.scale });
       body.setAttribute("d", at.pose.body);
       far.setAttribute("d", at.pose.far);
       near.setAttribute("d", at.pose.near);
       pieces(!at.done);
     };
+    draw(0);
     const clock = { t: 0 };
-    return gsap.to(clock, { t: route.total, duration: route.total * pace, ease: "none", delay, onStart: () => draw(0), onUpdate: () => draw(clock.t), onComplete: () => pieces(false) });
-  };
-  /** Where the mark sits at rest, for a route: its svg, its middle, its width, and the frame */
-  const restGeometry = () => {
-    const m = mark.current!;
-    const path = m.querySelector<SVGPathElement>("path")!;
-    const a = path.getBoundingClientRect();
-    const box = m.getBoundingClientRect();
-    const unit = path.getBBox();
-    const u = a.width / unit.width;
-    const r = root.current!.getBoundingClientRect();
-    return {
-      a,
-      geometry: {
-        origin: [box.left, box.top],
-        centre: [a.left - box.left + (MARK_CENTRE[0] - unit.x) * u, a.top - box.top + (MARK_CENTRE[1] - unit.y) * u],
-        width: a.width,
-        frame: { left: r.left, top: r.top, width: r.width, height: r.height },
-      } satisfies Pick<RouteOptions, "origin" | "centre" | "width" | "frame">,
-    };
+    return gsap.to(clock, {
+      t: route.total,
+      duration: route.total * pace,
+      ease: "none",
+      delay,
+      onUpdate: () => draw(clock.t),
+      onComplete: () => {
+        draw(route.total);
+        pieces(false);
+      },
+    });
   };
 
   // on the way in: everything reveals itself, and the mark flies in
   const entered = useRef<Promise<unknown>>(Promise.resolve());
   useLayoutEffect(() => {
-    if (!root.current || !mark.current) return;
-    // until now (the page as served) all of it waits hidden (.is-pre), so
+    const el = root.current;
+    if (!el || !mark.current) return;
+    // until it starts (and as served) all of it waits hidden (.is-pre), so
     // nothing shows at rest before it can reveal itself
-    root.current.classList.remove("is-pre");
-    if (still()) return;
+    if (still()) {
+      el.classList.remove("is-pre");
+      return;
+    }
     const m = mark.current;
     const q = gsap.utils.selector(root);
     const column = window.matchMedia("(max-width: 767px)").matches;
-    // measured at rest (a second run, in development, finds it moved)
-    gsap.set(m, { transformOrigin: "0 0", x: 0, y: 0, scale: 1 });
-    const { geometry } = restGeometry();
-    const rest = { x: 0, y: 0, scale: 1 };
-    const route = flightRoute({ ...geometry, from: rest, to: rest, start: ENTER_PATH[0], via: ENTER_PATH.slice(1), duration: ENTER_S, ease: "out", facing: 180 });
-    // off the screen until it flies in
-    const first = route.at(0);
-    gsap.set(m, { x: first.x, y: first.y, scale: first.scale });
-    const flight = fly(route, 0.25 * pace);
-    entered.current = flight.then();
-    const reveal = gsap
-      .timeline({ defaults: { ease: EASE.out } })
-      .from(q(".fl-logo__word"), { opacity: 0, yPercent: 14, duration: REVEAL_S }, 0.1)
-      .from(q("[data-clear='bar']"), { scaleX: 0, duration: REVEAL_S * 1.1 }, 0.2)
-      .from(q("[data-clear='left']"), { opacity: 0, [column ? "y" : "x"]: -24, duration: REVEAL_S * 0.8 }, 0.35)
-      .from(q("[data-clear='right']"), { opacity: 0, [column ? "y" : "x"]: 24, duration: REVEAL_S * 0.8 }, 0.35)
-      .timeScale(1 / pace);
+    let flight: gsap.core.Tween | null = null;
+    let reveal: gsap.core.Timeline | null = null;
+    let done: (v?: unknown) => void = () => {};
+    entered.current = new Promise((ok) => (done = ok));
+    const begin = () => {
+      el.classList.remove("is-pre");
+      gsap.set(m, { transformOrigin: "0 0" });
+      const rest = { x: 0, y: 0, scale: 1 };
+      // off the screen (its first frame) until it flies in
+      flight = fly((g) => flightRoute({ ...g, from: rest, to: rest, start: ENTER_PATH[0], via: ENTER_PATH.slice(1), duration: ENTER_S, ease: "out", facing: 180 }), 0.1 * pace);
+      flight.then(done);
+      reveal = gsap
+        .timeline({ defaults: { ease: EASE.out } })
+        .from(q(".fl-logo__word"), { opacity: 0, yPercent: 14, duration: REVEAL_S }, 0)
+        .from(q("[data-clear='bar']"), { scaleX: 0, duration: REVEAL_S * 1.1 }, 0.1)
+        .from(q("[data-clear='left']"), { opacity: 0, [column ? "y" : "x"]: -24, duration: REVEAL_S * 0.8 }, 0.25)
+        .from(q("[data-clear='right']"), { opacity: 0, [column ? "y" : "x"]: 24, duration: REVEAL_S * 0.8 }, 0.25)
+        .timeScale(1 / pace);
+    };
+    // The page does its heaviest work as it starts (the rest of it mounting:
+    // its scroll scenes, the section edges, the hero's player), in long
+    // blocks of a few hundred ms. A flight started then would stutter, so it
+    // waits for the browser to draw a few smooth frames in a row (at most
+    // SETTLE_MS), then begins.
+    let raf = 0;
+    let calm = 0;
+    let prev = performance.now();
+    const t0 = prev;
+    const watch = (now: number) => {
+      calm = now - prev < 24 ? calm + 1 : 0;
+      prev = now;
+      if (calm >= 6 || now - t0 > SETTLE_MS) return begin();
+      raf = requestAnimationFrame(watch);
+    };
+    raf = requestAnimationFrame(watch);
     return () => {
-      flight.kill();
-      reveal.revert();
+      cancelAnimationFrame(raf);
+      flight?.kill();
+      reveal?.revert();
     };
     // the way in runs once, on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -349,18 +406,21 @@ export function FilamentLoader({
       const to = landing()?.querySelector("path") ?? landing();
       let flight: gsap.core.Tween | null = null;
       if (to) {
-        const { a, geometry } = restGeometry();
-        const b = to.getBoundingClientRect();
-        const box = m.getBoundingClientRect();
-        const s = b.width / a.width;
-        const route = flightRoute({
-          ...geometry,
-          from: { x: 0, y: 0, scale: 1 },
-          to: { x: b.left - box.left - (a.left - box.left) * s, y: b.top - box.top - (a.top - box.top) * s, scale: s },
-          via: EXIT_PATH,
-          duration: EXIT_S,
-        });
-        flight = fly(route, (TINT_S - 0.05) * pace); // once it has turned
+        const target = to;
+        flight = fly((g) => {
+          // the site's logo, and the mark's own outline at rest, on screen
+          const b = target.getBoundingClientRect();
+          const s = b.width / g.width;
+          const ax = g.origin[0] + MARK_BOUNDS.x * g.u;
+          const ay = g.origin[1] + MARK_BOUNDS.y * g.u;
+          return flightRoute({
+            ...g,
+            from: { x: 0, y: 0, scale: 1 },
+            to: { x: b.left - g.origin[0] - (ax - g.origin[0]) * s, y: b.top - g.origin[1] - (ay - g.origin[1]) * s, scale: s },
+            via: EXIT_PATH,
+            duration: EXIT_S,
+          });
+        }, (TINT_S - 0.05) * pace); // once it has turned
         tweens.push(flight);
       }
 
@@ -403,15 +463,9 @@ export function FilamentLoader({
       </div>
 
       {/* the flat night, in squares, under the moving one */}
-      {tiles && (
-        <div className={`fl-tiles ${out ? "is-out" : ""}`} style={{ gridTemplateColumns: `repeat(${tiles.cols}, 1fr)`, gridTemplateRows: `repeat(${tiles.rows}, ${tiles.size}px)` }} aria-hidden="true">
-          {tiles.delays.map((d, i) => (
-            <span key={i} style={{ transitionDelay: `${d.toFixed(3)}s` }} />
-          ))}
-        </div>
-      )}
+      {tileGrid}
       <div ref={sky} className="fl-sky" aria-hidden="true">
-        <Sky variant={skyVariant} />
+        {night}
       </div>
 
       <div className="fl-hud">

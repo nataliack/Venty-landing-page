@@ -64,6 +64,33 @@ function parse(d: string) {
 const lerp = (a: Pt, b: Pt, t: number): Pt => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
 
 const { start: P0, segs: SEG } = parse(MARK);
+
+/** The mark's box in the logo's units (its outline's extremes, curves
+    included), so its place can be worked out from the svg's box alone */
+export const MARK_BOUNDS = (() => {
+  let x0 = Infinity;
+  let y0 = Infinity;
+  let x1 = -Infinity;
+  let y1 = -Infinity;
+  let p = P0;
+  for (const [c1, c2, e] of SEG) {
+    for (let k = 0; k <= 32; k++) {
+      const t = k / 32;
+      const a = (1 - t) ** 3;
+      const b = 3 * (1 - t) ** 2 * t;
+      const c = 3 * (1 - t) * t * t;
+      const d = t ** 3;
+      const x = a * p[0] + b * c1[0] + c * c2[0] + d * e[0];
+      const y = a * p[1] + b * c1[1] + c * c2[1] + d * e[1];
+      x0 = Math.min(x0, x);
+      y0 = Math.min(y0, y);
+      x1 = Math.max(x1, x);
+      y1 = Math.max(y1, y);
+    }
+    p = e;
+  }
+  return { x: x0, y: y0, width: x1 - x0, height: y1 - y0 };
+})();
 /** The anchor segment k ends on (k = 0: the start) */
 const anchor = (k: number): Pt => (k === 0 ? P0 : SEG[k - 1][2]);
 /** Segments a..b inclusive, 1-based as in the outline (segment k ends on P[k]) */
