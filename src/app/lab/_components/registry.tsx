@@ -18,6 +18,7 @@ import { Strip } from "./loaders/Strip";
 import { MadeToMeasure } from "./sections/MadeToMeasure";
 import { HowItWorksLight } from "./sections/HowItWorks";
 import { HowItWorksDesk } from "./sections/HowItWorksDesk";
+import { HcIndex, HcStack, HcSplit, HcStairs, HcSentence } from "./sections/hc/Concepts";
 import { DitherRise } from "./exp/DitherRise";
 import { FilamentLab } from "./loaders/Filament";
 import { MarkFlight } from "./exp/MarkFlight";
@@ -90,6 +91,11 @@ export const NATIVE: Record<string, ComponentType> = {
   "section-made-to-measure": MadeToMeasure,
   "section-how-it-works": HowItWorksLight,
   "section-how-it-works-desk": HowItWorksDesk,
+  "section-hiw-index": HcIndex,
+  "section-hiw-stack": HcStack,
+  "section-hiw-split": HcSplit,
+  "section-hiw-stairs": HcStairs,
+  "section-hiw-sentence": HcSentence,
   "loader-layout": LoaderLayout,
   "loader-orbit": LoaderOrbit,
   "loader-drift": LoaderDrift,
