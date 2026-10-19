@@ -5,64 +5,64 @@ import { FEATS, FIRST_FRAME, Shell, Visual, useTurn, type Feat, type FeatKey } f
 import "./bento.css";
 
 /* Features, back to the bento: structure only (no glow, no hovers). Three
-   rows on desktop, every card a square of one, two or three cells, in
-   three arrangements to compare (the switch, top right). Below 1100px the
-   cards keep their sizes (big or small) and pack themselves; on a phone,
-   two columns. Copy and visuals are stand-ins: each card is a slot. */
+   rows on desktop on a 12-column grid, rows tall enough that the smallest
+   card is still about square; cards of different widths, and one in each
+   arrangement two rows tall. Three arrangements to compare (the switch, top
+   centre). Below 1100px the cards keep how wide and tall they are, roughly
+   (six columns on a tablet, two on a phone), and pack themselves. Copy and
+   visuals are stand-ins: each card is a slot. */
 
 type Slot = FeatKey | "head";
-type Place = { c: string; r: string; big?: boolean };
-type Layout = { key: string; name: string; cols: number; max: number; head: "above" | "tile"; at: Partial<Record<Slot, Place>> };
+/** c: columns (start / span), r: rows; tall: two rows */
+type Place = { c: string; r: string; tall?: boolean };
+type Layout = { key: string; name: string; head: "above" | "tile"; at: Partial<Record<Slot, Place>> };
 
 const LAYOUTS: Layout[] = [
   {
-    key: "pair",
-    name: "Two squares",
-    cols: 4,
-    max: 1040,
+    key: "turn",
+    name: "Tall turn",
+    head: "tile",
+    at: {
+      head: { c: "1 / span 3", r: "1" },
+      body: { c: "4 / span 5", r: "1 / span 2", tall: true },
+      mark: { c: "9 / span 4", r: "1" },
+      refine: { c: "1 / span 3", r: "2" },
+      bodies: { c: "9 / span 4", r: "2" },
+      print: { c: "1 / span 7", r: "3" },
+      lib: { c: "8 / span 5", r: "3" },
+    },
+  },
+  {
+    key: "ref",
+    name: "Tall reference",
+    head: "tile",
+    at: {
+      mark: { c: "1 / span 4", r: "1 / span 2", tall: true },
+      head: { c: "5 / span 5", r: "1" },
+      refine: { c: "10 / span 3", r: "1" },
+      body: { c: "5 / span 5", r: "2" },
+      bodies: { c: "10 / span 3", r: "2" },
+      lib: { c: "1 / span 5", r: "3" },
+      print: { c: "6 / span 7", r: "3" },
+    },
+  },
+  {
+    key: "above",
+    name: "Heading above",
     head: "above",
     at: {
-      mark: { c: "1 / span 2", r: "1 / span 2", big: true },
-      body: { c: "3 / span 2", r: "1 / span 2", big: true },
-      refine: { c: "1", r: "3" },
-      bodies: { c: "2", r: "3" },
-      print: { c: "3", r: "3" },
-      lib: { c: "4", r: "3" },
-    },
-  },
-  {
-    key: "centre",
-    name: "Centre stage",
-    cols: 5,
-    max: 1200,
-    head: "tile",
-    at: {
-      head: { c: "1", r: "1" },
-      mark: { c: "1", r: "2" },
-      refine: { c: "1", r: "3" },
-      body: { c: "2 / span 3", r: "1 / span 3", big: true },
-      bodies: { c: "5", r: "1" },
-      print: { c: "5", r: "2" },
-      lib: { c: "5", r: "3" },
-    },
-  },
-  {
-    key: "steps",
-    name: "Stepped",
-    cols: 6,
-    max: 1280,
-    head: "tile",
-    at: {
-      head: { c: "1", r: "1" },
-      refine: { c: "2", r: "1" },
-      bodies: { c: "3", r: "1" },
-      mark: { c: "1 / span 2", r: "2 / span 2", big: true },
-      print: { c: "3", r: "2" },
-      lib: { c: "3", r: "3" },
-      body: { c: "4 / span 3", r: "1 / span 3", big: true },
+      body: { c: "1 / span 5", r: "1 / span 2", tall: true },
+      mark: { c: "6 / span 7", r: "1" },
+      refine: { c: "6 / span 3", r: "2" },
+      bodies: { c: "9 / span 4", r: "2" },
+      print: { c: "1 / span 7", r: "3" },
+      lib: { c: "8 / span 5", r: "3" },
     },
   },
 ];
+
+/** how many of the 12 columns a place spans */
+const spanOf = (p: Place) => +(p.c.split("span")[1] ?? 1);
 
 export function FzBento() {
   const [lay, setLay] = useState(0);
@@ -78,13 +78,14 @@ export function FzBento() {
         ))}
       </div>
       <section className="fzb">
-        <div className="fzb-in" style={{ "--cols": L.cols, "--max": `${L.max}px` } as CSSProperties}>
+        <div className="fzb-in">
         {L.head === "above" && <Head />}
         <div className={`fzb-grid is-${L.key}`}>
           {slots.map((s) => {
             const p = L.at[s]!;
             const style = { "--gc": p.c, "--gr": p.r } as CSSProperties;
-            const cls = `fzb-cell ${p.big ? "is-big" : ""}`;
+            const w = spanOf(p);
+            const cls = `fzb-cell ${w >= 7 ? "is-wide" : w >= 5 ? "is-mid" : ""} ${p.tall ? "is-tall" : ""}`;
             if (s === "head")
               return (
                 <div key={s} className={`${cls} fzb-head-tile`} style={style}>
@@ -92,7 +93,7 @@ export function FzBento() {
                 </div>
               );
             const f = FEATS.find((x) => x.k === s)!;
-            return <Card key={s} f={f} big={!!p.big} className={cls} style={style} />;
+            return <Card key={s} f={f} roomy={w >= 5 || !!p.tall} className={cls} style={style} />;
           })}
         </div>
         </div>
@@ -110,13 +111,13 @@ function Head() {
   );
 }
 
-function Card({ f, big, className, style }: { f: Feat; big: boolean; className: string; style: CSSProperties }) {
+function Card({ f, roomy, className, style }: { f: Feat; roomy: boolean; className: string; style: CSSProperties }) {
   return (
     <article className={`${className} fzb-card fzb-card--${f.k}`} style={style}>
       <p className="fzb-copy">
-        <b>{f.t}.</b> {big && f.s}
+        <b>{f.t}.</b> {f.s}
       </p>
-      <div className="fzb-vis">{f.k === "print" ? <Print big={big} /> : f.k === "body" ? <Turn /> : <Visual k={f.k} />}</div>
+      <div className="fzb-vis">{f.k === "print" ? <Print roomy={roomy} /> : f.k === "body" ? <Turn /> : <Visual k={f.k} />}</div>
     </article>
   );
 }
@@ -140,7 +141,7 @@ function Turn() {
    piece over the grid of home pages it tiles across (numbered, to tape
    together); A0 is one sheet for a print shop. Seam allowance adds the
    cutting line outside the sewing line. */
-function Print({ big }: { big: boolean }) {
+function Print({ roomy }: { roomy: boolean }) {
   const [a0, setA0] = useState(false);
   const [seam, setSeam] = useState(true);
   const piece = "M34 10 L58 8 L66 24 Q84 30 92 44 L88 82 L22 82 L18 44 Q26 30 34 24 Z";
@@ -173,10 +174,10 @@ function Print({ big }: { big: boolean }) {
       <div className="fzb-print__ctl">
         <div className="fzb-seg" role="group" aria-label="Paper">
           <button type="button" aria-pressed={!a0} onClick={() => setA0(false)}>
-            A4{big && " at home"}
+            A4{roomy && " at home"}
           </button>
           <button type="button" aria-pressed={a0} onClick={() => setA0(true)}>
-            A0{big && " print shop"}
+            A0{roomy && " at a print shop"}
           </button>
         </div>
         <button type="button" className="fzb-chip" aria-pressed={seam} onClick={() => setSeam((s) => !s)}>
