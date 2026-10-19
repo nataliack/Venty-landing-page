@@ -27,7 +27,7 @@ export function FzBirdReveal() {
   const wrap = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const through = useRef<HTMLDivElement>(null);
-  const clipG = useRef<SVGGElement>(null);
+  const clipG = useRef<SVGClipPathElement>(null);
   const lineG = useRef<SVGGElement>(null);
   const prog = useRef(0);
   const [turnImg, setTurn] = useTurn();
@@ -128,12 +128,11 @@ export function FzBirdReveal() {
           </div>
           <svg className="fz-birdline" aria-hidden="true">
             <defs>
-              <clipPath id="fz-bird-clip" clipPathUnits="userSpaceOnUse">
-                <g ref={clipG}>
-                  <path />
-                  <path />
-                  <path />
-                </g>
+              {/* the transform sits on the clip path itself: a clip path can't hold a group */}
+              <clipPath ref={clipG} id="fz-bird-clip" clipPathUnits="userSpaceOnUse">
+                <path />
+                <path />
+                <path />
               </clipPath>
             </defs>
             <g ref={lineG}>
