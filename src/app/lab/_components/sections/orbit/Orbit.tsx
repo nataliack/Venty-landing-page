@@ -47,20 +47,20 @@ const STEPS = [
   },
 ];
 
-const LOOP_CM = 160; // the loop is 1.6 m of tape, wide over the meadow
-const TAPE_W = 0.22; // the tape's width (16 mm), scene units
+const LOOP_CM = 100; // the loop is a metre of tape
+const TAPE_W = 0.4; // the tape's width (16 mm), scene units: wide, so its print reads
 const R = (LOOP_CM * TAPE_W) / (1.6 * 2 * Math.PI); // the loop's radius, at that width
 const R0 = (100 * 0.3) / (1.6 * 2 * Math.PI); // the first test's loop, for the phone framing
 /* where each card rides: step 1 at the front, the next a quarter round to
    its right, and so on (the loop turns clockwise to bring each forward) */
 const cardAngle = (i: number) => Math.PI / 2 - i * (Math.PI / 2);
 /* where the print starts: turned so every step's band falls on a whole
-   centimetre (80, 120, 0, 40) */
+   centimetre (50, 75, 0, 25) */
 const PHASE = Math.PI / 2;
 const mod1 = (x: number) => x - Math.floor(x);
 /* the grass, this far under the loop's middle (scene units): the tape held a
    little above it */
-const FLOOR = -0.6;
+const FLOOR = -1.1;
 /* the meadow image (2000 x 1168): how tall for its width, how much of it is
    on screen from the top, and where the middle of the grass is (from the top) */
 const ISLAND = { ratio: 1168 / 2000, show: 0.62, top: 0.29 };
@@ -68,35 +68,43 @@ const WAVE = 0.06; // how much the loop rises and falls as it goes round
 const cmAt = (angle: number) =>
   LOOP_CM * mod1(1 - (angle + PHASE) / (2 * Math.PI));
 
-/* the tape's printed face, drawn once onto a canvas. Ticks from both edges;
-   the only cornflower marks the steps: a band with the step's number where
-   its stretch of tape begins. From each band the tape counts again, 1, 2,
-   3... up to the next step's band, so a step and the numbers after it
-   belong together. */
+/* the tape's printed face, drawn once onto a canvas, as a tailor's tape is
+   printed: a bound edge each side, millimetre ticks from both edges, the
+   count in the middle. The steps are printed in the tape's own type, in
+   cornflower: STEP 1 where step 1's stretch begins, and from there the tape
+   counts again, 2, 3, 4... up to the next step. */
 function tapeTexture(maxSize: number) {
   const W = Math.min(8192, maxSize);
-  const H = 160;
+  const H = 256;
   const cv = document.createElement("canvas");
   cv.width = W;
   cv.height = H;
   const g = cv.getContext("2d")!;
-  g.fillStyle = "#f3f5fa";
+  g.fillStyle = "#f6f7fa";
   g.fillRect(0, 0, W, H);
-  g.fillStyle = "rgba(56,76,101,0.05)";
-  for (let y = 0; y < H; y += 2) g.fillRect(0, y, W, 1);
+  // the weave, faintly
+  g.fillStyle = "rgba(56,76,101,0.035)";
+  for (let y = 0; y < H; y += 3) g.fillRect(0, y, W, 1);
   const pxmm = W / (LOOP_CM * 10);
   const mmH = H / 16;
+  // the bound edges
+  g.fillStyle = "rgba(56,76,101,0.45)";
+  g.fillRect(0, mmH * 0.35, W, Math.max(1, mmH * 0.22));
+  g.fillRect(0, H - mmH * 0.57, W, Math.max(1, mmH * 0.22));
   const marks = STEPS.map((_, i) => Math.round(cmAt(cardAngle(i)))); // whole cm
-  g.fillStyle = "rgba(26,30,48,0.8)";
+  g.fillStyle = "rgba(26,30,48,0.78)";
   for (let mm = 0; mm < LOOP_CM * 10; mm++) {
     const x = Math.round(mm * pxmm);
-    const h = (mm % 10 === 0 ? 4 : mm % 5 === 0 ? 2.6 : 1.6) * mmH;
-    g.fillRect(x, 0, Math.max(1, pxmm * 0.15), h);
-    g.fillRect(x, H - h, Math.max(1, pxmm * 0.15), h);
+    const h = (mm % 10 === 0 ? 3.6 : mm % 5 === 0 ? 2.5 : 1.6) * mmH;
+    const tw = Math.max(1, pxmm * (mm % 10 === 0 ? 0.22 : 0.14));
+    g.fillRect(x, mmH * 0.8, tw, h);
+    g.fillRect(x, H - mmH * 0.8 - h, tw, h);
   }
   g.textAlign = "center";
   g.textBaseline = "middle";
   const sans = "Familjen Grotesk, system-ui, sans-serif";
+  // type drawn at its true width: the canvas has fewer pixels per mm along
+  // the tape than across it
   const text = (s: string, x: number, y: number) => {
     g.save();
     g.translate(x, y);
@@ -104,32 +112,28 @@ function tapeTexture(maxSize: number) {
     g.fillText(s, 0, 0);
     g.restore();
   };
+  g.font = `500 ${Math.round(4.6 * mmH)}px ${sans}`;
+  g.fillStyle = "rgba(26,30,48,0.78)";
   for (let cm = 0; cm < LOOP_CM; cm++) {
-    // how far past the last step's band this centimetre is
+    // how far past the last step this centimetre is
     const since = Math.min(...marks.map((m) => (cm - m + LOOP_CM) % LOOP_CM));
-    if (since < 2 || since > LOOP_CM / STEPS.length - 2) continue; // the bands' own room
-    g.font = `500 ${Math.round(4.4 * mmH)}px ${sans}`;
-    g.fillStyle = "rgba(26,30,48,0.62)";
-    text(String(since), cm * 10 * pxmm, H / 2 + mmH * 0.2);
+    if (since < 3 || since > LOOP_CM / STEPS.length - 1) continue; // the step's own room
+    text(String(since), cm * 10 * pxmm, H / 2 + mmH * 0.3);
   }
-  // the steps: a cornflower band, 36 mm long, the number in it (drawn past
-  // both ends too, so a band on the join is whole)
+  // the steps (printed past both ends too, so one on the join is whole)
+  g.font = `600 ${Math.round(4.6 * mmH)}px ${sans}`;
   marks.forEach((m, i) => {
     for (const shift of [-LOOP_CM, 0, LOOP_CM]) {
       const c = (m + shift) * 10 * pxmm;
-      g.fillStyle = "#687ef5";
-      g.beginPath();
-      g.roundRect(
-        c - 18 * pxmm,
-        mmH * 1.1,
-        36 * pxmm,
-        H - mmH * 2.2,
-        mmH * 0.8,
-      );
-      g.fill();
-      g.fillStyle = "#eff4ff";
-      g.font = `600 ${Math.round(7.4 * mmH)}px ${sans}`;
-      text(STEPS[i].n.padStart(2, "0"), c, H / 2 + mmH * 0.3);
+      g.fillStyle = "#4a5fd8";
+      g.fillRect(c - pxmm * 0.25, mmH * 0.8, pxmm * 0.5, mmH * 3.6);
+      g.fillRect(c - pxmm * 0.25, H - mmH * 4.4, pxmm * 0.5, mmH * 3.6);
+      g.save();
+      g.translate(c + 13 * pxmm, H / 2 + mmH * 0.3);
+      g.scale(pxmm / mmH, 1);
+      g.letterSpacing = `${Math.round(mmH * 0.5)}px`;
+      g.fillText(`STEP ${STEPS[i].n}`, 0, 0);
+      g.restore();
     }
   });
   const t = new THREE.CanvasTexture(cv);
@@ -251,6 +255,7 @@ function Orbit() {
     let w = 0;
     let h = 0;
     let rot = 0;
+    let sideY = 0; // where the side cards stand on screen
     let target = 0;
     let raf = 0;
     const v = new THREE.Vector3();
@@ -272,12 +277,13 @@ function Orbit() {
       // its top on screen, the earth under it running off the bottom
       const iw = w < 700 ? w * 1.3 : w * 0.78;
       const ih = iw * ISLAND.ratio;
-      const itop = h - ih * ISLAND.show;
+      const show = w < 700 ? 0.85 : ISLAND.show; // phones: more of it, the scene higher in the tall screen
+      const itop = h - ih * show;
       st.style.setProperty("--iw", `${iw}px`);
       st.style.setProperty("--itop", `${itop}px`);
       // what of it runs below the screen: room left under the scene for it,
       // so it is seen whole as the page scrolls on
-      s.querySelector<HTMLElement>(".or-pin")!.style.marginBottom = `${ih * (1 - ISLAND.show)}px`;
+      s.querySelector<HTMLElement>(".or-pin")!.style.marginBottom = `${ih * (1 - show)}px`;
       // aim the camera so the loop's floor lands in the middle of the grass
       const floorAt = itop + ih * ISLAND.top;
       let lookY = 1;
@@ -301,6 +307,12 @@ function Orbit() {
       st.style.setProperty("--cy", `${c.y}px`);
       st.style.setProperty("--base", `${base.y}px`);
       st.style.setProperty("--span", `${(edge.x - base.x) * 2}px`);
+      // the loop's shadow on the grass: an ellipse through its four points there
+      const sf = toScreen(new THREE.Vector3(0, FLOOR, R));
+      const sb = toScreen(new THREE.Vector3(0, FLOOR, -R));
+      st.style.setProperty("--sh", `${sf.y - sb.y}px`);
+      st.style.setProperty("--sy", `${(sf.y + sb.y) / 2}px`);
+      sideY = 0; // worked out again on the next frame
     };
 
     const draw = () => {
@@ -312,33 +324,31 @@ function Orbit() {
       rBack.render(scene, camera);
       rFront.clippingPlanes = [nearHalf];
       rFront.render(scene, camera);
-      // the cards: each at its point on the loop, just above the tape
+      // the cards: each where its point on the loop falls across the screen,
+      // flat to us (never turned). Those at the sides sit on one line; the
+      // one coming to the front rises above them, and is the clearest
       const cardW = w < 700 ? (3.6 * R) / R0 : 1.95; // scene units, at the front (phones: big enough to read)
+      const yAt = (i: number) => Math.sin(cardAngle(i) * 2) * WAVE + TAPE_W * 0.5 + 0.12; // just above the tape
+      if (!sideY) sideY = toScreen(v2.set(R, yAt(1), 0)).y;
+      const lift = h * 0.06;
       cards.current.forEach((el, i) => {
         if (!el) return;
         const a = cardAngle(i) + rot; // its angle in the world; the front is +90 deg
-        const y = Math.sin(cardAngle(i) * 2) * WAVE + TAPE_W * 0.5 + 0.12; // just above the tape
-        const p = new THREE.Vector3(Math.cos(a) * R, y, Math.sin(a) * R);
+        const p = new THREE.Vector3(Math.cos(a) * R, yAt(i), Math.sin(a) * R);
         const sp = toScreen(p);
         // its size on screen, from how wide it would be where it stands
         v2.copy(p).add(new THREE.Vector3(cardW, 0, 0));
-        const sp2 = toScreen(v2);
-        const px = Math.abs(sp2.x - sp.x);
+        const px = Math.abs(toScreen(v2).x - sp.x);
         const depth = Math.sin(a); // 1 at the front, -1 at the back
-        const near = (depth + 1) / 2;
-        // turned as the face of a cylinder is: square on at the front, its
-        // face turning away to the right on the right (its far edge going
-        // back), to the left on the left, its back to us at the back; a
-        // little short of edge-on at the sides, so they still read
-        let turn = ((Math.PI / 2 - a) * 180) / Math.PI;
-        turn = ((((turn + 180) % 360) + 360) % 360) - 180;
-        el.dataset.back = String(Math.abs(turn) > 90);
-        turn *= 0.78;
-        el.style.transform = `translate3d(${sp.x}px, ${sp.y}px, 0) translate(-50%, -100%) scale(${px / el.offsetWidth}) perspective(1100px) rotateY(${turn}deg)`;
-        el.style.opacity = String(Math.max(0, (near - 0.2) / 0.8) ** 1.4);
-        el.style.zIndex = String(
-          depth > 0 ? 30 + Math.round(depth * 10) : 2 + Math.round(near * 2),
-        );
+        const front = Math.max(0, depth) ** 1.5;
+        const y = depth > 0 ? sideY - lift * front : sp.y; // round the back: as it falls
+        el.style.transform = `translate3d(${sp.x}px, ${y}px, 0) translate(-50%, -100%) scale(${px / el.offsetWidth})`;
+        // clear at the front, faint at the sides, gone (shadow and all) before
+        // it goes round the back
+        // (phones: the sides run off the screen, so they only show coming in)
+        const edge = w < 700 ? -0.06 : 0.22;
+        el.style.opacity = String(Math.min(1, Math.max(0, (depth + edge) / (0.4 + edge))));
+        el.style.zIndex = String(depth > 0 ? 30 + Math.round(depth * 10) : 3);
         el.dataset.front = String(depth > 0.92);
       });
       if (rot !== target) raf = requestAnimationFrame(draw);
@@ -456,6 +466,7 @@ function Orbit() {
               </span>
             </div>
 
+            <div className="or-shadow" aria-hidden="true" />
             <canvas
               ref={back}
               className="or-canvas is-back"
