@@ -117,18 +117,20 @@ export function Visual({ k, turnRef, className = "" }: { k: FeatKey; turnRef?: R
 const VIS: Record<FeatKey, (r?: RefObject<HTMLImageElement | null>) => ReactNode> = {
   mark: () => (
     <div className="fz-mark">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/features/ref-jersey.webp" alt="" draggable={false} />
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <path className="fz-ink" pathLength={1} d="M33 29 C36 22 64 22 67 29 C69 36 58 40 50 40 C40 40 31 36 34 28" />
-        <path className="fz-ink is-late" pathLength={1} d="M10 66 L90 66" />
-      </svg>
-      <span className="fz-pin" style={{ left: "66%", top: "25%" }}>
-        Neckline
-      </span>
-      <span className="fz-pin" style={{ left: "60%", top: "70%" }}>
-        Longer than this
-      </span>
+      <div className="fz-mark__fig">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/features/ref-jersey.webp" alt="" draggable={false} />
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <path className="fz-ink" d="M36 29 C38 24 62 24 64 29 C66 36 57 40 50 40 C42 40 34 36 37 28.5" />
+          <path className="fz-ink is-dash" d="M8 66 L92 66" />
+        </svg>
+        <span className="fz-pin" style={{ left: "62%", top: "22%" }}>
+          Neckline
+        </span>
+        <span className="fz-pin" style={{ left: "52%", top: "69%" }}>
+          Longer than this
+        </span>
+      </div>
     </div>
   ),
   refine: () => (
