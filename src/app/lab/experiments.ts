@@ -29,6 +29,16 @@ export type Experiment = {
 export const EXPERIMENTS: Experiment[] = [
   {
     group: "sections",
+    slug: "section-features-bento",
+    no: 51,
+    title: "Features · Bento",
+    note: "Back to the bento, structure only (no glow, no hovers). Three rows on desktop and every card a square of one, two or three cells, in three arrangements to switch between: Two squares, Centre stage, Stepped. Print options drawn as the pattern over its A4 pages (or one A0 sheet), seam allowance on or off.",
+    tag: "Section · Structure",
+    date: "19 Oct",
+    kind: "native",
+  },
+  {
+    group: "sections",
     slug: "section-features-spotlight",
     no: 50,
     title: "Features · Spotlight",
