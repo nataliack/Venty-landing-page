@@ -212,25 +212,29 @@ function Orbit() {
     const film = st.querySelector<HTMLCanvasElement>(".or-island")!;
     const fg = film.getContext("2d")!;
     const size_ = st.clientWidth < 700 ? 900 : 1400;
-    const frames: (HTMLImageElement | null)[] = Array(ISLAND.frames).fill(null);
+    // kept as bitmaps, decoded once and ready to draw (drawing an <img>
+    // makes the browser hand the whole picture over again each time)
+    const frames: (ImageBitmap | null)[] = Array(ISLAND.frames).fill(null);
+    let gone = false;
     let shown = -1;
     const order = [0, 20, 39, 59, ...Array.from({ length: ISLAND.frames }, (_, i) => i)];
     const queue = [...new Set(order)];
     const load = () => {
       const i = queue.shift();
       if (i === undefined) return;
-      const img = new Image();
-      img.decoding = "async";
-      img.src = `/lab/orbit/island/${size_}/${String(i).padStart(2, "0")}.webp`;
-      img.decode().then(
-        () => {
-          frames[i] = img;
-          shown = -1;
-          kick();
-          load();
-        },
-        () => load(),
-      );
+      fetch(`/lab/orbit/island/${size_}/${String(i).padStart(2, "0")}.webp`)
+        .then((r) => r.blob())
+        .then((b) => createImageBitmap(b))
+        .then(
+          (bmp) => {
+            if (gone) return bmp.close();
+            frames[i] = bmp;
+            shown = -1;
+            kick();
+            load();
+          },
+          () => load(),
+        );
     };
     for (let k = 0; k < 4; k++) load(); // four at a time
     const paint = () => {
@@ -364,6 +368,8 @@ function Orbit() {
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(idle);
+      gone = true;
+      frames.forEach((f) => f?.close());
       ro.disconnect();
       box.removeEventListener("scroll", onScroll);
       for (const e of ["wheel", "touchstart", "keydown", "pointerdown"] as const)
