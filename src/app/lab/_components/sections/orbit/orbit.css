@@ -2,7 +2,18 @@
    are the Made to measure composer's glass (.mm-card): white at 62%, a
    20px blur, a hairline, 28px corners, a soft navy shadow. */
 
-.or { position: relative; height: 460svh; }
+.or { position: relative; }
+/* the title: centred, scrolling by as usual before the scene holds */
+.or-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: clamp(80px, 14svh, 150px) var(--gutter) clamp(24px, 4svh, 48px);
+  text-align: center;
+}
+/* the stretch the scene holds for while the loop turns */
+.or-pin { position: relative; height: 420svh; }
 .or-stage {
   position: sticky;
   top: 0;
@@ -12,21 +23,9 @@
     radial-gradient(60% 50% at 50% 62%, rgb(104 126 245 / 0.1), transparent 70%),
     var(--cloud);
 }
-/* the title, centred over the scene */
-.or-head {
-  position: absolute;
-  left: 50%;
-  top: clamp(48px, 8svh, 88px);
-  z-index: 50;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  width: min(100% - 2 * var(--gutter), 900px);
-  translate: -50% 0;
-  text-align: center;
-}
-.or-title { font-weight: 400; font-size: clamp(2rem, 4.4vw, 4.4rem); line-height: 1; letter-spacing: -0.05em; }
+.or-title { max-width: 16ch; font-weight: 400; font-size: clamp(2.4rem, 5.6vw, 5.6rem); line-height: 1; letter-spacing: -0.05em; text-wrap: balance; }
+/* where you are, over the scene */
+.or-count { position: absolute; left: var(--gutter); top: clamp(20px, 4svh, 40px); z-index: 50; white-space: nowrap; }
 .or-count { font-size: 14px; letter-spacing: -0.01em; color: var(--steel); }
 .or-count b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 400; font-size: 22px; color: var(--corn); }
 
@@ -47,18 +46,16 @@
     linear-gradient(160deg, #dfe5f6 0%, #cdd5ee 100%);
   box-shadow: inset 0 0 0 1px rgb(56 76 101 / 0.14);
 }
-/* the plinth: 90vw wide under the loop, its top at the loop's floor, and
-   running off the bottom of the screen (its lower edge is never seen) */
+/* the plinth: 90vw wide, all of it on screen near the bottom; the loop's
+   floor sits on its top surface (Orbit.tsx aims the camera so) */
 .or-plinth {
   left: 50%;
-  top: var(--base);
+  bottom: 3svh;
   z-index: 0;
   width: 90vw;
-  height: 70vw;
-  translate: -50% -9vw;
-  place-items: start center;
-  padding-top: 14vw;
-  border-radius: 50% 50% 0 0 / 18vw 18vw 0 0;
+  height: calc(90vw * 0.26);
+  translate: -50% 0;
+  border-radius: 50% / 34%;
 }
 
 /* the figure: standing on the plinth in the middle of the loop, behind the
@@ -67,8 +64,9 @@
   left: var(--cx);
   top: var(--base);
   z-index: 5;
-  width: calc(var(--span) * 0.26);
-  height: calc(var(--span) * 0.62);
+  /* tall: its head stands well above the cards */
+  height: min(var(--base) - 3svh, 62svh);
+  width: calc(min(var(--base) - 3svh, 62svh) * 0.34);
   translate: -50% -100%;
   border-radius: 999px 999px 18px 18px;
   color: var(--cloud);
@@ -138,3 +136,7 @@
   transition: background-color 0.4s, color 0.4s;
 }
 .or-steps li.is-on { color: var(--cloud); background: var(--corn); }
+
+/* a card with its back to us: the glass only, no words */
+.or-card[data-back="true"] > * { opacity: 0; }
+.or-card > * { transition: opacity 0.25s; }

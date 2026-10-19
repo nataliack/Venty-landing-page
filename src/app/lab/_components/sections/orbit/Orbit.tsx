@@ -20,10 +20,30 @@ import "./orbit.css";
    back. */
 
 const STEPS = [
-  { n: "01", k: "Measure", h: "Four measures to start.", p: "Add more when you want a closer fit. Every measure shows where the tape goes, and your body is saved for every pattern after." },
-  { n: "02", k: "Describe", h: "Show it. Say it.", p: "Upload the photo, or describe it in a sentence. Choose how close it should sit and the fabric you have in mind." },
-  { n: "03", k: "Draft", h: "See it on you.", p: "Venty drafts the pieces and shows the garment on your body in 3D. Ask for changes in plain words." },
-  { n: "04", k: "Print", h: "Print it at home.", p: "Print on A4 at home, or A0 at a print shop. Grainlines, notches and labels on every piece, with a page map to tape the A4 pages together." },
+  {
+    n: "01",
+    k: "Measure",
+    h: "Four measures to start.",
+    p: "Add more when you want a closer fit. Every measure shows where the tape goes, and your body is saved for every pattern after.",
+  },
+  {
+    n: "02",
+    k: "Describe",
+    h: "Show it. Say it.",
+    p: "Upload the photo, or describe it in a sentence. Choose how close it should sit and the fabric you have in mind.",
+  },
+  {
+    n: "03",
+    k: "Draft",
+    h: "See it on you.",
+    p: "Venty drafts the pieces and shows the garment on your body in 3D. Ask for changes in plain words.",
+  },
+  {
+    n: "04",
+    k: "Print",
+    h: "Print it at home.",
+    p: "Print on A4 at home, or A0 at a print shop. Grainlines, notches and labels on every piece, with a page map to tape the A4 pages together.",
+  },
 ];
 
 const LOOP_CM = 100; // the loop is a metre of tape
@@ -32,15 +52,19 @@ const R = (LOOP_CM * TAPE_W) / (1.6 * 2 * Math.PI); // the loop's radius: a metr
 /* where each card rides: step 1 at the front, the next a quarter round to
    its right, and so on (the loop turns clockwise to bring each forward) */
 const cardAngle = (i: number) => Math.PI / 2 - i * (Math.PI / 2);
-/* the print is turned a little so its join is never under a card */
-const PHASE = Math.PI / 4;
+/* where the print starts: turned so every step's band falls on a whole
+   centimetre (50, 75, 0, 25) */
+const PHASE = Math.PI / 2;
 const mod1 = (x: number) => x - Math.floor(x);
-const cmAt = (angle: number) => LOOP_CM * mod1(1 - (angle + PHASE) / (2 * Math.PI));
+const cmAt = (angle: number) =>
+  LOOP_CM * mod1(1 - (angle + PHASE) / (2 * Math.PI));
 
-/* the tape's printed face, drawn once onto a canvas: ticks from both edges
-   and the centimetres, quiet, in ink. The only cornflower on it marks the
-   steps: under each card, a cornflower band with the step's number. */
-function tapeTexture(maxSize: number, display: string) {
+/* the tape's printed face, drawn once onto a canvas. Ticks from both edges;
+   the only cornflower marks the steps: a band with the step's number where
+   its stretch of tape begins. From each band the tape counts again, 1, 2,
+   3... up to the next step's band, so a step and the numbers after it
+   belong together. */
+function tapeTexture(maxSize: number) {
   const W = Math.min(8192, maxSize);
   const H = 160;
   const cv = document.createElement("canvas");
@@ -53,8 +77,7 @@ function tapeTexture(maxSize: number, display: string) {
   for (let y = 0; y < H; y += 2) g.fillRect(0, y, W, 1);
   const pxmm = W / (LOOP_CM * 10);
   const mmH = H / 16;
-  const marks = STEPS.map((_, i) => cmAt(cardAngle(i)) * 10); // in mm
-  const under = (mm: number) => marks.some((m) => Math.abs(m - mm) < 22);
+  const marks = STEPS.map((_, i) => Math.round(cmAt(cardAngle(i)))); // whole cm
   g.fillStyle = "rgba(26,30,48,0.8)";
   for (let mm = 0; mm < LOOP_CM * 10; mm++) {
     const x = Math.round(mm * pxmm);
@@ -64,23 +87,34 @@ function tapeTexture(maxSize: number, display: string) {
   }
   g.textAlign = "center";
   g.textBaseline = "middle";
-  for (let cm = 1; cm < LOOP_CM; cm++) {
-    if (under(cm * 10)) continue;
-    g.font = `${cm % 10 === 0 ? 600 : 500} ${Math.round(3.2 * mmH)}px Familjen Grotesk, system-ui, sans-serif`;
+  const sans = "Familjen Grotesk, system-ui, sans-serif";
+  for (let cm = 0; cm < LOOP_CM; cm++) {
+    // how far past the last step's band this centimetre is
+    const since = Math.min(...marks.map((m) => (cm - m + LOOP_CM) % LOOP_CM));
+    if (since < 2 || since > LOOP_CM / STEPS.length - 2) continue; // the bands' own room
+    g.font = `500 ${Math.round(3.2 * mmH)}px ${sans}`;
     g.fillStyle = "rgba(26,30,48,0.62)";
-    g.fillText(String(cm), cm * 10 * pxmm, H / 2 + mmH * 0.2);
+    g.fillText(String(since), cm * 10 * pxmm, H / 2 + mmH * 0.2);
   }
-  // the steps: a cornflower band, 36 mm long, the number in it
+  // the steps: a cornflower band, 36 mm long, the number in it (drawn past
+  // both ends too, so a band on the join is whole)
   marks.forEach((m, i) => {
-    const x0 = (m - 18) * pxmm;
-    const w = 36 * pxmm;
-    g.fillStyle = "#687ef5";
-    g.beginPath();
-    g.roundRect(x0, mmH * 1.1, w, H - mmH * 2.2, mmH * 0.8);
-    g.fill();
-    g.fillStyle = "#eff4ff";
-    g.font = `400 ${Math.round(7.4 * mmH)}px ${display}`;
-    g.fillText(STEPS[i].n, m * pxmm, H / 2 + mmH * 0.5);
+    for (const shift of [-LOOP_CM, 0, LOOP_CM]) {
+      const c = (m + shift) * 10 * pxmm;
+      g.fillStyle = "#687ef5";
+      g.beginPath();
+      g.roundRect(
+        c - 18 * pxmm,
+        mmH * 1.1,
+        36 * pxmm,
+        H - mmH * 2.2,
+        mmH * 0.8,
+      );
+      g.fill();
+      g.fillStyle = "#eff4ff";
+      g.font = `600 ${Math.round(6 * mmH)}px ${sans}`;
+      g.fillText(STEPS[i].n, c, H / 2 + mmH * 0.3);
+    }
   });
   const t = new THREE.CanvasTexture(cv);
   t.colorSpace = THREE.SRGBColorSpace;
@@ -102,7 +136,9 @@ function loopGeometry() {
     const c = new THREE.Vector3(Math.cos(t) * R, y, Math.sin(t) * R);
     const out = new THREE.Vector3(Math.cos(t), 0, Math.sin(t));
     // the tape stands up, leaning a little out at the top
-    const up = new THREE.Vector3(0, 1, 0).addScaledVector(out, 0.22).normalize();
+    const up = new THREE.Vector3(0, 1, 0)
+      .addScaledVector(out, 0.22)
+      .normalize();
     const a = c.clone().addScaledVector(up, -TAPE_W / 2);
     const b = c.clone().addScaledVector(up, TAPE_W / 2);
     pos.push(a.x, a.y, a.z, b.x, b.y, b.z);
@@ -147,7 +183,11 @@ function Orbit() {
     if (!box || !s || !st || !cb || !cf) return;
 
     const make = (canvas: HTMLCanvasElement) => {
-      const r = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      const r = new THREE.WebGLRenderer({
+        canvas,
+        alpha: true,
+        antialias: true,
+      });
       r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
       r.outputColorSpace = THREE.SRGBColorSpace;
       r.localClippingEnabled = true;
@@ -168,19 +208,24 @@ function Orbit() {
 
     const loop = new THREE.Group();
     scene.add(loop);
-    const display = getComputedStyle(document.documentElement).getPropertyValue("--font-bigilla").trim() || "Georgia, serif";
-    const mat = new THREE.MeshStandardMaterial({ roughness: 0.7, side: THREE.DoubleSide });
+    const mat = new THREE.MeshStandardMaterial({
+      roughness: 0.7,
+      side: THREE.DoubleSide,
+    });
     const tape = new THREE.Mesh(loopGeometry(), mat);
     loop.add(tape);
-    document.fonts.load(`40px ${display}`).finally(() => {
-      mat.map = tapeTexture(rBack.capabilities.maxTextureSize, display);
+    document.fonts.ready.finally(() => {
+      mat.map = tapeTexture(rBack.capabilities.maxTextureSize);
       mat.needsUpdate = true;
       kick();
     });
 
     // the far half and the near half: split by a plane through the loop's
     // centre, square to the camera
-    const toCam = new THREE.Vector3().subVectors(camera.position, centre).setY(0).normalize();
+    const toCam = new THREE.Vector3()
+      .subVectors(camera.position, centre)
+      .setY(0)
+      .normalize();
     const farHalf = new THREE.Plane(toCam.clone().negate(), 0);
     const nearHalf = new THREE.Plane(toCam.clone(), 0);
 
@@ -202,9 +247,22 @@ function Orbit() {
       camera.aspect = w / h;
       // phones: back off so the whole loop fits
       camera.position.set(0, w < 700 ? 3.4 : 2.6, w < 700 ? 30 : 13);
-      // the scene low on the screen, under the title
-      camera.lookAt(new THREE.Vector3(0, w < 700 ? 3 : 2.2, 0));
       camera.updateProjectionMatrix();
+      // aim the camera so the loop's floor lands on the plinth's top surface
+      // (the plinth: 90vw wide, its whole height on screen, near the bottom)
+      const plinthH = w * 0.9 * 0.26; // the placeholder plinth: 90vw by 26% of that
+      const floorAt = h - h * 0.03 - plinthH * 0.84;
+      let lookY = 1;
+      for (let k = 0; k < 4; k++) {
+        camera.lookAt(0, lookY, 0);
+        camera.updateMatrixWorld();
+        const y = toScreen(new THREE.Vector3(0, -0.9, 0)).y;
+        const perUnit =
+          h / (2 * camera.position.z * Math.tan((camera.fov * Math.PI) / 360));
+        lookY -= (y - floorAt) / perUnit; // looking higher moves the scene down the screen
+      }
+      camera.lookAt(0, lookY, 0);
+      camera.updateMatrixWorld();
       rBack.setSize(w, h, false);
       rFront.setSize(w, h, false);
       // where the plinth's top and the loop's centre fall, for the images
@@ -227,11 +285,11 @@ function Orbit() {
       rFront.clippingPlanes = [nearHalf];
       rFront.render(scene, camera);
       // the cards: each at its point on the loop, just above the tape
-      const cardW = w < 700 ? 3.6 : 2.3; // scene units, at the front (phones: big enough to read)
+      const cardW = w < 700 ? 3.6 : 1.95; // scene units, at the front (phones: big enough to read)
       cards.current.forEach((el, i) => {
         if (!el) return;
         const a = cardAngle(i) + rot; // its angle in the world; the front is +90 deg
-        const y = Math.sin(cardAngle(i) * 2) * 0.16 + TAPE_W * 0.5 + 0.12; // just above the tape
+        const y = Math.sin(cardAngle(i) * 2) * 0.16 + TAPE_W * 0.5 + 0.3; // floating above the tape
         const p = new THREE.Vector3(Math.cos(a) * R, y, Math.sin(a) * R);
         const sp = toScreen(p);
         // its size on screen, from how wide it would be where it stands
@@ -240,10 +298,19 @@ function Orbit() {
         const px = Math.abs(sp2.x - sp.x);
         const depth = Math.sin(a); // 1 at the front, -1 at the back
         const near = (depth + 1) / 2;
-        const turn = -Math.cos(a) * 55; // turned with the loop at the sides
-        el.style.transform = `translate3d(${sp.x}px, ${sp.y}px, 0) translate(-50%, -100%) scale(${px / el.offsetWidth}) perspective(900px) rotateY(${turn}deg)`;
+        // turned as the face of a cylinder is: square on at the front, its
+        // face turning away to the right on the right (its far edge going
+        // back), to the left on the left, its back to us at the back; a
+        // little short of edge-on at the sides, so they still read
+        let turn = ((Math.PI / 2 - a) * 180) / Math.PI;
+        turn = ((((turn + 180) % 360) + 360) % 360) - 180;
+        el.dataset.back = String(Math.abs(turn) > 90);
+        turn *= 0.78;
+        el.style.transform = `translate3d(${sp.x}px, ${sp.y}px, 0) translate(-50%, -100%) scale(${px / el.offsetWidth}) perspective(1100px) rotateY(${turn}deg)`;
         el.style.opacity = String(0.25 + 0.75 * near ** 1.6);
-        el.style.zIndex = String(depth > 0 ? 30 + Math.round(depth * 10) : 2 + Math.round(near * 2));
+        el.style.zIndex = String(
+          depth > 0 ? 30 + Math.round(depth * 10) : 2 + Math.round(near * 2),
+        );
         el.dataset.front = String(depth > 0.92);
       });
       if (rot !== target) raf = requestAnimationFrame(draw);
@@ -254,12 +321,25 @@ function Orbit() {
 
     // the scroll turns the loop a quarter at a time, holding on each step
     const onScroll = () => {
-      const run = s.offsetHeight - box.clientHeight;
-      const p = Math.min(1, Math.max(0, (box.scrollTop - s.offsetTop) / Math.max(1, run)));
+      const pin = s.querySelector<HTMLElement>(".or-pin")!;
+      const top =
+        pin.getBoundingClientRect().top -
+        box.getBoundingClientRect().top +
+        box.scrollTop;
+      const run = pin.offsetHeight - box.clientHeight;
+      const p = Math.min(
+        1,
+        Math.max(0, (box.scrollTop - top) / Math.max(1, run)),
+      );
       const k = p * (STEPS.length - 1);
       const base = Math.floor(k);
       const f = k - base;
-      const hold = f < 0.3 ? 0 : f > 0.7 ? 1 : ((f - 0.3) / 0.4) ** 2 * (3 - 2 * ((f - 0.3) / 0.4));
+      const hold =
+        f < 0.3
+          ? 0
+          : f > 0.7
+            ? 1
+            : ((f - 0.3) / 0.4) ** 2 * (3 - 2 * ((f - 0.3) / 0.4));
       const turns = Math.min(STEPS.length - 1, base + hold);
       target = turns * (Math.PI / 2);
       setOn(Math.round(turns));
@@ -291,49 +371,67 @@ function Orbit() {
   return (
     <>
       <section ref={sec} className="or">
-        <div ref={stage} className="or-stage">
-          <header className="or-head">
-            <p className="hc-eyebrow">How it works</p>
-            <h2 className="or-title">
-              From your body
-              <br />
-              to the cutting table.
-            </h2>
+        {/* the title scrolls by as usual; the scene below holds while the loop turns */}
+        <header data-in className="or-intro">
+          <p className="hc-eyebrow">How it works</p>
+          <h2 className="or-title">From your body to the cutting table.</h2>
+        </header>
+        <div className="or-pin">
+          <div ref={stage} className="or-stage">
             <p className="or-count" aria-live="polite">
               <b>{STEPS[on].n}</b> / 04 · {STEPS[on].k}
             </p>
-          </header>
 
-          {/* placeholders: the plinth (an image, still) and the figure standing on it */}
-          <div className="or-plinth" aria-hidden="true">
-            <span>Plinth · your image</span>
-          </div>
-          <div className="or-figure" aria-hidden="true">
-            <span>Figure · your image, standing on the plinth, behind the cards</span>
-          </div>
+            {/* placeholders: the plinth (an image, still) and the figure standing on it */}
+            <div className="or-plinth" aria-hidden="true">
+              <span>Plinth · your image</span>
+            </div>
+            <div className="or-figure" aria-hidden="true">
+              <span>
+                Figure · your image, standing on the plinth, behind the cards
+              </span>
+            </div>
 
-          <canvas ref={back} className="or-canvas is-back" aria-hidden="true" />
-          {STEPS.map((s, i) => (
-            <article key={s.n} ref={(el) => void (cards.current[i] = el)} className="or-card" aria-current={on === i ? "step" : undefined}>
-              <div className="or-card__img" aria-hidden="true">
-                Image · {s.n} {s.k}
-              </div>
-              <p className="or-card__top">
-                <b>{s.n}</b> {s.k}
-              </p>
-              <h3 className="or-card__h">{s.h}</h3>
-              <p className="or-card__p">{s.p}</p>
-            </article>
-          ))}
-          <canvas ref={front} className="or-canvas is-front" aria-hidden="true" />
-
-          <ol className="or-steps" aria-hidden="true">
+            <canvas
+              ref={back}
+              className="or-canvas is-back"
+              aria-hidden="true"
+            />
             {STEPS.map((s, i) => (
-              <li key={s.n} className={i === on ? "is-on" : ""} style={{ "--i": i } as CSSProperties}>
-                {s.n}
-              </li>
+              <article
+                key={s.n}
+                ref={(el) => void (cards.current[i] = el)}
+                className="or-card"
+                aria-current={on === i ? "step" : undefined}
+              >
+                <div className="or-card__img" aria-hidden="true">
+                  Image · {s.n} {s.k}
+                </div>
+                <p className="or-card__top">
+                  <b>{s.n}</b> {s.k}
+                </p>
+                <h3 className="or-card__h">{s.h}</h3>
+                <p className="or-card__p">{s.p}</p>
+              </article>
             ))}
-          </ol>
+            <canvas
+              ref={front}
+              className="or-canvas is-front"
+              aria-hidden="true"
+            />
+
+            <ol className="or-steps" aria-hidden="true">
+              {STEPS.map((s, i) => (
+                <li
+                  key={s.n}
+                  className={i === on ? "is-on" : ""}
+                  style={{ "--i": i } as CSSProperties}
+                >
+                  {s.n}
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       </section>
       <section className="hc-sec">
