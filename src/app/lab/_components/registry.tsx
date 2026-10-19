@@ -22,6 +22,7 @@ import { HcIndex, HcStack, HcSplit, HcStairs, HcSentence } from "./sections/hc/C
 import { HcPull, HcRuler, HcTaped } from "./sections/hc/Concepts2";
 import { HcCarousel, HcTabs, HcBento, HcZigzag, HcTags } from "./sections/hc/Concepts3";
 import { HcOrbit } from "./sections/orbit/Orbit";
+import { FzTurn, FzFlip, FzZoom, FzTable } from "./sections/fz/Concepts";
 import { DitherRise } from "./exp/DitherRise";
 import { FilamentLab } from "./loaders/Filament";
 import { MarkFlight } from "./exp/MarkFlight";
@@ -108,6 +109,10 @@ export const NATIVE: Record<string, ComponentType> = {
   "section-hiw-zigzag": HcZigzag,
   "section-hiw-tags": HcTags,
   "section-hiw-orbit": HcOrbit,
+  "section-features-turn": FzTurn,
+  "section-features-flip": FzFlip,
+  "section-features-zoom": FzZoom,
+  "section-features-table": FzTable,
   "loader-layout": LoaderLayout,
   "loader-orbit": LoaderOrbit,
   "loader-drift": LoaderDrift,
