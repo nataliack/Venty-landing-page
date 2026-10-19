@@ -51,9 +51,14 @@ const STEPS = [
 
 const STEP = 58; // degrees between cards round the cylinder: the next one turned well round at the side
 const SLICES = 12; // strips per card: enough that the bend reads smooth
-/* the meadow image (2000 x 1168): how tall for its width, how much of it is
-   on screen from the top, and where the middle of the grass is (from the top) */
-const ISLAND = { ratio: 1168 / 2000, show: 0.62, top: 0.29 };
+/* the meadow: a turning film as 60 frames (public/lab/orbit/island/), keyed
+   with a loose soft mask round it, evenly spaced by how far it has turned:
+   frame 0 at the first step, frame 59 once the cards have turned through
+   all four. How tall for its width, and where the middle of its grass is */
+const ISLAND = { frames: 60, ratio: 888 / 1400, top: 0.28 };
+/* the valley behind (1493 x 2000): the full width, its sky behind the
+   meadow while the cards turn, the rest of it seen as the page scrolls on */
+const VALLEY = { ratio: 2000 / 1493 };
 
 function Card({ s }: { s: (typeof STEPS)[number] }) {
   return (
@@ -147,12 +152,20 @@ function Orbit() {
       w = st.clientWidth;
       const h = st.clientHeight;
       const phone = w < 700;
-      // the meadow: 78vw wide (wider on phones, running off both sides), only
-      // its top on screen, the earth under it running off the bottom
+      // the meadow: 78vw wide (wider on phones), all of it there, floating
+      // with its grass a little below the screen's middle
       const iw = phone ? w * 1.3 : w * 0.78;
       const ih = iw * ISLAND.ratio;
-      const show = phone ? 0.85 : ISLAND.show;
-      const itop = h - ih * show;
+      const itop = h * 0.62 - ih * ISLAND.top;
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      film.width = Math.round(iw * dpr);
+      film.height = Math.round(ih * dpr);
+      shown = -1; // drawn again at this size
+      // the valley: the full width (wider on phones, so it is tall enough)
+      const vw = Math.max(w, (h * 1.9) / VALLEY.ratio);
+      const vh = vw * VALLEY.ratio;
+      st.style.setProperty("--vw", `${vw}px`);
+      st.style.setProperty("--vh", `${vh}px`);
       // the cards: their width, and the cylinder they are stuck round
       cw = phone ? Math.min(290, w * 0.74) : 340;
       R = phone ? cw * 1.35 : Math.max(cw * 1.75, w * 0.36);
@@ -167,9 +180,11 @@ function Orbit() {
       st.style.setProperty("--cw", `${cw}px`);
       // the figure: standing on the grass, its head well above the front card
       st.style.setProperty("--fig-top", `${ry - ch / 2 - h * 0.17}px`);
-      // what of the meadow runs below the screen: room left under the scene
-      // for it, so it is seen whole as the page scrolls on
-      s.querySelector<HTMLElement>(".or-pin")!.style.marginBottom = `${ih * (1 - show)}px`;
+      // room under the scene for what runs below the screen (the rest of the
+      // valley, the meadow's underside), so once the cards are done the page
+      // scrolls on through the valley
+      const below = Math.max(vh - h, itop + ih - h, 0);
+      s.querySelector<HTMLElement>(".or-pin")!.style.marginBottom = `${below}px`;
       // the mask the cards turn into: clear across the middle, softly hiding
       // them towards the cylinder's sides, gone before they go round the back
       const side = (R * P) / (P + BACK * R); // the cylinder's side, on screen, from the middle
@@ -193,11 +208,52 @@ function Orbit() {
       });
     };
 
+    // the meadow's frames: the four steps' own first, then the rest
+    const film = st.querySelector<HTMLCanvasElement>(".or-island")!;
+    const fg = film.getContext("2d")!;
+    const size_ = st.clientWidth < 700 ? 900 : 1400;
+    const frames: (HTMLImageElement | null)[] = Array(ISLAND.frames).fill(null);
+    let shown = -1;
+    const order = [0, 20, 39, 59, ...Array.from({ length: ISLAND.frames }, (_, i) => i)];
+    const queue = [...new Set(order)];
+    const load = () => {
+      const i = queue.shift();
+      if (i === undefined) return;
+      const img = new Image();
+      img.decoding = "async";
+      img.src = `/lab/orbit/island/${size_}/${String(i).padStart(2, "0")}.webp`;
+      img.decode().then(
+        () => {
+          frames[i] = img;
+          shown = -1;
+          kick();
+          load();
+        },
+        () => load(),
+      );
+    };
+    for (let k = 0; k < 4; k++) load(); // four at a time
+    const paint = () => {
+      // the frame for how far the cards have turned (or the nearest loaded)
+      const want = Math.round((rot / (STEP * (STEPS.length - 1))) * (ISLAND.frames - 1));
+      const at = Math.min(ISLAND.frames - 1, Math.max(0, want));
+      let i = at;
+      for (let d = 0; d < ISLAND.frames && !frames[i]; d++) {
+        if (frames[at - d]) i = at - d;
+        else if (frames[at + d]) i = at + d;
+      }
+      if (!frames[i] || i === shown) return;
+      shown = i;
+      fg.clearRect(0, 0, film.width, film.height);
+      fg.drawImage(frames[i]!, 0, 0, film.width, film.height);
+    };
+
     const draw = () => {
       raf = 0;
       rot += (target - rot) * 0.12;
       if (Math.abs(target - rot) < 0.01) rot = target;
       rg.style.transform = `translateZ(${-BACK * R}px) rotateX(4deg) rotateY(${-rot}deg)`;
+      paint();
       groups.forEach((g, i) => {
         g.style.transform = `rotateY(${i * STEP}deg)`;
         // the card's glass and its edge: drawn flat on the screen, to the
@@ -329,17 +385,13 @@ function Orbit() {
               Step <b>{STEPS[on].n}</b> of 4 · {STEPS[on].k}
             </p>
 
-            {/* the meadow (still, for now), and a placeholder figure standing on it */}
-            <img
-              className="or-island"
-              src="/lab/orbit/island-2000.webp"
-              srcSet="/lab/orbit/island-1200.webp 1200w, /lab/orbit/island-2000.webp 2000w"
-              sizes="(max-width: 699px) 130vw, 78vw"
-              width={2000}
-              height={1168}
-              alt=""
-              decoding="async"
-            />
+            {/* the meadow, turning with the cards, and a placeholder figure standing on it */}
+            {/* the valley behind it all (a first placement, not final) */}
+            <div className="or-valley" aria-hidden="true">
+              <img src="/lab/orbit/valley.jpg" width={1493} height={2000} alt="" decoding="async" />
+            </div>
+            {/* the meadow, turning with the cards */}
+            <canvas className="or-island" aria-hidden="true" />
             <div className="or-figure" aria-hidden="true">
               <span>Figure · your image, standing on the meadow, behind the cards</span>
             </div>

@@ -20,10 +20,25 @@
   height: 100svh;
   overflow-x: clip;
   overflow-y: visible;
-  background:
-    radial-gradient(60% 50% at 50% 62%, rgb(104 126 245 / 0.1), transparent 70%),
-    var(--cloud);
 }
+/* the valley: from the stage's top down past its bottom (the rest is seen as
+   the page scrolls on); its top and foot melt into the page. The photo is
+   untouched: the melts are laid over it */
+.or-valley {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  z-index: 0;
+  width: var(--vw);
+  height: var(--vh);
+  translate: -50% 0;
+  pointer-events: none;
+}
+.or-valley img { display: block; width: 100%; height: 100%; max-width: none; }
+.or-valley::before,
+.or-valley::after { content: ""; position: absolute; left: 0; right: 0; }
+.or-valley::before { top: 0; height: 24svh; background: linear-gradient(var(--cloud), rgb(238 242 253 / 0)); }
+.or-valley::after { bottom: 0; height: 28svh; background: linear-gradient(rgb(238 242 253 / 0), var(--cloud)); }
 .or-title { max-width: 16ch; font-weight: 400; font-size: clamp(2.4rem, 5.6vw, 5.6rem); line-height: 1; letter-spacing: -0.05em; text-wrap: balance; }
 /* where you are, over the scene */
 .or-count { position: absolute; left: var(--gutter); top: clamp(20px, 4svh, 40px); z-index: 50; white-space: nowrap; }
@@ -52,7 +67,7 @@
   position: absolute;
   left: 50%;
   top: var(--itop);
-  z-index: 0;
+  z-index: 1;
   width: var(--iw);
   max-width: none;
   height: auto;
