@@ -29,6 +29,16 @@ export type Experiment = {
 export const EXPERIMENTS: Experiment[] = [
   {
     group: "sections",
+    slug: "section-hiw-orbit",
+    no: 42,
+    title: "How it works · Orbit",
+    note: "Structure and motion test, low fidelity on purpose. A loop of tape measure in 3D goes round a figure standing on a plinth (placeholders for images); the four steps ride on it as glass cards, and the scroll turns it a quarter at a time, holding on each step at the front.",
+    tag: "Section · Test",
+    date: "19 Oct",
+    kind: "native",
+  },
+  {
+    group: "sections",
     slug: "section-hiw-tags",
     no: 41,
     title: "How it works · Swing tags",

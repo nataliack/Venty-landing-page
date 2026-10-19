@@ -21,6 +21,7 @@ import { HowItWorksDesk } from "./sections/HowItWorksDesk";
 import { HcIndex, HcStack, HcSplit, HcStairs, HcSentence } from "./sections/hc/Concepts";
 import { HcPull, HcRuler, HcTaped } from "./sections/hc/Concepts2";
 import { HcCarousel, HcTabs, HcBento, HcZigzag, HcTags } from "./sections/hc/Concepts3";
+import { HcOrbit } from "./sections/orbit/Orbit";
 import { DitherRise } from "./exp/DitherRise";
 import { FilamentLab } from "./loaders/Filament";
 import { MarkFlight } from "./exp/MarkFlight";
@@ -106,6 +107,7 @@ export const NATIVE: Record<string, ComponentType> = {
   "section-hiw-bento": HcBento,
   "section-hiw-zigzag": HcZigzag,
   "section-hiw-tags": HcTags,
+  "section-hiw-orbit": HcOrbit,
   "loader-layout": LoaderLayout,
   "loader-orbit": LoaderOrbit,
   "loader-drift": LoaderDrift,

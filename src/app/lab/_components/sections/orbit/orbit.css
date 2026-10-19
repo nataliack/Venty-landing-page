@@ -1,0 +1,115 @@
+/* How it works · Orbit (Orbit.tsx): structure and motion test. The cards
+   are the Made to measure composer's glass (.mm-card): white at 62%, a
+   20px blur, a hairline, 28px corners, a soft navy shadow. */
+
+.or { position: relative; height: 460svh; }
+.or-stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 50% at 50% 62%, rgb(104 126 245 / 0.1), transparent 70%),
+    var(--cloud);
+}
+.or-head { position: absolute; left: var(--gutter); top: clamp(56px, 9svh, 96px); z-index: 50; display: flex; flex-direction: column; gap: 12px; }
+.or-title { font-weight: 400; font-size: clamp(1.9rem, 3.6vw, 3.6rem); line-height: 1.02; letter-spacing: -0.05em; }
+.or-count { font-size: 14px; letter-spacing: -0.01em; color: var(--steel); }
+.or-count b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 400; font-size: 22px; color: var(--corn); }
+
+/* ---- the placeholders --------------------------------------------------- */
+.or-plinth,
+.or-figure {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--navy);
+  background:
+    radial-gradient(rgb(56 76 101 / 0.14) 1px, transparent 1.3px) 0 0 / 14px 14px,
+    linear-gradient(160deg, #dfe5f6 0%, #cdd5ee 100%);
+  box-shadow: inset 0 0 0 1px rgb(56 76 101 / 0.14);
+}
+/* the plinth: under the loop, its top at the loop's floor */
+.or-plinth {
+  left: var(--cx);
+  top: var(--base);
+  z-index: 0;
+  width: calc(var(--span) * 1.15);
+  height: calc(var(--span) * 0.42);
+  translate: -50% -18%;
+  border-radius: 50% / 22%;
+}
+.or-plinth span { translate: 0 30%; }
+/* the figure: standing on the plinth in the middle of the loop, behind the cards */
+.or-figure {
+  left: var(--cx);
+  top: var(--base);
+  z-index: 5;
+  width: calc(var(--span) * 0.26);
+  height: calc(var(--span) * 0.62);
+  translate: -50% -100%;
+  border-radius: 999px 999px 18px 18px;
+}
+
+/* ---- the loop: far half behind, near half in front --------------------- */
+.or-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.or-canvas.is-back { z-index: 1; }
+.or-canvas.is-front { z-index: 20; }
+
+/* ---- the cards ------------------------------------------------------------ */
+.or-card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 14px 18px;
+  border-radius: 28px;
+  background: rgb(255 255 255 / 0.62);
+  border: 1px solid rgb(18 21 36 / 0.1);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 30px 80px -36px rgb(56 76 101 / 0.45), 0 2px 6px -2px rgb(56 76 101 / 0.12);
+  transform-origin: 50% 100%;
+  will-change: transform, opacity;
+}
+.or-card__img {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  border-radius: 18px;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--navy);
+  background: radial-gradient(rgb(56 76 101 / 0.12) 1px, transparent 1.3px) 0 0 / 12px 12px, linear-gradient(160deg, #e2e8f8, #d3dbf0);
+}
+.or-card__top { margin-top: 4px; padding: 0 4px; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--navy); }
+.or-card__top b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 400; font-size: 16px; color: var(--corn); margin-right: 4px; }
+.or-card__h { padding: 0 4px; font-weight: 400; font-size: 26px; line-height: 1.05; letter-spacing: -0.04em; color: var(--ink); }
+.or-card__p { padding: 0 4px; font-size: 13px; line-height: 1.45; letter-spacing: -0.01em; color: var(--navy); }
+@media (max-width: 699px) { .or-card { width: 280px; } }
+
+/* ---- where you are: four dots at the bottom --------------------------------- */
+.or-steps { position: absolute; left: 50%; bottom: 28px; z-index: 50; display: flex; gap: 8px; translate: -50% 0; list-style: none; }
+.or-steps li {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  font-family: var(--font-bigilla), Georgia, serif;
+  font-size: 13px;
+  color: var(--steel);
+  background: rgb(255 255 255 / 0.6);
+  box-shadow: inset 0 0 0 1px rgb(18 21 36 / 0.1);
+  transition: background-color 0.4s, color 0.4s;
+}
+.or-steps li.is-on { color: var(--cloud); background: var(--corn); }
