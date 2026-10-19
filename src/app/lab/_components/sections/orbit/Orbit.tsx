@@ -6,8 +6,9 @@ import { End, Shell, useBox } from "../hc/parts";
 import "./orbit.css";
 
 /* How it works · Orbit. A structure and motion test (low fidelity on
-   purpose): a plinth at the bottom (an image, still), a figure standing on
-   it (an image, behind the cards), and around them a loop of tape measure
+   purpose): a floating meadow at the bottom (an image, still; only its top
+   on screen, the earth under it running off the bottom), a figure standing
+   on it (a placeholder, behind the cards), and around them a loop of tape measure
    in 3D (WebGL, three.js), the four steps riding on it as glass cards (the
    Made to measure composer's glass). The scroll turns the loop a quarter at
    a time, holding on each step as it comes to the front.
@@ -46,16 +47,22 @@ const STEPS = [
   },
 ];
 
-const LOOP_CM = 100; // the loop is a metre of tape
+const LOOP_CM = 120; // the loop is 1.2 m of tape, wide over the meadow
 const TAPE_W = 0.3; // the tape's width (16 mm), scene units
-const R = (LOOP_CM * TAPE_W) / (1.6 * 2 * Math.PI); // the loop's radius: a metre round, at that width
+const R = (LOOP_CM * TAPE_W) / (1.6 * 2 * Math.PI); // the loop's radius, at that width
+const R0 = (100 * TAPE_W) / (1.6 * 2 * Math.PI); // the first test's metre loop, for the phone framing
 /* where each card rides: step 1 at the front, the next a quarter round to
    its right, and so on (the loop turns clockwise to bring each forward) */
 const cardAngle = (i: number) => Math.PI / 2 - i * (Math.PI / 2);
 /* where the print starts: turned so every step's band falls on a whole
-   centimetre (50, 75, 0, 25) */
+   centimetre (60, 90, 0, 30) */
 const PHASE = Math.PI / 2;
 const mod1 = (x: number) => x - Math.floor(x);
+/* the loop floats this far over the grass (scene units) */
+const FLOOR = -0.55;
+/* the meadow image (2000 x 1168): how tall for its width, how much of it is
+   on screen from the top, and where the middle of the grass is (from the top) */
+const ISLAND = { ratio: 1168 / 2000, show: 0.55, top: 0.29 };
 const cmAt = (angle: number) =>
   LOOP_CM * mod1(1 - (angle + PHASE) / (2 * Math.PI));
 
@@ -246,17 +253,22 @@ function Orbit() {
       h = st.clientHeight;
       camera.aspect = w / h;
       // phones: back off so the whole loop fits
-      camera.position.set(0, w < 700 ? 3.4 : 2.6, w < 700 ? 30 : 13);
+      camera.position.set(0, w < 700 ? 3.4 : 2.6, w < 700 ? (30 * R) / R0 : 13);
       camera.updateProjectionMatrix();
-      // aim the camera so the loop's floor lands on the plinth's top surface
-      // (the plinth: 90vw wide, its whole height on screen, near the bottom)
-      const plinthH = w * 0.9 * 0.26; // the placeholder plinth: 90vw by 26% of that
-      const floorAt = h - h * 0.03 - plinthH * 0.84;
+      // the meadow: 90vw wide (wider on phones, running off both sides), only
+      // its top on screen, the earth under it running off the bottom
+      const iw = w < 700 ? w * 1.5 : w * 0.9;
+      const ih = iw * ISLAND.ratio;
+      const itop = h - ih * ISLAND.show;
+      st.style.setProperty("--iw", `${iw}px`);
+      st.style.setProperty("--itop", `${itop}px`);
+      // aim the camera so the loop's floor lands in the middle of the grass
+      const floorAt = itop + ih * ISLAND.top;
       let lookY = 1;
       for (let k = 0; k < 4; k++) {
         camera.lookAt(0, lookY, 0);
         camera.updateMatrixWorld();
-        const y = toScreen(new THREE.Vector3(0, -0.9, 0)).y;
+        const y = toScreen(new THREE.Vector3(0, FLOOR, 0)).y;
         const perUnit =
           h / (2 * camera.position.z * Math.tan((camera.fov * Math.PI) / 360));
         lookY -= (y - floorAt) / perUnit; // looking higher moves the scene down the screen
@@ -265,10 +277,10 @@ function Orbit() {
       camera.updateMatrixWorld();
       rBack.setSize(w, h, false);
       rFront.setSize(w, h, false);
-      // where the plinth's top and the loop's centre fall, for the images
+      // where the grass and the loop's centre fall, for the figure
       const c = toScreen(new THREE.Vector3(0, 0, 0));
-      const base = toScreen(new THREE.Vector3(0, -0.9, 0));
-      const edge = toScreen(new THREE.Vector3(R, -0.9, 0));
+      const base = toScreen(new THREE.Vector3(0, FLOOR, 0));
+      const edge = toScreen(new THREE.Vector3(R, FLOOR, 0));
       st.style.setProperty("--cx", `${c.x}px`);
       st.style.setProperty("--cy", `${c.y}px`);
       st.style.setProperty("--base", `${base.y}px`);
@@ -285,11 +297,11 @@ function Orbit() {
       rFront.clippingPlanes = [nearHalf];
       rFront.render(scene, camera);
       // the cards: each at its point on the loop, just above the tape
-      const cardW = w < 700 ? 3.6 : 1.95; // scene units, at the front (phones: big enough to read)
+      const cardW = w < 700 ? (3.6 * R) / R0 : 1.95; // scene units, at the front (phones: big enough to read)
       cards.current.forEach((el, i) => {
         if (!el) return;
         const a = cardAngle(i) + rot; // its angle in the world; the front is +90 deg
-        const y = Math.sin(cardAngle(i) * 2) * 0.16 + TAPE_W * 0.5 + 0.3; // floating above the tape
+        const y = Math.sin(cardAngle(i) * 2) * 0.16 + TAPE_W * 0.5 + 0.12; // just above the tape
         const p = new THREE.Vector3(Math.cos(a) * R, y, Math.sin(a) * R);
         const sp = toScreen(p);
         // its size on screen, from how wide it would be where it stands
@@ -344,7 +356,17 @@ function Orbit() {
       target = turns * (Math.PI / 2);
       setOn(Math.round(turns));
       kick();
+      // when the scroll stops between two steps, settle on the nearer one
+      clearTimeout(idle);
+      if (box.scrollTop > top && box.scrollTop < top + run) {
+        idle = window.setTimeout(() => {
+          const at = top + (Math.round(k) / (STEPS.length - 1)) * run;
+          if (Math.abs(at - box.scrollTop) > 2)
+            box.scrollTo({ top: at, behavior: "smooth" });
+        }, 160);
+      }
     };
+    let idle = 0;
 
     size();
     onScroll();
@@ -358,6 +380,7 @@ function Orbit() {
     box.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       cancelAnimationFrame(raf);
+      clearTimeout(idle);
       ro.disconnect();
       box.removeEventListener("scroll", onScroll);
       tape.geometry.dispose();
@@ -382,13 +405,20 @@ function Orbit() {
               <b>{STEPS[on].n}</b> / 04 · {STEPS[on].k}
             </p>
 
-            {/* placeholders: the plinth (an image, still) and the figure standing on it */}
-            <div className="or-plinth" aria-hidden="true">
-              <span>Plinth · your image</span>
-            </div>
+            {/* the meadow (still, for now), and a placeholder figure standing on it */}
+            <img
+              className="or-island"
+              src="/lab/orbit/island-2000.webp"
+              srcSet="/lab/orbit/island-1200.webp 1200w, /lab/orbit/island-2000.webp 2000w"
+              sizes="(max-width: 699px) 150vw, 90vw"
+              width={2000}
+              height={1168}
+              alt=""
+              decoding="async"
+            />
             <div className="or-figure" aria-hidden="true">
               <span>
-                Figure · your image, standing on the plinth, behind the cards
+                Figure · your image, standing on the meadow, behind the cards
               </span>
             </div>
 

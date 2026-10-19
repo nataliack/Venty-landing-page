@@ -30,7 +30,6 @@
 .or-count b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 400; font-size: 22px; color: var(--corn); }
 
 /* ---- the placeholders --------------------------------------------------- */
-.or-plinth,
 .or-figure {
   position: absolute;
   display: grid;
@@ -46,16 +45,19 @@
     linear-gradient(160deg, #dfe5f6 0%, #cdd5ee 100%);
   box-shadow: inset 0 0 0 1px rgb(56 76 101 / 0.14);
 }
-/* the plinth: 90vw wide, all of it on screen near the bottom; the loop's
-   floor sits on its top surface (Orbit.tsx aims the camera so) */
-.or-plinth {
+/* the meadow: sized and placed by Orbit.tsx (90vw wide, its grass on
+   screen, the earth under it off the bottom); the loop's floor on its grass */
+.or-island {
+  position: absolute;
   left: 50%;
-  bottom: 3svh;
+  top: var(--itop);
   z-index: 0;
-  width: 90vw;
-  height: calc(90vw * 0.26);
+  width: var(--iw);
+  max-width: none;
+  height: auto;
   translate: -50% 0;
-  border-radius: 50% / 34%;
+  pointer-events: none;
+  user-select: none;
 }
 
 /* the figure: standing on the plinth in the middle of the loop, behind the
