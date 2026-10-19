@@ -129,7 +129,7 @@
 @media (max-width: 767px) {
   .fz-turnst { place-items: start center; padding-top: 10svh; }
   .fz-turnst__model { width: min(52svh, 80vw); }
-  .fz-turnst__panel, .fz-turnst__panel.is-right { left: 16px; right: 16px; top: auto; bottom: 140px; translate: none; width: auto; }
+  .fz-turnst__panel, .fz-turnst__panel.is-right { left: 16px; right: 16px; top: auto; bottom: 160px; translate: none; width: auto; }
   .fz-turnst__card { display: none; }
   @keyframes fz-in { from { opacity: 0; translate: 0 30px; } }
   .fz-rail { left: 16px; right: 16px; translate: none; justify-content: space-between; font-size: 11px; gap: 4px; }
