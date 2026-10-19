@@ -26,13 +26,21 @@ const STEPS = [
   { n: "04", k: "Print", h: "Print it at home.", p: "Print on A4 at home, or A0 at a print shop. Grainlines, notches and labels on every piece, with a page map to tape the A4 pages together." },
 ];
 
-const R = 3; // the loop's radius, scene units
+const LOOP_CM = 100; // the loop is a metre of tape
 const TAPE_W = 0.3; // the tape's width (16 mm), scene units
-const LOOP_CM = Math.round(((2 * Math.PI * R) / TAPE_W) * 1.6); // its length in cm at that scale
+const R = (LOOP_CM * TAPE_W) / (1.6 * 2 * Math.PI); // the loop's radius: a metre round, at that width
+/* where each card rides: step 1 at the front, the next a quarter round to
+   its right, and so on (the loop turns clockwise to bring each forward) */
+const cardAngle = (i: number) => Math.PI / 2 - i * (Math.PI / 2);
+/* the print is turned a little so its join is never under a card */
+const PHASE = Math.PI / 4;
+const mod1 = (x: number) => x - Math.floor(x);
+const cmAt = (angle: number) => LOOP_CM * mod1(1 - (angle + PHASE) / (2 * Math.PI));
 
-/* the tape's printed face, drawn once onto a canvas: ticks from both edges,
-   the centimetres in ink, every tenth in cornflower, a faint weave */
-function tapeTexture(maxSize: number) {
+/* the tape's printed face, drawn once onto a canvas: ticks from both edges
+   and the centimetres, quiet, in ink. The only cornflower on it marks the
+   steps: under each card, a cornflower band with the step's number. */
+function tapeTexture(maxSize: number, display: string) {
   const W = Math.min(8192, maxSize);
   const H = 160;
   const cv = document.createElement("canvas");
@@ -45,21 +53,35 @@ function tapeTexture(maxSize: number) {
   for (let y = 0; y < H; y += 2) g.fillRect(0, y, W, 1);
   const pxmm = W / (LOOP_CM * 10);
   const mmH = H / 16;
-  g.fillStyle = "#1a1e30";
+  const marks = STEPS.map((_, i) => cmAt(cardAngle(i)) * 10); // in mm
+  const under = (mm: number) => marks.some((m) => Math.abs(m - mm) < 22);
+  g.fillStyle = "rgba(26,30,48,0.8)";
   for (let mm = 0; mm < LOOP_CM * 10; mm++) {
     const x = Math.round(mm * pxmm);
-    const h = (mm % 10 === 0 ? 4.2 : mm % 5 === 0 ? 2.8 : 1.7) * mmH;
-    g.fillRect(x, 0, Math.max(1, pxmm * 0.16), h);
-    g.fillRect(x, H - h, Math.max(1, pxmm * 0.16), h);
+    const h = (mm % 10 === 0 ? 4 : mm % 5 === 0 ? 2.6 : 1.6) * mmH;
+    g.fillRect(x, 0, Math.max(1, pxmm * 0.15), h);
+    g.fillRect(x, H - h, Math.max(1, pxmm * 0.15), h);
   }
   g.textAlign = "center";
   g.textBaseline = "middle";
   for (let cm = 1; cm < LOOP_CM; cm++) {
-    const ten = cm % 10 === 0;
-    g.font = `${ten ? 600 : 500} ${Math.round((ten ? 5 : 3.8) * mmH)}px Familjen Grotesk, system-ui, sans-serif`;
-    g.fillStyle = ten ? "#687ef5" : "#1a1e30";
+    if (under(cm * 10)) continue;
+    g.font = `${cm % 10 === 0 ? 600 : 500} ${Math.round(3.2 * mmH)}px Familjen Grotesk, system-ui, sans-serif`;
+    g.fillStyle = "rgba(26,30,48,0.62)";
     g.fillText(String(cm), cm * 10 * pxmm, H / 2 + mmH * 0.2);
   }
+  // the steps: a cornflower band, 36 mm long, the number in it
+  marks.forEach((m, i) => {
+    const x0 = (m - 18) * pxmm;
+    const w = 36 * pxmm;
+    g.fillStyle = "#687ef5";
+    g.beginPath();
+    g.roundRect(x0, mmH * 1.1, w, H - mmH * 2.2, mmH * 0.8);
+    g.fill();
+    g.fillStyle = "#eff4ff";
+    g.font = `400 ${Math.round(7.4 * mmH)}px ${display}`;
+    g.fillText(STEPS[i].n, m * pxmm, H / 2 + mmH * 0.5);
+  });
   const t = new THREE.CanvasTexture(cv);
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 8;
@@ -85,7 +107,8 @@ function loopGeometry() {
     const b = c.clone().addScaledVector(up, TAPE_W / 2);
     pos.push(a.x, a.y, a.z, b.x, b.y, b.z);
     // read from outside: the numbers run left to right across the front, upright
-    uv.push(1 - i / N, 0, 1 - i / N, 1);
+    const u = 1 - (t + PHASE) / (2 * Math.PI);
+    uv.push(u, 0, u, 1);
     if (i < N) {
       const k = i * 2;
       idx.push(k, k + 2, k + 1, k + 1, k + 2, k + 3);
@@ -145,11 +168,15 @@ function Orbit() {
 
     const loop = new THREE.Group();
     scene.add(loop);
-    const tape = new THREE.Mesh(
-      loopGeometry(),
-      new THREE.MeshStandardMaterial({ map: tapeTexture(rBack.capabilities.maxTextureSize), roughness: 0.7, side: THREE.DoubleSide }),
-    );
+    const display = getComputedStyle(document.documentElement).getPropertyValue("--font-bigilla").trim() || "Georgia, serif";
+    const mat = new THREE.MeshStandardMaterial({ roughness: 0.7, side: THREE.DoubleSide });
+    const tape = new THREE.Mesh(loopGeometry(), mat);
     loop.add(tape);
+    document.fonts.load(`40px ${display}`).finally(() => {
+      mat.map = tapeTexture(rBack.capabilities.maxTextureSize, display);
+      mat.needsUpdate = true;
+      kick();
+    });
 
     // the far half and the near half: split by a plane through the loop's
     // centre, square to the camera
@@ -175,8 +202,8 @@ function Orbit() {
       camera.aspect = w / h;
       // phones: back off so the whole loop fits
       camera.position.set(0, w < 700 ? 3.4 : 2.6, w < 700 ? 30 : 13);
-      // phones: the scene a little lower on the screen, under the title
-      camera.lookAt(w < 700 ? new THREE.Vector3(0, 1.4, 0) : centre);
+      // the scene low on the screen, under the title
+      camera.lookAt(new THREE.Vector3(0, w < 700 ? 3 : 2.2, 0));
       camera.updateProjectionMatrix();
       rBack.setSize(w, h, false);
       rFront.setSize(w, h, false);
@@ -194,7 +221,7 @@ function Orbit() {
       raf = 0;
       rot += (target - rot) * 0.12;
       if (Math.abs(target - rot) < 0.0005) rot = target;
-      loop.rotation.y = rot;
+      loop.rotation.y = -rot; // clockwise, seen from above
       rBack.clippingPlanes = [farHalf];
       rBack.render(scene, camera);
       rFront.clippingPlanes = [nearHalf];
@@ -203,8 +230,8 @@ function Orbit() {
       const cardW = w < 700 ? 3.6 : 2.3; // scene units, at the front (phones: big enough to read)
       cards.current.forEach((el, i) => {
         if (!el) return;
-        const a = i * (Math.PI / 2) + Math.PI / 2 - rot; // its angle in the world; the front is +90 deg
-        const y = Math.sin((a + rot) * 2) * 0.16 + TAPE_W * 0.5 + 0.12; // the wave is on the loop
+        const a = cardAngle(i) + rot; // its angle in the world; the front is +90 deg
+        const y = Math.sin(cardAngle(i) * 2) * 0.16 + TAPE_W * 0.5 + 0.12; // just above the tape
         const p = new THREE.Vector3(Math.cos(a) * R, y, Math.sin(a) * R);
         const sp = toScreen(p);
         // its size on screen, from how wide it would be where it stands
