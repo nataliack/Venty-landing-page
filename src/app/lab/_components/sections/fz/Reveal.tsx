@@ -65,7 +65,7 @@ export function FzBirdReveal() {
       const heading = ((Math.atan2(dy, dx) * 180) / Math.PI) * 0.7 * (1 - d);
       // its width: small to a third of the screen across, then past the edges
       const small = Math.min(vw, vh * 1.4);
-      const w = small * (0.1 + 0.22 * a) * Math.pow(40, d);
+      const w = small * (0.1 + 0.22 * a) * Math.pow(70, d);
       const s = w / MARK_BOUNDS.width;
       const pose = flightPose(beats, (1 - d) * (t > 0 ? 1 : 0), { heading });
       const tf = `translate(${x.toFixed(2)} ${y.toFixed(2)}) scale(${s.toFixed(5)}) translate(${-CX} ${-CY})`;
