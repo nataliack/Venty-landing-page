@@ -22,32 +22,32 @@ import "./orbit.css";
 
 const STEPS = [
   {
-    n: "01",
+    n: "1",
     k: "Measure",
-    h: "Four measures to start.",
-    p: "Add more when you want a closer fit. Every measure shows where the tape goes, and your body is saved for every pattern after.",
+    h: "Take your measurements.",
+    p: "Grab a soft tape measure and enter your bust, waist, hips and back length. Venty shows you where the tape goes for each one. Your measurements are saved, so you only do this once.",
   },
   {
-    n: "02",
+    n: "2",
     k: "Describe",
-    h: "Show it. Say it.",
-    p: "Upload the photo, or describe it in a sentence. Choose how close it should sit and the fabric you have in mind.",
+    h: "Show Venty what you want to make.",
+    p: "Upload a photo of a garment you love, or describe it in a sentence. Then choose how fitted you want it and the fabric you plan to sew with.",
   },
   {
-    n: "03",
+    n: "3",
     k: "Draft",
-    h: "See it on you.",
-    p: "Venty drafts the pieces and shows the garment on your body in 3D. Ask for changes in plain words.",
+    h: "Venty drafts the pattern to your body.",
+    p: "Every pattern piece is drawn from your measurements. Preview the garment on your body in 3D, and ask for changes in plain words, like longer sleeves.",
   },
   {
-    n: "04",
+    n: "4",
     k: "Print",
-    h: "Print it at home.",
-    p: "Print on A4 at home, or A0 at a print shop. Grainlines, notches and labels on every piece, with a page map to tape the A4 pages together.",
+    h: "Print your pattern and start sewing.",
+    p: "Print on A4 at home, or A0 at a print shop. Every piece has grainlines, notches and labels, and the A4 pages come with a map for taping them together.",
   },
 ];
 
-const LOOP_CM = 140; // the loop is 1.4 m of tape, wide over the meadow
+const LOOP_CM = 160; // the loop is 1.6 m of tape, wide over the meadow
 const TAPE_W = 0.22; // the tape's width (16 mm), scene units
 const R = (LOOP_CM * TAPE_W) / (1.6 * 2 * Math.PI); // the loop's radius, at that width
 const R0 = (100 * 0.3) / (1.6 * 2 * Math.PI); // the first test's loop, for the phone framing
@@ -55,11 +55,12 @@ const R0 = (100 * 0.3) / (1.6 * 2 * Math.PI); // the first test's loop, for the 
    its right, and so on (the loop turns clockwise to bring each forward) */
 const cardAngle = (i: number) => Math.PI / 2 - i * (Math.PI / 2);
 /* where the print starts: turned so every step's band falls on a whole
-   centimetre (70, 105, 0, 35) */
+   centimetre (80, 120, 0, 40) */
 const PHASE = Math.PI / 2;
 const mod1 = (x: number) => x - Math.floor(x);
-/* the grass, this far under the loop's middle (scene units): the tape on it */
-const FLOOR = -0.24;
+/* the grass, this far under the loop's middle (scene units): the tape held a
+   little above it */
+const FLOOR = -0.6;
 /* the meadow image (2000 x 1168): how tall for its width, how much of it is
    on screen from the top, and where the middle of the grass is (from the top) */
 const ISLAND = { ratio: 1168 / 2000, show: 0.62, top: 0.29 };
@@ -96,13 +97,20 @@ function tapeTexture(maxSize: number) {
   g.textAlign = "center";
   g.textBaseline = "middle";
   const sans = "Familjen Grotesk, system-ui, sans-serif";
+  const text = (s: string, x: number, y: number) => {
+    g.save();
+    g.translate(x, y);
+    g.scale(pxmm / mmH, 1);
+    g.fillText(s, 0, 0);
+    g.restore();
+  };
   for (let cm = 0; cm < LOOP_CM; cm++) {
     // how far past the last step's band this centimetre is
     const since = Math.min(...marks.map((m) => (cm - m + LOOP_CM) % LOOP_CM));
     if (since < 2 || since > LOOP_CM / STEPS.length - 2) continue; // the bands' own room
-    g.font = `500 ${Math.round(3.2 * mmH)}px ${sans}`;
+    g.font = `500 ${Math.round(4.4 * mmH)}px ${sans}`;
     g.fillStyle = "rgba(26,30,48,0.62)";
-    g.fillText(String(since), cm * 10 * pxmm, H / 2 + mmH * 0.2);
+    text(String(since), cm * 10 * pxmm, H / 2 + mmH * 0.2);
   }
   // the steps: a cornflower band, 36 mm long, the number in it (drawn past
   // both ends too, so a band on the join is whole)
@@ -120,8 +128,8 @@ function tapeTexture(maxSize: number) {
       );
       g.fill();
       g.fillStyle = "#eff4ff";
-      g.font = `600 ${Math.round(6 * mmH)}px ${sans}`;
-      g.fillText(STEPS[i].n, c, H / 2 + mmH * 0.3);
+      g.font = `600 ${Math.round(7.4 * mmH)}px ${sans}`;
+      text(STEPS[i].n.padStart(2, "0"), c, H / 2 + mmH * 0.3);
     }
   });
   const t = new THREE.CanvasTexture(cv);
@@ -205,7 +213,7 @@ function Orbit() {
     const rFront = make(cf);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 200);
     camera.position.set(0, 2.6, 13);
     const centre = new THREE.Vector3(0, 0.2, 0);
     camera.lookAt(centre);
@@ -257,7 +265,8 @@ function Orbit() {
       h = st.clientHeight;
       camera.aspect = w / h;
       // phones: back off so the whole loop fits
-      camera.position.set(0, w < 700 ? 3.4 : 2.6, w < 700 ? (30 * R) / R0 : 13);
+      const camZ = w < 700 ? (30 * R) / R0 : 13 * (R / R0) ** 0.5;
+      camera.position.set(0, camZ * 0.27, camZ);
       camera.updateProjectionMatrix();
       // the meadow: 78vw wide (wider on phones, running off both sides), only
       // its top on screen, the earth under it running off the bottom
@@ -266,6 +275,9 @@ function Orbit() {
       const itop = h - ih * ISLAND.show;
       st.style.setProperty("--iw", `${iw}px`);
       st.style.setProperty("--itop", `${itop}px`);
+      // what of it runs below the screen: room left under the scene for it,
+      // so it is seen whole as the page scrolls on
+      s.querySelector<HTMLElement>(".or-pin")!.style.marginBottom = `${ih * (1 - ISLAND.show)}px`;
       // aim the camera so the loop's floor lands in the middle of the grass
       const floorAt = itop + ih * ISLAND.top;
       let lookY = 1;
@@ -424,7 +436,7 @@ function Orbit() {
         <div className="or-pin">
           <div ref={stage} className="or-stage">
             <p className="or-count" aria-live="polite">
-              <b>{STEPS[on].n}</b> / 04 · {STEPS[on].k}
+              Step <b>{STEPS[on].n}</b> of 4 · {STEPS[on].k}
             </p>
 
             {/* the meadow (still, for now), and a placeholder figure standing on it */}
@@ -456,11 +468,12 @@ function Orbit() {
                 className="or-card"
                 aria-current={on === i ? "step" : undefined}
               >
-                <div className="or-card__img" aria-hidden="true">
-                  Image · {s.n} {s.k}
-                </div>
                 <p className="or-card__top">
-                  <b>{s.n}</b> {s.k}
+                  <b aria-hidden="true">{s.n}</b>
+                  <span>
+                    <span className="sr-only">Step {s.n}: </span>
+                    {s.k}
+                  </span>
                 </p>
                 <h3 className="or-card__h">{s.h}</h3>
                 <p className="or-card__p">{s.p}</p>

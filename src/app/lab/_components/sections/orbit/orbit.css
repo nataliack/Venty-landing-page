@@ -2,7 +2,7 @@
    are the Made to measure composer's glass (.mm-card): white at 62%, a
    20px blur, a hairline, 28px corners, a soft navy shadow. */
 
-.or { position: relative; }
+.or { position: relative; background: var(--cloud); }
 /* the title: centred, scrolling by as usual before the scene holds */
 .or-intro {
   display: flex;
@@ -18,7 +18,8 @@
   position: sticky;
   top: 0;
   height: 100svh;
-  overflow: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
   background:
     radial-gradient(60% 50% at 50% 62%, rgb(104 126 245 / 0.1), transparent 70%),
     var(--cloud);
@@ -26,8 +27,8 @@
 .or-title { max-width: 16ch; font-weight: 400; font-size: clamp(2.4rem, 5.6vw, 5.6rem); line-height: 1; letter-spacing: -0.05em; text-wrap: balance; }
 /* where you are, over the scene */
 .or-count { position: absolute; left: var(--gutter); top: clamp(20px, 4svh, 40px); z-index: 50; white-space: nowrap; }
-.or-count { font-size: 14px; letter-spacing: -0.01em; color: var(--steel); }
-.or-count b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 400; font-size: 22px; color: var(--corn); }
+.or-count { font-size: 14px; letter-spacing: -0.01em; color: var(--navy); }
+.or-count b { font-weight: 600; color: var(--ink); }
 
 /* ---- the placeholders --------------------------------------------------- */
 .or-figure {
@@ -92,8 +93,8 @@
   width: 340px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 14px 14px 18px;
+  gap: 12px;
+  padding: 22px 22px 26px;
   border-radius: 28px;
   /* the composer's glass, a little clearer, so what stands behind reads
      through it, blurred */
@@ -105,19 +106,20 @@
   transform-origin: 50% 100%;
   will-change: transform, opacity;
 }
-.or-card__img {
+/* the step: its number in a cornflower disc, its name beside it, both large
+   enough to read at a glance */
+.or-card__top { display: flex; align-items: center; gap: 10px; padding: 0 2px; font-size: 15px; font-weight: 500; letter-spacing: -0.01em; color: var(--ink); }
+.or-card__top b {
   display: grid;
   place-items: center;
-  aspect-ratio: 16 / 9;
-  border-radius: 18px;
-  font-size: 10px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--navy);
-  background: radial-gradient(rgb(56 76 101 / 0.12) 1px, transparent 1.3px) 0 0 / 12px 12px, linear-gradient(160deg, #e2e8f8, #d3dbf0);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  background: #4a5fd8; /* a deeper cornflower: white on it passes AA */
 }
-.or-card__top { margin-top: 4px; padding: 0 4px; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--navy); }
-.or-card__top b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 400; font-size: 16px; color: var(--corn); margin-right: 4px; }
 .or-card__h { padding: 0 4px; font-weight: 400; font-size: 26px; line-height: 1.05; letter-spacing: -0.04em; color: var(--ink); }
 .or-card__p { padding: 0 4px; font-size: 13px; line-height: 1.45; letter-spacing: -0.01em; color: var(--navy); }
 @media (max-width: 699px) { .or-card { width: 280px; } }
