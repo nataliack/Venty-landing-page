@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { End, Shell, useBox } from "../hc/parts";
 import "./orbit.css";
@@ -47,22 +47,23 @@ const STEPS = [
   },
 ];
 
-const LOOP_CM = 120; // the loop is 1.2 m of tape, wide over the meadow
-const TAPE_W = 0.3; // the tape's width (16 mm), scene units
+const LOOP_CM = 140; // the loop is 1.4 m of tape, wide over the meadow
+const TAPE_W = 0.22; // the tape's width (16 mm), scene units
 const R = (LOOP_CM * TAPE_W) / (1.6 * 2 * Math.PI); // the loop's radius, at that width
-const R0 = (100 * TAPE_W) / (1.6 * 2 * Math.PI); // the first test's metre loop, for the phone framing
+const R0 = (100 * 0.3) / (1.6 * 2 * Math.PI); // the first test's loop, for the phone framing
 /* where each card rides: step 1 at the front, the next a quarter round to
    its right, and so on (the loop turns clockwise to bring each forward) */
 const cardAngle = (i: number) => Math.PI / 2 - i * (Math.PI / 2);
 /* where the print starts: turned so every step's band falls on a whole
-   centimetre (60, 90, 0, 30) */
+   centimetre (70, 105, 0, 35) */
 const PHASE = Math.PI / 2;
 const mod1 = (x: number) => x - Math.floor(x);
-/* the loop floats this far over the grass (scene units) */
-const FLOOR = -0.55;
+/* the grass, this far under the loop's middle (scene units): the tape on it */
+const FLOOR = -0.24;
 /* the meadow image (2000 x 1168): how tall for its width, how much of it is
    on screen from the top, and where the middle of the grass is (from the top) */
-const ISLAND = { ratio: 1168 / 2000, show: 0.55, top: 0.29 };
+const ISLAND = { ratio: 1168 / 2000, show: 0.62, top: 0.29 };
+const WAVE = 0.06; // how much the loop rises and falls as it goes round
 const cmAt = (angle: number) =>
   LOOP_CM * mod1(1 - (angle + PHASE) / (2 * Math.PI));
 
@@ -139,12 +140,12 @@ function loopGeometry() {
   const idx: number[] = [];
   for (let i = 0; i <= N; i++) {
     const t = (i / N) * Math.PI * 2;
-    const y = Math.sin(t * 2) * 0.16;
+    const y = Math.sin(t * 2) * WAVE;
     const c = new THREE.Vector3(Math.cos(t) * R, y, Math.sin(t) * R);
     const out = new THREE.Vector3(Math.cos(t), 0, Math.sin(t));
     // the tape stands up, leaning a little out at the top
     const up = new THREE.Vector3(0, 1, 0)
-      .addScaledVector(out, 0.22)
+      .addScaledVector(out, 0.1)
       .normalize();
     const a = c.clone().addScaledVector(up, -TAPE_W / 2);
     const b = c.clone().addScaledVector(up, TAPE_W / 2);
@@ -223,6 +224,9 @@ function Orbit() {
     loop.add(tape);
     document.fonts.ready.finally(() => {
       mat.map = tapeTexture(rBack.capabilities.maxTextureSize);
+      mat.emissiveMap = mat.map; // lit from within a little: white, not grey
+      mat.emissive.set(0xffffff);
+      mat.emissiveIntensity = 0.45;
       mat.needsUpdate = true;
       kick();
     });
@@ -255,9 +259,9 @@ function Orbit() {
       // phones: back off so the whole loop fits
       camera.position.set(0, w < 700 ? 3.4 : 2.6, w < 700 ? (30 * R) / R0 : 13);
       camera.updateProjectionMatrix();
-      // the meadow: 90vw wide (wider on phones, running off both sides), only
+      // the meadow: 78vw wide (wider on phones, running off both sides), only
       // its top on screen, the earth under it running off the bottom
-      const iw = w < 700 ? w * 1.5 : w * 0.9;
+      const iw = w < 700 ? w * 1.3 : w * 0.78;
       const ih = iw * ISLAND.ratio;
       const itop = h - ih * ISLAND.show;
       st.style.setProperty("--iw", `${iw}px`);
@@ -301,7 +305,7 @@ function Orbit() {
       cards.current.forEach((el, i) => {
         if (!el) return;
         const a = cardAngle(i) + rot; // its angle in the world; the front is +90 deg
-        const y = Math.sin(cardAngle(i) * 2) * 0.16 + TAPE_W * 0.5 + 0.12; // just above the tape
+        const y = Math.sin(cardAngle(i) * 2) * WAVE + TAPE_W * 0.5 + 0.12; // just above the tape
         const p = new THREE.Vector3(Math.cos(a) * R, y, Math.sin(a) * R);
         const sp = toScreen(p);
         // its size on screen, from how wide it would be where it stands
@@ -319,7 +323,7 @@ function Orbit() {
         el.dataset.back = String(Math.abs(turn) > 90);
         turn *= 0.78;
         el.style.transform = `translate3d(${sp.x}px, ${sp.y}px, 0) translate(-50%, -100%) scale(${px / el.offsetWidth}) perspective(1100px) rotateY(${turn}deg)`;
-        el.style.opacity = String(0.25 + 0.75 * near ** 1.6);
+        el.style.opacity = String(Math.max(0, (near - 0.2) / 0.8) ** 1.4);
         el.style.zIndex = String(
           depth > 0 ? 30 + Math.round(depth * 10) : 2 + Math.round(near * 2),
         );
@@ -331,45 +335,59 @@ function Orbit() {
       if (!raf) raf = requestAnimationFrame(draw);
     };
 
-    // the scroll turns the loop a quarter at a time, holding on each step
-    const onScroll = () => {
+    // the scroll turns the loop with it. When it stops between two steps it
+    // settles on one: the next one in the way you were going if you scrolled
+    // at all on purpose (a sixth of a step), back where you were if not
+    let at = 0; // the step it last settled on
+    let going = -1; // the step it is gliding to (-1: none); your own scroll cancels it
+    let idle = 0;
+    const yours = () => void (going = -1);
+    const span = () => {
       const pin = s.querySelector<HTMLElement>(".or-pin")!;
       const top =
         pin.getBoundingClientRect().top -
         box.getBoundingClientRect().top +
         box.scrollTop;
-      const run = pin.offsetHeight - box.clientHeight;
-      const p = Math.min(
-        1,
-        Math.max(0, (box.scrollTop - top) / Math.max(1, run)),
-      );
-      const k = p * (STEPS.length - 1);
-      const base = Math.floor(k);
-      const f = k - base;
-      const hold =
-        f < 0.3
-          ? 0
-          : f > 0.7
-            ? 1
-            : ((f - 0.3) / 0.4) ** 2 * (3 - 2 * ((f - 0.3) / 0.4));
-      const turns = Math.min(STEPS.length - 1, base + hold);
-      target = turns * (Math.PI / 2);
-      setOn(Math.round(turns));
-      kick();
-      // when the scroll stops between two steps, settle on the nearer one
-      clearTimeout(idle);
-      if (box.scrollTop > top && box.scrollTop < top + run) {
-        idle = window.setTimeout(() => {
-          const at = top + (Math.round(k) / (STEPS.length - 1)) * run;
-          if (Math.abs(at - box.scrollTop) > 2)
-            box.scrollTo({ top: at, behavior: "smooth" });
-        }, 160);
-      }
+      return { top, run: pin.offsetHeight - box.clientHeight };
     };
-    let idle = 0;
+    const onScroll = () => {
+      const { top, run } = span();
+      const p = Math.min(1, Math.max(0, (box.scrollTop - top) / Math.max(1, run)));
+      const k = p * (STEPS.length - 1);
+      target = k * (Math.PI / 2);
+      setOn(Math.round(k));
+      kick();
+      clearTimeout(idle);
+      const inside = box.scrollTop > top + 1 && box.scrollTop < top + run - 1;
+      if (!inside) {
+        at = Math.round(k);
+        return;
+      }
+      idle = window.setTimeout(() => {
+        if (going >= 0) {
+          // still gliding (a slow frame paused it): carry on to the same step
+          const y = top + (going / (STEPS.length - 1)) * run;
+          if (Math.abs(y - box.scrollTop) > 2) box.scrollTo({ top: y, behavior: "smooth" });
+          else going = -1;
+          return;
+        }
+        const d = k - at;
+        let to = at;
+        if (d > 1 / 6) to = Math.ceil(k - 1 / 6);
+        else if (d < -1 / 6) to = Math.floor(k + 1 / 6);
+        to = Math.min(STEPS.length - 1, Math.max(0, to));
+        at = to;
+        const y = top + (to / (STEPS.length - 1)) * run;
+        if (Math.abs(y - box.scrollTop) > 2) {
+          going = to;
+          box.scrollTo({ top: y, behavior: "smooth" });
+        }
+      }, 120);
+    };
 
     size();
     onScroll();
+    at = Math.round(target / (Math.PI / 2));
     rot = target;
     draw();
     const ro = new ResizeObserver(() => {
@@ -378,11 +396,15 @@ function Orbit() {
     });
     ro.observe(st);
     box.addEventListener("scroll", onScroll, { passive: true });
+    for (const e of ["wheel", "touchstart", "keydown", "pointerdown"] as const)
+      box.addEventListener(e, yours, { passive: true });
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(idle);
       ro.disconnect();
       box.removeEventListener("scroll", onScroll);
+      for (const e of ["wheel", "touchstart", "keydown", "pointerdown"] as const)
+        box.removeEventListener(e, yours);
       tape.geometry.dispose();
       (tape.material as THREE.MeshStandardMaterial).map?.dispose();
       (tape.material as THREE.Material).dispose();
@@ -450,17 +472,6 @@ function Orbit() {
               aria-hidden="true"
             />
 
-            <ol className="or-steps" aria-hidden="true">
-              {STEPS.map((s, i) => (
-                <li
-                  key={s.n}
-                  className={i === on ? "is-on" : ""}
-                  style={{ "--i": i } as CSSProperties}
-                >
-                  {s.n}
-                </li>
-              ))}
-            </ol>
           </div>
         </div>
       </section>

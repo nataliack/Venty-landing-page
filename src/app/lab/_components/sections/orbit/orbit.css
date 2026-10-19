@@ -122,23 +122,6 @@
 .or-card__p { padding: 0 4px; font-size: 13px; line-height: 1.45; letter-spacing: -0.01em; color: var(--navy); }
 @media (max-width: 699px) { .or-card { width: 280px; } }
 
-/* ---- where you are: four dots at the bottom --------------------------------- */
-.or-steps { position: absolute; left: 50%; bottom: 28px; z-index: 50; display: flex; gap: 8px; translate: -50% 0; list-style: none; }
-.or-steps li {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  font-family: var(--font-bigilla), Georgia, serif;
-  font-size: 13px;
-  color: var(--steel);
-  background: rgb(255 255 255 / 0.6);
-  box-shadow: inset 0 0 0 1px rgb(18 21 36 / 0.1);
-  transition: background-color 0.4s, color 0.4s;
-}
-.or-steps li.is-on { color: var(--cloud); background: var(--corn); }
-
 /* a card with its back to us: the glass only, no words */
 .or-card[data-back="true"] > * { opacity: 0; }
 .or-card > * { transition: opacity 0.25s; }
