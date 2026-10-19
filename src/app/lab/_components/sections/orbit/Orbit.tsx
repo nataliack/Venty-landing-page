@@ -12,9 +12,13 @@ import "./orbit.css";
    scroll turns the cylinder a step at a time.
 
    The cards are stuck to the cylinder like stickers: each one bends round
-   it. CSS can't bend an element, so each card is drawn as thin upright
-   strips, every strip the whole card clipped to its own slice and set at
-   its own angle round the cylinder; side by side they make one curved card.
+   it. CSS can't bend an element, so each card's words are drawn as thin
+   upright strips, every strip the whole card clipped to its own slice and
+   set at its own angle round the cylinder; side by side they read as one
+   curved card. The glass and the edge under them are drawn flat on the
+   screen to the card's exact outline on the cylinder (worked out here with
+   the same turns), so the blur is smooth and the edge stays stuck to the
+   card. A mask at the cylinder's sides hides the cards as they turn away.
    The strips are decoration (aria-hidden); the steps are read from a plain
    list for screen readers. */
 
@@ -85,14 +89,62 @@ function Orbit() {
     const rg = ring.current;
     if (!box || !s || !st || !rg) return;
     const groups = [...rg.querySelectorAll<HTMLElement>(".or-sticker")];
+    const view = st.querySelector<HTMLElement>(".or-view")!;
+    const panes = [...st.querySelectorAll<HTMLElement>(".or-pane")];
+    const lines = [...st.querySelectorAll<SVGPathElement>(".or-lines path")];
 
     let rot = 0; // degrees the cylinder has turned
     let target = 0;
     let raf = 0;
+    // this screen's numbers, from size()
+    let w = 0;
+    let cw = 0;
+    let ch = 0;
+    let R = 0;
+    let ry = 0;
+    let mask = "";
+    const P = 2400; // the perspective (matches .or-view)
+    const TILT = (4 * Math.PI) / 180; // seen from a touch below
+    const BACK = 0.6; // the cylinder set back by this much of its radius
+
+    /* a point on a card (x across it, y down it, from its middle) to the
+       screen, with the same turns the CSS gives the strips: round the
+       cylinder, the cylinder turned and tilted, then the perspective */
+    const project = (i: number, x: number, y: number) => {
+      const a = ((i * STEP - rot) * Math.PI) / 180 + x / R;
+      const X = R * Math.sin(a);
+      let Z = R * Math.cos(a);
+      const Y = y * Math.cos(TILT) - Z * Math.sin(TILT);
+      Z = y * Math.sin(TILT) + Z * Math.cos(TILT) - BACK * R;
+      const k = P / (P - Z);
+      return [w / 2 + X * k, ry + Y * k];
+    };
+    /* a card's outline, its 28px corners and all, as screen points: the long
+       edges sampled finely, so they follow the curve */
+    const outline = (i: number) => {
+      const r = 28;
+      const hx = cw / 2;
+      const hy = ch / 2;
+      const pts: number[][] = [];
+      const arc = (cx: number, cy: number, from: number) => {
+        for (let k = 0; k <= 6; k++) {
+          const t = from + (k / 6) * (Math.PI / 2);
+          pts.push(project(i, cx + Math.cos(t) * r, cy + Math.sin(t) * r));
+        }
+      };
+      const N = 28;
+      arc(-hx + r, -hy + r, Math.PI);
+      for (let k = 1; k < N; k++) pts.push(project(i, -hx + r + ((cw - 2 * r) * k) / N, -hy));
+      arc(hx - r, -hy + r, -Math.PI / 2);
+      arc(hx - r, hy - r, 0);
+      for (let k = 1; k < N; k++) pts.push(project(i, hx - r - ((cw - 2 * r) * k) / N, hy));
+      arc(-hx + r, hy - r, Math.PI / 2);
+      return pts;
+    };
 
     // the scene's place and the cylinder's size, for this screen
     const size = () => {
-      const w = st.clientWidth;
+      w = st.clientWidth;
       const h = st.clientHeight;
       const phone = w < 700;
       // the meadow: 78vw wide (wider on phones, running off both sides), only
@@ -102,41 +154,40 @@ function Orbit() {
       const show = phone ? 0.85 : ISLAND.show;
       const itop = h - ih * show;
       // the cards: their width, and the cylinder they are stuck round
-      const cw = phone ? Math.min(290, w * 0.74) : 330;
-      const R = phone ? cw * 1.15 : Math.max(cw * 1.45, w * 0.3);
+      cw = phone ? Math.min(290, w * 0.74) : 340;
+      R = phone ? cw * 1.35 : Math.max(cw * 1.75, w * 0.36);
       const card = groups[0]?.querySelector<HTMLElement>(".or-card");
-      const ch = card?.offsetHeight || 300;
-      // the cylinder's middle: the front card's top well clear of the count
-      const ry = Math.max(h * 0.47, ch / 2 + h * 0.14);
+      ch = card?.offsetHeight || 300;
+      // the cylinder's middle: a little below the screen's middle
+      ry = Math.max(h * 0.53, ch / 2 + h * 0.16);
       st.style.setProperty("--iw", `${iw}px`);
       st.style.setProperty("--itop", `${itop}px`);
       st.style.setProperty("--grass", `${itop + ih * ISLAND.top}px`);
       st.style.setProperty("--ry", `${ry}px`);
       st.style.setProperty("--cw", `${cw}px`);
-      st.style.setProperty("--R", `${R}px`);
       // the figure: standing on the grass, its head well above the front card
       st.style.setProperty("--fig-top", `${ry - ch / 2 - h * 0.17}px`);
       // what of the meadow runs below the screen: room left under the scene
       // for it, so it is seen whole as the page scrolls on
       s.querySelector<HTMLElement>(".or-pin")!.style.marginBottom = `${ih * (1 - show)}px`;
-      // the blur behind each card: one smooth pane across the card's chord
-      // (blurring strip by strip would band), the strips' glass over it
-      const half = cw / (2 * R);
-      groups.forEach((g) => {
-        const pane = g.querySelector<HTMLElement>(".or-pane")!;
-        pane.style.width = `${2 * R * Math.sin(half)}px`;
-        pane.style.height = `${ch}px`;
-        pane.style.transform = `translateZ(${R * Math.cos(half)}px)`;
-      });
-      // each strip: its slice of the card and its angle round the cylinder
+      // the mask the cards turn into: clear across the middle, softly hiding
+      // them towards the cylinder's sides, gone before they go round the back
+      const side = (R * P) / (P + BACK * R); // the cylinder's side, on screen, from the middle
+      mask = `linear-gradient(90deg, transparent ${w / 2 - side * 0.98}px, #000 ${w / 2 - side * 0.5}px, #000 ${w / 2 + side * 0.5}px, transparent ${w / 2 + side * 0.98}px)`;
+      view.style.maskImage = mask;
+      view.style.setProperty("-webkit-mask-image", mask);
+      const svg = st.querySelector<SVGSVGElement>(".or-lines")!;
+      svg.style.maskImage = mask;
+      svg.style.setProperty("-webkit-mask-image", mask);
+      // each strip: its slice of the card's words and its angle round the cylinder
       const sw = cw / SLICES;
       groups.forEach((g) => {
         g.querySelectorAll<HTMLElement>(".or-card").forEach((el, k) => {
           const x = (k + 0.5) * sw - cw / 2; // the strip's middle, from the card's
           const phi = (x / R) * (180 / Math.PI);
-          const l = k * sw - 0.15; // a hair of overlap, so no gaps between strips
-          const r = cw - (k + 1) * sw - 0.15;
-          el.style.clipPath = `inset(-1px ${Math.max(0, r)}px -1px ${Math.max(0, l)}px)`;
+          const l = k * sw;
+          const r = cw - (k + 1) * sw;
+          el.style.clipPath = `inset(-2px ${Math.max(0, r)}px -2px ${Math.max(0, l)}px)`;
           el.style.transform = `rotateY(${phi}deg) translateZ(${R}px) translateX(${-x}px)`;
         });
       });
@@ -146,18 +197,44 @@ function Orbit() {
       raf = 0;
       rot += (target - rot) * 0.12;
       if (Math.abs(target - rot) < 0.01) rot = target;
-      // seen from a touch below, so the card in front stands a little higher
-      // than those turning away at the sides
-      rg.style.transform = `translateZ(calc(var(--R) * -0.6)) rotateX(4deg) rotateY(${-rot}deg)`; // set back, so the front card is near its own size
+      rg.style.transform = `translateZ(${-BACK * R}px) rotateX(4deg) rotateY(${-rot}deg)`;
       groups.forEach((g, i) => {
-        const a = i * STEP - rot; // its angle from the front
         g.style.transform = `rotateY(${i * STEP}deg)`;
-        const depth = Math.cos((a * Math.PI) / 180);
-        // clear at the front, softer at the sides, gone before the back
-        g.style.setProperty("--o", String(Math.min(1, Math.max(0, (depth - 0.1) / 0.75))));
-        // the blur only on the card coming to the front (its pane matches the
-        // curve closely there; at the sides the glass alone is enough)
-        g.style.setProperty("--g", String(Math.max(0, (depth - 0.8) / 0.2) ** 2));
+        // the card's glass and its edge: drawn flat on the screen, to the
+        // card's exact outline on the cylinder (so they stay stuck to it),
+        // hidden once its face turns away
+        const facing = Math.cos(((i * STEP - rot) * Math.PI) / 180) > 0;
+        const pane = panes[i];
+        const line = lines[i];
+        if (!facing) {
+          pane.style.display = "none";
+          line.setAttribute("d", "");
+          return;
+        }
+        const pts = outline(i);
+        let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+        for (const [x, y] of pts) {
+          x0 = Math.min(x0, x);
+          y0 = Math.min(y0, y);
+          x1 = Math.max(x1, x);
+          y1 = Math.max(y1, y);
+        }
+        x0 = Math.floor(x0);
+        y0 = Math.floor(y0);
+        const d = (dx: number, dy: number) =>
+          "M" + pts.map(([x, y]) => `${(x - dx).toFixed(1)} ${(y - dy).toFixed(1)}`).join("L") + "Z";
+        pane.style.display = "";
+        pane.style.left = `${x0}px`;
+        pane.style.top = `${y0}px`;
+        pane.style.width = `${Math.ceil(x1 - x0) + 1}px`;
+        pane.style.height = `${Math.ceil(y1 - y0) + 1}px`;
+        pane.style.clipPath = `path("${d(x0, y0)}")`;
+        // the same mask as the cards, lined up with the screen
+        pane.style.maskImage = mask;
+        pane.style.setProperty("-webkit-mask-image", mask);
+        pane.style.maskSize = `${w}px 100%`;
+        pane.style.maskPosition = `${-x0}px 0`;
+        line.setAttribute("d", d(0, 0));
       });
       if (rot !== target) raf = requestAnimationFrame(draw);
     };
@@ -276,12 +353,21 @@ function Orbit() {
               ))}
             </ol>
 
-            {/* the cylinder, and on it each card as strips */}
+            {/* each card's glass and edge, drawn to its outline on the cylinder */}
+            {STEPS.map((s) => (
+              <div key={s.n} className="or-pane" aria-hidden="true" />
+            ))}
+            <svg className="or-lines" aria-hidden="true">
+              {STEPS.map((s) => (
+                <path key={s.n} />
+              ))}
+            </svg>
+
+            {/* the cylinder, and on it each card's words as strips */}
             <div className="or-view" aria-hidden="true">
               <div ref={ring} className="or-ring">
                 {STEPS.map((s) => (
                   <div key={s.n} className="or-sticker">
-                    <div className="or-pane" />
                     {Array.from({ length: SLICES }, (_, k) => (
                       <article key={k} className="or-card">
                         <Card s={s} />
