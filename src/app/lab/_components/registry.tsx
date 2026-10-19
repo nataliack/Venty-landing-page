@@ -23,6 +23,8 @@ import { HcPull, HcRuler, HcTaped } from "./sections/hc/Concepts2";
 import { HcCarousel, HcTabs, HcBento, HcZigzag, HcTags } from "./sections/hc/Concepts3";
 import { HcOrbit } from "./sections/orbit/Orbit";
 import { FzTurn, FzFlip, FzZoom, FzTable } from "./sections/fz/Concepts";
+import { FzSplit, FzDeck, FzSpotlight } from "./sections/fz/Pinned";
+import { FzBirdReveal } from "./sections/fz/Reveal";
 import { DitherRise } from "./exp/DitherRise";
 import { FilamentLab } from "./loaders/Filament";
 import { MarkFlight } from "./exp/MarkFlight";
@@ -113,6 +115,10 @@ export const NATIVE: Record<string, ComponentType> = {
   "section-features-flip": FzFlip,
   "section-features-zoom": FzZoom,
   "section-features-table": FzTable,
+  "section-features-bird": FzBirdReveal,
+  "section-features-split": FzSplit,
+  "section-features-deck": FzDeck,
+  "section-features-spotlight": FzSpotlight,
   "loader-layout": LoaderLayout,
   "loader-orbit": LoaderOrbit,
   "loader-drift": LoaderDrift,

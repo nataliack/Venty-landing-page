@@ -31,14 +31,16 @@ export const hold = (f: number, a = 0.18) => {
 
 /** The concept's own scroller, with the section's heading before it and
     some air after it, so the pinned part scrolls in and out like on the page */
-export function Shell({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function Shell({ children, className = "", head = true }: { children: ReactNode; className?: string; head?: boolean }) {
   return (
     <div data-fz-scroll data-lenis-prevent className={`fz absolute inset-0 overflow-y-auto overflow-x-hidden ${className}`}>
-      <header className="fz-head">
-        <p className="fz-eyebrow">Features</p>
-        <h2 className="fz-title">Everything a pattern needs.</h2>
-        <p className="fz-scrollcue">Scroll</p>
-      </header>
+      {head && (
+        <header className="fz-head">
+          <p className="fz-eyebrow">Features</p>
+          <h2 className="fz-title">Everything a pattern needs.</h2>
+          <p className="fz-scrollcue">Scroll</p>
+        </header>
+      )}
       {children}
       <footer className="fz-end">
         <p className="fz-eyebrow">Next section</p>

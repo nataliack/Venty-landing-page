@@ -1,0 +1,175 @@
+/* Features, calmer pinned scrolls (Split, Deck, Spotlight) and the bird
+   reveal. Uses the fz tokens (fz.css). */
+
+/* ---- Split ---- */
+.fz-split {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(24px, 5vw, 96px);
+  align-items: center;
+  padding: 0 clamp(16px, 6vw, 110px);
+}
+.fz-split__list { position: relative; padding-left: 22px; }
+.fz-split__list ol { margin-top: 22px; }
+.fz-split__list li { padding: 10px 0; border-top: 1px solid var(--line); }
+.fz-split__list li:last-child { border-bottom: 1px solid var(--line); }
+.fz-split__list button { display: flex; align-items: baseline; gap: 16px; width: 100%; text-align: left; color: var(--steel); transition: color 0.4s; }
+.fz-split__list li.is-on button { color: var(--cloud); }
+.fz-split__list li.is-on .fz-n { color: var(--corn); }
+.fz-split__list .fz-n { color: inherit; width: 2ch; }
+.fz-split__t { font-size: clamp(22px, 2.3vw, 36px); line-height: 1.1; letter-spacing: -0.035em; }
+.fz-split__p {
+  display: grid;
+  grid-template-rows: 0fr;
+  padding-left: calc(2ch + 16px);
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--peri);
+  overflow: hidden;
+  opacity: 0;
+  transition: grid-template-rows 0.6s var(--expo), opacity 0.4s, margin 0.6s var(--expo);
+}
+.fz-split__list li.is-on .fz-split__p { grid-template-rows: 1fr; opacity: 1; margin-top: 8px; }
+/* the progress, a thin rule down the left of the list */
+.fz-split__rule { position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: var(--line); }
+.fz-split__rule span { position: absolute; inset: 0; background: var(--corn); transform-origin: 50% 0; scale: 1 var(--p, 0); }
+.fz-split__vis { position: relative; height: min(70svh, 640px); }
+.fz-split__vis .fz-v { position: absolute; inset: 0; opacity: 0; translate: 0 60px; scale: 0.96; transition: opacity 0.6s ease, translate 0.9s var(--expo), scale 0.9s var(--expo); }
+.fz-split__vis .fz-v.is-past { translate: 0 -60px; }
+.fz-split__vis .fz-v.is-on { opacity: 1; translate: 0 0; scale: 1; }
+.fz-split__count { position: absolute; right: 18px; bottom: 14px; font-size: 13px; color: var(--peri); font-variant-numeric: tabular-nums; }
+@media (max-width: 767px) {
+  .fz-split { grid-template-columns: 1fr; grid-template-rows: auto 1fr; align-items: start; gap: 18px; padding: 8svh 16px 110px; }
+  /* phones: only the feature you're on, the rest as a row of numbers */
+  .fz-split__list { padding-left: 0; }
+  .fz-split__list ol { display: flex; flex-wrap: wrap; gap: 0 14px; margin-top: 12px; }
+  .fz-split__list li { border: 0 !important; padding: 0; }
+  .fz-split__list li:not(.is-on) .fz-split__t { display: none; }
+  .fz-split__list li.is-on { flex-basis: 100%; order: -1; margin-bottom: 8px; }
+  .fz-split__rule { display: none; }
+  .fz-split__vis { height: auto; min-height: 0; }
+}
+
+/* ---- Deck ---- */
+.fz-deck { position: relative; padding: 0 clamp(16px, 4vw, 64px); }
+.fz-deck__card {
+  position: sticky;
+  top: calc(8svh + var(--i) * 10px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5%;
+  height: 80svh;
+  max-width: 1200px;
+  margin: 0 auto 20svh;
+  padding: clamp(24px, 4vw, 56px);
+  border-radius: 32px;
+  transform-origin: 50% 0;
+  scale: calc(1 - var(--k, 0) * 0.06);
+  filter: brightness(calc(1 - var(--k, 0) * 0.35));
+  box-shadow: 0 -20px 60px -30px rgb(0 0 0 / 0.8);
+}
+.fz-deck__card:last-child { margin-bottom: 10svh; }
+.fz-deck__card.is-c0 { background: var(--cloud); color: var(--ink); }
+.fz-deck__card.is-c0 .fz-v { background: rgb(18 21 36 / 0.06); box-shadow: inset 0 0 0 1px rgb(18 21 36 / 0.1); }
+.fz-deck__card.is-c0 .fz-rows li { background: rgb(18 21 36 / 0.06); }
+.fz-deck__card.is-c0 .fz-msg:not(.is-me) { background: rgb(18 21 36 / 0.07); }
+.fz-deck__card.is-c1 { background: var(--corn); color: #fff; }
+.fz-deck__card.is-c1 .fz-n { color: #fff; opacity: 0.7; }
+.fz-deck__card.is-c2 { background: #171b2e; box-shadow: inset 0 0 0 1px var(--line), 0 -20px 60px -30px rgb(0 0 0 / 0.8); }
+.fz-deck__copy { align-self: end; }
+.fz-deck__vis { min-height: 0; }
+@media (max-width: 767px) {
+  .fz-deck__card { grid-template-columns: 1fr; grid-template-rows: auto 1fr; gap: 18px; height: 76svh; border-radius: 24px; }
+  .fz-deck__copy { align-self: start; }
+}
+
+/* ---- Spotlight ---- */
+.fz-spot {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8svh clamp(16px, 4vw, 64px) 100px;
+}
+.fz-spot__row { display: flex; gap: 12px; flex: 1 1 0; min-height: 0; transition: flex-grow 0.9s var(--expo); }
+.fz-spot__row.is-on { flex-grow: 2.4; }
+.fz-spot__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 18px;
+  border-radius: 24px;
+  background: rgb(239 244 255 / 0.04);
+  box-shadow: inset 0 0 0 1px var(--line);
+  cursor: pointer;
+  overflow: hidden;
+  transition: flex-grow 0.9s var(--expo), background-color 0.5s, box-shadow 0.5s;
+}
+.fz-spot__card.is-on { flex-grow: 2.6; background: rgb(104 126 245 / 0.12); box-shadow: inset 0 0 0 1px rgb(104 126 245 / 0.6); cursor: default; }
+.fz-spot__copy { position: relative; z-index: 1; }
+.fz-spot__t { margin-top: 6px; font-size: clamp(17px, 1.6vw, 26px); line-height: 1.1; letter-spacing: -0.03em; font-weight: 400; }
+.fz-spot__p { max-width: 36ch; margin-top: 8px; font-size: 15px; line-height: 1.4; color: var(--peri); opacity: 0; translate: 0 8px; transition: opacity 0.4s, translate 0.6s var(--expo); }
+.fz-spot__card.is-on .fz-spot__p { opacity: 1; translate: 0 0; transition-delay: 0.25s; }
+.fz-spot__vis { flex: 1; margin-top: 14px; min-height: 0; opacity: 0.35; transition: opacity 0.5s; }
+.fz-spot__card.is-on .fz-spot__vis { opacity: 1; }
+@media (max-width: 767px) {
+  /* an accordion: one open, five titles */
+  .fz-spot { gap: 8px; padding: 6svh 16px 110px; }
+  .fz-spot__row { flex-direction: column; gap: 8px; flex: none; }
+  .fz-spot__row.is-on { flex: 1 1 0; }
+  .fz-spot__card { flex: none; padding: 12px 16px; }
+  .fz-spot__card .fz-spot__copy { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .fz-spot__card .fz-spot__t { margin: 0; font-size: 17px; }
+  .fz-spot__card:not(.is-on) .fz-spot__p, .fz-spot__card:not(.is-on) .fz-spot__vis { display: none; }
+  .fz-spot__card.is-on { flex: 1 1 0; }
+  .fz-spot__card.is-on .fz-spot__p { flex-basis: 100%; margin-top: 4px; }
+}
+
+/* ---- the bird reveal ---- */
+.fz-reveal__stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+/* the section before (a stand-in): light, like How it works */
+.fz-before {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  padding: 0 16px;
+  text-align: center;
+  background: radial-gradient(70% 60% at 50% 40%, #fff, var(--cloud));
+  color: var(--ink);
+}
+.fz-before::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgb(11 12 21 / 0.18) 1px, transparent 1.3px);
+  background-size: 18px 18px;
+  -webkit-mask-image: radial-gradient(ellipse 50% 45% at 50% 45%, #000 30%, transparent 100%);
+  mask-image: radial-gradient(ellipse 50% 45% at 50% 45%, #000 30%, transparent 100%);
+}
+.fz-before .fz-eyebrow { color: var(--steel); }
+.fz-before .fz-title { position: relative; }
+.fz-before__note { position: relative; font-size: 13px; color: var(--steel); }
+/* Features, seen only through the bird */
+.fz-through {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  padding: 0 16px;
+  text-align: center;
+  background: radial-gradient(80% 70% at 50% 60%, #1b2350, var(--night));
+  -webkit-clip-path: url(#fz-bird-clip);
+  clip-path: url(#fz-bird-clip);
+}
+.fz-through.is-open { -webkit-clip-path: none; clip-path: none; }
+.fz-through__turn { width: min(38svh, 60vw); aspect-ratio: 1; margin-top: 18px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 1px var(--line), 0 0 90px -10px rgb(104 126 245 / 0.6); }
+.fz-through__turn img { width: 100%; height: 100%; object-fit: cover; }
+/* the bird's own line, so it reads as the bird while it is small */
+.fz-birdline { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.fz-birdline path { fill: none; stroke: var(--corn); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
