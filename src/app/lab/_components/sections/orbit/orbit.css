@@ -46,8 +46,8 @@
     linear-gradient(160deg, #dfe5f6 0%, #cdd5ee 100%);
   box-shadow: inset 0 0 0 1px rgb(56 76 101 / 0.14);
 }
-/* the meadow: sized and placed by Orbit.tsx (90vw wide, its grass on
-   screen, the earth under it off the bottom); the loop's floor on its grass */
+/* the meadow: sized and placed by Orbit.tsx (78vw wide, its grass on
+   screen, the earth under it off the bottom) */
 .or-island {
   position: absolute;
   left: 50%;
@@ -61,16 +61,16 @@
   user-select: none;
 }
 
-/* the figure: standing on the plinth in the middle of the loop, behind the
-   cards (a strong placeholder, so the cards' blur shows over it) */
+/* the figure: standing on the grass in the middle of the cylinder, behind
+   the cards, its head well above the front card (placed by Orbit.tsx; a
+   strong placeholder, so the cards' blur shows over it) */
 .or-figure {
-  left: var(--cx);
-  top: var(--base);
+  left: 50%;
+  top: var(--fig-top);
   z-index: 5;
-  /* tall: its head stands well above the cards */
-  height: min(var(--base) - 3svh, 36svh);
-  width: calc(min(var(--base) - 3svh, 36svh) * 0.36);
-  translate: -50% -100%;
+  height: calc(var(--grass) - var(--fig-top));
+  width: calc((var(--grass) - var(--fig-top)) * 0.34);
+  translate: -50% 0;
   border-radius: 999px 999px 18px 18px;
   color: var(--cloud);
   background:
@@ -80,17 +80,33 @@
   box-shadow: none;
 }
 
-/* ---- the loop: far half behind, near half in front --------------------- */
-.or-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.or-canvas.is-back { z-index: 1; }
-.or-canvas.is-front { z-index: 20; }
+/* ---- the cylinder ----------------------------------------------------------- */
+.or-view {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  perspective: 2400px;
+  perspective-origin: 50% var(--ry);
+  pointer-events: none;
+}
+.or-ring,
+.or-sticker {
+  position: absolute;
+  left: 50%;
+  top: var(--ry);
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+.or-sticker { left: 0; top: 0; }
 
-/* ---- the cards ------------------------------------------------------------ */
+/* ---- the cards: each drawn as strips (Orbit.tsx clips and turns each) ------ */
 .or-card {
   position: absolute;
-  left: 0;
+  left: calc(var(--cw) * -0.5);
   top: 0;
-  width: 340px;
+  translate: 0 -50%;
+  width: var(--cw);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -98,13 +114,26 @@
   border-radius: 28px;
   /* the composer's glass, a little clearer, so what stands behind reads
      through it, blurred */
-  background: rgb(255 255 255 / 0.5);
+  /* the glass's tint: on the strips at the sides; on the smooth pane for the
+     card in front (strips side by side would show their seams there) */
+  background: rgb(255 255 255 / calc(0.5 * (1 - var(--g, 0))));
   border: 1px solid rgb(18 21 36 / 0.1);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9);
+  opacity: var(--o, 1);
+  backface-visibility: hidden;
+}
+/* the blur behind a card: one smooth pane (Orbit.tsx sizes and places it) */
+.or-pane {
+  position: absolute;
+  left: 0;
+  top: 0;
+  translate: -50% -50%;
+  border-radius: 28px;
+  background: rgb(255 255 255 / 0.5);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
   backdrop-filter: blur(20px) saturate(140%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 30px 80px -36px rgb(56 76 101 / 0.45), 0 2px 6px -2px rgb(56 76 101 / 0.12);
-  transform-origin: 50% 100%;
-  will-change: transform, opacity;
+  opacity: var(--g, 0);
+  backface-visibility: hidden;
 }
 /* the step: its number in a cornflower disc, its name beside it, both large
    enough to read at a glance */
@@ -122,19 +151,3 @@
 }
 .or-card__h { padding: 0 4px; font-weight: 400; font-size: 26px; line-height: 1.05; letter-spacing: -0.04em; color: var(--ink); }
 .or-card__p { padding: 0 4px; font-size: 13px; line-height: 1.45; letter-spacing: -0.01em; color: var(--navy); }
-@media (max-width: 699px) { .or-card { width: 280px; } }
-
-/* the loop's soft shadow on the grass (placed by Orbit.tsx) */
-.or-shadow {
-  position: absolute;
-  left: var(--cx);
-  top: var(--sy);
-  z-index: 0;
-  width: calc(var(--span) * 1.04);
-  height: calc(var(--sh) * 1.04);
-  translate: -50% -50%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, transparent 80%, rgb(18 26 46 / 0.3) 93%, transparent 100%);
-  filter: blur(8px);
-  pointer-events: none;
-}
