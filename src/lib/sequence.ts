@@ -179,11 +179,13 @@ export function createSequence(
 
   /** alpha: frames with transparency (the canvas is cleared under each
       draw). fit: "cover" fills the canvas (a slice, picked by the camera),
-      "contain" shows the whole frame, centred. */
+      "contain" shows the whole frame, centred. blend: between two frames,
+      lay the next over the earlier by the exact position (on by default);
+      off, it always shows exactly one frame, the nearest. */
   function createPlayer(
     canvas: HTMLCanvasElement,
     camera: (frame: number) => number = () => 0.5,
-    { alpha = false, fit = "cover" }: { alpha?: boolean; fit?: "cover" | "contain" } = {},
+    { alpha = false, fit = "cover", blend = true }: { alpha?: boolean; fit?: "cover" | "contain"; blend?: boolean } = {},
   ) {
     const { width: FW, height: FH } = manifest;
     // where the frame sits in a box of this size: its scale and top left
@@ -229,7 +231,7 @@ export function createSequence(
       const mix = Math.round((pos - a) * 32) / 32;
       let k = -1;
       let over = -1;
-      if (mix > 0 && mix < 1 && frames.has(a) && frames.has(a + 1)) {
+      if (blend && mix > 0 && mix < 1 && frames.has(a) && frames.has(a + 1)) {
         k = a;
         over = a + 1;
       }

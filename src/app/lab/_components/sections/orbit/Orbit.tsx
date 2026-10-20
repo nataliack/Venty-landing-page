@@ -57,10 +57,10 @@ const SLICES = 12; // strips per card: enough that the bend reads smooth
    to the cards' full turn (public/lab/orbit/island/: AVIF, keyed with a
    loose soft mask round it, 1400px and 900px for phones). Played by the
    site's sequence engine (src/lib/sequence.ts): downloaded once, the frames
-   just ahead of the turn first, only a few decoded at a time, blended by the
-   turn's exact position. The manifest has how far the meadow has turned at
-   each frame (the film eases in), so it turns exactly with the cards.
-   How tall for its width, and where the middle of its grass is */
+   just ahead of the turn first, only a few decoded at a time, always one
+   real frame on screen (no blending). The manifest has how far the meadow
+   has turned at each frame (the film eases in), so it turns exactly with
+   the cards. How tall for its width, and where the middle of its grass is */
 const ISLAND = { ratio: islandFilm.height / islandFilm.width, top: 0.28 };
 /** the film's exact (fractional) frame for a turn of so many degrees */
 const filmAt = (deg: number) => {
@@ -221,7 +221,9 @@ function Orbit() {
     // the meadow's film
     const film = st.querySelector<HTMLCanvasElement>(".or-island")!;
     const seq = createSequence(islandFilm, `/lab/orbit/island/${st.clientWidth < 700 ? 900 : 1400}`, { opening: 24, ext: "avif" });
-    const player = seq.createPlayer(film, undefined, { alpha: true, fit: "contain" });
+    // one real frame at a time, never two laid over each other: with every
+    // frame of the film here, the steps between them are too small to see
+    const player = seq.createPlayer(film, undefined, { alpha: true, fit: "contain", blend: false });
 
     const draw = () => {
       raf = 0;
