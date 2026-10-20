@@ -108,7 +108,9 @@ export function PhoneCard() {
     const tick = () => {
       const n = NEXT[next.current++ % NEXT.length];
       const id = uid.current++;
-      setRows((l) => [{ id, ...n, status: "Draft" as const, drafting: true }, ...l].slice(0, 6));
+      // the ones before move along: the last new one goes to fitting, the one fitting gets printed
+      const along = (r: Row, i: number): Row => (i === 0 ? { ...r, status: "Fitting" } : i === 1 && r.status === "Fitting" ? { ...r, status: "Printed" } : r);
+      setRows((l) => [{ id, ...n, status: "Draft" as const, drafting: true }, ...l.map(along)].slice(0, 6));
       setStep((s) => s + 1);
       timers.push(window.setTimeout(() => setRows((l) => l.map((r) => (r.id === id ? { ...r, drafting: false } : r))), 2200));
     };
