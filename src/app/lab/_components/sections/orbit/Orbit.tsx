@@ -109,10 +109,6 @@ const Scene = memo(function Scene() {
 function Card({ s }: { s: (typeof STEPS)[number] }) {
   return (
     <>
-      <p className="or-card__top">
-        <b>{s.n}</b>
-        <span>{s.k}</span>
-      </p>
       <h3 className="or-card__h">{s.h}</h3>
       <p className="or-card__p">{s.p}</p>
     </>
@@ -464,7 +460,18 @@ function Orbit() {
       }
       kick();
       clearTimeout(idle);
-      if (touch) return; // phones and tablets: their own snapping does the settling
+      if (touch) {
+        // phones and tablets: their own snapping does the settling, but only
+        // within the steps; past the last (or before the first) it lets go,
+        // so the page scrolls on freely into the valley
+        const snapping = box.scrollTop >= top - 4 && box.scrollTop <= top + run + 4;
+        if (snapping !== snapOn) {
+          snapOn = snapping;
+          if (snapping) box.style.setProperty("scroll-snap-type", "y proximity");
+          else box.style.removeProperty("scroll-snap-type");
+        }
+        return;
+      }
       const inside = box.scrollTop > top + 1 && box.scrollTop < top + run - 1;
       if (!inside) {
         at = Math.round(k);
@@ -499,7 +506,7 @@ function Orbit() {
       going = touch ? -1 : i;
       box.scrollTo({ top: top + (i / (STEPS.length - 1)) * run, behavior: "smooth" });
     };
-    if (touch) box.style.setProperty("scroll-snap-type", "y proximity");
+    let snapOn = false; // touch screens: the snapping is on within the steps (set by onScroll)
 
     size();
     onScroll();
@@ -576,7 +583,7 @@ function Orbit() {
             {/* the meadow, turning with the cards, and a placeholder figure standing on it */}
             {/* the valley behind it all (a first placement, not final) */}
             <div className="or-valley" aria-hidden="true">
-              <img src="/lab/orbit/valley.webp" width={1792} height={1943} alt="" decoding="async" />
+              <img src="/lab/orbit/valley.webp?v=2" width={1792} height={1943} alt="" decoding="async" />
             </div>
             {/* the meadow, turning with the cards */}
             <canvas className="or-island" aria-hidden="true" />
