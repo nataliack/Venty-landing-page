@@ -2,7 +2,7 @@
    cards #1b1c26 with a hairline, status dots (Printed primary, Fitting
    peri, Draft white 40%). Uses the fz tokens. */
 /* the stage: clipped at the card's sides and foot, open at the top so the front phone can rise out of it */
-.ph-stage { position: absolute; inset: 0; clip-path: inset(-90px 0 0 0 round 0 0 22px 22px); }
+.ph-stage { position: absolute; inset: 0; clip-path: inset(-140px 0 0 0 round 0 0 22px 22px); }
 /* the dot grid, fading round the phones */
 .ph-dots {
   position: absolute;
@@ -163,18 +163,16 @@
 .fzb-cell.is-l.fzb-card--lib .ph-stage { left: var(--bleed); }
 @media (min-width: 1100px) {
   .fzb-card--lib .fzb-copy { right: auto; max-width: 30ch; }
-  .fzb-card--lib .ph-stage .ph { left: 64%; }
-  .fzb-card--lib .ph-glow { left: 64%; }
 }
 .fzb-card--lib .fzb-copy b { display: block; margin-bottom: 4px; font-size: clamp(15px, 1.2vw, 18px); }
 
 /* hover: the phones behind lean out to the sides, the front one rises out of the card */
 @media (hover: hover) {
-  .fzb-card--lib:hover .ph.is-front { translate: -50% -34px; }
-  .fzb-card--lib:hover .ph.is-back.is-l { translate: calc(-50% - var(--w) * 0.8) 6px; rotate: -10deg; }
-  .fzb-card--lib:hover .ph.is-back.is-r { translate: calc(-50% + var(--w) * 0.8) 6px; rotate: 10deg; }
+  .fzb-card--lib:hover .ph.is-front { translate: -50% -76px; }
+  .fzb-card--lib:hover .ph.is-back.is-l { translate: calc(-50% - var(--w) * 0.8) 0; rotate: -9deg; }
+  .fzb-card--lib:hover .ph.is-back.is-r { translate: calc(-50% + var(--w) * 0.8) 0; rotate: 9deg; }
   .fzb-card--lib .ph-glow { transition: opacity 0.9s ease, translate 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
-  .fzb-card--lib:hover .ph-glow { opacity: 1.4; translate: -50% -24px; }
+  .fzb-card--lib:hover .ph-glow { translate: -50% -50px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

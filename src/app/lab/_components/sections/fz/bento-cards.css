@@ -16,19 +16,19 @@
   background: radial-gradient(70% 60% at 50% 35%, #1d2442, #0f1222);
   box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.07);
 }
-.bc-mark__fig { position: absolute; left: 50%; top: 3%; height: 112%; aspect-ratio: 880 / 1339; translate: -50% 0; }
+@property --z { syntax: "<number>"; inherits: true; initial-value: 1; }
+/* the push-in: the figure scales about the detail; the pins keep their size */
+.bc-mark__fig { position: absolute; left: 50%; top: 3%; height: 112%; aspect-ratio: 880 / 1339; translate: -50% 0; scale: var(--z); transition: --z 0.95s cubic-bezier(0.65, 0, 0.35, 1); }
 .bc-mark__fig img, .bc-mark__fig svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.bc-ink { fill: none; stroke: var(--corn); stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; opacity: 0.7; transition: opacity 0.3s; }
-.bc-ink.is-on { opacity: 1; filter: drop-shadow(0 0 8px rgb(104 126 245 / 0.7)); }
 /* the hem: where it is (a fine line), where it should fall (dashed), the way down */
-.bc-hem { opacity: 0.7; transition: opacity 0.3s; }
-.bc-hem.is-on { opacity: 1; }
+.bc-hem { opacity: 0; transition: opacity 0.3s; }
+.bc-hem.is-on { opacity: 1; transition-delay: 0.7s; }
 .bc-hem path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .bc-hem__now { stroke: rgb(239 244 255 / 0.85); stroke-width: 4; stroke-dasharray: 2 14; }
 .bc-hem__new { stroke: var(--corn); stroke-width: 8; stroke-dasharray: 28 18; filter: drop-shadow(0 0 6px rgb(104 126 245 / 0.6)); }
 .bc-hem__arrow { stroke: var(--corn); stroke-width: 7; }
-.bc-chip { position: absolute; translate: -50% -50%; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; color: #fff; background: var(--corn); box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.6); white-space: nowrap; opacity: 0.8; transition: opacity 0.3s, scale 0.3s; }
-.bc-chip.is-on { opacity: 1; scale: 1.06; }
+.bc-chip { position: absolute; translate: -50% -50%; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; color: #fff; background: var(--corn); box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.6); white-space: nowrap; opacity: 0; scale: calc(1 / var(--z)); transition: opacity 0.3s; }
+.bc-chip.is-on { opacity: 1; transition-delay: 0.8s; }
 .bc-pin {
   position: absolute;
   display: grid;
@@ -44,7 +44,19 @@
   box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.6);
   transition: background-color 0.25s, color 0.25s, scale 0.3s;
 }
-.bc-pin.is-on { background: var(--corn); color: #fff; scale: 1.12; }
+.bc-pin { scale: calc(1 / var(--z)); }
+.bc-pin.is-on { background: var(--corn); color: #fff; scale: calc(1.12 / var(--z)); }
+.bc-pin.is-away { opacity: 0; pointer-events: none; }
+/* the selection round a detail: marching ants, once the push-in lands */
+.bc-sel { opacity: 0; transition: opacity 0.3s ease; }
+.bc-sel.is-on { opacity: 1; transition-delay: 0.7s; }
+.bc-sel > * { fill: rgb(104 126 245 / 0.08); stroke: var(--corn); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-dasharray: 7 5; animation: bc-ants 1.2s linear infinite; }
+@keyframes bc-ants { to { stroke-dashoffset: -24; } }
+/* Whole look: back out, shown while pushed in */
+.bc-mark__out { position: absolute; left: 50%; bottom: 10px; z-index: 3; translate: -50% 8px; padding: 6px 12px; border-radius: 999px; font-size: 11.5px; color: var(--cloud); background: rgb(11 12 21 / 0.7); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.14); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transition: opacity 0.3s, translate 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.bc-mark__frame.is-in .bc-mark__out { opacity: 1; translate: -50% 0; pointer-events: auto; }
+.bc-mark__frame.is-in .bc-tools { opacity: 0; pointer-events: none; }
+.bc-tools { transition: opacity 0.3s; }
 .bc-tools {
   position: absolute;
   left: 8px;
@@ -64,8 +76,10 @@
 .bc-tools button[aria-pressed="true"] { background: var(--corn); color: #fff; }
 .bc-mark__side { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .bc-notes { display: flex; flex-direction: column; gap: 6px; }
-.bc-notes li {
+.bc-notes button {
   display: flex;
+  width: 100%;
+  text-align: left;
   gap: 10px;
   align-items: flex-start;
   padding: 10px 12px;
@@ -78,9 +92,9 @@
   cursor: pointer;
   transition: box-shadow 0.25s, background-color 0.25s;
 }
-.bc-notes li.is-on { background: rgb(104 126 245 / 0.08); box-shadow: inset 0 0 0 1px rgb(104 126 245 / 0.5); }
+.bc-notes button.is-on { background: rgb(104 126 245 / 0.08); box-shadow: inset 0 0 0 1px rgb(104 126 245 / 0.5); }
 .bc-notes__n { display: grid; place-items: center; flex: none; width: 18px; height: 18px; border-radius: 50%; font-size: 10.5px; background: rgb(239 244 255 / 0.1); color: var(--cloud); }
-.bc-notes li.is-on .bc-notes__n { background: var(--corn); }
+.bc-notes button.is-on .bc-notes__n { background: var(--corn); }
 .bc-refs { display: flex; gap: 6px; }
 .bc-refs__thumb, .bc-refs__add { width: 40px; height: 40px; border-radius: 10px; overflow: hidden; }
 .bc-refs__thumb { background: #161b33; box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.08); }
@@ -106,36 +120,43 @@
 .bc-compose { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 10px 10px; padding: 6px 6px 6px 12px; border-radius: 999px; font-size: 12.5px; color: rgb(157 172 205 / 0.6); background: rgb(239 244 255 / 0.04); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.08); }
 .bc-compose__send { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--cloud); color: var(--ink); }
 
-/* ---- See it on your body: a turntable ---- */
-.bc-turn { position: absolute; inset: 0; cursor: grab; touch-action: pan-y; outline: none; }
-.bc-turn:active { cursor: grabbing; }
+/* ---- See it on your body: her, and a plain slider ---- */
+.bc-turn { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 10px; }
+.bc-turn__stage { position: relative; flex: 1; min-height: 0; cursor: grab; touch-action: pan-y; }
+.bc-turn.is-dragging .bc-turn__stage { cursor: grabbing; }
 /* the frame's backdrop never shows an edge: she is feathered into the card */
-.bc-turn img {
+.bc-turn__stage img {
   position: absolute;
   left: 50%;
-  top: 46%;
-  z-index: 1;
-  height: 108%;
+  top: 50%;
+  height: 112%;
   aspect-ratio: 1;
   width: auto;
   max-width: none;
-  translate: -50% -50%;
+  translate: -50% -48%;
   user-select: none;
   pointer-events: none;
   -webkit-mask-image: radial-gradient(closest-side at 50% 46%, #000 50%, rgb(0 0 0 / 0.45) 74%, transparent 100%);
   mask-image: radial-gradient(closest-side at 50% 46%, #000 50%, rgb(0 0 0 / 0.45) 74%, transparent 100%);
 }
-/* the ring she stands in: its back half behind her, its front half in front */
-.bc-ring { position: absolute; left: 4%; right: 4%; bottom: 7%; width: 92%; height: auto; overflow: visible; pointer-events: none; }
-.bc-ring.is-back { z-index: 0; }
-.bc-ring.is-front { z-index: 2; }
-.bc-ring__line { fill: none; stroke: rgb(239 244 255 / 0.22); stroke-width: 0.6; }
-.bc-ring.is-front .bc-ring__line { stroke: rgb(239 244 255 / 0.4); }
-.bc-ring line { stroke: var(--cloud); stroke-width: 0.7; stroke-linecap: round; }
-.bc-ring line.is-big { stroke: var(--corn); stroke-width: 1.1; }
-.bc-ring__front { fill: var(--corn); filter: drop-shadow(0 0 3px var(--corn)); }
-.bc-turn:focus-visible .bc-ring.is-front .bc-ring__line { stroke: var(--corn); stroke-width: 1; }
-.bc-turn__hint { position: absolute; left: 50%; bottom: 0; z-index: 3; display: flex; align-items: center; gap: 6px; translate: -50% 0; padding: 5px 11px; border-radius: 999px; font-size: 11.5px; color: rgb(239 244 255 / 0.8); background: rgb(11 12 21 / 0.6); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.1); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.bc-turn__hint { position: absolute; left: 50%; bottom: 4px; translate: -50% 0; padding: 5px 11px; border-radius: 999px; font-size: 11.5px; color: rgb(239 244 255 / 0.8); background: rgb(11 12 21 / 0.6); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.1); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: opacity 0.25s, translate 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+.bc-turn.is-dragging .bc-turn__hint { opacity: 0; translate: -50% 6px; }
+/* the slider: a plain track, cornflower up to her angle */
+.bc-slider {
+  --v: 0%;
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(90deg, var(--corn) 0 var(--v), rgb(239 244 255 / 0.12) var(--v) 100%) 0 50% / 100% 4px no-repeat;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.bc-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--cloud); box-shadow: 0 0 0 4px rgb(104 126 245 / 0.3), 0 2px 6px rgb(0 0 0 / 0.5); transition: box-shadow 0.2s; }
+.bc-slider::-moz-range-thumb { width: 18px; height: 18px; border: 0; border-radius: 50%; background: var(--cloud); box-shadow: 0 0 0 4px rgb(104 126 245 / 0.3), 0 2px 6px rgb(0 0 0 / 0.5); }
+.bc-slider:active::-webkit-slider-thumb { box-shadow: 0 0 0 6px rgb(104 126 245 / 0.4), 0 2px 6px rgb(0 0 0 / 0.5); }
+.bc-slider:focus-visible { outline: 2px solid var(--corn); outline-offset: 4px; }
 
 /* ---- Body library ---- */
 .bc-bodies { position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr); gap: 14px; align-items: center; }
@@ -185,16 +206,26 @@
 .bc-count { display: flex; align-items: baseline; gap: 6px; padding: 10px 12px; border-radius: 12px; background: rgb(239 244 255 / 0.025); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.06); }
 .bc-count b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: 30px; line-height: 1; color: var(--cloud); font-variant-numeric: tabular-nums; }
 .bc-count span { font-size: 12.5px; color: rgb(157 172 205 / 0.8); }
-.bc-arrange__tools { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: auto; }
+.bc-picked { display: flex; align-items: center; gap: 6px; padding: 6px 6px 6px 12px; border-radius: 12px; background: rgb(239 244 255 / 0.025); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.06); }
+.bc-picked__name { display: flex; flex: 1; flex-direction: column; min-width: 0; font-size: 13px; color: var(--cloud); text-transform: capitalize; }
+.bc-picked__name small { font-size: 11px; color: rgb(157 172 205 / 0.75); font-variant-numeric: tabular-nums; }
+.bc-iconbtn { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; color: var(--cloud); background: rgb(239 244 255 / 0.06); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.1); transition: background-color 0.2s; }
+@media (hover: hover) { .bc-iconbtn:hover { background: rgb(239 244 255 / 0.12); } }
+.bc-iconbtn:active { scale: 0.94; }
+.bc-arrange__panel > .bc-ghost { margin-top: auto; }
 .bc-ghost { display: flex; align-items: center; justify-content: center; gap: 6px; height: 34px; border-radius: 999px; font-size: 12.5px; color: var(--cloud); background: rgb(239 244 255 / 0.05); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.1); transition: background-color 0.2s, opacity 0.2s; }
 .bc-ghost:disabled { opacity: 0.4; }
 .bc-ghost.is-primary { color: var(--ink); background: var(--cloud); box-shadow: none; }
 @media (hover: hover) { .bc-ghost:not(.is-primary):not(:disabled):hover { background: rgb(239 244 255 / 0.09); } }
+/* narrow: the sheet on top at its own shape, the controls under it, the card as tall as it needs */
 @media (max-width: 640px) {
-  .bc-arrange { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; }
-  .bc-arrange__panel { display: grid; grid-template-columns: 1fr auto; align-items: center; }
-  .bc-arrange__panel .bc-seg { grid-column: 1 / -1; }
-  .bc-arrange__tools { margin: 0; }
+  .fzb-card--print .fzb-vis { position: relative; flex: none; }
+  .bc-arrange { position: static; grid-template-columns: 1fr; }
+  .bc-arrange__canvas { aspect-ratio: 116 / 86; padding: 8px; }
+  .bc-arrange__panel { display: grid; grid-template-columns: auto 1fr; gap: 8px; }
+  .bc-arrange__panel .bc-seg, .bc-arrange__panel > .bc-ghost { grid-column: 1 / -1; }
+  .bc-arrange__panel > .bc-ghost { margin: 0; height: 40px; }
+  .bc-count { padding: 8px 12px; }
 }
 
 /* ---- Pattern library ---- */

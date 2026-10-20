@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type CSSProperties, type PointerEvent as RPointerEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as RPointerEvent } from "react";
 import { MARK, MARK_BOUNDS } from "@/lib/markFlight";
 import { Icon, I } from "../mtm/icons";
 import { FIRST_FRAME, useTurn } from "./parts";
@@ -12,7 +12,9 @@ import "./bento-cards.css";
 
 const CIRCLE = "M12 4a8 8 0 1 0 0 16a8 8 0 0 0 0-16z";
 const SEND = "M12 19V5M5.5 11.5L12 5l6.5 6.5";
-const ROTATE = "M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7";
+// turning a piece: a sheet with an arrow round its corner, each way
+const TURN_L = "M12 5h6a2 2 0 0 1 2 2v3M15 8l-3-3 3-3M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2";
+const TURN_R = "M12 5H6a2 2 0 0 0-2 2v3M9 8l3-3-3-3M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2";
 const SPARK = "M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6";
 
 /** the Venty bird, small, as an avatar */
@@ -26,45 +28,74 @@ function Bird({ size = 14 }: { size?: number }) {
 }
 
 /* ---- Mark up your references -------------------------------------------
-   A small editor: the reference with its marks, the tools floating at its
-   side, the notes the pins make, the references underneath. The marks: a
-   ring round the neckline (pin 1), and the hem's change (pin 2): where the
-   hem is now, an arrow down, and a dashed line where it should fall, "+5 cm".
-   The photo's units: 880 x 1339; its hem is at 878. */
-const PINS = [
-  { n: 1, x: 0.66, y: 0.27, note: "Keep this neckline, a touch deeper" },
-  { n: 2, x: 0.2, y: 0.655, note: "5 cm longer, straight hem" },
+   A prototype of Jose's idea: the reference sits whole; tap a note (or its
+   pin) and the picture pushes in to that detail, macro, and a selection is
+   drawn round it. Tap another and it pulls back out first, then pushes in
+   to the next; tap the same again, or "Whole look", to pull out.
+
+   Here the push-in is the still photo scaled (a stand-in). The real thing
+   is one short clip per detail, each starting on this exact still and
+   ending on its macro; going back out plays it in reverse. See DETAILS for
+   what each clip ends on. The selections stay drawn in code so they're
+   always sharp. The photo's units: 880 x 1339. */
+const DETAILS = [
+  { n: 1, note: "Keep this neckline, a touch deeper", pin: [0.67, 0.3], at: [0.473, 0.336], z: 2.6, sel: <ellipse cx="416" cy="452" rx="150" ry="98" /> },
+  { n: 2, note: "This mesh and print, same weight", pin: [0.72, 0.52], at: [0.47, 0.53], z: 2.3, sel: <rect x="252" y="570" width="326" height="276" rx="34" /> },
+  { n: 3, note: "5 cm longer, straight hem", pin: [0.2, 0.655], at: [0.5, 0.69], z: 2.2, sel: null },
 ];
+const OUT_MS = 560; // the pull-out before pushing in to another detail
 export function MarkCard() {
   const [tool, setTool] = useState("pen");
-  const [on, setOn] = useState(1);
+  const [on, setOn] = useState<number | null>(null);
+  const [aim, setAim] = useState<number | null>(null); // where the zoom is centred (kept while pulling out)
+  const t = useRef(0);
+  useEffect(() => () => window.clearTimeout(t.current), []);
+  const pick = (n: number | null) => {
+    window.clearTimeout(t.current);
+    if (n === on || n === null) return setOn(null);
+    if (on === null) {
+      setAim(n);
+      return setOn(n);
+    }
+    // out of this detail, then in to the next
+    setOn(null);
+    t.current = window.setTimeout(() => {
+      setAim(n);
+      setOn(n);
+    }, OUT_MS);
+  };
+  const a = DETAILS.find((x) => x.n === (on ?? aim)) ?? DETAILS[0];
   return (
     <div className="bc-mark">
-      <div className="bc-mark__frame">
-        <div className="bc-mark__fig">
+      <div className={`bc-mark__frame ${on ? "is-in" : ""}`}>
+        <div
+          className="bc-mark__fig"
+          style={{ "--z": on ? a.z : 1, transformOrigin: `${a.at[0] * 100}% ${a.at[1] * 100}%` } as CSSProperties}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/features/ref-jersey.webp" alt="The reference: a cropped jersey, marked up" draggable={false} />
           <svg viewBox="0 0 880 1339" aria-hidden="true">
-            <path className={`bc-ink ${on === 1 ? "is-on" : ""}`} d="M312 420 C324 352 552 344 580 418 C598 470 532 520 444 522 C358 524 298 482 316 410" />
-            <g className={`bc-hem ${on === 2 ? "is-on" : ""}`}>
+            {DETAILS.map((x) => x.sel && <g key={x.n} className={`bc-sel ${on === x.n ? "is-on" : ""}`}>{x.sel}</g>)}
+            <g className={`bc-hem ${on === 3 ? "is-on" : ""}`}>
               <path className="bc-hem__now" d="M60 878 H820" />
               <path className="bc-hem__new" d="M60 978 H820" />
               <path className="bc-hem__arrow" d="M720 892 V962 M700 942 L720 964 L740 942" />
             </g>
           </svg>
-          <span className={`bc-chip ${on === 2 ? "is-on" : ""}`} style={{ left: "82%", top: "73%" }}>
+          <span className={`bc-chip ${on === 3 ? "is-on" : ""}`} style={{ left: "82%", top: "73%" }}>
             +5 cm
           </span>
-          {PINS.map((p) => (
+          {DETAILS.map((x) => (
             <button
-              key={p.n}
+              key={x.n}
               type="button"
-              className={`bc-pin ${on === p.n ? "is-on" : ""}`}
-              style={{ left: `${p.x * 100}%`, top: `${p.y * 100}%` }}
-              onClick={() => setOn(p.n)}
-              aria-label={`Note ${p.n}: ${p.note}`}
+              className={`bc-pin ${on === x.n ? "is-on" : ""} ${on && on !== x.n ? "is-away" : ""}`}
+              style={{ left: `${x.pin[0] * 100}%`, top: `${x.pin[1] * 100}%` }}
+              onClick={() => pick(x.n)}
+              aria-label={`Note ${x.n}: ${x.note}`}
+              aria-pressed={on === x.n}
             >
-              {p.n}
+              {x.n}
             </button>
           ))}
         </div>
@@ -74,35 +105,30 @@ export function MarkCard() {
             ["ring", CIRCLE, "Ring"],
             ["pin", I.pin, "Pin a note"],
             ["erase", I.erase, "Erase"],
-          ].map(([k, d, label]) => (
+          ].map(([k, dd, label]) => (
             <button key={k} type="button" aria-pressed={tool === k} onClick={() => setTool(k)} aria-label={label} title={label}>
-              <Icon d={d} size={15} />
+              <Icon d={dd} size={15} />
             </button>
           ))}
         </div>
+        <button type="button" className="bc-mark__out" onClick={() => pick(null)} tabIndex={on ? 0 : -1}>
+          Whole look
+        </button>
       </div>
       <div className="bc-mark__side">
         <p className="bc-label">
-          Notes <span>{PINS.length}</span>
+          Notes <span>{DETAILS.length}</span>
         </p>
         <ol className="bc-notes">
-          {PINS.map((p) => (
-            <li key={p.n} className={on === p.n ? "is-on" : ""} onClick={() => setOn(p.n)}>
-              <span className="bc-notes__n">{p.n}</span>
-              {p.note}
+          {DETAILS.map((x) => (
+            <li key={x.n}>
+              <button type="button" className={on === x.n ? "is-on" : ""} onClick={() => pick(x.n)} aria-pressed={on === x.n}>
+                <span className="bc-notes__n">{x.n}</span>
+                {x.note}
+              </button>
             </li>
           ))}
         </ol>
-        <p className="bc-label">References</p>
-        <div className="bc-refs">
-          <span className="bc-refs__thumb is-on">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/features/ref-jersey.webp" alt="" draggable={false} />
-          </span>
-          <span className="bc-refs__add" aria-hidden="true">
-            <Icon d={I.plus} size={14} />
-          </span>
-        </div>
       </div>
     </div>
   );
@@ -144,82 +170,57 @@ export function RefineCard() {
 }
 
 /* ---- See it on your body ---------------------------------------------------
-   Her turn, feathered into the card, standing in a ring like a turntable:
-   drag anywhere and she turns, and the ring's marks turn with her (the
-   half behind her drawn behind her, the half in front in front), her front
-   marked on it in cornflower. Arrow keys turn her too (the ring is a
-   slider for screen readers). */
-const TICKS = 60;
-function Ring({ deg, half }: { deg: number; half: "back" | "front" }) {
-  const marks = [];
-  for (let i = 0; i < TICKS; i++) {
-    const a = ((i * 360) / TICKS + deg) * (Math.PI / 180);
-    const c = Math.cos(a); // 1: the front of the ring
-    if ((half === "front") !== c >= 0) continue;
-    const s = Math.sin(a);
-    const big = i % 15 === 0;
-    const x0 = 100 + 88 * s;
-    const y0 = 30 + 17 * c;
-    const k = big ? 1.1 : 1.05;
-    marks.push(
-      <line key={i} x1={x0} y1={y0} x2={100 + 88 * k * s} y2={30 + 17 * k * c} className={big ? "is-big" : ""} style={{ opacity: 0.18 + 0.7 * ((c + 1) / 2) }} />,
-    );
-  }
-  // her front, on the ring
-  const f = deg * (Math.PI / 180);
-  const fc = Math.cos(f);
-  const front = (half === "front") === fc >= 0;
-  return (
-    <svg viewBox="0 0 200 60" className={`bc-ring is-${half}`} aria-hidden="true">
-      <path d={half === "front" ? "M12 30 A88 17 0 0 0 188 30" : "M12 30 A88 17 0 0 1 188 30"} className="bc-ring__line" />
-      {marks}
-      {front && <circle cx={100 + 88 * Math.sin(f)} cy={30 + 17 * fc} r={half === "front" ? 3.2 : 2.4} className="bc-ring__front" />}
-    </svg>
-  );
-}
+   Her turn, feathered into the card; drag her, or the slider under her (a
+   plain track, filled cornflower up to where she is). "Drag to turn" sits
+   there until you do, and keeps out of the way while you are. */
 export function TurnCard() {
   const [img, set] = useTurn();
   const [deg, setDeg] = useState(0);
+  const [dragging, setDragging] = useState(false);
   const drag = useRef<{ x: number; d: number } | null>(null);
   const to = (d: number) => {
     const v = Math.round(((d % 360) + 360) % 360);
     setDeg(v);
     set(v);
   };
+  const end = () => {
+    drag.current = null;
+    setDragging(false);
+  };
   return (
-    <div
-      className="bc-turn"
-      role="slider"
-      tabIndex={0}
-      aria-label="Turn her"
-      aria-valuemin={0}
-      aria-valuemax={359}
-      aria-valuenow={deg}
-      aria-valuetext={`${deg} degrees`}
-      onKeyDown={(e) => {
-        if (e.key === "ArrowRight" || e.key === "ArrowUp") to(deg + 15);
-        if (e.key === "ArrowLeft" || e.key === "ArrowDown") to(deg - 15);
-      }}
-      onPointerDown={(e) => {
-        drag.current = { x: e.clientX, d: deg };
-        try {
-          e.currentTarget.setPointerCapture(e.pointerId);
-        } catch {}
-      }}
-      onPointerMove={(e) => drag.current && to(drag.current.d + (e.clientX - drag.current.x) * 0.7)}
-      onPointerUp={() => (drag.current = null)}
-      onPointerCancel={() => (drag.current = null)}
-    >
-      <Ring deg={deg} half="back" />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img ref={img} src={FIRST_FRAME} alt="The model in the garment; drag to turn her" draggable={false} />
-      <Ring deg={deg} half="front" />
-      <span className="bc-turn__hint" aria-hidden="true">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M8 7l-5 5 5 5M16 7l5 5-5 5" />
-        </svg>
-        Drag to turn
-      </span>
+    <div className={`bc-turn ${dragging ? "is-dragging" : ""}`}>
+      <div
+        className="bc-turn__stage"
+        onPointerDown={(e) => {
+          drag.current = { x: e.clientX, d: deg };
+          setDragging(true);
+          try {
+            e.currentTarget.setPointerCapture(e.pointerId);
+          } catch {}
+        }}
+        onPointerMove={(e) => drag.current && to(drag.current.d + (e.clientX - drag.current.x) * 0.7)}
+        onPointerUp={end}
+        onPointerCancel={end}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img ref={img} src={FIRST_FRAME} alt="The model in the garment; drag or use the slider to turn her" draggable={false} />
+        <span className="bc-turn__hint" aria-hidden="true">
+          Drag to turn
+        </span>
+      </div>
+      <input
+        type="range"
+        className="bc-slider"
+        min={0}
+        max={359}
+        value={deg}
+        onChange={(e) => to(+e.target.value)}
+        onPointerDown={() => setDragging(true)}
+        onPointerUp={() => setDragging(false)}
+        style={{ "--v": `${(deg / 359) * 100}%` } as CSSProperties}
+        aria-label="Turn her"
+        aria-valuetext={`${deg} degrees`}
+      />
     </div>
   );
 }
@@ -302,17 +303,17 @@ export function BodiesCard() {
 
 /* ---- Arrange and print ----------------------------------------------------------
    The pieces on the sheet, as printed tissue: drag them about, turn the one
-   you've picked a quarter, or let Venty pack them. On A4 the sheet is the
-   grid of home pages it tiles across, and the count says how many pages
-   the pieces touch (pack them and it drops); on A0 it is one sheet. */
-type Piece = { id: string; label: string; d: string; w: number; h: number; x: number; y: number; r: 0 | 90 };
+   you've picked 15° either way, or let Venty pack them. On A4 the sheet is
+   the grid of home pages it tiles across, and the count says how many
+   pages the pieces touch (pack them and it drops); on A0 it is one sheet. */
+type Piece = { id: string; label: string; d: string; w: number; h: number; x: number; y: number; r: number };
 const SHEET = { w: 112, h: 82, cols: 4, rows: 3 };
 const TILE = { w: SHEET.w / SHEET.cols, h: SHEET.h / SHEET.rows };
 const START: Piece[] = [
-  { id: "front", label: "FRONT", d: "M6 0 L15 0 L17 6 Q21 8 24 11 L22.5 30 L1.5 30 L0 11 Q3 8 6 6 Z", w: 24, h: 30, x: 4, y: 5, r: 0 },
-  { id: "back", label: "BACK", d: "M3 0 Q11 2.6 19 0 L22 30 L0 30 Z", w: 22, h: 30, x: 62, y: 9, r: 0 },
+  { id: "front", label: "FRONT", d: "M6 0 L15 0 L17 6 Q21 8 24 11 L22.5 30 L1.5 30 L0 11 Q3 8 6 6 Z", w: 24, h: 30, x: 4, y: 5, r: -15 },
+  { id: "back", label: "BACK", d: "M3 0 Q11 2.6 19 0 L22 30 L0 30 Z", w: 22, h: 30, x: 62, y: 9, r: 10 },
   { id: "skirt", label: "SKIRT", d: "M6 0 L18 0 L24 40 L0 40 Z", w: 24, h: 40, x: 34, y: 37, r: 0 },
-  { id: "sleeve", label: "SLEEVE", d: "M0 18 Q3.5 5 15 0 Q26.5 5 30 18 Z", w: 30, h: 18, x: 77, y: 56, r: 0 },
+  { id: "sleeve", label: "SLEEVE", d: "M0 18 Q3.5 5 15 0 Q26.5 5 30 18 Z", w: 30, h: 18, x: 77, y: 56, r: -30 },
   { id: "facing", label: "FACING", d: "M0 3 Q9 -1 18 3 L18 7 Q9 3 0 7 Z", w: 18, h: 7, x: 88, y: 4, r: 0 },
 ];
 // packed: on the six home pages top left (three across, two down), none touching
@@ -323,12 +324,14 @@ const PACKED: Record<string, Pick<Piece, "x" | "y" | "r">> = {
   sleeve: { x: 1, y: 33, r: 0 },
   facing: { x: 33, y: 40, r: 0 },
 };
-/** a piece's box on the sheet, turned or not (it turns about its middle) */
+/** a piece's box on the sheet at any angle (it turns about its middle) */
 const box = (p: Piece) => {
-  const [w, h] = p.r ? [p.h, p.w] : [p.w, p.h];
-  const cx = p.x + p.w / 2;
-  const cy = p.y + p.h / 2;
-  return { x: cx - w / 2, y: cy - h / 2, w, h };
+  const a = (p.r * Math.PI) / 180;
+  const c = Math.abs(Math.cos(a));
+  const sn = Math.abs(Math.sin(a));
+  const w = p.w * c + p.h * sn;
+  const h = p.w * sn + p.h * c;
+  return { x: p.x + p.w / 2 - w / 2, y: p.y + p.h / 2 - h / 2, w, h };
 };
 const clampTo = (p: Piece): Piece => {
   const b = box(p);
@@ -346,10 +349,11 @@ const pagesOf = (ps: Piece[]) => {
     }
   return n;
 };
+const norm = (r: number) => ((((r + 180) % 360) + 360) % 360) - 180;
 export function PrintCard() {
   const [a0, setA0] = useState(false);
   const [pieces, setPieces] = useState<Piece[]>(START);
-  const [sel, setSel] = useState<string | null>("skirt");
+  const [sel, setSel] = useState("skirt");
   const [dragging, setDragging] = useState(false);
   const svg = useRef<SVGSVGElement>(null);
   const grab = useRef<{ id: string; dx: number; dy: number } | null>(null);
@@ -358,7 +362,13 @@ export function PrintCard() {
     const pt = new DOMPoint(e.clientX, e.clientY).matrixTransform(m);
     return { x: pt.x, y: pt.y };
   };
+  const turn = (by: number) => setPieces((l) => l.map((p) => (p.id === sel ? clampTo({ ...p, r: norm(p.r + by) }) : p)));
+  const picked = pieces.find((p) => p.id === sel)!;
   const pages = pagesOf(pieces);
+  const stop = () => {
+    grab.current = null;
+    setDragging(false);
+  };
   return (
     <div className="bc-arrange">
       <div className="bc-arrange__canvas">
@@ -372,14 +382,8 @@ export function PrintCard() {
             const { x, y } = at(e);
             setPieces((l) => l.map((p) => (p.id === g.id ? clampTo({ ...p, x: x - g.dx, y: y - g.dy }) : p)));
           }}
-          onPointerUp={() => {
-            grab.current = null;
-            setDragging(false);
-          }}
-          onPointerCancel={() => {
-            grab.current = null;
-            setDragging(false);
-          }}
+          onPointerUp={stop}
+          onPointerCancel={stop}
         >
           <rect x="0" y="0" width={SHEET.w} height={SHEET.h} rx="1.2" className="bc-sheet" />
           {!a0 &&
@@ -434,19 +438,21 @@ export function PrintCard() {
           <b>{a0 ? "1" : pages}</b>
           <span>{a0 ? "sheet" : `of ${SHEET.rows * SHEET.cols} pages`}</span>
         </div>
-        <div className="bc-arrange__tools">
-          <button
-            type="button"
-            className="bc-ghost"
-            disabled={!sel}
-            onClick={() => setPieces((l) => l.map((p) => (p.id === sel ? clampTo({ ...p, r: p.r ? 0 : 90 }) : p)))}
-          >
-            <Icon d={ROTATE} size={14} /> Turn
+        <div className="bc-picked">
+          <span className="bc-picked__name">
+            {picked.label.toLowerCase()}
+            <small>{Math.round(picked.r)}°</small>
+          </span>
+          <button type="button" className="bc-iconbtn" onClick={() => turn(-15)} aria-label="Turn the piece 15 degrees left" title="Turn left">
+            <Icon d={TURN_L} size={15} />
           </button>
-          <button type="button" className="bc-ghost is-primary" onClick={() => setPieces((l) => l.map((p) => clampTo({ ...p, ...PACKED[p.id] })))}>
-            <Icon d={SPARK} size={14} /> Pack
+          <button type="button" className="bc-iconbtn" onClick={() => turn(15)} aria-label="Turn the piece 15 degrees right" title="Turn right">
+            <Icon d={TURN_R} size={15} />
           </button>
         </div>
+        <button type="button" className="bc-ghost is-primary" onClick={() => setPieces((l) => l.map((p) => clampTo({ ...p, ...PACKED[p.id] })))}>
+          <Icon d={SPARK} size={14} /> Pack the pieces
+        </button>
       </div>
     </div>
   );
