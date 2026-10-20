@@ -2,7 +2,11 @@
    are the Made to measure composer's glass (.mm-card): white at 62%, a
    20px blur, a hairline, 28px corners, a soft navy shadow. */
 
-.or { position: relative; background: var(--cloud); }
+/* the sides are cut here, on the section (the meadow and the valley are wider
+   than a phone), not on the held scene: Safari cuts a clipped scene's foot too */
+.or { position: relative; overflow-x: clip; background: var(--cloud); }
+/* room under the scene for the rest of the valley, sized by Orbit.tsx */
+.or-after { pointer-events: none; }
 /* the title: centred, scrolling by as usual before the scene holds */
 .or-intro {
   display: flex;
@@ -23,8 +27,8 @@
   position: sticky;
   top: 0;
   height: 100svh;
-  overflow-x: clip;
-  overflow-y: visible;
+  /* below, the valley carries on past the scene's foot (into .or-after) */
+  overflow: visible;
 }
 /* the valley: from the stage's top down past its bottom (the rest is seen as
    the page scrolls on); its top and foot melt into the page. The photo is

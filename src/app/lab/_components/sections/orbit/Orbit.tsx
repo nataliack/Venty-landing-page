@@ -239,7 +239,7 @@ function Orbit() {
       // scrolls on through the valley
       const below = Math.max(vtop + vh - h, itop + ih - h, 0);
       const pin = s.querySelector<HTMLElement>(".or-pin")!;
-      pin.style.marginBottom = `${below}px`;
+      s.querySelector<HTMLElement>(".or-after")!.style.height = `${below}px`;
       const run = pin.offsetHeight - box.clientHeight;
       pin.querySelectorAll<HTMLElement>(".or-snap").forEach((m, i) => {
         m.style.top = `${(i / (STEPS.length - 1)) * run}px`;
@@ -604,6 +604,7 @@ function Orbit() {
             <Scene />
           </div>
         </div>
+        <div className="or-after" aria-hidden="true" />
       </section>
       <section className="hc-sec">
         <End />
