@@ -13,7 +13,12 @@
   text-align: center;
 }
 /* the stretch the scene holds for while the loop turns */
-.or-pin { position: relative; height: 420svh; }
+/* the stretch the scene holds for while the cards turn: about 80% of a
+   screen's scroll per step (half a screen on phones, where a thumb flick
+   should be enough) */
+.or-pin { position: relative; height: 340svh; }
+@media (max-width: 699px) { .or-pin { height: 250svh; } }
+.or-snap { position: absolute; left: 0; width: 1px; height: 1px; scroll-snap-align: start; pointer-events: none; }
 .or-stage {
   position: sticky;
   top: 0;
@@ -40,10 +45,58 @@
 .or-valley::before { top: 0; height: 24svh; background: linear-gradient(var(--cloud), rgb(238 242 253 / 0)); }
 .or-valley::after { bottom: 0; height: 28svh; background: linear-gradient(rgb(238 242 253 / 0), var(--cloud)); }
 .or-title { max-width: 16ch; font-weight: 400; font-size: clamp(2.4rem, 5.6vw, 5.6rem); line-height: 1; letter-spacing: -0.05em; text-wrap: balance; }
-/* where you are, over the scene */
-.or-count { position: absolute; left: var(--gutter); top: clamp(20px, 4svh, 40px); z-index: 50; white-space: nowrap; }
-.or-count { font-size: 14px; letter-spacing: -0.01em; color: var(--navy); }
-.or-count b { font-weight: 600; color: var(--ink); }
+/* ---- the steps: a glass pill at the top, centred. The current step shows
+   its name; the others are numbers to tap. The cornflower highlight slides
+   along with the turn (placed by Orbit.tsx) */
+.or-steps {
+  position: absolute;
+  left: 50%;
+  top: clamp(16px, 4svh, 36px);
+  z-index: 50;
+  display: flex;
+  width: max-content; /* placed from the middle, it would otherwise wrap at half the screen */
+  gap: 2px;
+  padding: 4px;
+  translate: -50% 0;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.5);
+  border: 1px solid rgb(18 21 36 / 0.1);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+}
+.or-steps__glow {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  border-radius: 999px;
+  background: #4a5fd8; /* a deeper cornflower: white on it passes AA */
+  box-shadow: 0 6px 16px -8px rgb(74 95 216 / 0.8);
+  pointer-events: none;
+}
+.or-steps button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 34px;
+  min-width: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+  transition: color 0.3s;
+  cursor: pointer;
+}
+.or-steps button b { font-weight: 600; }
+.or-steps button.is-on { color: #fff; }
+/* the name opens beside the number on the current step */
+.or-steps__name { display: grid; grid-template-columns: 0fr; opacity: 0; transition: grid-template-columns 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s; }
+.or-steps__name > span { min-width: 0; overflow: hidden; white-space: nowrap; padding-left: 8px; }
+.or-steps button.is-on .or-steps__name { grid-template-columns: 1fr; opacity: 1; }
+.or-steps button:focus-visible { outline: 2px solid #4a5fd8; outline-offset: 2px; }
+@media (hover: hover) { .or-steps button:not(.is-on):hover { color: var(--ink); } }
 
 /* ---- the placeholders --------------------------------------------------- */
 .or-figure {
@@ -117,7 +170,11 @@
 /* ---- the cards' glass and edges: flat, placed by Orbit.tsx ----------------- */
 .or-pane {
   position: absolute;
+  left: 0;
+  top: 0;
   z-index: 8;
+  will-change: transform;
+  visibility: hidden; /* until Orbit.tsx places it */
   background: rgb(255 255 255 / 0.5);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
   backdrop-filter: blur(20px) saturate(140%);
@@ -134,7 +191,7 @@
   overflow: visible;
   pointer-events: none;
 }
-.or-lines path { fill: none; stroke: rgb(18 21 36 / 0.12); stroke-width: 1; }
+
 
 /* ---- the cards' words: each drawn as strips (Orbit.tsx clips and turns each) */
 .or-card {

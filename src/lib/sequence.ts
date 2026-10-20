@@ -181,11 +181,19 @@ export function createSequence(
       draw). fit: "cover" fills the canvas (a slice, picked by the camera),
       "contain" shows the whole frame, centred. blend: between two frames,
       lay the next over the earlier by the exact position (on by default);
-      off, it always shows exactly one frame, the nearest. */
+      off, it always shows exactly one frame, the nearest. skim: when the
+      playhead moves fast, decode only the frames it can show (every 2nd,
+      4th or 8th by its speed) instead of every frame it races past; back to
+      every frame as it slows. */
   function createPlayer(
     canvas: HTMLCanvasElement,
     camera: (frame: number) => number = () => 0.5,
-    { alpha = false, fit = "cover", blend = true }: { alpha?: boolean; fit?: "cover" | "contain"; blend?: boolean } = {},
+    {
+      alpha = false,
+      fit = "cover",
+      blend = true,
+      skim = false,
+    }: { alpha?: boolean; fit?: "cover" | "contain"; blend?: boolean; skim?: boolean } = {},
   ) {
     const { width: FW, height: FH } = manifest;
     // where the frame sits in a box of this size: its scale and top left
@@ -217,6 +225,9 @@ export function createSequence(
     let pinned = new Set<number>();
     let target = 0;
     let pos = 0; // the exact (fractional) position; target is the nearest frame
+    let lastPos = 0;
+    let speed = 0; // frames per call of setPosition, smoothed
+    let stride = 1; // skim: the gap between the frames decoded ahead
     let focus = camera(0);
     let dir = 1;
     let drawn = -1;
@@ -266,12 +277,12 @@ export function createSequence(
 
     const inWindowOf = (i: number) => {
       const ahead = (i - target) * dir;
-      return ahead <= AHEAD && ahead >= -BEHIND;
+      return ahead <= AHEAD * stride && ahead >= -BEHIND;
     };
     const inWindow = (i: number) => {
       if (pinned.has(i)) return true;
       const ahead = (i - target) * dir;
-      return ahead <= AHEAD && ahead >= -BEHIND;
+      return ahead <= AHEAD * stride && ahead >= -BEHIND;
     };
 
     // Starts decodes, nearest the playhead first, never more than PARALLEL at
@@ -338,13 +349,22 @@ export function createSequence(
     const update = () => {
       setPlayhead(target, dir);
       wanted.clear();
-      want(target);
-      for (let d = 1; d <= AHEAD; d++) want(target + d * dir);
-      for (let d = 1; d <= BEHIND; d++) want(target - d * dir);
+      if (stride > 1) {
+        // moving fast: only the frames on the stride (the same ones from call
+        // to call, so none is decoded for nothing)
+        const base = Math.round(target / stride) * stride;
+        want(base);
+        for (let d = 1; d <= AHEAD; d++) want(base + d * stride * dir);
+        want(base - stride * dir); // one behind, on the stride too
+      } else {
+        want(target);
+        for (let d = 1; d <= AHEAD; d++) want(target + d * dir);
+        for (let d = 1; d <= BEHIND; d++) want(target - d * dir);
+      }
       // free what has fallen out of the window
       for (const [i, img] of frames) {
         const ahead = (i - target) * dir;
-        if (ahead > AHEAD || ahead < -BEHIND) {
+        if (ahead > AHEAD * stride || ahead < -BEHIND) {
           if (i === drawn || i === drawnOver || pinned.has(i)) continue;
           if ("close" in img) img.close();
           frames.delete(i);
@@ -379,6 +399,11 @@ export function createSequence(
       /** A web frame position, fractional */
       setPosition(position: number) {
         pos = Math.min(N - 1, Math.max(0, position));
+        if (skim) {
+          speed = speed * 0.6 + Math.abs(pos - lastPos) * 0.4;
+          stride = speed < 1.5 ? 1 : speed < 3 ? 2 : speed < 6 ? 4 : 8;
+        }
+        lastPos = pos;
         // the camera follows the exact scroll position, so it glides between frames
         focus = camera(pos);
         const f = Math.round(pos);

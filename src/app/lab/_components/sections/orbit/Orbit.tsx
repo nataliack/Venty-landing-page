@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { createSequence } from "@/lib/sequence";
 import islandFilm from "../../../../../../public/lab/orbit/island/manifest.json";
 import { End, Shell, useBox } from "../hc/parts";
@@ -73,6 +73,38 @@ const filmAt = (deg: number) => {
    meadow while the cards turn, the rest of it seen as the page scrolls on */
 const VALLEY = { ratio: 2000 / 1493 };
 
+/* the cards' glass, edges and words: built once and never rendered again
+   (the turn moves them directly), so a change of step only re-renders the
+   step pill, not the 48 strips */
+const Scene = memo(function Scene() {
+  return (
+    <>
+            {/* each card's glass and edge, drawn to its outline on the cylinder */}
+            {STEPS.map((s) => (
+              <div key={s.n} className="or-pane" aria-hidden="true" />
+            ))}
+            {/* the cards' edges (and the side cards' glass tint), drawn on a canvas:
+                cheap to draw again every frame of a turn */}
+            <canvas className="or-lines" aria-hidden="true" />
+
+            {/* the cylinder, and on it each card's words as strips */}
+            <div className="or-view" aria-hidden="true">
+              <div className="or-ring">
+                {STEPS.map((s) => (
+                  <div key={s.n} className="or-sticker">
+                    {Array.from({ length: SLICES }, (_, k) => (
+                      <article key={k} className="or-card">
+                        <Card s={s} />
+                      </article>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+    </>
+  );
+});
+
 function Card({ s }: { s: (typeof STEPS)[number] }) {
   return (
     <>
@@ -98,18 +130,27 @@ function Orbit() {
   const box = useBox();
   const sec = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
-  const ring = useRef<HTMLDivElement>(null);
   const [on, setOn] = useState(0);
+  const goTo = useRef<(i: number) => void>(() => {});
 
   useEffect(() => {
     const s = sec.current;
     const st = stage.current;
-    const rg = ring.current;
+    const rg = st?.querySelector<HTMLElement>(".or-ring");
     if (!box || !s || !st || !rg) return;
     const groups = [...rg.querySelectorAll<HTMLElement>(".or-sticker")];
     const view = st.querySelector<HTMLElement>(".or-view")!;
     const panes = [...st.querySelectorAll<HTMLElement>(".or-pane")];
-    const lines = [...st.querySelectorAll<SVGPathElement>(".or-lines path")];
+    const edges = st.querySelector<HTMLCanvasElement>(".or-lines")!;
+    const eg = edges.getContext("2d")!;
+    let edgeDpr = 1;
+    let edgeFade: CanvasGradient | null = null;
+    let paneW = 0;
+    let paneH = 0;
+    const btns = [...st.querySelectorAll<HTMLElement>(".or-steps button")];
+    const glow = st.querySelector<HTMLElement>(".or-steps__glow")!;
+    let slots: [number, number][] = btns.map((b) => [b.offsetLeft, b.offsetWidth]); // each button's left and width
+    const touch = window.matchMedia("(pointer: coarse)").matches;
 
     let rot = 0; // degrees the cylinder has turned
     let target = 0;
@@ -121,6 +162,7 @@ function Orbit() {
     let R = 0;
     let ry = 0;
     let mask = "";
+    let maskEdge = Infinity; // past this, from the middle, the mask hides everything
     const P = 2400; // the perspective (matches .or-view)
     const TILT = (4 * Math.PI) / 180; // seen from a touch below
     const BACK = 0.6; // the cylinder set back by this much of its radius
@@ -150,7 +192,7 @@ function Orbit() {
           pts.push(project(i, cx + Math.cos(t) * r, cy + Math.sin(t) * r));
         }
       };
-      const N = 28;
+      const N = 18;
       arc(-hx + r, -hy + r, Math.PI);
       for (let k = 1; k < N; k++) pts.push(project(i, -hx + r + ((cw - 2 * r) * k) / N, -hy));
       arc(hx - r, -hy + r, -Math.PI / 2);
@@ -169,7 +211,7 @@ function Orbit() {
       // with its grass a little below the screen's middle
       const iw = phone ? w * 1.3 : w * 0.78;
       const ih = iw * ISLAND.ratio;
-      const itop = h * 0.62 - ih * ISLAND.top;
+      const itop = h * (phone ? 0.72 : 0.62) - ih * ISLAND.top; // phones: lower in the tall screen
       st.style.setProperty("--ih", `${ih}px`);
       // the valley: the full width (wider on phones, so it is tall enough)
       const vw = Math.max(w, (h * 1.9) / VALLEY.ratio);
@@ -181,8 +223,8 @@ function Orbit() {
       R = phone ? cw * 1.35 : Math.max(cw * 1.75, w * 0.36);
       const card = groups[0]?.querySelector<HTMLElement>(".or-card");
       ch = card?.offsetHeight || 300;
-      // the cylinder's middle: a little below the screen's middle
-      ry = Math.max(h * 0.53, ch / 2 + h * 0.16);
+      // the cylinder's middle: a little below the screen's middle (lower still on phones)
+      ry = Math.max(h * (phone ? 0.6 : 0.53), ch / 2 + h * 0.16);
       st.style.setProperty("--iw", `${iw}px`);
       st.style.setProperty("--itop", `${itop}px`);
       st.style.setProperty("--grass", `${itop + ih * ISLAND.top}px`);
@@ -194,16 +236,38 @@ function Orbit() {
       // valley, the meadow's underside), so once the cards are done the page
       // scrolls on through the valley
       const below = Math.max(vh - h, itop + ih - h, 0);
-      s.querySelector<HTMLElement>(".or-pin")!.style.marginBottom = `${below}px`;
-      // the mask the cards turn into: clear across the middle, softly hiding
-      // them towards the cylinder's sides, gone before they go round the back
-      const side = (R * P) / (P + BACK * R); // the cylinder's side, on screen, from the middle
-      mask = `linear-gradient(90deg, transparent ${w / 2 - side * 0.98}px, #000 ${w / 2 - side * 0.5}px, #000 ${w / 2 + side * 0.5}px, transparent ${w / 2 + side * 0.98}px)`;
+      const pin = s.querySelector<HTMLElement>(".or-pin")!;
+      pin.style.marginBottom = `${below}px`;
+      const run = pin.offsetHeight - box.clientHeight;
+      pin.querySelectorAll<HTMLElement>(".or-snap").forEach((m, i) => {
+        m.style.top = `${(i / (STEPS.length - 1)) * run}px`;
+      });
+      // the mask the cards turn into: clear over the meadow, the cards hidden
+      // past its sides behind a short soft edge (glass, words and edge alike)
+      const edge = iw * 0.42; // the meadow's side, from the middle (its film has a soft margin)
+      const soft = 30;
+      maskEdge = edge + soft;
+      mask = `linear-gradient(90deg, transparent ${w / 2 - edge - soft}px, #000 ${w / 2 - edge}px, #000 ${w / 2 + edge}px, transparent ${w / 2 + edge + soft}px)`;
       view.style.maskImage = mask;
       view.style.setProperty("-webkit-mask-image", mask);
-      const svg = st.querySelector<SVGSVGElement>(".or-lines")!;
-      svg.style.maskImage = mask;
-      svg.style.setProperty("-webkit-mask-image", mask);
+      // the edges' canvas: the stage's size, its fade the same as the mask's
+      edgeDpr = Math.min(2, window.devicePixelRatio || 1);
+      edges.width = Math.round(w * edgeDpr);
+      edges.height = Math.round(h * edgeDpr);
+      edgeFade = eg.createLinearGradient(0, 0, w, 0);
+      const at = (x: number) => Math.min(1, Math.max(0, x / w));
+      edgeFade.addColorStop(at(w / 2 - edge - soft), "rgba(0,0,0,0)");
+      edgeFade.addColorStop(at(w / 2 - edge), "rgba(0,0,0,1)");
+      edgeFade.addColorStop(at(w / 2 + edge), "rgba(0,0,0,1)");
+      edgeFade.addColorStop(at(w / 2 + edge + soft), "rgba(0,0,0,0)");
+      // the front card's glass pane: one size for this screen, a little bigger
+      // than the card ever is on screen
+      paneW = Math.ceil(cw * 1.3 + 24);
+      paneH = Math.ceil(ch * 1.3 + 24);
+      panes.forEach((pn) => {
+        pn.style.width = `${paneW}px`;
+        pn.style.height = `${paneH}px`;
+      });
       // each strip: its slice of the card's words and its angle round the cylinder
       const sw = cw / SLICES;
       groups.forEach((g) => {
@@ -223,7 +287,15 @@ function Orbit() {
     const seq = createSequence(islandFilm, `/lab/orbit/island/${st.clientWidth < 700 ? 900 : 1400}`, { opening: 24, ext: "avif" });
     // one real frame at a time, never two laid over each other: with every
     // frame of the film here, the steps between them are too small to see
-    const player = seq.createPlayer(film, undefined, { alpha: true, fit: "contain", blend: false });
+    // (skim: a fast scroll decodes only the frames it can show, so it never
+    // floods the machine with frames it races past)
+    const player = seq.createPlayer(film, undefined, {
+      alpha: true,
+      fit: "contain",
+      blend: false,
+      // (?noskim, in development: without it, for comparing)
+      skim: !(process.env.NODE_ENV === "development" && location.search.includes("noskim")),
+    });
     // resting on a step, the turns to the steps either side kept ready: every
     // 4th frame along them (5th on phones), so a turn's fast start never
     // waits for frames to decode; the slow end gets every frame
@@ -255,6 +327,21 @@ function Orbit() {
         film.dataset.shown = String(player.shown);
       }
 
+      // the step indicator's highlight: between the steps' buttons, as far as
+      // the cards have turned, so it moves with them
+      if (slots.length) {
+        const kf = Math.min(STEPS.length - 1, Math.max(0, rot / STEP));
+        const i0 = Math.floor(kf);
+        const i1 = Math.min(STEPS.length - 1, i0 + 1);
+        const f = kf - i0;
+        const [ax, aw] = slots[i0];
+        const [bx, bw] = slots[i1];
+        glow.style.transform = `translateX(${ax + (bx - ax) * f}px)`;
+        glow.style.width = `${aw + (bw - aw) * f}px`;
+      }
+
+      const tintsNow: number[][][] = [];
+      const edgesNow: number[][][] = [];
       groups.forEach((g, i) => {
         g.style.transform = `rotateY(${i * STEP}deg)`;
         // the card's glass and its edge: drawn flat on the screen, to the
@@ -262,12 +349,11 @@ function Orbit() {
         // hidden once its face turns away
         const facing = Math.cos(((i * STEP - rot) * Math.PI) / 180) > 0;
         const pane = panes[i];
-        const line = lines[i];
-        if (!facing) {
-          pane.style.display = "none";
-          line.setAttribute("d", "");
-          return;
-        }
+        // (hidden, never removed: making a blurred layer afresh costs a long frame)
+        const off = () => {
+          if (pane.style.visibility !== "hidden") pane.style.visibility = "hidden";
+        };
+        if (!facing) return off();
         const pts = outline(i);
         let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
         for (const [x, y] of pts) {
@@ -276,25 +362,58 @@ function Orbit() {
           x1 = Math.max(x1, x);
           y1 = Math.max(y1, y);
         }
+        // wholly behind the mask: nothing to draw
+        if (x1 < w / 2 - maskEdge || x0 > w / 2 + maskEdge) return off();
         x0 = Math.floor(x0);
         y0 = Math.floor(y0);
         const d = (dx: number, dy: number) =>
           "M" + pts.map(([x, y]) => `${(x - dx).toFixed(1)} ${(y - dy).toFixed(1)}`).join("L") + "Z";
-        pane.style.display = "";
-        pane.style.left = `${x0}px`;
-        pane.style.top = `${y0}px`;
-        pane.style.width = `${Math.ceil(x1 - x0) + 1}px`;
-        pane.style.height = `${Math.ceil(y1 - y0) + 1}px`;
-        pane.style.clipPath = `path("${d(x0, y0)}")`;
-        // the same mask as the cards, lined up with the screen
-        pane.style.maskImage = mask;
-        pane.style.setProperty("-webkit-mask-image", mask);
-        pane.style.maskSize = `${w}px 100%`;
-        pane.style.maskPosition = `${-x0}px 0`;
-        line.setAttribute("d", d(0, 0));
+        edgesNow.push(pts);
+        // clear of the mask (the card in front): the real blur, in a pane of a
+        // fixed size that only moves (so a turn never lays the page out again),
+        // clipped to the outline. Cut by the mask (the cards at the sides): the
+        // glass's tint drawn with the edges, under the same mask (half hidden,
+        // the blur behind isn't seen, and it costs)
+        const clear = x0 >= w / 2 - (maskEdge - 30) && x1 <= w / 2 + (maskEdge - 30);
+        if (clear && x1 - x0 <= paneW && y1 - y0 <= paneH) {
+          if (pane.style.visibility !== "visible") pane.style.visibility = "visible";
+          pane.style.transform = `translate3d(${x0}px, ${y0}px, 0)`;
+          pane.style.clipPath = `path("${d(x0, y0)}")`;
+        } else {
+          if (pane.style.visibility !== "hidden") pane.style.visibility = "hidden";
+          tintsNow.push(pts);
+        }
       });
-      if (rot !== target) raf = requestAnimationFrame(draw);
+      // the edges and the side cards' tint, then the mask's fade over them
+      eg.setTransform(edgeDpr, 0, 0, edgeDpr, 0, 0);
+      eg.globalCompositeOperation = "source-over";
+      eg.clearRect(0, 0, w, edges.height / edgeDpr);
+      const trace = (pts: number[][]) => {
+        eg.beginPath();
+        pts.forEach(([x, y], k) => (k ? eg.lineTo(x, y) : eg.moveTo(x, y)));
+        eg.closePath();
+      };
+      eg.fillStyle = "rgba(255,255,255,0.62)";
+      for (const pts of tintsNow) {
+        trace(pts);
+        eg.fill();
+      }
+      eg.strokeStyle = "rgba(18,21,36,0.12)";
+      eg.lineWidth = 1;
+      for (const pts of edgesNow) {
+        trace(pts);
+        eg.stroke();
+      }
+      if (edgeFade && (tintsNow.length || edgesNow.length)) {
+        eg.globalCompositeOperation = "destination-in";
+        eg.fillStyle = edgeFade;
+        eg.fillRect(0, 0, w, edges.height / edgeDpr);
+        eg.globalCompositeOperation = "source-over";
+      }
+      // keep drawing while the turn or the indicator is still moving
+      if (rot !== target || performance.now() < settleUntil) raf = requestAnimationFrame(draw);
     };
+    let settleUntil = 0; // the indicator's buttons resize for a moment after the step changes
     const kick = () => {
       if (!raf) raf = requestAnimationFrame(draw);
     };
@@ -303,25 +422,35 @@ function Orbit() {
     // it settles on one: the next one in the way you were going if you
     // scrolled at all on purpose (a sixth of a step), back where you were if not
     let at = 0; // the step it last settled on
+    let shownStep = -1;
     let going = -1; // the step it is gliding to (-1: none); your own scroll cancels it
     let idle = 0;
     const yours = () => void (going = -1);
+    // where the held stretch starts in the scroll, and how long it runs:
+    // measured when the page lays out again, not on every scroll
+    let spanned: { top: number; run: number } | null = null;
     const span = () => {
+      if (spanned) return spanned;
       const pin = s.querySelector<HTMLElement>(".or-pin")!;
       const top =
         pin.getBoundingClientRect().top -
         box.getBoundingClientRect().top +
         box.scrollTop;
-      return { top, run: pin.offsetHeight - box.clientHeight };
+      return (spanned = { top, run: pin.offsetHeight - box.clientHeight });
     };
     const onScroll = () => {
       const { top, run } = span();
       const p = Math.min(1, Math.max(0, (box.scrollTop - top) / Math.max(1, run)));
       const k = p * (STEPS.length - 1);
       target = k * STEP;
-      setOn(Math.round(k));
+      if (Math.round(k) !== shownStep) {
+        shownStep = Math.round(k);
+        setOn(shownStep);
+        settleUntil = performance.now() + 600;
+      }
       kick();
       clearTimeout(idle);
+      if (touch) return; // phones and tablets: their own snapping does the settling
       const inside = box.scrollTop > top + 1 && box.scrollTop < top + run - 1;
       if (!inside) {
         at = Math.round(k);
@@ -349,16 +478,35 @@ function Orbit() {
       }, 120);
     };
 
+    // the step indicator: tap a step to go to it
+    goTo.current = (i: number) => {
+      const { top, run } = span();
+      at = i;
+      going = touch ? -1 : i;
+      box.scrollTo({ top: top + (i / (STEPS.length - 1)) * run, behavior: "smooth" });
+    };
+    if (touch) box.style.setProperty("scroll-snap-type", "y proximity");
+
     size();
     onScroll();
     at = Math.round(target / STEP);
     rot = target;
     draw();
     const ro = new ResizeObserver(() => {
+      spanned = null;
       size();
       kick();
     });
+    ro.observe(s);
     ro.observe(st);
+    // the indicator's buttons resize as a step's name opens (and when the
+    // font arrives): the highlight follows them
+    const rb = new ResizeObserver(() => {
+      slots = btns.map((b) => [b.offsetLeft, b.offsetWidth]); // measured here, not every frame
+      settleUntil = Math.max(settleUntil, performance.now() + 50);
+      kick();
+    });
+    btns.forEach((b) => rb.observe(b));
     box.addEventListener("scroll", onScroll, { passive: true });
     for (const e of ["wheel", "touchstart", "keydown", "pointerdown"] as const)
       box.addEventListener(e, yours, { passive: true });
@@ -366,7 +514,10 @@ function Orbit() {
       cancelAnimationFrame(raf);
       clearTimeout(idle);
       player.destroy();
+      box.style.removeProperty("scroll-snap-type");
+      goTo.current = () => {};
       ro.disconnect();
+      rb.disconnect();
       box.removeEventListener("scroll", onScroll);
       for (const e of ["wheel", "touchstart", "keydown", "pointerdown"] as const)
         box.removeEventListener(e, yours);
@@ -382,10 +533,31 @@ function Orbit() {
           <h2 className="or-title">From your body to the cutting table.</h2>
         </header>
         <div className="or-pin">
+          {/* where the scroll can settle on touch screens: one per step */}
+          {STEPS.map((s) => (
+            <span key={s.n} className="or-snap" aria-hidden="true" />
+          ))}
           <div ref={stage} className="or-stage">
-            <p className="or-count" aria-live="polite">
-              Step <b>{STEPS[on].n}</b> of 4 · {STEPS[on].k}
-            </p>
+            {/* the steps: the current one named, the others as numbers to tap;
+                the highlight slides along with the turn */}
+            <nav className="or-steps" aria-label="How it works, steps">
+              <span className="or-steps__glow" aria-hidden="true" />
+              {STEPS.map((s, i) => (
+                <button
+                  key={s.n}
+                  type="button"
+                  className={on === i ? "is-on" : undefined}
+                  aria-current={on === i ? "step" : undefined}
+                  aria-label={`Step ${s.n}: ${s.k}`}
+                  onClick={() => goTo.current(i)}
+                >
+                  <b>{s.n}</b>
+                  <span className="or-steps__name" aria-hidden="true">
+                    <span>{s.k}</span>
+                  </span>
+                </button>
+              ))}
+            </nav>
 
             {/* the meadow, turning with the cards, and a placeholder figure standing on it */}
             {/* the valley behind it all (a first placement, not final) */}
@@ -407,30 +579,7 @@ function Orbit() {
               ))}
             </ol>
 
-            {/* each card's glass and edge, drawn to its outline on the cylinder */}
-            {STEPS.map((s) => (
-              <div key={s.n} className="or-pane" aria-hidden="true" />
-            ))}
-            <svg className="or-lines" aria-hidden="true">
-              {STEPS.map((s) => (
-                <path key={s.n} />
-              ))}
-            </svg>
-
-            {/* the cylinder, and on it each card's words as strips */}
-            <div className="or-view" aria-hidden="true">
-              <div ref={ring} className="or-ring">
-                {STEPS.map((s) => (
-                  <div key={s.n} className="or-sticker">
-                    {Array.from({ length: SLICES }, (_, k) => (
-                      <article key={k} className="or-card">
-                        <Card s={s} />
-                      </article>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </div>
+            <Scene />
           </div>
         </div>
       </section>
