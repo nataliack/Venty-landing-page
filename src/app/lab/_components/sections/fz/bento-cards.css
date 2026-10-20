@@ -176,6 +176,12 @@
 .bc-pc__t { font-size: 2.1px; letter-spacing: 0.08em; fill: #121524; }
 .bc-pc.is-sel .bc-pc__paper { stroke: var(--corn); stroke-width: 0.6; filter: drop-shadow(0 0 1.6px rgb(104 126 245 / 0.9)); }
 .bc-arrange__panel { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+/* the paper: a two-way choice */
+.bc-seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 3px; border-radius: 12px; background: rgb(239 244 255 / 0.03); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.07); }
+.bc-seg button { display: flex; flex-direction: column; align-items: flex-start; padding: 7px 10px; border-radius: 9px; font-size: 11.5px; color: rgb(157 172 205 / 0.75); text-align: left; transition: background-color 0.2s, color 0.2s; }
+.bc-seg button b { font-weight: 400; font-size: 15px; color: rgb(239 244 255 / 0.7); }
+.bc-seg button[aria-pressed="true"] { background: rgb(239 244 255 / 0.08); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.1); color: var(--peri); }
+.bc-seg button[aria-pressed="true"] b { color: var(--cloud); }
 .bc-count { display: flex; align-items: baseline; gap: 6px; padding: 10px 12px; border-radius: 12px; background: rgb(239 244 255 / 0.025); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.06); }
 .bc-count b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: 30px; line-height: 1; color: var(--cloud); font-variant-numeric: tabular-nums; }
 .bc-count span { font-size: 12.5px; color: rgb(157 172 205 / 0.8); }
