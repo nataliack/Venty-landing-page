@@ -32,7 +32,7 @@
 .or-valley {
   position: absolute;
   left: 50%;
-  top: 0;
+  top: var(--vtop, 0);
   z-index: 0;
   width: var(--vw);
   height: var(--vh);

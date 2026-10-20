@@ -69,9 +69,10 @@ const filmAt = (deg: number) => {
   for (let k = 1; k < a.length; k++) if (a[k] >= deg) return k - 1 + (deg - a[k - 1]) / (a[k] - a[k - 1]);
   return a.length - 1;
 };
-/* the valley behind (1493 x 2000): the full width, its sky behind the
-   meadow while the cards turn, the rest of it seen as the page scrolls on */
-const VALLEY = { ratio: 2000 / 1493 };
+/* the valley behind (1792 x 1943, its sky cleared to the page's own pale):
+   the full width, its sky behind the meadow while the cards turn, the rest
+   of it seen as the page scrolls on */
+const VALLEY = { ratio: 1943 / 1792 };
 
 /* the cards' glass, edges and words: built once and never rendered again
    (the turn moves them directly), so a change of step only re-renders the
@@ -217,6 +218,10 @@ function Orbit() {
       const vw = Math.max(w, (h * 1.9) / VALLEY.ratio);
       const vh = vw * VALLEY.ratio;
       st.style.setProperty("--vw", `${vw}px`);
+      // the valley lowered so its sky is behind the meadow: the line where its
+      // peaks begin (an eighth of the way down the photo) at the meadow's middle
+      const vtop = itop + ih * 0.5 - vh * 0.12;
+      st.style.setProperty("--vtop", `${vtop}px`);
       st.style.setProperty("--vh", `${vh}px`);
       // the cards: their width, and the cylinder they are stuck round
       cw = phone ? Math.min(290, w * 0.74) : 340;
@@ -235,7 +240,7 @@ function Orbit() {
       // room under the scene for what runs below the screen (the rest of the
       // valley, the meadow's underside), so once the cards are done the page
       // scrolls on through the valley
-      const below = Math.max(vh - h, itop + ih - h, 0);
+      const below = Math.max(vtop + vh - h, itop + ih - h, 0);
       const pin = s.querySelector<HTMLElement>(".or-pin")!;
       pin.style.marginBottom = `${below}px`;
       const run = pin.offsetHeight - box.clientHeight;
@@ -347,7 +352,9 @@ function Orbit() {
         // the card's glass and its edge: drawn flat on the screen, to the
         // card's exact outline on the cylinder (so they stay stuck to it),
         // hidden once its face turns away
-        const facing = Math.cos(((i * STEP - rot) * Math.PI) / 180) > 0;
+        // facing out enough to read (nearly edge-on, its glass would show as a
+        // bare sliver with no words on it)
+        const facing = Math.cos(((i * STEP - rot) * Math.PI) / 180) > 0.3;
         const pane = panes[i];
         // (hidden, never removed: making a blurred layer afresh costs a long frame)
         const off = () => {
@@ -369,16 +376,23 @@ function Orbit() {
         const d = (dx: number, dy: number) =>
           "M" + pts.map(([x, y]) => `${(x - dx).toFixed(1)} ${(y - dy).toFixed(1)}`).join("L") + "Z";
         edgesNow.push(pts);
-        // clear of the mask (the card in front): the real blur, in a pane of a
-        // fixed size that only moves (so a turn never lays the page out again),
-        // clipped to the outline. Cut by the mask (the cards at the sides): the
-        // glass's tint drawn with the edges, under the same mask (half hidden,
-        // the blur behind isn't seen, and it costs)
-        const clear = x0 >= w / 2 - (maskEdge - 30) && x1 <= w / 2 + (maskEdge - 30);
-        if (clear && x1 - x0 <= paneW && y1 - y0 <= paneH) {
+        // every card on show gets its glass, the real blur: a pane of a fixed
+        // size that only moves (so a turn never lays the page out again),
+        // clipped to the outline. One cut by the mask (turning in or out at
+        // the sides) carries the mask's soft edge too, in its own coordinates
+        if (x1 - x0 <= paneW && y1 - y0 <= paneH) {
           if (pane.style.visibility !== "visible") pane.style.visibility = "visible";
           pane.style.transform = `translate3d(${x0}px, ${y0}px, 0)`;
           pane.style.clipPath = `path("${d(x0, y0)}")`;
+          const clear = x0 >= w / 2 - (maskEdge - 30) && x1 <= w / 2 + (maskEdge - 30);
+          const m = clear
+            ? "none"
+            : `linear-gradient(90deg, transparent ${w / 2 - maskEdge - x0}px, #000 ${w / 2 - maskEdge + 30 - x0}px, #000 ${w / 2 + maskEdge - 30 - x0}px, transparent ${w / 2 + maskEdge - x0}px)`;
+          if (pane.dataset.mask !== m) {
+            pane.dataset.mask = m;
+            pane.style.maskImage = m;
+            pane.style.setProperty("-webkit-mask-image", m);
+          }
         } else {
           if (pane.style.visibility !== "hidden") pane.style.visibility = "hidden";
           tintsNow.push(pts);
@@ -562,7 +576,7 @@ function Orbit() {
             {/* the meadow, turning with the cards, and a placeholder figure standing on it */}
             {/* the valley behind it all (a first placement, not final) */}
             <div className="or-valley" aria-hidden="true">
-              <img src="/lab/orbit/valley.jpg" width={1493} height={2000} alt="" decoding="async" />
+              <img src="/lab/orbit/valley.webp" width={1792} height={1943} alt="" decoding="async" />
             </div>
             {/* the meadow, turning with the cards */}
             <canvas className="or-island" aria-hidden="true" />
