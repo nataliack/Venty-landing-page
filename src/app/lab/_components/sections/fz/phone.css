@@ -18,15 +18,15 @@
   inset: 0;
   z-index: 3;
   pointer-events: none;
-  background: linear-gradient(180deg, transparent 38%, rgb(14 15 25 / 0.85) 66%, rgb(14 15 25) 82%);
+  background: linear-gradient(180deg, transparent 56%, rgb(14 15 25 / 0.8) 74%, rgb(14 15 25) 88%);
 }
 
 /* the device */
 .ph {
-  --w: clamp(210px, 17vw, 240px);
+  --w: clamp(200px, 16vw, 228px);
   position: absolute;
   left: 50%;
-  top: 22px;
+  top: 14px;
   width: var(--w);
   aspect-ratio: 9 / 19.5;
   translate: -50% 0;
@@ -54,7 +54,7 @@
 .ph__island::after { content: ""; position: absolute; right: 9px; top: 50%; width: 6px; height: 6px; translate: 0 -50%; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #2b3460, #0b0c15 70%); }
 
 /* the behind phones: smaller, set back, their screens only blocks */
-.ph.is-back { --w: clamp(190px, 15.5vw, 218px); top: 44px; opacity: 0.55; filter: brightness(0.7); }
+.ph.is-back { --w: clamp(182px, 14.6vw, 206px); top: 34px; opacity: 0.55; filter: brightness(0.7); }
 .ph.is-back.is-l { translate: calc(-50% - var(--w) * 0.72) 0; }
 .ph.is-back.is-r { translate: calc(-50% + var(--w) * 0.72) 0; }
 .ph.is-front { z-index: 2; }
@@ -75,15 +75,15 @@
 .ph__status-icons { display: flex; align-items: center; gap: 5px; }
 .ph__battery { position: relative; width: 20px; height: 10px; padding: 1.5px; border-radius: 3px; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.5); }
 .ph__battery span { display: block; width: 75%; height: 100%; border-radius: 1.5px; background: #fff; }
-.ph__head { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; }
+.ph__head { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
 .ph__logo { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: #fff; background: radial-gradient(60% 60% at 50% 0%, #b4bdd9, #687ef5 60%, #4f63e0); }
 .ph__title { font-size: 14px; font-weight: 500; letter-spacing: -0.02em; }
 .ph__plus { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #1b1c26; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1); }
-.ph__search { display: flex; align-items: center; gap: 7px; height: 30px; margin-top: 14px; padding: 0 12px; border-radius: 999px; font-size: 11.5px; color: rgb(255 255 255 / 0.45); background: #1b1c26; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08); }
-.ph__sub { display: flex; justify-content: space-between; margin: 16px 2px 4px; font-size: 11.5px; font-weight: 500; }
+.ph__search { display: flex; align-items: center; gap: 7px; height: 28px; margin-top: 10px; padding: 0 12px; border-radius: 999px; font-size: 11.5px; color: rgb(255 255 255 / 0.45); background: #1b1c26; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08); }
+.ph__sub { display: flex; justify-content: space-between; margin: 11px 2px 2px; font-size: 11.5px; font-weight: 500; }
 .ph__sub .is-muted { font-weight: 400; color: rgb(255 255 255 / 0.45); }
 .ph__list { display: flex; flex-direction: column; }
-.ph__row { display: flex; align-items: center; gap: 10px; padding: 8px 2px; border-bottom: 1px solid rgb(255 255 255 / 0.07); }
+.ph__row { display: flex; align-items: center; gap: 10px; padding: 7px 2px; border-bottom: 1px solid rgb(255 255 255 / 0.07); }
 .ph__thumb { display: grid; place-items: center; flex: none; width: 32px; height: 34px; border-radius: 10px; color: #a0abca; background: #1b1c26; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08), inset 0 1px 0 rgb(255 255 255 / 0.05); }
 .ph__text { position: relative; display: flex; flex: 1; flex-direction: column; min-width: 0; }
 .ph__name { overflow: hidden; font-size: 12px; font-weight: 500; letter-spacing: -0.01em; white-space: nowrap; text-overflow: ellipsis; }
@@ -97,7 +97,7 @@
 
 /* working: the list makes room, the new one fades in, its bar fills, its dot breathes */
 .ph__list.is-shifting { animation: ph-shift 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
-@keyframes ph-shift { from { translate: 0 -51px; } }
+@keyframes ph-shift { from { translate: 0 -49px; } }
 .ph__row.is-new { animation: ph-in 0.6s ease 0.15s both; }
 @keyframes ph-in { from { opacity: 0; } }
 .ph__bar { position: absolute; left: 0; right: 0; bottom: -5px; height: 2px; border-radius: 2px; background: rgb(255 255 255 / 0.08); overflow: hidden; }
