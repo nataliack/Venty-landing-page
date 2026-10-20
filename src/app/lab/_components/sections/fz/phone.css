@@ -1,7 +1,8 @@
 /* Pattern library, on the phone. The screen is the app's own: bg #0b0c15,
    cards #1b1c26 with a hairline, status dots (Printed primary, Fitting
    peri, Draft white 40%). Uses the fz tokens. */
-.ph-stage { position: absolute; inset: 0; overflow: hidden; }
+/* the stage: clipped at the card's sides and foot, open at the top so the front phone can rise out of it */
+.ph-stage { position: absolute; inset: 0; clip-path: inset(-90px 0 0 0 round 0 0 22px 22px); }
 /* the dot grid, fading round the phones */
 .ph-dots {
   position: absolute;
@@ -21,51 +22,99 @@
   background: linear-gradient(180deg, transparent 56%, rgb(14 15 25 / 0.8) 74%, rgb(14 15 25) 88%);
 }
 
-/* the device */
-.ph {
-  --w: clamp(200px, 16vw, 228px);
+/* the light of the front screen, spilling on the card round it */
+.ph-glow {
   position: absolute;
   left: 50%;
-  top: 14px;
-  width: var(--w);
-  aspect-ratio: 9 / 19.5;
+  top: 6%;
+  width: 70%;
+  height: 80%;
   translate: -50% 0;
-  padding: 7px;
-  border-radius: calc(var(--w) * 0.19);
-  background: linear-gradient(160deg, #3a3e50, #15161f 30%, #0d0e15 60%, #2a2d3c);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.14), inset 0 0 0 2px #050509, 0 30px 60px -20px rgb(0 0 0 / 0.9);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(104 126 245 / 0.22), transparent);
+  filter: blur(20px);
 }
-.ph__btn { position: absolute; width: 3px; border-radius: 2px; background: linear-gradient(90deg, #4a4e62, #22242f); }
-.ph__btn.is-l1 { left: -2px; top: 17%; height: 4%; }
-.ph__btn.is-l2 { left: -2px; top: 24%; height: 8%; }
-.ph__btn.is-l3 { left: -2px; top: 34%; height: 8%; }
-.ph__btn.is-r1 { right: -2px; top: 27%; height: 12%; }
+
+/* the device, about an iPhone's proportions (71.5 x 147.6 mm). Its frame is
+   brushed graphite titanium: lit along its edges, dark across its face,
+   a hairline catching the light all the way round */
+.ph {
+  --w: clamp(232px, 19vw, 272px);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  position: absolute;
+  left: 50%;
+  top: 16px;
+  width: var(--w);
+  aspect-ratio: 71.5 / 147.6;
+  padding: calc(var(--w) * 0.03);
+  border-radius: calc(var(--w) * 0.175);
+  translate: -50% 0;
+  background:
+    linear-gradient(90deg, #7d818d 0%, #3a3c45 1.6%, #1e1f25 4.5%, #24252c 50%, #1e1f25 95.5%, #3a3c45 98.4%, #7d818d 100%),
+    #1e1f25;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.2),
+    inset 0 1.5px 1px rgb(255 255 255 / 0.28),
+    inset 0 -1.5px 1px rgb(0 0 0 / 0.6),
+    0 0 0 1px #050508,
+    0 2px 2px rgb(0 0 0 / 0.5),
+    0 40px 70px -24px rgb(0 0 0 / 0.95);
+  transition: translate 0.9s var(--ease), rotate 0.9s var(--ease), scale 0.9s var(--ease);
+}
+/* the antenna bands: small breaks in the frame near the corners */
+.ph__band { position: absolute; width: calc(var(--w) * 0.03); height: 3px; background: #4b4e59; }
+.ph__band.is-tl, .ph__band.is-bl { left: 0; }
+.ph__band.is-tr, .ph__band.is-br { right: 0; }
+.ph__band.is-tl, .ph__band.is-tr { top: 11%; }
+.ph__band.is-bl, .ph__band.is-br { bottom: 11%; }
+/* the buttons, standing proud of the frame */
+.ph__btn { position: absolute; width: 4px; border-radius: 2px; background: linear-gradient(90deg, #8a8e9a, #3a3c46 60%, #1b1c22); box-shadow: 0 1px 2px rgb(0 0 0 / 0.6); }
+.ph__btn.is-l1 { left: -3px; top: 18%; height: 5%; }
+.ph__btn.is-l2 { left: -3px; top: 26%; height: 9%; }
+.ph__btn.is-l3 { left: -3px; top: 37%; height: 9%; }
+.ph__btn.is-r1 { right: -3px; top: 29%; height: 14%; transform: scaleX(-1); }
+/* the glass: a black border round the screen, a sheen across it */
+.ph__glass {
+  position: relative;
+  height: 100%;
+  padding: calc(var(--w) * 0.022);
+  border-radius: calc(var(--w) * 0.148);
+  background: #000;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+}
 .ph__screen {
   position: relative;
   height: 100%;
   overflow: hidden;
-  padding: 12px 12px 0;
-  border-radius: calc(var(--w) * 0.16);
+  padding: 11px 13px 0;
+  border-radius: calc(var(--w) * 0.128);
   background: #0b0c15;
   color: #fff;
   font-family: var(--font-familjen), system-ui, sans-serif;
 }
-.ph__island { position: absolute; left: 50%; top: 9px; width: 34%; height: 19px; translate: -50% 0; border-radius: 999px; background: #000; }
-.ph__island::after { content: ""; position: absolute; right: 9px; top: 50%; width: 6px; height: 6px; translate: 0 -50%; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #2b3460, #0b0c15 70%); }
+.ph__sheen {
+  position: absolute;
+  inset: calc(var(--w) * 0.022);
+  border-radius: calc(var(--w) * 0.128);
+  pointer-events: none;
+  background: linear-gradient(118deg, rgb(255 255 255 / 0.1) 0%, rgb(255 255 255 / 0.03) 22%, transparent 34%, transparent 70%, rgb(255 255 255 / 0.03) 100%);
+}
+.ph__island { position: absolute; left: 50%; top: 10px; z-index: 2; width: 33%; height: 21px; translate: -50% 0; border-radius: 999px; background: #000; }
+.ph__island::after { content: ""; position: absolute; right: 9px; top: 50%; width: 7px; height: 7px; translate: 0 -50%; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #34407a, #0b0c15 65%); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.05); }
 
-/* the behind phones: smaller, set back, their screens only blocks */
-.ph.is-back { --w: clamp(182px, 14.6vw, 206px); top: 34px; opacity: 0.55; filter: brightness(0.7); }
-.ph.is-back.is-l { translate: calc(-50% - var(--w) * 0.72) 0; }
-.ph.is-back.is-r { translate: calc(-50% + var(--w) * 0.72) 0; }
+/* the phones behind: set back, a little smaller, tilted out, dimmer */
+.ph.is-back { --w: clamp(212px, 17.2vw, 246px); top: 40px; filter: brightness(0.55) saturate(0.8); }
+.ph.is-back.is-l { translate: calc(-50% - var(--w) * 0.66) 0; rotate: -7deg; }
+.ph.is-back.is-r { translate: calc(-50% + var(--w) * 0.66) 0; rotate: 7deg; }
 .ph.is-front { z-index: 2; }
-.ph__ghost { padding-top: 36px; }
+.ph__ghost { padding-top: 40px; }
 .ph__ghost-head { display: flex; align-items: center; justify-content: space-between; }
-.ph__ghost-head .is-dot { width: 24px; height: 24px; border-radius: 50%; background: rgb(255 255 255 / 0.1); }
+.ph__ghost-head .is-dot { width: 26px; height: 26px; border-radius: 50%; background: rgb(255 255 255 / 0.1); }
 .ph__ghost-head .is-bar { width: 40%; height: 9px; border-radius: 9px; background: rgb(255 255 255 / 0.12); }
 .ph__ghost-search { display: block; height: 28px; margin: 14px 0 16px; border-radius: 999px; background: rgb(255 255 255 / 0.06); }
 .ph__ghost ul { display: flex; flex-direction: column; gap: 12px; }
 .ph__ghost li { display: flex; gap: 10px; align-items: center; }
-.ph__ghost .is-thumb { width: 30px; height: 32px; flex: none; border-radius: 9px; background: rgb(255 255 255 / 0.08); }
+.ph__ghost .is-thumb { width: 32px; height: 34px; flex: none; border-radius: 10px; background: rgb(255 255 255 / 0.08); }
 .ph__ghost .is-lines { display: flex; flex: 1; flex-direction: column; gap: 6px; }
 .ph__ghost .is-lines span { height: 7px; border-radius: 7px; background: rgb(255 255 255 / 0.1); }
 .ph__ghost .is-lines span + span { height: 5px; background: rgb(255 255 255 / 0.06); }
@@ -107,12 +156,23 @@
 @keyframes ph-pulse { to { opacity: 0.3; } }
 
 /* in the bento: the stage fills the card; the words along the bottom */
+.fzb-card--lib { overflow: visible; z-index: 1; }
 .fzb-card--lib .fzb-vis { position: absolute; inset: 0; margin: 0; }
 .fzb-card--lib .fzb-copy { position: absolute; left: 18px; right: 18px; bottom: 18px; z-index: 4; }
 .fzb-cell.is-r.fzb-card--lib .fzb-copy { right: calc(18px + var(--bleed)); }
 .fzb-cell.is-r.fzb-card--lib .ph-stage { right: var(--bleed); }
 .fzb-card--lib .fzb-copy b { display: block; margin-bottom: 4px; font-size: clamp(15px, 1.2vw, 18px); }
 
+/* hover: the phones behind lean out to the sides, the front one rises out of the card */
+@media (hover: hover) {
+  .fzb-card--lib:hover .ph.is-front { translate: -50% -34px; }
+  .fzb-card--lib:hover .ph.is-back.is-l { translate: calc(-50% - var(--w) * 0.8) 6px; rotate: -10deg; }
+  .fzb-card--lib:hover .ph.is-back.is-r { translate: calc(-50% + var(--w) * 0.8) 6px; rotate: 10deg; }
+  .fzb-card--lib .ph-glow { transition: opacity 0.9s ease, translate 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
+  .fzb-card--lib:hover .ph-glow { opacity: 1.4; translate: -50% -24px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .ph { transition: none; }
   .ph__list.is-shifting, .ph__row.is-new, .ph__bar::after, .ph__row.is-drafting .ph__dot { animation: none; }
 }

@@ -49,7 +49,9 @@ function Bird({ size = 16 }: { size?: number }) {
   );
 }
 
-/** the device: bezel, side buttons, the island; the screen is its child */
+/** the device: a titanium frame (its antenna bands, the buttons on its
+    sides), the black border round the glass, the island, a sheen across
+    the glass; the screen is its child */
 function Device({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={`ph ${className}`} aria-hidden={className.includes("is-back") || undefined}>
@@ -57,9 +59,16 @@ function Device({ children, className = "" }: { children: React.ReactNode; class
       <span className="ph__btn is-l2" />
       <span className="ph__btn is-l3" />
       <span className="ph__btn is-r1" />
-      <div className="ph__screen">
-        <span className="ph__island" />
-        {children}
+      <span className="ph__band is-tl" />
+      <span className="ph__band is-tr" />
+      <span className="ph__band is-bl" />
+      <span className="ph__band is-br" />
+      <div className="ph__glass">
+        <div className="ph__screen">
+          <span className="ph__island" />
+          {children}
+        </div>
+        <span className="ph__sheen" />
       </div>
     </div>
   );
@@ -129,12 +138,19 @@ export function PhoneCard() {
   return (
     <div ref={root} className="ph-stage">
       <span className="ph-dots" aria-hidden="true" />
+      <span className="ph-glow" aria-hidden="true" />
       <Ghost side="l" />
       <Ghost side="r" />
       <Device className="is-front">
         <div className="ph__status">
           <span>9:41</span>
           <span className="ph__status-icons" aria-hidden="true">
+            <svg width="16" height="11" viewBox="0 0 17 12" fill="currentColor">
+              <rect x="0" y="8" width="3" height="4" rx="1" />
+              <rect x="4.6" y="5.5" width="3" height="6.5" rx="1" />
+              <rect x="9.2" y="3" width="3" height="9" rx="1" />
+              <rect x="13.8" y="0" width="3" height="12" rx="1" />
+            </svg>
             <svg width="15" height="11" viewBox="0 0 24 18" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
               <path d="M2 6.8a15 15 0 0 1 20 0M5 10.9a10 10 0 0 1 14 0M8.5 14.4a5 5 0 0 1 7 0M12 17.5h.01" />
             </svg>
