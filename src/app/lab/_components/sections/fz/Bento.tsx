@@ -2,7 +2,8 @@
 
 import type { CSSProperties } from "react";
 import { FEATS, Shell, type Feat, type FeatKey } from "./parts";
-import { BodiesCard, LibCard, MarkCard, PrintCard, RefineCard, TurnCard } from "./BentoCards";
+import { BodiesCard, MarkCard, PrintCard, RefineCard, TurnCard } from "./BentoCards";
+import { PhoneCard } from "./Phone";
 import "./bento.css";
 
 /* Features, the bento (locked: Heading above). Structure and tone only (no
@@ -77,7 +78,7 @@ const CARDS: Record<FeatKey, () => React.ReactNode> = {
   body: TurnCard,
   bodies: BodiesCard,
   print: PrintCard,
-  lib: LibCard,
+  lib: PhoneCard,
 };
 
 function Card({ f, className, style }: { f: Feat; className: string; style: CSSProperties }) {
