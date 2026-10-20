@@ -109,7 +109,7 @@ export function RefineCard() {
         <span className="bc-tag">v2 → v3</span>
       </header>
       <div className="bc-chat__log">
-        <p className="bc-bubble is-me">Make it 5 cm longer and the straps a little wider.</p>
+        <p className="bc-bubble is-me">5 cm longer, wider straps.</p>
         <div className="bc-reply">
           <span className="bc-avatar">
             <Bird size={12} />
