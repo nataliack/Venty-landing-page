@@ -210,8 +210,9 @@ function Orbit() {
       const ih = iw * ISLAND.ratio;
       const itop = h * (phone ? 0.72 : 0.62) - ih * ISLAND.top; // phones: lower in the tall screen
       st.style.setProperty("--ih", `${ih}px`);
-      // the valley: the full width (wider on phones, so it is tall enough)
-      const vw = Math.max(w, (h * 1.9) / VALLEY.ratio);
+      // the valley: the full width (phones: about two thirds of its width on
+      // screen, so its mountains frame the meadow either side as on desktop)
+      const vw = phone ? w * 1.5 : Math.max(w, (h * 1.9) / VALLEY.ratio);
       const vh = vw * VALLEY.ratio;
       st.style.setProperty("--vw", `${vw}px`);
       // the valley lowered so its sky is behind the meadow: the line where its
