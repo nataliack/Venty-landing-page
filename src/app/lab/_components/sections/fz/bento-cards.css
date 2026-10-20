@@ -7,17 +7,16 @@
 .bc-panel { border-radius: 14px; background: rgb(239 244 255 / 0.025); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.06); }
 
 /* ---- Mark up ---- */
-.bc-mark { position: absolute; inset: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; }
+.bc-mark { position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
 .bc-mark__frame {
   position: relative;
   height: 100%;
-  aspect-ratio: 4 / 5;
   overflow: hidden;
   border-radius: 14px;
   background: radial-gradient(70% 60% at 50% 35%, #1d2442, #0f1222);
   box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.07);
 }
-.bc-mark__fig { position: absolute; left: 6%; right: 6%; top: 5%; aspect-ratio: 896 / 1339; }
+.bc-mark__fig { position: absolute; left: 50%; top: 5%; height: 150%; aspect-ratio: 896 / 1339; translate: -50% 0; }
 .bc-mark__fig img, .bc-mark__fig svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .bc-ink { fill: none; stroke: var(--corn); stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 6px rgb(104 126 245 / 0.6)); }
 .bc-ink.is-dash { stroke-width: 7; stroke-dasharray: 26 20; }
@@ -85,7 +84,8 @@
 .bc-chat__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 12px; border-bottom: 1px solid rgb(239 244 255 / 0.06); font-size: 12.5px; color: rgb(239 244 255 / 0.85); }
 .bc-chat__file { display: flex; align-items: center; gap: 7px; }
 .bc-chat__file::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--corn); box-shadow: 0 0 8px var(--corn); }
-.bc-chat__log { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; padding: 12px; min-height: 0; }
+.bc-chat__log { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; padding: 12px; min-height: 0; overflow: hidden; -webkit-mask-image: linear-gradient(180deg, transparent, #000 28px); mask-image: linear-gradient(180deg, transparent, #000 28px); }
+.bc-chat__log > * { flex: none; }
 .bc-bubble { max-width: 88%; padding: 9px 12px; border-radius: 14px; font-size: 13px; line-height: 1.38; color: rgb(239 244 255 / 0.9); background: rgb(239 244 255 / 0.06); }
 .bc-bubble.is-me { align-self: flex-end; border-bottom-right-radius: 4px; background: var(--corn); color: #fff; }
 .bc-reply { display: flex; gap: 8px; align-items: flex-start; }
@@ -206,8 +206,6 @@
 
 /* ---- narrow cards ---- */
 @media (max-width: 640px) {
-  .bc-mark { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr); }
-  .bc-mark__frame { aspect-ratio: auto; }
   .bc-refs, .bc-mark__side .bc-label:last-of-type { display: none; }
   .bc-print { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; gap: 10px; }
   .bc-print__panel .bc-label, .bc-print__panel .bc-row:last-of-type { display: none; }
