@@ -74,6 +74,8 @@
   .ft-head { grid-template-columns: minmax(0, 1fr); align-items: start; }
   .ft-lede { justify-self: start; width: min(46ch, 100%); }
 }
+/* the line reveal writes text-align: start on each line; they follow the body instead */
+.ft-lede > div { text-align: inherit !important; }
 @media (max-width: 767px) {
   .ft-head { justify-items: center; text-align: center; }
   .ft-title { align-items: center; }
