@@ -18,7 +18,7 @@ export const FEATS: Feat[] = [
   { k: "refine", n: "02", w: "Refine", t: "Refine in plain words", s: "Say what to change, the way you'd say it. Venty redrafts the pieces." },
   { k: "body", n: "03", w: "See it", t: "See it on your body", s: "Turn it on your body, then see the flat pieces it is cut from." },
   { k: "bodies", n: "04", w: "Bodies", t: "Body library", s: "Every body you measure, saved and dated. Keep one for anyone you sew for." },
-  { k: "print", n: "05", w: "Print", t: "Print options", s: "A4 at home or A0 at a print shop, seam allowance on or off." },
+  { k: "print", n: "05", w: "Arrange", t: "Arrange and print", s: "Move the pieces round the sheet to use less paper, then print on A4 at home or A0 at a print shop." },
   { k: "lib", n: "06", w: "Library", t: "Pattern library", s: "Every pattern with its versions and notes. Print it again any time." },
 ];
 

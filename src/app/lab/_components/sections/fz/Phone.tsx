@@ -145,12 +145,6 @@ export function PhoneCard() {
         <div className="ph__status">
           <span>9:41</span>
           <span className="ph__status-icons" aria-hidden="true">
-            <svg width="16" height="11" viewBox="0 0 17 12" fill="currentColor">
-              <rect x="0" y="8" width="3" height="4" rx="1" />
-              <rect x="4.6" y="5.5" width="3" height="6.5" rx="1" />
-              <rect x="9.2" y="3" width="3" height="9" rx="1" />
-              <rect x="13.8" y="0" width="3" height="12" rx="1" />
-            </svg>
             <svg width="15" height="11" viewBox="0 0 24 18" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
               <path d="M2 6.8a15 15 0 0 1 20 0M5 10.9a10 10 0 0 1 14 0M8.5 14.4a5 5 0 0 1 7 0M12 17.5h.01" />
             </svg>

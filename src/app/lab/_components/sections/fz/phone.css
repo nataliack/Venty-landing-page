@@ -68,11 +68,11 @@
 .ph__band.is-tl, .ph__band.is-tr { top: 11%; }
 .ph__band.is-bl, .ph__band.is-br { bottom: 11%; }
 /* the buttons, standing proud of the frame */
-.ph__btn { position: absolute; width: 4px; border-radius: 2px; background: linear-gradient(90deg, #8a8e9a, #3a3c46 60%, #1b1c22); box-shadow: 0 1px 2px rgb(0 0 0 / 0.6); }
-.ph__btn.is-l1 { left: -3px; top: 18%; height: 5%; }
-.ph__btn.is-l2 { left: -3px; top: 26%; height: 9%; }
-.ph__btn.is-l3 { left: -3px; top: 37%; height: 9%; }
-.ph__btn.is-r1 { right: -3px; top: 29%; height: 14%; transform: scaleX(-1); }
+.ph__btn { position: absolute; width: 2px; border-radius: 1px; background: linear-gradient(90deg, #7c808c, #34363f); box-shadow: 0 0.5px 1px rgb(0 0 0 / 0.5); }
+.ph__btn.is-l1 { left: -1.5px; top: 18%; height: 5%; }
+.ph__btn.is-l2 { left: -1.5px; top: 26%; height: 9%; }
+.ph__btn.is-l3 { left: -1.5px; top: 37%; height: 9%; }
+.ph__btn.is-r1 { right: -1.5px; top: 29%; height: 14%; transform: scaleX(-1); }
 /* the glass: a black border round the screen, a sheen across it */
 .ph__glass {
   position: relative;
@@ -159,8 +159,13 @@
 .fzb-card--lib { overflow: visible; z-index: 1; }
 .fzb-card--lib .fzb-vis { position: absolute; inset: 0; margin: 0; }
 .fzb-card--lib .fzb-copy { position: absolute; left: 18px; right: 18px; bottom: 18px; z-index: 4; }
-.fzb-cell.is-r.fzb-card--lib .fzb-copy { right: calc(18px + var(--bleed)); }
-.fzb-cell.is-r.fzb-card--lib .ph-stage { right: var(--bleed); }
+.fzb-cell.is-l.fzb-card--lib .fzb-copy { left: calc(18px + var(--bleed)); }
+.fzb-cell.is-l.fzb-card--lib .ph-stage { left: var(--bleed); }
+@media (min-width: 1100px) {
+  .fzb-card--lib .fzb-copy { right: auto; max-width: 30ch; }
+  .fzb-card--lib .ph-stage .ph { left: 64%; }
+  .fzb-card--lib .ph-glow { left: 64%; }
+}
 .fzb-card--lib .fzb-copy b { display: block; margin-bottom: 4px; font-size: clamp(15px, 1.2vw, 18px); }
 
 /* hover: the phones behind lean out to the sides, the front one rises out of the card */

@@ -32,8 +32,8 @@ const AT: Record<FeatKey, Place> = {
   mark: { c: "6 / span 7", r: "1" },
   refine: { c: "6 / span 3", r: "2" },
   bodies: { c: "9 / span 4", r: "2" },
-  print: { c: "1 / span 7", r: "3" },
-  lib: { c: "8 / span 5", r: "3" },
+  lib: { c: "1 / span 7", r: "3" },
+  print: { c: "8 / span 5", r: "3" },
 };
 
 /** how many of the 12 columns a place spans */
