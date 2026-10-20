@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createSequence } from "@/lib/sequence";
+import islandFilm from "../../../../../../public/lab/orbit/island/manifest.json";
 import { End, Shell, useBox } from "../hc/parts";
 import "./orbit.css";
 
@@ -51,11 +53,22 @@ const STEPS = [
 
 const STEP = 58; // degrees between cards round the cylinder: the next one turned well round at the side
 const SLICES = 12; // strips per card: enough that the bend reads smooth
-/* the meadow: a turning film as 60 frames (public/lab/orbit/island/), keyed
-   with a loose soft mask round it, evenly spaced by how far it has turned:
-   frame 0 at the first step, frame 59 once the cards have turned through
-   all four. How tall for its width, and where the middle of its grass is */
-const ISLAND = { frames: 60, ratio: 888 / 1400, top: 0.28 };
+/* the meadow: the turning film, every one of its frames from the first step
+   to the cards' full turn (public/lab/orbit/island/: AVIF, keyed with a
+   loose soft mask round it, 1400px and 900px for phones). Played by the
+   site's sequence engine (src/lib/sequence.ts): downloaded once, the frames
+   just ahead of the turn first, only a few decoded at a time, blended by the
+   turn's exact position. The manifest has how far the meadow has turned at
+   each frame (the film eases in), so it turns exactly with the cards.
+   How tall for its width, and where the middle of its grass is */
+const ISLAND = { ratio: islandFilm.height / islandFilm.width, top: 0.28 };
+/** the film's exact (fractional) frame for a turn of so many degrees */
+const filmAt = (deg: number) => {
+  const a = islandFilm.angles;
+  if (deg <= a[0]) return 0;
+  for (let k = 1; k < a.length; k++) if (a[k] >= deg) return k - 1 + (deg - a[k - 1]) / (a[k] - a[k - 1]);
+  return a.length - 1;
+};
 /* the valley behind (1493 x 2000): the full width, its sky behind the
    meadow while the cards turn, the rest of it seen as the page scrolls on */
 const VALLEY = { ratio: 2000 / 1493 };
@@ -157,10 +170,7 @@ function Orbit() {
       const iw = phone ? w * 1.3 : w * 0.78;
       const ih = iw * ISLAND.ratio;
       const itop = h * 0.62 - ih * ISLAND.top;
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
-      film.width = Math.round(iw * dpr);
-      film.height = Math.round(ih * dpr);
-      shown = -1; // drawn again at this size
+      st.style.setProperty("--ih", `${ih}px`);
       // the valley: the full width (wider on phones, so it is tall enough)
       const vw = Math.max(w, (h * 1.9) / VALLEY.ratio);
       const vh = vw * VALLEY.ratio;
@@ -208,56 +218,17 @@ function Orbit() {
       });
     };
 
-    // the meadow's frames: the four steps' own first, then the rest
+    // the meadow's film
     const film = st.querySelector<HTMLCanvasElement>(".or-island")!;
-    const fg = film.getContext("2d")!;
-    const size_ = st.clientWidth < 700 ? 900 : 1400;
-    // kept as bitmaps, decoded once and ready to draw (drawing an <img>
-    // makes the browser hand the whole picture over again each time)
-    const frames: (ImageBitmap | null)[] = Array(ISLAND.frames).fill(null);
-    let gone = false;
-    let shown = -1;
-    const order = [0, 20, 39, 59, ...Array.from({ length: ISLAND.frames }, (_, i) => i)];
-    const queue = [...new Set(order)];
-    const load = () => {
-      const i = queue.shift();
-      if (i === undefined) return;
-      fetch(`/lab/orbit/island/${size_}/${String(i).padStart(2, "0")}.webp`)
-        .then((r) => r.blob())
-        .then((b) => createImageBitmap(b))
-        .then(
-          (bmp) => {
-            if (gone) return bmp.close();
-            frames[i] = bmp;
-            shown = -1;
-            kick();
-            load();
-          },
-          () => load(),
-        );
-    };
-    for (let k = 0; k < 4; k++) load(); // four at a time
-    const paint = () => {
-      // the frame for how far the cards have turned (or the nearest loaded)
-      const want = Math.round((rot / (STEP * (STEPS.length - 1))) * (ISLAND.frames - 1));
-      const at = Math.min(ISLAND.frames - 1, Math.max(0, want));
-      let i = at;
-      for (let d = 0; d < ISLAND.frames && !frames[i]; d++) {
-        if (frames[at - d]) i = at - d;
-        else if (frames[at + d]) i = at + d;
-      }
-      if (!frames[i] || i === shown) return;
-      shown = i;
-      fg.clearRect(0, 0, film.width, film.height);
-      fg.drawImage(frames[i]!, 0, 0, film.width, film.height);
-    };
+    const seq = createSequence(islandFilm, `/lab/orbit/island/${st.clientWidth < 700 ? 900 : 1400}`, { opening: 24, ext: "avif" });
+    const player = seq.createPlayer(film, undefined, { alpha: true, fit: "contain" });
 
     const draw = () => {
       raf = 0;
       rot += (target - rot) * 0.12;
       if (Math.abs(target - rot) < 0.01) rot = target;
       rg.style.transform = `translateZ(${-BACK * R}px) rotateX(4deg) rotateY(${-rot}deg)`;
-      paint();
+      player.setPosition(filmAt(rot));
       groups.forEach((g, i) => {
         g.style.transform = `rotateY(${i * STEP}deg)`;
         // the card's glass and its edge: drawn flat on the screen, to the
@@ -368,8 +339,7 @@ function Orbit() {
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(idle);
-      gone = true;
-      frames.forEach((f) => f?.close());
+      player.destroy();
       ro.disconnect();
       box.removeEventListener("scroll", onScroll);
       for (const e of ["wheel", "touchstart", "keydown", "pointerdown"] as const)

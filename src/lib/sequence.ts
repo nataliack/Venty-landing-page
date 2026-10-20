@@ -32,19 +32,24 @@ export type SequenceManifest = {
 export type CameraKeys = readonly (readonly [number, number])[];
 
 type Decoded = ImageBitmap | HTMLImageElement;
+const viaImage = (blob: Blob): Promise<Decoded> =>
+  new Promise((ok, fail) => {
+    const im = new Image();
+    im.onload = () => ok(im);
+    im.onerror = fail;
+    im.src = URL.createObjectURL(blob);
+  });
+// (an <img> as the fallback too where createImageBitmap can't read the format)
 const decode = (blob: Blob): Promise<Decoded> =>
-  "createImageBitmap" in window
-    ? createImageBitmap(blob)
-    : new Promise((ok, fail) => {
-        const im = new Image();
-        im.onload = () => ok(im);
-        im.onerror = fail;
-        im.src = URL.createObjectURL(blob);
-      });
+  "createImageBitmap" in window ? createImageBitmap(blob).catch(() => viaImage(blob)) : viaImage(blob);
 
-export function createSequence(manifest: SequenceManifest, base: string, { opening = 48 }: { opening?: number } = {}) {
+export function createSequence(
+  manifest: SequenceManifest,
+  base: string,
+  { opening = 48, ext = "webp" }: { opening?: number; ext?: "webp" | "avif" } = {},
+) {
   const N = manifest.frames;
-  const frameUrl = (i: number) => `${base}/frames/${String(i + 1).padStart(4, "0")}.webp?v=${manifest.version}`;
+  const frameUrl = (i: number) => `${base}/frames/${String(i + 1).padStart(4, "0")}.${ext}?v=${manifest.version}`;
 
   /** The web frame showing a given master frame (0-based, as numbered in the
       edit). Repeated master frames are dropped by the encoder, so the two
@@ -172,8 +177,26 @@ export function createSequence(manifest: SequenceManifest, base: string, { openi
     return preloading;
   }
 
-  function createPlayer(canvas: HTMLCanvasElement, camera: (frame: number) => number = () => 0.5) {
+  /** alpha: frames with transparency (the canvas is cleared under each
+      draw). fit: "cover" fills the canvas (a slice, picked by the camera),
+      "contain" shows the whole frame, centred. */
+  function createPlayer(
+    canvas: HTMLCanvasElement,
+    camera: (frame: number) => number = () => 0.5,
+    { alpha = false, fit = "cover" }: { alpha?: boolean; fit?: "cover" | "contain" } = {},
+  ) {
     const { width: FW, height: FH } = manifest;
+    // where the frame sits in a box of this size: its scale and top left
+    const place = (cw: number, ch: number) => {
+      if (fit === "contain") {
+        const s = Math.min(cw / FW, ch / FH);
+        return { s, x: (cw - FW * s) / 2, y: (ch - FH * s) / 2 };
+      }
+      const s = Math.max(cw / FW, ch / FH);
+      // the focus point goes to the middle of the screen, without ever
+      // pulling an edge of the frame into view
+      return { s, x: Math.min(0, Math.max(cw - FW * s, cw / 2 - focus * FW * s)), y: (ch - FH * s) / 2 };
+    };
     // decoded ahead of the playhead in the direction of travel, and behind it;
     // a smaller window on touch screens, where memory is tighter
     const touch = window.matchMedia("(pointer: coarse)").matches;
@@ -183,7 +206,7 @@ export function createSequence(manifest: SequenceManifest, base: string, { openi
     // cannot be cancelled, so the queue below is what keeps a fast scroll from
     // piling up a backlog the landing frame then has to wait behind
     const PARALLEL = touch ? 2 : 3;
-    const g = canvas.getContext("2d", { alpha: false })!;
+    const g = canvas.getContext("2d", { alpha })!;
     const frames = new Map<number, Decoded>();
     const pending = new Set<number>();
     const wanted = new Set<number>();
@@ -217,13 +240,10 @@ export function createSequence(manifest: SequenceManifest, base: string, { openi
       if (k < 0) return;
       const m = over < 0 ? 0 : mix;
       if (k === drawn && over === drawnOver && m === drawnMix && !force && !moved()) return;
-      const cw = canvas.width;
-      const ch = canvas.height;
-      const s = Math.max(cw / FW, ch / FH);
-      // the focus point goes to the middle of the screen, without ever
-      // pulling an edge of the frame into view
-      const x = Math.round(Math.min(0, Math.max(cw - FW * s, cw / 2 - focus * FW * s)));
-      const y = (ch - FH * s) / 2;
+      const p = place(canvas.width, canvas.height);
+      const { s, y } = p;
+      const x = Math.round(p.x);
+      if (alpha) g.clearRect(0, 0, canvas.width, canvas.height);
       g.imageSmoothingEnabled = true;
       g.imageSmoothingQuality = "high";
       g.drawImage(frames.get(k)!, x, y, FW * s, FH * s);
@@ -300,19 +320,10 @@ export function createSequence(manifest: SequenceManifest, base: string, { openi
     };
 
     // where the frame sits in the canvas box, in CSS px: scale and offset
-    const view = () => {
-      const cw = canvas.clientWidth;
-      const ch = canvas.clientHeight;
-      const s = Math.max(cw / FW, ch / FH);
-      return { s, x: Math.min(0, Math.max(cw - FW * s, cw / 2 - focus * FW * s)), y: (ch - FH * s) / 2 };
-    };
+    const view = () => place(canvas.clientWidth, canvas.clientHeight);
 
     // whether the camera has moved the frame by a pixel since the last draw
-    const moved = () => {
-      const s = Math.max(canvas.width / FW, canvas.height / FH);
-      const x = Math.round(Math.min(0, Math.max(canvas.width - FW * s, canvas.width / 2 - focus * FW * s)));
-      return x !== drawnX;
-    };
+    const moved = () => Math.round(place(canvas.width, canvas.height).x) !== drawnX;
 
     const update = () => {
       setPlayhead(target, dir);
