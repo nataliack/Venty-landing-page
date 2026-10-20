@@ -1,41 +1,51 @@
-/* Features, the bento: structure only. Every cell is a square: the rows
-   are as tall as the columns are wide (container units). Uses fz tokens. */
-.fzb-switch {
-  position: sticky;
-  top: 12px;
-  z-index: 5;
-  display: flex;
-  gap: 2px;
-  width: fit-content;
-  margin: 12px auto 0;
-  padding: 3px;
-  border-radius: 999px;
-  background: rgb(18 21 36 / 0.85);
-  box-shadow: inset 0 0 0 1px var(--line);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+/* Features, the bento (Heading above). Structure and tone only. Uses fz
+   tokens. Dark, after Linear's: cards a breath lighter than the night, a
+   faint rim, the outer cards dissolving into the background at the sides. */
+
+.fzb { padding: 14svh 16px 16svh; }
+
+/* the head: title left over two lines, the body on the right */
+.fzb-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px 48px;
+  align-items: start;
+  width: min(1240px, 100%);
+  margin: 0 auto clamp(56px, 10svh, 120px);
 }
-.fzb-switch button { height: 32px; padding: 0 14px; border-radius: 999px; font-size: 13px; color: var(--peri); }
-.fzb-switch button[aria-pressed="true"] { background: var(--cloud); color: var(--ink); }
+.fzb-title { font-size: clamp(44px, 6vw, 92px); line-height: 0.96; letter-spacing: -0.05em; font-weight: 400; }
+.fzb-title span { display: block; }
+.fzb-lede { max-width: 32ch; padding-top: 0.5em; font-size: clamp(18px, 1.55vw, 23px); line-height: 1.38; letter-spacing: -0.02em; color: rgb(239 244 255 / 0.78); }
+@media (max-width: 767px) {
+  .fzb-head { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 18px; }
+  .fzb-lede { padding-top: 0; }
+}
 
-.fzb { padding: 10svh 16px 14svh; }
-.fzb-in { width: min(1320px, 100%); margin: 0 auto; }
-.fzb-head { margin-bottom: 28px; }
-.fzb-title { margin-top: 10px; font-size: clamp(34px, 5vw, 64px); line-height: 1; letter-spacing: -0.045em; font-weight: 400; }
-
-/* desktop: 12 columns, three rows tall enough that a 3-column card is
-   about square */
+/* the grid runs past the text column by --bleed each side and fades out
+   there; the cards on its edges pad their content back in, so only their
+   ground and rim dissolve */
+.fzb-bleed {
+  --bleed: clamp(16px, 7vw, 140px);
+  width: min(1240px, 100%);
+  margin: 0 auto;
+}
 .fzb-grid {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   grid-template-rows: repeat(3, clamp(280px, 22vw, 330px));
+  margin: 0 calc(-1 * var(--bleed));
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--bleed), #000 calc(100% - var(--bleed)), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 var(--bleed), #000 calc(100% - var(--bleed)), transparent);
 }
 .fzb-cell { grid-column: var(--gc); grid-row: var(--gr); }
+.fzb-cell.is-l { padding-left: calc(18px + var(--bleed)); }
+.fzb-cell.is-r { padding-right: calc(18px + var(--bleed)); }
 /* tablet: six columns; wide cards full width, the rest half, the tall one
-   still two rows */
+   still two rows; no bleed */
 @media (max-width: 1099px) {
-  .fzb-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: 300px; grid-auto-flow: dense; }
+  .fzb-bleed { --bleed: 0px; }
+  .fzb-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: 300px; grid-auto-flow: dense; -webkit-mask-image: none; mask-image: none; }
   .fzb-cell { grid-column: span 3; grid-row: auto; }
   .fzb-cell.is-wide { grid-column: span 6; }
   .fzb-cell.is-tall { grid-row: span 2; }
@@ -54,22 +64,28 @@
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  border-radius: 24px;
+  border-radius: 22px;
 }
+/* a breath lighter than the night, lit a little from above */
 .fzb-card {
   padding: 18px;
   overflow: hidden;
-  background: rgb(239 244 255 / 0.04);
-  box-shadow: inset 0 0 0 1px var(--line);
+  background: linear-gradient(180deg, rgb(239 244 255 / 0.034), rgb(239 244 255 / 0.012) 55%, rgb(239 244 255 / 0.008));
+  box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.055), inset 0 1px 0 rgb(239 244 255 / 0.05);
 }
-.fzb-copy { max-width: 42ch; font-size: clamp(14px, 1.05vw, 16px); line-height: 1.38; letter-spacing: -0.01em; color: var(--peri); }
-.fzb-copy b { font-weight: 400; color: var(--cloud); }
+.fzb-copy { max-width: 42ch; font-size: clamp(14px, 1.05vw, 16px); line-height: 1.4; letter-spacing: -0.01em; color: rgb(157 172 205 / 0.75); }
+.fzb-copy b { font-weight: 400; color: rgb(239 244 255 / 0.92); }
 .fzb-vis { position: relative; flex: 1; min-height: 0; margin-top: 14px; }
 .fzb-vis > .fz-v { position: absolute; inset: 0; }
-/* the heading as a tile: type to the bottom left */
-.fzb-head-tile { justify-content: flex-end; padding: 4px 4px 12px; }
-.fzb-head-tile .fzb-head { margin: 0; }
-.fzb-head-tile .fzb-title { font-size: clamp(30px, 3vw, 48px); }
+
+/* the stand-ins, quietened for the dark: fewer fills, lower contrast */
+.fzb .fz-v { background: rgb(239 244 255 / 0.015); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.045); }
+.fzb .fz-v--mark { background: radial-gradient(60% 60% at 50% 45%, rgb(56 76 101 / 0.35), transparent 75%); box-shadow: none; }
+.fzb .fz-msg { background: rgb(239 244 255 / 0.045); color: rgb(239 244 255 / 0.85); }
+.fzb .fz-msg.is-me { background: rgb(104 126 245 / 0.75); }
+.fzb .fz-input { box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.06); }
+.fzb .fz-rows li { background: rgb(239 244 255 / 0.03); }
+.fzb .fz-rows li:first-child { box-shadow: inset 0 0 0 1px rgb(104 126 245 / 0.45); }
 
 /* phones: the half-width cards are small; their stand-ins shrink */
 @media (max-width: 640px) {
@@ -87,7 +103,11 @@
 
 /* see it on your body */
 .fzb-card--body { padding-bottom: 0; }
-.fzb-turn { position: absolute; inset: 0 -18px; overflow: hidden; border-radius: 0 0 24px 24px; }
+.fzb-turn { position: absolute; inset: 0 -18px; overflow: hidden; border-radius: 0 0 22px 22px; }
+.fzb-cell.is-l .fzb-turn { left: calc(-18px - var(--bleed)); }
+/* she sinks into the dark at the edges of her card */
+.fzb-turn::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(75% 70% at 55% 38%, transparent 40%, rgb(11 12 21 / 0.85) 100%), linear-gradient(180deg, rgb(11 12 21 / 0.6), transparent 22%, transparent 70%, rgb(11 12 21 / 0.9)); }
+.fzb-turn__slider { z-index: 1; }
 .fzb-turn img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 20%; }
 .fzb-turn__slider { position: absolute; left: 16px; right: 16px; bottom: 16px; }
 .fzb-turn__slider input { width: 100%; accent-color: var(--corn); }
@@ -95,16 +115,16 @@
 /* print options: the pattern as it prints */
 .fzb-print { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 10px; }
 .fzb-print__sheet { flex: 1; min-height: 0; width: 100%; }
-.fzb-print__paper { fill: var(--cloud); }
-.fzb-print__page { fill: none; stroke: rgb(72 95 136 / 0.45); stroke-width: 0.4; stroke-dasharray: 1.2 1; }
-.fzb-print__no { font-size: 3.4px; fill: rgb(72 95 136 / 0.8); }
-.fzb-print__sew { fill: rgb(104 126 245 / 0.12); stroke: var(--ink); stroke-width: 0.6; }
+.fzb-print__paper { fill: rgb(239 244 255 / 0.03); stroke: rgb(239 244 255 / 0.12); stroke-width: 0.4; }
+.fzb-print__page { fill: none; stroke: rgb(157 172 205 / 0.22); stroke-width: 0.4; stroke-dasharray: 1.2 1; }
+.fzb-print__no { font-size: 3.4px; fill: rgb(157 172 205 / 0.5); }
+.fzb-print__sew { fill: rgb(104 126 245 / 0.1); stroke: rgb(239 244 255 / 0.75); stroke-width: 0.5; }
 .fzb-print__cut { fill: none; stroke: var(--corn); stroke-width: 0.5; stroke-dasharray: 1.6 1.2; }
-.fzb-print__label { font-size: 4px; letter-spacing: 0.08em; fill: var(--ink); text-anchor: middle; }
+.fzb-print__label { font-size: 4px; letter-spacing: 0.08em; fill: rgb(239 244 255 / 0.7); text-anchor: middle; }
 .fzb-print__size { font-size: 7px; fill: var(--steel); text-anchor: end; }
 .fzb-print__ctl { display: flex; flex-wrap: wrap; gap: 6px; }
 .fzb-seg { display: inline-flex; gap: 2px; padding: 2px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--line); }
 .fzb-seg button, .fzb-chip { height: 28px; padding: 0 10px; border-radius: 999px; font-size: 12px; color: var(--peri); white-space: nowrap; }
-.fzb-seg button[aria-pressed="true"] { background: var(--cloud); color: var(--ink); }
+.fzb-seg button[aria-pressed="true"] { background: rgb(239 244 255 / 0.1); color: var(--cloud); }
 .fzb-chip { box-shadow: inset 0 0 0 1px var(--line); }
 .fzb-chip[aria-pressed="true"] { box-shadow: inset 0 0 0 1px var(--corn); color: var(--cloud); }

@@ -4,110 +4,66 @@ import { useState, type CSSProperties } from "react";
 import { FEATS, FIRST_FRAME, Shell, Visual, useTurn, type Feat, type FeatKey } from "./parts";
 import "./bento.css";
 
-/* Features, back to the bento: structure only (no glow, no hovers). Three
-   rows on desktop on a 12-column grid, rows tall enough that the smallest
-   card is still about square; cards of different widths, and one in each
-   arrangement two rows tall. Three arrangements to compare (the switch, top
-   centre). Below 1100px the cards keep how wide and tall they are, roughly
-   (six columns on a tablet, two on a phone), and pack themselves. Copy and
-   visuals are stand-ins: each card is a slot. */
+/* Features, the bento (locked: Heading above). Structure and tone only (no
+   glow, no hovers).
 
-type Slot = FeatKey | "head";
+   The head: the title large over two lines on the left, a short body on the
+   right (one centred column on a phone).
+
+   The grid: three tall rows on 12 columns. See it on your body two rows
+   tall on the left; Mark up wide beside it; Refine and Body library under
+   that; Print wide and Pattern library along the bottom. Below 1100px the
+   cards keep how wide and tall they are, roughly (six columns on a tablet,
+   two on a phone), and pack themselves.
+
+   The tone (after Linear's dark sections): the cards are only a breath
+   lighter than the night behind them, a faint rim on top, and the whole
+   grid runs a little wider than the text and fades out at its sides, so
+   the outer cards dissolve into the background. Copy and visuals are
+   stand-ins: each card is a slot. */
+
 /** c: columns (start / span), r: rows; tall: two rows */
 type Place = { c: string; r: string; tall?: boolean };
-type Layout = { key: string; name: string; head: "above" | "tile"; at: Partial<Record<Slot, Place>> };
 
-const LAYOUTS: Layout[] = [
-  {
-    key: "turn",
-    name: "Tall turn",
-    head: "tile",
-    at: {
-      head: { c: "1 / span 3", r: "1" },
-      body: { c: "4 / span 5", r: "1 / span 2", tall: true },
-      mark: { c: "9 / span 4", r: "1" },
-      refine: { c: "1 / span 3", r: "2" },
-      bodies: { c: "9 / span 4", r: "2" },
-      print: { c: "1 / span 7", r: "3" },
-      lib: { c: "8 / span 5", r: "3" },
-    },
-  },
-  {
-    key: "ref",
-    name: "Tall reference",
-    head: "tile",
-    at: {
-      mark: { c: "1 / span 4", r: "1 / span 2", tall: true },
-      head: { c: "5 / span 5", r: "1" },
-      refine: { c: "10 / span 3", r: "1" },
-      body: { c: "5 / span 5", r: "2" },
-      bodies: { c: "10 / span 3", r: "2" },
-      lib: { c: "1 / span 5", r: "3" },
-      print: { c: "6 / span 7", r: "3" },
-    },
-  },
-  {
-    key: "above",
-    name: "Heading above",
-    head: "above",
-    at: {
-      body: { c: "1 / span 5", r: "1 / span 2", tall: true },
-      mark: { c: "6 / span 7", r: "1" },
-      refine: { c: "6 / span 3", r: "2" },
-      bodies: { c: "9 / span 4", r: "2" },
-      print: { c: "1 / span 7", r: "3" },
-      lib: { c: "8 / span 5", r: "3" },
-    },
-  },
-];
+const AT: Record<FeatKey, Place> = {
+  body: { c: "1 / span 5", r: "1 / span 2", tall: true },
+  mark: { c: "6 / span 7", r: "1" },
+  refine: { c: "6 / span 3", r: "2" },
+  bodies: { c: "9 / span 4", r: "2" },
+  print: { c: "1 / span 7", r: "3" },
+  lib: { c: "8 / span 5", r: "3" },
+};
 
 /** how many of the 12 columns a place spans */
 const spanOf = (p: Place) => +(p.c.split("span")[1] ?? 1);
 
 export function FzBento() {
-  const [lay, setLay] = useState(0);
-  const L = LAYOUTS[lay];
-  const slots = Object.keys(L.at) as Slot[];
   return (
     <Shell head={false}>
-      <div className="fzb-switch" role="group" aria-label="Arrangement">
-        {LAYOUTS.map((l, i) => (
-          <button key={l.key} type="button" aria-pressed={i === lay} onClick={() => setLay(i)}>
-            {l.name}
-          </button>
-        ))}
-      </div>
       <section className="fzb">
-        <div className="fzb-in">
-        {L.head === "above" && <Head />}
-        <div className={`fzb-grid is-${L.key}`}>
-          {slots.map((s) => {
-            const p = L.at[s]!;
-            const style = { "--gc": p.c, "--gr": p.r } as CSSProperties;
-            const w = spanOf(p);
-            const cls = `fzb-cell ${w >= 7 ? "is-wide" : w >= 5 ? "is-mid" : ""} ${p.tall ? "is-tall" : ""}`;
-            if (s === "head")
-              return (
-                <div key={s} className={`${cls} fzb-head-tile`} style={style}>
-                  <Head />
-                </div>
-              );
-            const f = FEATS.find((x) => x.k === s)!;
-            return <Card key={s} f={f} roomy={w >= 5 || !!p.tall} className={cls} style={style} />;
-          })}
-        </div>
+        <header className="fzb-head">
+          <h2 className="fzb-title">
+            <span>Everything a</span> <span>pattern needs.</span>
+          </h2>
+          <p className="fzb-lede">
+            Mark up a reference, change it in plain words, see it turn on your body, then print it the way you sew. Every pattern and every body you measure stays in your library.
+          </p>
+        </header>
+        <div className="fzb-bleed">
+          <div className="fzb-grid">
+            {FEATS.map((f) => {
+              const p = AT[f.k];
+              const w = spanOf(p);
+              const start = +p.c.split("/")[0];
+              // the cards on the grid's outer edges reach into the bleed and fade there
+              const edge = `${start === 1 ? "is-l" : ""} ${start + w - 1 === 12 ? "is-r" : ""}`;
+              const cls = `fzb-cell ${w >= 7 ? "is-wide" : w >= 5 ? "is-mid" : ""} ${p.tall ? "is-tall" : ""} ${edge}`;
+              return <Card key={f.k} f={f} roomy={w >= 5 || !!p.tall} className={cls} style={{ "--gc": p.c, "--gr": p.r } as CSSProperties} />;
+            })}
+          </div>
         </div>
       </section>
     </Shell>
-  );
-}
-
-function Head() {
-  return (
-    <header className="fzb-head">
-      <p className="fz-eyebrow">Features</p>
-      <h2 className="fzb-title">Everything a pattern needs.</h2>
-    </header>
   );
 }
 

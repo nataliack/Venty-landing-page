@@ -32,7 +32,7 @@ export const EXPERIMENTS: Experiment[] = [
     slug: "section-features-bento",
     no: 51,
     title: "Features · Bento",
-    note: "Back to the bento, structure only (no glow, no hovers). Three tall rows on a 12-column grid, cards of different widths and one two rows tall, in three arrangements to switch between: Tall turn, Tall reference, Heading above. Print options drawn as the pattern over its A4 pages (or one A0 sheet), seam allowance on or off.",
+    note: "The bento, locked on Heading above: the title large over two lines with a short body on the right, then three tall rows on 12 columns, the turn two rows tall. Dark, after Linear: cards a breath lighter than the night, the outer cards dissolving into the background at the sides. Structure and tone only; copy and visuals are stand-ins.",
     tag: "Section · Structure",
     date: "19 Oct",
     kind: "native",
