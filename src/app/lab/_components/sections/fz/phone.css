@@ -103,7 +103,7 @@
 .ph__island::after { content: ""; position: absolute; right: 9px; top: 50%; width: 7px; height: 7px; translate: 0 -50%; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #34407a, #0b0c15 65%); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.05); }
 
 /* the phones behind: set back, a little smaller, tilted out, dimmer */
-.ph.is-back { --w: clamp(212px, 17.2vw, 246px); top: 40px; filter: brightness(0.55) saturate(0.8); }
+.ph.is-back { --w: clamp(212px, 17.2vw, 246px); top: 40px; filter: brightness(0.82) saturate(0.85); }
 .ph.is-back.is-l { translate: calc(-50% - var(--w) * 0.66) 0; rotate: -7deg; }
 .ph.is-back.is-r { translate: calc(-50% + var(--w) * 0.66) 0; rotate: 7deg; }
 .ph.is-front { z-index: 2; }
