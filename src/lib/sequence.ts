@@ -212,6 +212,9 @@ export function createSequence(
     const frames = new Map<number, Decoded>();
     const pending = new Set<number>();
     const wanted = new Set<number>();
+    // frames kept decoded outside the window, for a move the caller knows is
+    // coming (see pin() below)
+    let pinned = new Set<number>();
     let target = 0;
     let pos = 0; // the exact (fractional) position; target is the nearest frame
     let focus = camera(0);
@@ -261,7 +264,12 @@ export function createSequence(
       drawnX = x;
     };
 
+    const inWindowOf = (i: number) => {
+      const ahead = (i - target) * dir;
+      return ahead <= AHEAD && ahead >= -BEHIND;
+    };
     const inWindow = (i: number) => {
+      if (pinned.has(i)) return true;
       const ahead = (i - target) * dir;
       return ahead <= AHEAD && ahead >= -BEHIND;
     };
@@ -337,7 +345,7 @@ export function createSequence(
       for (const [i, img] of frames) {
         const ahead = (i - target) * dir;
         if (ahead > AHEAD || ahead < -BEHIND) {
-          if (i === drawn || i === drawnOver) continue;
+          if (i === drawn || i === drawnOver || pinned.has(i)) continue;
           if ("close" in img) img.close();
           frames.delete(i);
         }
@@ -384,6 +392,26 @@ export function createSequence(
       project(fx: number, fy: number) {
         const v = view();
         return { x: v.x + fx * v.s, y: v.y + fy * v.s, s: v.s };
+      },
+      /** Keeps these frames decoded, outside the window, until the next call:
+          for a move the caller knows may come (a sparse run of frames along
+          it, so the fast part of the move always has a frame close by while
+          the window catches up). Decoded after the window's own frames. */
+      pin(list: number[]) {
+        const next = new Set(list.filter((i) => i >= 0 && i < N));
+        for (const [i, img] of frames) {
+          if (pinned.has(i) && !next.has(i) && !inWindowOf(i) && i !== drawn && i !== drawnOver) {
+            if ("close" in img) img.close();
+            frames.delete(i);
+          }
+        }
+        pinned = next;
+        for (const i of pinned) want(i);
+        pump();
+      },
+      /** The frame on the canvas now (for checks) */
+      get shown() {
+        return drawn;
       },
       destroy() {
         destroyed = true;

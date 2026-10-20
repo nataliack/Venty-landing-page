@@ -224,6 +224,21 @@ function Orbit() {
     // one real frame at a time, never two laid over each other: with every
     // frame of the film here, the steps between them are too small to see
     const player = seq.createPlayer(film, undefined, { alpha: true, fit: "contain", blend: false });
+    // resting on a step, the turns to the steps either side kept ready: every
+    // 4th frame along them (5th on phones), so a turn's fast start never
+    // waits for frames to decode; the slow end gets every frame
+    const stride = st.clientWidth < 700 ? 5 : 4;
+    let pinnedAt = -1;
+    const ready = (step: number) => {
+      if (step === pinnedAt) return;
+      pinnedAt = step;
+      const from = Math.floor(filmAt(Math.max(0, step - 1) * STEP));
+      const to = Math.ceil(filmAt(Math.min(STEPS.length - 1, step + 1) * STEP));
+      const list: number[] = [];
+      for (let f = from; f <= to; f += stride) list.push(f);
+      list.push(to);
+      player.pin(list);
+    };
 
     const draw = () => {
       raf = 0;
@@ -231,6 +246,15 @@ function Orbit() {
       if (Math.abs(target - rot) < 0.01) rot = target;
       rg.style.transform = `translateZ(${-BACK * R}px) rotateX(4deg) rotateY(${-rot}deg)`;
       player.setPosition(filmAt(rot));
+      // landed on a step: get the turns either side of it ready (not while
+      // turning, when the turn's own frames come first)
+      if (rot === target && Math.abs(rot / STEP - Math.round(rot / STEP)) < 0.001) ready(Math.round(rot / STEP));
+      if (process.env.NODE_ENV === "development") {
+        // for checks: the frame the turn wants, and the one on screen
+        film.dataset.want = String(Math.round(filmAt(rot)));
+        film.dataset.shown = String(player.shown);
+      }
+
       groups.forEach((g, i) => {
         g.style.transform = `rotateY(${i * STEP}deg)`;
         // the card's glass and its edge: drawn flat on the screen, to the
