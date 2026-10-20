@@ -315,13 +315,13 @@ const START: Piece[] = [
   { id: "sleeve", label: "SLEEVE", d: "M0 18 Q3.5 5 15 0 Q26.5 5 30 18 Z", w: 30, h: 18, x: 77, y: 56, r: 0 },
   { id: "facing", label: "FACING", d: "M0 3 Q9 -1 18 3 L18 7 Q9 3 0 7 Z", w: 18, h: 7, x: 88, y: 4, r: 0 },
 ];
-// packed: as few home pages as they'll go on
+// packed: on the six home pages top left (three across, two down), none touching
 const PACKED: Record<string, Pick<Piece, "x" | "y" | "r">> = {
-  front: { x: 1.5, y: 1.5, r: 0 },
-  back: { x: 28.5, y: 1.5, r: 0 },
-  skirt: { x: 1.5, y: 36.5, r: 90 },
-  sleeve: { x: 26, y: 33, r: 0 },
-  facing: { x: 33, y: 46.5, r: 0 },
+  front: { x: 1, y: 1, r: 0 },
+  back: { x: 27, y: 1, r: 0 },
+  skirt: { x: 51, y: 1, r: 0 },
+  sleeve: { x: 1, y: 33, r: 0 },
+  facing: { x: 33, y: 40, r: 0 },
 };
 /** a piece's box on the sheet, turned or not (it turns about its middle) */
 const box = (p: Piece) => {
