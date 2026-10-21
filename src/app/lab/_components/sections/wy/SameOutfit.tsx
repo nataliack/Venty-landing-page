@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { BACKDROPS, BODIES, OUTFITS, cutout } from "./figures";
+import LightRays from "./LightRays";
 import { SwapImage, type Pair } from "./Swap";
 import "./wy.css";
 
@@ -23,10 +24,10 @@ import "./wy.css";
    the pill's foot), arrows, keys, then one short line. It plays by itself
    while on screen until you choose one.
 
-   The light: a spotlight from above on each girl, in code (a soft cone, a
-   pool at her feet, a highlight on her alone, masked by her own cutout). It
-   sways slowly, each at its own pace; as she changes it catches, dips and
-   comes back.
+   The light: rays from above on each girl (React Bits' LightRays, in the
+   cloud of the palette), a pool at her feet and a highlight on her alone,
+   masked by her own cutout, drifting slowly. As she changes, a wave of light
+   runs down her rays.
 
    PLACEHOLDERS (figures.ts): the backgrounds are gradients and the cutouts
    are figures drawn from each body's measures; Jose's images replace them. */
@@ -47,7 +48,7 @@ export function SameOutfit() {
   const [seen, setSeen] = useState(false);
   const [n, setN] = useState(0);
   // the lab's test: the swap's two colours
-  const [pair, setPair] = useState<Pair>("night-corn");
+  const [pair, setPair] = useState<Pair>("night");
   const atRef = useRef(0);
 
   const go = useCallback((i: number, byHand = true) => {
@@ -116,13 +117,28 @@ export function SameOutfit() {
             <div className="wy-bgs" aria-hidden="true">
               {BODIES.map((b, i) => (
                 <div key={b.id} className="wy-bg" style={{ background: BACKDROPS[i], ...SWAY[i] } as CSSProperties}>
-                  {/* the light from above: it sways a little; as she changes it catches */}
-                  <div className="wy-spot">
-                    <div key={n} className={`wy-spot__in ${n ? "is-flick" : ""}`}>
-                      <span className="wy-spot__cone" />
-                      <span className="wy-spot__pool" />
-                    </div>
-                  </div>
+                  {/* the light from above (React Bits' LightRays, in Venty's cloud): as
+                      she changes, a wave of light runs down it */}
+                  <LightRays
+                    className="wy-rays"
+                    raysOrigin="top-center"
+                    raysColor="#dfe6ff"
+                    raysSpeed={0.7}
+                    lightSpread={0.42}
+                    rayLength={1.7}
+                    rayDensity={1.1}
+                    glow={0.5}
+                    haze={0.35}
+                    atmosphere={0.55}
+                    intensity={0.95}
+                    fadeDistance={1.1}
+                    followMouse={false}
+                    cursorShadow={false}
+                    clickPulse={false}
+                    maxDevicePixelRatio={1.5}
+                    pulse={n}
+                  />
+                  <span className="wy-pool" />
                 </div>
               ))}
             </div>
@@ -183,9 +199,9 @@ export function SameOutfit() {
           <span>Swap colours</span>
           {(
             [
+              ["night", "Night only"],
               ["night-corn", "Night, cornflower"],
               ["night-cloud", "Night, cloud"],
-              ["corn-peri", "Cornflower, periwinkle"],
             ] as const
           ).map(([k, label]) => (
             <button key={k} type="button" aria-pressed={pair === k} onClick={() => setPair(k)}>

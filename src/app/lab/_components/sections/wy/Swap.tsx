@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 /* The outfit swap, in the page's own dither: the squares the sections rise
    with (DitherEdge's Bayer order) and the loading screen's way out (rows
-   from the top, a little scatter). Two colours only. The pixels gather only
+   from the top, a little scatter). One colour, the night (two to test). The pixels gather only
    over her, in a loose halo that hugs her (its edge broken by noise, never a
    clean shape), never the whole room:
 
@@ -16,8 +16,9 @@ import { useEffect, useRef, useState } from "react";
    One canvas per girl, drawn only while a swap runs (under a second), all
    four at once; two fills a frame. */
 
-export type Pair = "night-corn" | "night-cloud" | "corn-peri";
+export type Pair = "night" | "night-corn" | "night-cloud" | "corn-peri";
 export const PAIRS: Record<Pair, [string, string]> = {
+  night: ["#0b0c15", "#0b0c15"],
   "night-corn": ["#0b0c15", "#687ef5"],
   "night-cloud": ["#0b0c15", "#eff4ff"],
   "corn-peri": ["#687ef5", "#9daccd"],

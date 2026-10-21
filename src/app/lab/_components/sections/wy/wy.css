@@ -69,29 +69,11 @@
 .wy-bgs, .wy-girls { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .wy-bg { position: relative; aspect-ratio: 2 / 3; overflow: hidden; }
 
-/* the light from above: a soft cone from a point over her head, a pool at
-   her feet, both swaying a little from the top (each light at its own pace) */
-.wy-spot { position: absolute; inset: 0; transform-origin: 50% -8%; animation: wy-sway var(--sway, 9s) ease-in-out var(--sway-at, 0s) infinite alternate; }
-@keyframes wy-sway {
-  from { rotate: -4deg; }
-  to { rotate: 4deg; }
-}
-.wy-spot__in { position: absolute; inset: 0; }
-.wy-spot__cone {
-  position: absolute;
-  left: 50%;
-  top: -8%;
-  width: 92%;
-  height: 112%;
-  translate: -50% 0;
-  background: linear-gradient(180deg, rgb(239 244 255 / 0.3), rgb(214 220 243 / 0.12) 45%, rgb(157 172 205 / 0.04) 80%, transparent);
-  clip-path: polygon(46% 0, 54% 0, 100% 100%, 0 100%);
-  filter: blur(10px);
-  mix-blend-mode: screen;
-  animation: wy-breathe 5s ease-in-out infinite alternate;
-}
-@keyframes wy-breathe { to { opacity: 0.82; } }
-.wy-spot__pool {
+/* the light from above: the rays (LightRays) and a pool at her feet */
+.wy-rays { position: absolute; inset: 0; mix-blend-mode: screen; }
+.light-rays { position: relative; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
+.light-rays__canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.wy-pool {
   position: absolute;
   left: 50%;
   bottom: 4%;
@@ -99,18 +81,9 @@
   height: 9%;
   translate: -50% 0;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(239 244 255 / 0.26), rgb(157 172 205 / 0.08) 60%, transparent);
+  background: radial-gradient(closest-side, rgb(239 244 255 / 0.22), rgb(157 172 205 / 0.07) 60%, transparent);
   filter: blur(4px);
   mix-blend-mode: screen;
-}
-/* as she changes, the light catches: a quick dip and back */
-.wy-spot__in.is-flick { animation: wy-flick 0.9s steps(1) both; }
-@keyframes wy-flick {
-  0% { opacity: 1; }
-  12% { opacity: 0.35; }
-  20% { opacity: 0.9; }
-  30% { opacity: 0.5; }
-  45%, 100% { opacity: 1; }
 }
 /* the light on her alone (masked by her cutout), following the sway */
 .wy-onher {
@@ -129,7 +102,7 @@
   to { background-position: 70% 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .wy-spot, .wy-spot__cone, .wy-spot__in.is-flick, .wy-onher { animation: none; }
+  .wy-onher { animation: none; }
 }
 
 .wy-girls { position: relative; z-index: 2; }
