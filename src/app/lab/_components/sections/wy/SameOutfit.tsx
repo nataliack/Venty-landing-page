@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import "./wy.css";
 
 /* 5. What you can make: "Same idea. A different body every time." (Jose's
@@ -14,9 +14,14 @@ import "./wy.css";
    column is a stack of layers, one per outfit, so photos drop into the same
    slots: <img> per body per outfit, the transition unchanged.
 
-   Controls: the outfit bar (a chip per outfit, its sketch and name, the
-   one on shows a fill while it plays), arrows, keys (left, right), a swipe
-   on the row. It plays by itself while on screen until you choose one. */
+   Layout: the title huge and centred behind them, so they stand in front
+   of it like a cover; under them the outfit bar, then one short line.
+
+   Controls: the outfit bar. One pill slides between the chips, its leading
+   edge first and the other catching up (a small stretch), and the icon of
+   the one it lands on hops; while it plays by itself a fill runs along the
+   pill's foot. Arrows, keys (left, right) and a swipe on the row too. It
+   plays by itself while on screen until you choose one. */
 
 type Body = { id: string; name: string; h: number; m: [number, number, number] };
 const BODIES: Body[] = [
@@ -165,6 +170,24 @@ export function SameOutfit() {
   useEffect(() => () => window.clearTimeout(clear.current), []);
 
   const o = OUTFITS[at];
+
+  // the pill: measured off the chip it's on; it stretches the way it's going
+  const chips = useRef<HTMLDivElement>(null);
+  const [pill, setPill] = useState<{ l: number; r: number; fwd: boolean } | null>(null);
+  const was = useRef(0);
+  useLayoutEffect(() => {
+    const box = chips.current;
+    const el = box?.querySelectorAll<HTMLElement>(".wy-chip")[at];
+    if (!box || !el) return;
+    const place = () => setPill({ l: el.offsetLeft, r: el.offsetLeft + el.offsetWidth, fwd: at >= was.current });
+    place();
+    was.current = at;
+    // phones: keep the chip in view
+    box.scrollTo({ left: el.offsetLeft - (box.clientWidth - el.offsetWidth) / 2, behavior: "smooth" });
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [at]);
+
   return (
     <div data-lenis-prevent className="absolute inset-0 overflow-y-auto overflow-x-hidden">
       <section
@@ -176,53 +199,9 @@ export function SameOutfit() {
           if (e.key === "ArrowLeft") go(at - 1);
         }}
       >
-        <header className="wy-head">
-          <div>
-            <p className="wy-eyebrow">What you can make</p>
-            <h2 id="wy-title" className="wy-title">
-              <span>Same idea.</span> <span>A different body every time.</span>
-            </h2>
-          </div>
-          <p className="wy-lede">Start from one of our patterns or from anything you&apos;ve saved: a photo, a sketch, a few words. Whatever you choose is drafted to the body you measured, not to a size.</p>
-        </header>
+        <p className="wy-eyebrow">What you can make</p>
 
-        {/* the outfit bar */}
-        <div className="wy-bar">
-          <button type="button" className="wy-arrow" onClick={() => go(at - 1)} aria-label="Previous outfit">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M15 5l-7 7 7 7" />
-            </svg>
-          </button>
-          <div className="wy-chips" role="tablist" aria-label="Outfit">
-            {OUTFITS.map((x, i) => (
-              <button
-                key={x.k}
-                type="button"
-                role="tab"
-                aria-selected={i === at}
-                className={`wy-chip ${i === at ? "is-on" : ""} ${i === at && auto && seen ? "is-playing" : ""}`}
-                onClick={() => go(i)}
-                style={{ "--play": `${PLAY_MS}ms` } as CSSProperties}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" aria-hidden="true">
-                  <path d={x.icon} />
-                </svg>
-                <span className="wy-chip__name">
-                  <span className="is-full">{x.name}</span>
-                  <span className="is-short">{x.short}</span>
-                </span>
-                <span key={`${at}-${n}`} className="wy-chip__fill" aria-hidden="true" />
-              </button>
-            ))}
-          </div>
-          <button type="button" className="wy-arrow" onClick={() => go(at + 1)} aria-label="Next outfit">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-
-        {/* the line-up */}
+        {/* the line-up, standing in front of the title */}
         <div
           className="wy-stage"
           onPointerDown={(e) => (swipe.current = e.clientX)}
@@ -233,10 +212,9 @@ export function SameOutfit() {
             if (Math.abs(dx) > 40) go(at + (dx < 0 ? 1 : -1));
           }}
         >
-          {/* the outfit's name, huge, behind them */}
-          <p className="wy-behind" aria-hidden="true">
-            <span key={n}>{o.name.split(",")[0]}</span>
-          </p>
+          <h2 id="wy-title" className="wy-title">
+            <span>Same idea.</span> <span>A different body every time.</span>
+          </h2>
           <ol className="wy-row">
             {BODIES.map((b, i) => (
               <li key={b.id} className="wy-col" style={{ "--i": i } as CSSProperties}>
@@ -254,21 +232,48 @@ export function SameOutfit() {
                   {n > 0 && <span key={`hem-${n}`} className="wy-hem" aria-hidden="true" />}
                 </div>
                 <p className="wy-label">
-                  <b>{b.name}</b>
-                  <span>
-                    {b.h} cm · {b.m[0]} · {b.m[1]} · {b.m[2]}
-                  </span>
+                  {b.name} <span>{b.h} cm</span>
                 </p>
               </li>
             ))}
           </ol>
-          <p className="wy-now" aria-live="polite">
-            <span key={n} className="wy-now__in">
-              <b>{o.name}</b> {o.line}. One pattern, drafted four ways.
-            </span>
-          </p>
-          <p className="wy-legend">Height · bust · waist · hip, in cm</p>
         </div>
+
+        {/* the outfit bar */}
+        <div className="wy-bar">
+          <button type="button" className="wy-arrow" onClick={() => go(at - 1)} aria-label="Previous outfit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M15 5l-7 7 7 7" />
+            </svg>
+          </button>
+          <div ref={chips} className="wy-chips" role="tablist" aria-label="Outfit">
+            {pill && (
+              <span className={`wy-pill ${pill.fwd ? "is-fwd" : "is-back"}`} style={{ "--wy-l": `${pill.l}px`, "--wy-r": `${pill.r}px` } as CSSProperties} aria-hidden="true">
+                {auto && seen && <span key={`${at}-${n}`} className="wy-pill__fill" style={{ "--play": `${PLAY_MS}ms` } as CSSProperties} />}
+              </span>
+            )}
+            {OUTFITS.map((x, i) => (
+              <button key={x.k} type="button" role="tab" aria-selected={i === at} className={`wy-chip ${i === at ? "is-on" : ""}`} onClick={() => go(i)}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" aria-hidden="true">
+                  <path d={x.icon} />
+                </svg>
+                <span className="wy-chip__name">
+                  <span className="is-full">{x.name}</span>
+                  <span className="is-short">{x.short}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+          <button type="button" className="wy-arrow" onClick={() => go(at + 1)} aria-label="Next outfit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+        <p className="wy-lede">Start from our patterns or anything you&apos;ve saved. Every one is drafted to the body you measured.</p>
+        <p className="sr-only" aria-live="polite">
+          {o.name}
+        </p>
       </section>
     </div>
   );

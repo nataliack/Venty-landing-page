@@ -22,44 +22,22 @@
 @media (min-width: 768px) { .wy { padding-left: 32px; padding-right: 32px; } }
 @media (min-width: 1280px) { .wy { padding-left: 48px; padding-right: 48px; } }
 
-/* the head: title left over two lines, the body far right on its last line */
-.wy-head {
-  display: grid;
-  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
-  align-items: last baseline;
-  gap: 20px clamp(32px, 6vw, 120px);
-  max-width: 1344px;
-  margin: 0 auto clamp(40px, 7svh, 80px);
-}
-.wy-eyebrow { margin-bottom: 14px; font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--peri); }
-.wy-title { display: flex; flex-direction: column; font-weight: 400; font-size: clamp(2.4rem, 5.6vw, 5.4rem); line-height: 0.98; letter-spacing: -0.05em; }
-.wy-lede { justify-self: end; width: min(36ch, 100%); font-size: clamp(15px, 1.15vw, 17px); line-height: 1.55; letter-spacing: -0.01em; color: rgb(239 244 255 / 0.72); }
-@media (max-width: 899px) {
-  .wy-head { grid-template-columns: minmax(0, 1fr); align-items: start; }
-  .wy-lede { justify-self: start; width: min(46ch, 100%); }
-}
-@media (max-width: 767px) {
-  .wy-head { justify-items: center; text-align: center; }
-  .wy-title { align-items: center; }
-  .wy-lede { justify-self: center; }
-}
-
 /* ---- the outfit bar: arrows either side of a row of chips ---- */
 .wy-bar { display: flex; align-items: center; justify-content: center; gap: 8px; max-width: 1344px; margin: 0 auto; }
 .wy-arrow { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 50%; color: var(--cloud); background: rgb(239 244 255 / 0.04); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.1); transition: background-color 0.2s; }
 @media (hover: hover) { .wy-arrow:hover { background: rgb(239 244 255 / 0.1); } }
 .wy-arrow:active { scale: 0.94; }
-.wy-chips { display: flex; gap: 4px; min-width: 0; padding: 4px; border-radius: 999px; background: rgb(239 244 255 / 0.03); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.08); overflow-x: auto; scrollbar-width: none; }
+.wy-chips { position: relative; display: flex; gap: 4px; min-width: 0; padding: 4px; border-radius: 999px; background: rgb(239 244 255 / 0.03); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.08); overflow-x: auto; scrollbar-width: none; }
 .wy-chips::-webkit-scrollbar { display: none; }
 .wy-chip {
   position: relative;
+  z-index: 1;
   display: flex;
   flex: none;
   align-items: center;
   gap: 8px;
   height: 40px;
   padding: 0 16px 0 12px;
-  overflow: hidden;
   border-radius: 999px;
   font-size: 13.5px;
   letter-spacing: -0.01em;
@@ -68,35 +46,14 @@
   transition: color 0.3s, background-color 0.3s, box-shadow 0.3s;
 }
 @media (hover: hover) { .wy-chip:not(.is-on):hover { color: var(--cloud); background: rgb(239 244 255 / 0.05); } }
-.wy-chip.is-on { color: var(--cloud); background: rgb(239 244 255 / 0.09); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.14); }
+.wy-chip.is-on { color: var(--cloud); }
 .wy-chip svg { flex: none; }
 .wy-chip.is-on svg { color: var(--corn); }
-/* while it plays by itself, the chip on fills along its foot until the next */
-.wy-chip__fill { position: absolute; left: 14px; right: 14px; bottom: 5px; height: 2px; border-radius: 2px; background: var(--corn); transform-origin: 0 50%; scale: 0 1; opacity: 0; }
-.wy-chip.is-playing .wy-chip__fill { opacity: 1; animation: wy-fill var(--play) linear both; }
-@keyframes wy-fill { to { scale: 1 1; } }
 .wy-chip__name .is-short { display: none; }
 .wy-chip:focus-visible, .wy-arrow:focus-visible { outline: 2px solid var(--corn); outline-offset: 2px; }
 
 /* ---- the stage ---- */
 .wy-stage { position: relative; max-width: 1180px; margin: clamp(24px, 4svh, 44px) auto 0; touch-action: pan-y; user-select: none; }
-/* the outfit's name, huge, behind them */
-.wy-behind {
-  position: absolute;
-  left: 50%;
-  top: 34%;
-  translate: -50% -50%;
-  margin: 0;
-  font-size: clamp(64px, 13vw, 220px);
-  line-height: 1;
-  letter-spacing: -0.06em;
-  white-space: nowrap;
-  color: rgb(239 244 255 / 0.045);
-  pointer-events: none;
-}
-.wy-behind span { display: inline-block; animation: wy-rise 1.1s var(--expo) both; }
-@keyframes wy-rise { from { opacity: 0; translate: 0 24%; } }
-
 .wy-row { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(6px, 2vw, 32px); align-items: end; }
 .wy-col { position: relative; display: flex; flex-direction: column; align-items: center; }
 /* a light from above on each: a soft cone, brightest at the top */
@@ -164,14 +121,72 @@
   100% { top: 100%; opacity: 0; }
 }
 
-.wy-label { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 14px; text-align: center; }
-.wy-label b { font-weight: 400; font-size: 15px; letter-spacing: -0.02em; }
-.wy-label span { font-size: 12px; color: rgb(157 172 205 / 0.8); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.wy-now { margin: clamp(22px, 4svh, 36px) 0 0; overflow: hidden; text-align: center; font-size: 15px; color: rgb(157 172 205 / 0.85); }
-.wy-now b { font-weight: 400; color: var(--cloud); }
-.wy-now__in { display: inline-block; animation: wy-up 0.7s var(--expo) both; }
-@keyframes wy-up { from { opacity: 0; translate: 0 70%; } }
-.wy-legend { margin-top: 6px; text-align: center; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: rgb(157 172 205 / 0.5); }
+.wy-label { margin-top: 14px; text-align: center; font-size: 14px; letter-spacing: -0.02em; white-space: nowrap; }
+.wy-label span { margin-left: 4px; color: rgb(157 172 205 / 0.75); font-variant-numeric: tabular-nums; }
+
+/* the eyebrow, alone at the top; the title huge and centred behind them */
+.wy-eyebrow { margin: 0 0 clamp(18px, 3svh, 32px); text-align: center; }
+.wy-title {
+  position: absolute;
+  left: 50%;
+  top: 2%;
+  z-index: 0;
+  width: max-content;
+  max-width: 100vw;
+  translate: -50% 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  font-weight: 400;
+  font-size: clamp(2.6rem, 8.2vw, 9.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+  text-align: center;
+  color: var(--cloud);
+  pointer-events: none;
+}
+.wy-title span:last-child { color: rgb(239 244 255 / 0.5); }
+.wy-row { z-index: 1; }
+
+/* under them: the bar, then one short line */
+.wy-bar { margin-top: clamp(26px, 4.5svh, 48px); }
+.wy-lede { max-width: 44ch; margin: 16px auto 0; text-align: center; font-size: 14px; line-height: 1.5; color: rgb(157 172 205 / 0.8); }
+
+/* the pill: one shape slides between the chips. Its two edges are separate
+   lengths, eased with a little overshoot; the leading edge goes first and
+   the trailing one follows, so it stretches as it travels and settles */
+@property --wy-l { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --wy-r { syntax: "<length>"; inherits: false; initial-value: 0px; }
+.wy-pill {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: var(--wy-l);
+  width: calc(var(--wy-r) - var(--wy-l));
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(239 244 255 / 0.09);
+  box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.16), 0 6px 18px -8px rgb(104 126 245 / 0.6);
+  transition: --wy-l 0.5s cubic-bezier(0.34, 1.4, 0.64, 1), --wy-r 0.5s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.wy-pill.is-fwd { transition-delay: 0.07s, 0s; }
+.wy-pill.is-back { transition-delay: 0s, 0.07s; }
+/* while it plays by itself, a fill runs along the pill's foot until the next */
+.wy-pill__fill { position: absolute; left: 14px; right: 14px; bottom: 4px; height: 2px; border-radius: 2px; background: var(--corn); transform-origin: 0 50%; animation: wy-fill var(--play) linear both; }
+@keyframes wy-fill { from { scale: 0 1; } }
+/* the icon it lands on hops */
+.wy-chip.is-on svg { animation: wy-hop 0.55s cubic-bezier(0.34, 1.6, 0.64, 1) 0.12s both; }
+@keyframes wy-hop {
+  0% { translate: 0 0; rotate: 0deg; }
+  40% { translate: 0 -3px; rotate: -8deg; }
+  100% { translate: 0 0; rotate: 0deg; }
+}
+@media (max-width: 640px) {
+  .wy-title { font-size: clamp(2.1rem, 10.5vw, 3rem); top: 0; }
+  .wy-label { font-size: 12px; }
+  .wy-label span { display: block; margin: 2px 0 0; font-size: 10.5px; }
+}
 
 /* phones: the four stay in a row, smaller; the chips say less */
 @media (max-width: 640px) {
@@ -183,10 +198,10 @@
   .wy-chip__name .is-short { display: inline; }
   .wy-label b { font-size: 12.5px; }
   .wy-label span { font-size: 9.5px; }
-  .wy-now { font-size: 13px; padding: 0 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wy-layer.is-in, .wy-hem, .wy-behind span, .wy-now__in, .wy-chip.is-playing .wy-chip__fill { animation: none; }
+  .wy-layer.is-in, .wy-hem, .wy-pill__fill, .wy-chip.is-on svg { animation: none; }
+  .wy-pill { transition: none; }
   .wy-hem { display: none; }
 }
