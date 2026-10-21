@@ -226,7 +226,7 @@ export function HowItWorks() {
       // with its grass a little below the screen's middle (lower on phones)
       const iw = phone ? w * 1.3 : w * 0.78;
       const ih = iw * ISLAND.ratio;
-      const itop = h * (phone ? 0.72 : 0.62) - ih * ISLAND.top;
+      const itop = h * (phone ? 0.76 : 0.62) - ih * ISLAND.top;
       st.style.setProperty("--ih", `${ih}px`);
       // the valley: the full width (phones: about two thirds of its width on
       // screen, so its mountains frame the meadow either side as on desktop),
@@ -242,17 +242,21 @@ export function HowItWorks() {
       R = phone ? cw * 1.35 : Math.max(cw * 1.75, w * 0.36);
       const card = groups[0]?.querySelector<HTMLElement>(".hw-card");
       ch = card?.offsetHeight || 300;
-      // the cylinder's middle: a little below the screen's middle (lower still on phones)
-      ry = Math.max(h * (phone ? 0.6 : 0.53), ch / 2 + h * 0.16);
+      // the cylinder's middle: a little below the screen's middle (lower still
+      // on phones, where the pill sits under the site's header)
+      ry = Math.max(h * (phone ? 0.64 : 0.53), ch / 2 + h * 0.2);
       st.style.setProperty("--iw", `${iw}px`);
       st.style.setProperty("--itop", `${itop}px`);
       st.style.setProperty("--ry", `${ry}px`);
       st.style.setProperty("--cw", `${cw}px`);
       // the objects: from just under the step pill down to the grass, so they
-      // show round the front card and through its glass
-      const objTop = Math.max(h * 0.1, ry - ch / 2 - h * 0.3);
-      st.style.setProperty("--obj-top", `${objTop}px`);
-      st.style.setProperty("--obj-h", `${itop + ih * ISLAND.top + h * 0.02 - objTop}px`);
+      // show round the front card and through its glass (phones: a little
+      // smaller, their foot kept on the grass)
+      const objTop = Math.max(h * (phone ? 0.15 : 0.1), ry - ch / 2 - h * 0.3);
+      const objFoot = itop + ih * ISLAND.top + h * 0.02;
+      const objH = (objFoot - objTop) * (phone ? 0.9 : 1);
+      st.style.setProperty("--obj-top", `${objFoot - objH}px`);
+      st.style.setProperty("--obj-h", `${objH}px`);
       // where the scroll can settle on touch screens: one per step
       const pin = s.querySelector<HTMLElement>(".hw-pin")!;
       const run = pin.offsetHeight - (1 + HAND) * box.clientHeight; // the end is the hand-off's
