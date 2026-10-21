@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState, type CSSProperties } from "react";
 import { createSequence } from "@/lib/sequence";
 import islandFilm from "../../../../../../public/lab/orbit/island/manifest.json";
 import { End, Shell, useBox } from "../hc/parts";
@@ -69,9 +69,15 @@ const filmAt = (deg: number) => {
   for (let k = 1; k < a.length; k++) if (a[k] >= deg) return k - 1 + (deg - a[k - 1]) / (a[k] - a[k - 1]);
   return a.length - 1;
 };
-/* what floats behind the cards, one per step (900 x 1000, transparent);
-   null: a placeholder until its image is made */
-const OBJECTS: (string | null)[] = ["/lab/orbit/objects/1-measure.webp", null, null, null];
+/* what floats behind the cards, one per step (1000px tall, transparent):
+   its size against the others (s: the wide collage a little smaller, so it
+   doesn't swamp the cards). null: a placeholder until its image is made */
+const OBJECTS: ({ src: string; w: number; h: number; s: number } | null)[] = [
+  { src: "/lab/orbit/objects/1-measure.webp", w: 900, h: 1000, s: 1 },
+  { src: "/lab/orbit/objects/2-describe.webp", w: 1312, h: 1000, s: 0.8 },
+  { src: "/lab/orbit/objects/3-draft.webp", w: 842, h: 1000, s: 1 },
+  null,
+];
 
 /* the valley behind (1792 x 1943, its sky cleared to the page's own pale):
    the full width, its sky behind the meadow while the cards turn, the rest
@@ -607,9 +613,18 @@ function Orbit() {
             {/* what floats behind the cards: one object per step, each fading in
                 as its card turns to the front (placeholders where there's no
                 image yet) */}
-            {OBJECTS.map((src, i) =>
-              src ? (
-                <img key={i} className="or-object" src={src} width={900} height={1000} alt="" decoding="async" />
+            {OBJECTS.map((o, i) =>
+              o ? (
+                <img
+                  key={i}
+                  className="or-object"
+                  src={o.src}
+                  width={o.w}
+                  height={o.h}
+                  style={{ "--s": o.s } as CSSProperties}
+                  alt=""
+                  decoding="async"
+                />
               ) : (
                 <div key={i} className="or-object or-figure" aria-hidden="true">
                   <span>Step {i + 1} · object image</span>

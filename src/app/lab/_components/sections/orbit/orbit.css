@@ -137,11 +137,13 @@
 .or-object {
   position: absolute;
   left: 50%;
-  top: var(--obj-top);
+  /* its own size (--s), centred in the band */
+  top: calc(var(--obj-top) + var(--obj-h) * (1 - var(--s, 1)) / 2);
   z-index: 5;
-  height: var(--obj-h);
+  height: calc(var(--obj-h) * var(--s, 1));
   width: auto;
-  max-width: none;
+  max-width: 96vw;
+  object-fit: contain;
   translate: -50% 0;
   opacity: 0;
   will-change: opacity, scale;
