@@ -26,6 +26,7 @@ import { FzTurn, FzFlip, FzZoom, FzTable } from "./sections/fz/Concepts";
 import { FzSplit, FzDeck, FzSpotlight } from "./sections/fz/Pinned";
 import { FzBirdReveal } from "./sections/fz/Reveal";
 import { FzBento } from "./sections/fz/Bento";
+import { SameOutfit } from "./sections/wy/SameOutfit";
 import { DitherRise } from "./exp/DitherRise";
 import { FilamentLab } from "./loaders/Filament";
 import { MarkFlight } from "./exp/MarkFlight";
@@ -121,6 +122,7 @@ export const NATIVE: Record<string, ComponentType> = {
   "section-features-deck": FzDeck,
   "section-features-spotlight": FzSpotlight,
   "section-features-bento": FzBento,
+  "section-make-same-outfit": SameOutfit,
   "loader-layout": LoaderLayout,
   "loader-orbit": LoaderOrbit,
   "loader-drift": LoaderDrift,

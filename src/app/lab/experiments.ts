@@ -29,6 +29,16 @@ export type Experiment = {
 export const EXPERIMENTS: Experiment[] = [
   {
     group: "sections",
+    slug: "section-make-same-outfit",
+    no: 52,
+    title: "What you can make · Same outfit",
+    note: "Same idea. A different body every time. Four women, four bodies, one outfit, each cut to her. Change the outfit and all four are dressed again: it pulls on from the top, one after another, a cornflower hem line running down ahead of it. Outfit chips (it plays by itself until you choose), arrows, keys and a swipe. The figures are placeholders drawn from each body's measures; photographs drop into the same slots.",
+    tag: "Section · Concept",
+    date: "21 Oct",
+    kind: "native",
+  },
+  {
+    group: "sections",
     slug: "section-features-bento",
     no: 51,
     title: "Features · Bento",
