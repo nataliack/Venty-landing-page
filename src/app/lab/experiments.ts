@@ -29,6 +29,16 @@ export type Experiment = {
 export const EXPERIMENTS: Experiment[] = [
   {
     group: "sections",
+    slug: "section-features-swap",
+    no: 57,
+    title: "Features · Mark up first",
+    note: "The live Features section, its code, cards and styles, with two cards swapped. Mark up is now the big card, with a new reference, the cream tweed suit: tap a note (collar, buttons, pockets, hem) and the picture pushes in to that detail. See it on your body takes the wide place: her on the left, the views to jump to, how far round she is and the slider beside her.",
+    tag: "Section · Variation",
+    date: "21 Oct",
+    kind: "native",
+  },
+  {
+    group: "sections",
     slug: "section-faq-lines",
     no: 56,
     title: "FAQ · Pattern lines",

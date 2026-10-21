@@ -31,6 +31,7 @@ import { DitherRise } from "./exp/DitherRise";
 import { FilamentLab } from "./loaders/Filament";
 import { MarkFlight } from "./exp/MarkFlight";
 import { FaqCutLine, FaqCutOut, FaqPatternLines, FaqPatternPiece } from "./sections/faq/FaqConcepts";
+import { FeaturesSwap } from "./sections/fv/Features";
 
 /* Loader concepts run inside the harness: stand-in page, simulated
    network, Replay. */
@@ -118,6 +119,7 @@ export const NATIVE: Record<string, ComponentType> = {
   "section-faq-cutout": FaqCutOut,
   "section-faq-piece": FaqPatternPiece,
   "section-faq-lines": FaqPatternLines,
+  "section-features-swap": FeaturesSwap,
   "section-features-turn": FzTurn,
   "section-features-flip": FzFlip,
   "section-features-zoom": FzZoom,
