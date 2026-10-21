@@ -233,8 +233,10 @@
     linear-gradient(90deg, rgb(104 126 245 / 0.06) 1px, transparent 1px),
     linear-gradient(0deg, rgb(104 126 245 / 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgb(104 126 245 / 0.03) 1px, transparent 1px);
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 68%, transparent 100%);
-  mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 68%, transparent 100%);
+  /* mostly at the foot: barely there at the top, strongest low down, then
+     fading out at the very bottom */
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, rgb(0 0 0 / 0.12) 35%, #000 72%, #000 86%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, rgb(0 0 0 / 0.12) 35%, #000 72%, #000 86%, transparent 100%);
 }
 .qp-frame {
   position: relative;
@@ -288,7 +290,7 @@
 }
 /* the number: the page's eyebrow type */
 .qp-n { font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--steel); }
-.qp-t { font-size: clamp(17px, 1.4vw, 20px); font-weight: 500; line-height: 1.25; letter-spacing: -0.025em; color: var(--ink); text-wrap: balance; }
+.qp-t { font-size: clamp(17px, 1.4vw, 20px); font-weight: 500; line-height: 1.25; letter-spacing: -0.025em; color: var(--navy); text-wrap: balance; } /* the body's colour, softer than ink */
 /* the button: a small rounded square, a plus that turns to a minus */
 .qp-btn {
   position: relative;
