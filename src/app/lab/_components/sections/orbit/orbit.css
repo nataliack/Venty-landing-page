@@ -132,16 +132,25 @@
   user-select: none;
 }
 
-/* the figure: standing on the grass in the middle of the cylinder, behind
-   the cards, its head well above the front card (placed by Orbit.tsx; a
-   strong placeholder, so the cards' blur shows over it) */
-.or-figure {
+/* what floats behind the cards, one per step: from above the front card down
+   to the grass (placed by Orbit.tsx), faded in and out with the turn */
+.or-object {
+  position: absolute;
   left: 50%;
-  top: var(--fig-top);
+  top: var(--obj-top);
   z-index: 5;
-  height: calc(var(--grass) - var(--fig-top));
-  width: calc((var(--grass) - var(--fig-top)) * 0.34);
+  height: var(--obj-h);
+  width: auto;
+  max-width: none;
   translate: -50% 0;
+  opacity: 0;
+  will-change: opacity, scale;
+  pointer-events: none;
+  user-select: none;
+}
+/* the placeholder, where a step has no image yet */
+.or-figure.or-object {
+  width: calc(var(--obj-h) * 0.34);
   border-radius: 999px 999px 18px 18px;
   color: var(--cloud);
   background:

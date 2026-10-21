@@ -69,6 +69,10 @@ const filmAt = (deg: number) => {
   for (let k = 1; k < a.length; k++) if (a[k] >= deg) return k - 1 + (deg - a[k - 1]) / (a[k] - a[k - 1]);
   return a.length - 1;
 };
+/* what floats behind the cards, one per step (900 x 1000, transparent);
+   null: a placeholder until its image is made */
+const OBJECTS: (string | null)[] = ["/lab/orbit/objects/1-measure.webp", null, null, null];
+
 /* the valley behind (1792 x 1943, its sky cleared to the page's own pale):
    the full width, its sky behind the meadow while the cards turn, the rest
    of it seen as the page scrolls on */
@@ -145,6 +149,7 @@ function Orbit() {
     let paneW = 0;
     let paneH = 0;
     const btns = [...st.querySelectorAll<HTMLElement>(".or-steps button")];
+    const objects = [...st.querySelectorAll<HTMLElement>(".or-object")];
     const glow = st.querySelector<HTMLElement>(".or-steps__glow")!;
     let slots: [number, number][] = btns.map((b) => [b.offsetLeft, b.offsetWidth]); // each button's left and width
     const touch = window.matchMedia("(pointer: coarse)").matches;
@@ -233,7 +238,11 @@ function Orbit() {
       st.style.setProperty("--ry", `${ry}px`);
       st.style.setProperty("--cw", `${cw}px`);
       // the figure: standing on the grass, its head well above the front card
-      st.style.setProperty("--fig-top", `${ry - ch / 2 - h * 0.17}px`);
+      // the objects: from just under the step pill down to the grass, so they
+      // show round the front card and through its glass
+      const objTop = Math.max(h * 0.1, ry - ch / 2 - h * 0.3);
+      st.style.setProperty("--obj-top", `${objTop}px`);
+      st.style.setProperty("--obj-h", `${itop + ih * ISLAND.top + h * 0.02 - objTop}px`);
       // room under the scene for what runs below the screen (the rest of the
       // valley, the meadow's underside), so once the cards are done the page
       // scrolls on through the valley
@@ -342,6 +351,13 @@ function Orbit() {
         glow.style.width = `${aw + (bw - aw) * f}px`;
       }
 
+      // the objects: each as clear as its card is close to the front
+      const kf = rot / STEP;
+      objects.forEach((el, i) => {
+        const v = Math.min(1, Math.max(0, 1 - Math.abs(kf - i) * 1.6));
+        el.style.opacity = String(v);
+        el.style.scale = String(0.96 + 0.04 * v);
+      });
       const tintsNow: number[][][] = [];
       const edgesNow: number[][][] = [];
       groups.forEach((g, i) => {
@@ -588,9 +604,18 @@ function Orbit() {
             </div>
             {/* the meadow, turning with the cards */}
             <canvas className="or-island" aria-hidden="true" />
-            <div className="or-figure" aria-hidden="true">
-              <span>Figure · your image, standing on the meadow, behind the cards</span>
-            </div>
+            {/* what floats behind the cards: one object per step, each fading in
+                as its card turns to the front (placeholders where there's no
+                image yet) */}
+            {OBJECTS.map((src, i) =>
+              src ? (
+                <img key={i} className="or-object" src={src} width={900} height={1000} alt="" decoding="async" />
+              ) : (
+                <div key={i} className="or-object or-figure" aria-hidden="true">
+                  <span>Step {i + 1} · object image</span>
+                </div>
+              ),
+            )}
 
             {/* the steps, for screen readers */}
             <ol className="sr-only">
