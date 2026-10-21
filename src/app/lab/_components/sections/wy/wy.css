@@ -14,13 +14,11 @@
   position: relative;
   min-height: 100svh;
   overflow-x: clip;
-  padding: clamp(80px, 13svh, 150px) 16px clamp(80px, 12svh, 140px);
+  padding: clamp(72px, 11svh, 130px) 0 clamp(72px, 11svh, 130px);
   color: var(--cloud);
   background: radial-gradient(70% 50% at 50% 100%, rgb(104 126 245 / 0.08), transparent 70%), var(--night);
   font-family: var(--font-familjen), system-ui, sans-serif;
 }
-@media (min-width: 768px) { .wy { padding-left: 32px; padding-right: 32px; } }
-@media (min-width: 1280px) { .wy { padding-left: 48px; padding-right: 48px; } }
 
 /* ---- the outfit bar: arrows either side of a row of chips ---- */
 .wy-bar { display: flex; align-items: center; justify-content: center; gap: 8px; max-width: 1344px; margin: 0 auto; }
@@ -52,99 +50,38 @@
 .wy-chip__name .is-short { display: none; }
 .wy-chip:focus-visible, .wy-arrow:focus-visible { outline: 2px solid var(--corn); outline-offset: 2px; }
 
-/* ---- the stage ---- */
-.wy-stage { position: relative; max-width: 1180px; margin: clamp(24px, 4svh, 44px) auto 0; touch-action: pan-y; user-select: none; }
-.wy-row { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(6px, 2vw, 32px); align-items: end; }
-.wy-col { position: relative; display: flex; flex-direction: column; align-items: center; }
-/* a light from above on each: a soft cone, brightest at the top */
-.wy-light {
-  position: absolute;
-  left: 50%;
-  top: -14%;
-  width: 150%;
-  height: 112%;
-  translate: -50% 0;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgb(239 244 255 / 0.16), rgb(239 244 255 / 0.05) 55%, transparent 92%);
-  clip-path: polygon(44% 0, 56% 0, 88% 100%, 12% 100%);
-  filter: blur(6px);
-}
-/* tall enough to read as people, short enough that the head, the bar and all four fit one screen */
-.wy-person { position: relative; width: min(100%, 230px, calc(min(54svh, 560px) * 100 / 240)); aspect-ratio: 100 / 240; }
-/* light on them from above, dark at their feet */
-.wy-person::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; background: radial-gradient(ellipse 70% 30% at 50% 6%, rgb(239 244 255 / 0.1), transparent 70%), linear-gradient(180deg, transparent 62%, rgb(11 12 21 / 0.45)); }
-.wy-fig { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.wy-fig__pool { fill: rgb(239 244 255 / 0.1); filter: blur(1.5px); }
-.wy-fig__skin { fill: #1d2236; stroke: rgb(157 172 205 / 0.28); stroke-width: 0.4; }
-.wy-fig__arm { fill: none; stroke: #1d2236; stroke-linecap: round; }
+/* the words keep a gutter; the line-up runs edge to edge */
+.wy-eyebrow, .wy-bar, .wy-lede { padding-left: 16px; padding-right: 16px; }
+.wy-eyebrow { margin: 0 0 clamp(18px, 3svh, 30px); text-align: center; }
 
-/* the outfits, cut to each body (placeholders) */
-.wy-wear { stroke: rgb(11 12 21 / 0.35); stroke-width: 0.35; stroke-linejoin: round; }
-.wy-wear.is-gown { fill: #687ef5; }
-.wy-wear.is-slip { fill: #c0c8db; }
-.wy-wear.is-top { fill: #eff4ff; }
-.wy-wear.is-trousers { fill: #485f88; }
-.wy-wear.is-puffer { fill: #9daccd; }
-.wy-wear.is-skirt { fill: #384c65; }
-.wy-wear.is-sleeve { fill: none; stroke-linecap: round; }
-.wy-wear.is-sleeve.is-top { stroke: #eff4ff; }
-.wy-wear.is-sleeve.is-puffer { stroke: #9daccd; }
-.wy-wear.is-strap { fill: none; stroke: #c0c8db; stroke-width: 0.7; }
-.wy-wear.is-seamline, .wy-wear.is-quilt { fill: none; stroke: rgb(11 12 21 / 0.28); stroke-width: 0.45; stroke-dasharray: 1.4 1.1; }
-
-/* the change: the new outfit pulls on from the top, column by column, a
-   cornflower hem line running down ahead of it */
-.wy-layer { position: absolute; inset: 0; z-index: 1; }
-.wy-layer.is-prev { z-index: 1; animation: wy-off 0.95s var(--pull) calc(var(--i) * 110ms) both; }
-/* the old one goes in step under the hem line: above the line the new outfit, below it the old */
-@keyframes wy-off {
-  from { clip-path: inset(0 0 0 0); }
-  to { clip-path: inset(100% 0 0 0); }
-}
-.wy-layer.is-in { z-index: 2; animation: wy-pull 0.95s var(--pull) calc(var(--i) * 110ms) both; }
-@keyframes wy-pull {
-  from { clip-path: inset(0 0 100% 0); }
-  to { clip-path: inset(0 0 0 0); }
-}
-.wy-hem {
-  position: absolute;
-  left: 4%;
-  right: 4%;
-  top: 0;
-  z-index: 4;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--corn);
-  box-shadow: 0 0 12px 2px rgb(104 126 245 / 0.7);
-  opacity: 0;
-  animation: wy-hem 0.95s var(--pull) calc(var(--i) * 110ms) both;
-}
-@keyframes wy-hem {
-  0% { top: 0; opacity: 0; }
-  10% { opacity: 1; }
-  85% { opacity: 1; }
-  100% { top: 100%; opacity: 0; }
-}
-
-.wy-label { margin-top: 14px; text-align: center; font-size: 14px; letter-spacing: -0.02em; white-space: nowrap; }
-.wy-label span { margin-left: 4px; color: rgb(157 172 205 / 0.75); font-variant-numeric: tabular-nums; }
-
-/* the eyebrow, alone at the top; the title huge and centred behind them */
-.wy-eyebrow { margin: 0 0 clamp(18px, 3svh, 32px); text-align: center; }
+/* ---- the line-up ----------------------------------------------------------
+   Full bleed, columns flush: four across (desktop), three (tablet), two
+   (phone), the rest a swipe away, snapping to each girl. Three layers on
+   one grid cell: the backgrounds, the title (held still across the visible
+   width while the line-up scrolls under it), the girls. */
+.wy-track { --n: 4; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.wy-track::-webkit-scrollbar { display: none; }
+@media (max-width: 1023px) { .wy-track { --n: 3; } }
+@media (max-width: 640px) { .wy-track { --n: 2; } }
+.wy-strip { display: grid; width: calc(100% * 4 / var(--n)); }
+.wy-strip > * { grid-area: 1 / 1; }
+.wy-bgs, .wy-girls { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.wy-bg { aspect-ratio: 2 / 3; }
+.wy-girls { position: relative; z-index: 2; }
+.wy-cell { position: relative; aspect-ratio: 2 / 3; scroll-snap-align: start; }
+/* the title: across the visible line-up, high, round their heads, behind them */
 .wy-title {
-  position: absolute;
-  left: 50%;
-  top: 2%;
-  z-index: 0;
-  width: max-content;
-  max-width: 100vw;
-  translate: -50% 0;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  align-self: start;
+  width: calc(100% * var(--n) / 4);
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 0;
+  margin: clamp(10px, 3.2vw, 56px) 0 0;
   font-weight: 400;
-  font-size: clamp(2.6rem, 8.2vw, 9.2rem);
+  font-size: clamp(2.2rem, 7.6vw, 8.6rem);
   line-height: 0.92;
   letter-spacing: -0.055em;
   text-align: center;
@@ -152,7 +89,24 @@
   pointer-events: none;
 }
 .wy-title span:last-child { color: rgb(239 244 255 / 0.5); }
-.wy-row { z-index: 1; }
+@media (max-width: 1023px) { .wy-title { font-size: clamp(2rem, 9vw, 5.4rem); } }
+@media (max-width: 640px) { .wy-title { font-size: clamp(1.9rem, 10.5vw, 3rem); } }
+/* her: the cutout, the swap's canvas over it */
+.wy-swap { position: absolute; inset: 0; }
+.wy-swap img, .wy-swap canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.wy-swap img { object-fit: cover; user-select: none; }
+.wy-swap canvas { pointer-events: none; }
+/* her name and height, on the image under her feet */
+.wy-label { position: absolute; left: 0; right: 0; bottom: 3.2%; z-index: 1; margin: 0; text-align: center; font-size: 14px; letter-spacing: -0.02em; white-space: nowrap; }
+.wy-label span { margin-left: 4px; color: rgb(157 172 205 / 0.8); font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) { .wy-label { font-size: 12px; } }
+
+/* the lab's test panel */
+.wy-test { position: absolute; right: 12px; top: 12px; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; max-width: 340px; padding: 6px; border-radius: 14px; font-size: 11px; color: var(--peri); background: rgb(11 12 21 / 0.8); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.12); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.wy-test span { padding: 0 4px 0 6px; text-transform: uppercase; letter-spacing: 0.08em; font-size: 10px; }
+.wy-test button { height: 26px; padding: 0 9px; border-radius: 999px; color: rgb(239 244 255 / 0.75); }
+.wy-test button[aria-pressed="true"] { color: var(--ink); background: var(--cloud); }
+@media (max-width: 640px) { .wy-test { left: 8px; right: 8px; max-width: none; } }
 
 /* under them: the bar, then one short line */
 .wy-bar { margin-top: clamp(26px, 4.5svh, 48px); }
@@ -187,12 +141,6 @@
   40% { translate: 0 -3px; rotate: -8deg; }
   100% { translate: 0 0; rotate: 0deg; }
 }
-@media (max-width: 640px) {
-  .wy-title { font-size: clamp(2.1rem, 10.5vw, 3rem); top: 0; }
-  .wy-label { font-size: 12px; }
-  .wy-label span { display: block; margin: 2px 0 0; font-size: 10.5px; }
-}
-
 /* phones: the four stay in a row, smaller; the chips say less */
 @media (max-width: 640px) {
   .wy-bar { gap: 4px; }
@@ -201,12 +149,9 @@
   .wy-chip { height: 36px; padding: 0 12px 0 10px; font-size: 12.5px; }
   .wy-chip__name .is-full { display: none; }
   .wy-chip__name .is-short { display: inline; }
-  .wy-label b { font-size: 12.5px; }
-  .wy-label span { font-size: 9.5px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wy-layer.is-in, .wy-layer.is-prev, .wy-hem, .wy-pill__fill, .wy-chip.is-on svg { animation: none; }
+  .wy-pill__fill, .wy-chip.is-on svg { animation: none; }
   .wy-pill { transition: none; }
-  .wy-hem { display: none; }
 }
