@@ -224,7 +224,12 @@
 
 
 /* ---- 4. Pattern lines ------------------------------------------------------------- */
-.qp { --mark: rgb(56 76 101 / 0.42); --mid: 40%; }
+.qp { --mark: rgb(56 76 101 / 0.32); --mid: 40%; }
+/* the graph paper fades out at the bottom as well as the top */
+.qp .qx-paper {
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 68%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 68%, transparent 100%);
+}
 .qp-frame {
   position: relative;
   display: grid;
@@ -240,75 +245,48 @@
   -webkit-mask-image: linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent);
   mask-image: linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent);
 }
-/* a fold line: a long dash and a dot, over and over */
+/* a stitching line: short even dashes */
 .qp-guide {
   position: absolute;
   top: 0;
   bottom: 0;
   width: 1px;
-  background: repeating-linear-gradient(180deg, var(--mark) 0 14px, transparent 14px 19px, var(--mark) 19px 21px, transparent 21px 26px);
+  background: repeating-linear-gradient(180deg, var(--mark) 0 6px, transparent 6px 11px);
 }
 .qp-guide.is-l { left: 0; }
 .qp-guide.is-m { left: var(--mid); }
 .qp-guide.is-r { right: 0; }
-/* behind the scissors the middle guide is cut: a dark seam, its lit edge beside it */
-.qp-cut {
-  position: absolute;
-  left: 0;
-  top: 120px; /* the guides start 120px above the content */
-  width: 1.5px;
-  height: calc((100% - 240px) * var(--p));
-  background: rgb(18 21 36 / 0.62);
-  box-shadow: 1.5px 0 0 rgb(255 255 255 / 0.9);
-}
 
 .qp-side { position: relative; padding: 0 clamp(28px, 4vw, 64px) 0 clamp(28px, 3vw, 40px); }
-.qp-head { position: sticky; top: 20svh; display: flex; flex-direction: column; gap: 16px; padding-top: 6px; }
-.qp-head > :not(.qp-hole) { opacity: 0; translate: 0 18px; transition: opacity 1.2s var(--expo), translate 1.2s var(--expo); }
+.qp-head { display: flex; flex-direction: column; gap: 16px; padding-top: 30px; }
+.qp-head > :not(.qp-mark) { opacity: 0; translate: 0 18px; transition: opacity 1.2s var(--expo), translate 1.2s var(--expo); }
 .qp-head > .qx-title { transition-delay: 0.08s; }
-.qp-head > .qx-lede { transition-delay: 0.16s; }
-.qp-head > .qp-grain { transition-delay: 0.24s; }
-.qp-head.is-in > :not(.qp-hole) { opacity: 1; translate: 0 0; }
-/* the grainline: a straight line with an arrowhead at each end, named */
-.qp-grain { display: flex; align-items: center; gap: 12px; margin-top: 22px; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--steel); }
-.qp-grain__line { position: relative; width: min(160px, 40%); height: 1px; background: var(--mark); }
-.qp-grain__line::before,
-.qp-grain__line::after { content: ""; position: absolute; top: -3px; width: 0; height: 0; border-top: 3.5px solid transparent; border-bottom: 3.5px solid transparent; }
-.qp-grain__line::before { left: -1px; border-right: 6px solid rgb(56 76 101 / 0.6); }
-.qp-grain__line::after { right: -1px; border-left: 6px solid rgb(56 76 101 / 0.6); }
+.qp-head > .qp-body { transition-delay: 0.16s; }
+.qp-head.is-in > :not(.qp-mark) { opacity: 1; translate: 0 0; }
+/* body text: the page's own (as Features' lede), wrapped without widows */
+.qp-body,
+.qp-a p { font-size: clamp(15px, 1.15vw, 17px); line-height: 1.55; letter-spacing: -0.01em; color: var(--navy); text-wrap: pretty; }
+.qp-body { max-width: 24ch; text-wrap: balance; }
 
-/* a drill hole: a ring with a cross, sitting on the guide */
-.qp-hole {
-  position: absolute;
-  left: 0;
-  top: 33px;
-  z-index: 1;
-  width: 11px;
-  height: 11px;
-  translate: -50% -50%;
-  border-radius: 50%;
-  border: 1px solid rgb(56 76 101 / 0.6);
-  background:
-    linear-gradient(rgb(56 76 101 / 0.6), rgb(56 76 101 / 0.6)) 50% 50% / 1px 100% no-repeat,
-    linear-gradient(rgb(56 76 101 / 0.6), rgb(56 76 101 / 0.6)) 50% 50% / 100% 1px no-repeat,
-    var(--cloud);
-}
-.qp-hole.is-head { left: calc(-1 * clamp(28px, 3vw, 40px)); top: 13px; }
+/* a small mark on the guide at each question */
+.qp-mark { position: absolute; left: 0; top: 45px; z-index: 1; width: 5px; height: 5px; translate: -50% -50%; border-radius: 50%; background: rgb(56 76 101 / 0.5); }
+.qp-mark.is-head { left: calc(-1 * clamp(28px, 3vw, 40px)); top: 37px; }
 
 .qp-list { position: relative; }
 .qp-row { position: relative; padding: 0 0 0 clamp(28px, 3vw, 44px); }
 .qp-q {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) auto;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   width: 100%;
-  padding: 22px clamp(16px, 2vw, 28px) 22px 0;
+  padding: 32px clamp(20px, 2.4vw, 32px) 32px 0;
   text-align: left;
   cursor: pointer;
 }
-.qp-n { font-size: 11px; letter-spacing: 0.02em; color: var(--steel); }
-.qp-t { font-size: clamp(17px, 1.4vw, 20px); font-weight: 500; line-height: 1.25; letter-spacing: -0.025em; color: var(--ink); }
+/* the number: the page's eyebrow type */
+.qp-n { font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--steel); }
+.qp-t { font-size: clamp(17px, 1.4vw, 20px); font-weight: 500; line-height: 1.25; letter-spacing: -0.025em; color: var(--ink); text-wrap: balance; }
 /* the button: a small rounded square, a plus that turns to a minus */
 .qp-btn {
   position: relative;
@@ -331,8 +309,8 @@
 .qp-a { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.6s var(--expo); }
 .qp-row.is-open .qp-a { grid-template-rows: 1fr; }
 .qp-a__in { min-height: 0; overflow: hidden; }
-.qp-a p { max-width: 56ch; padding: 0 clamp(16px, 2vw, 28px) 26px 48px; font-size: 15px; line-height: 1.6; letter-spacing: -0.01em; color: var(--navy); }
-/* a stitching line under each question, across the column, notched at both guides */
+.qp-a p { max-width: 54ch; padding: 0 clamp(20px, 2.4vw, 32px) 34px 56px; }
+/* a stitching line under each question, across the column */
 .qp-stitch {
   position: absolute;
   left: 0;
@@ -341,21 +319,14 @@
   height: 1px;
   background: repeating-linear-gradient(90deg, var(--mark) 0 6px, transparent 6px 11px);
 }
-.qp-stitch i { position: absolute; top: -4px; width: 1px; height: 9px; background: rgb(56 76 101 / 0.6); }
-.qp-stitch i.is-l { left: 0; }
-.qp-stitch i.is-r { right: 0; }
 .qp-row:last-child .qp-stitch { display: none; }
-/* the scissors, on the middle guide, pointing down the way they cut */
-.qp-sc { position: absolute; left: 0; width: 42px; translate: -50% -50%; rotate: 90deg; z-index: 2; }
 
 @media (max-width: 899px) {
   .qp { --mid: 0px; }
-  .qp-frame { grid-template-columns: 1fr; gap: 48px; }
+  .qp-frame { grid-template-columns: 1fr; gap: 40px; }
   .qp-guide.is-l { display: none; }
   .qp-side { padding: 0 0 0 28px; }
-  .qp-head { position: static; }
-  .qp-hole.is-head { left: -28px; }
+  .qp-mark.is-head { left: -28px; }
   .qp-a p { padding-left: 20px; }
-  .qp-q { grid-template-columns: 30px minmax(0, 1fr) auto; }
-  .qp-sc { width: 34px; }
+  .qp-q { grid-template-columns: 34px minmax(0, 1fr) auto; padding: 26px 16px 26px 0; }
 }

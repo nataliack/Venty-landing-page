@@ -364,19 +364,18 @@ function PatternPiece() {
 }
 
 /* ---- 4. Pattern lines --------------------------------------------------------
-   React Bits' FAQ 4, open: no cards, the questions float between guide lines,
-   and every line is a pattern-making mark. The long guides are fold lines
-   (dash and dot), the lines between the questions stitching lines, a notch
-   where a stitching line meets a guide, a drill hole (a ring with a cross)
-   on the guide at each question, a grainline under the intro. The guides
-   fade out top and bottom. The scissors cut down the guide beside the
-   questions as you scroll: behind them, the fold line is cut. */
+   React Bits' FAQ 4, open: no cards, the questions float between dashed
+   guide lines (stitching lines), a small mark on the guide at each one. The
+   guides fade out top and bottom, as the graph paper does. Six questions,
+   the ones asked first. */
+
+const QA_SHORT = [0, 1, 2, 3, 7, 11].map((i) => QA[i]);
 
 function LinesRow({ n, q, a, open, onToggle }: { n: number; q: string; a: string; open: boolean; onToggle: () => void }) {
   const id = useId();
   return (
     <div className={`qp-row ${open ? "is-open" : ""}`}>
-      <span className="qp-hole" aria-hidden="true" />
+      <span className="qp-mark" aria-hidden="true" />
       <h3>
         <button type="button" className="qp-q" aria-expanded={open} aria-controls={id} onClick={onToggle}>
           <span className="qp-n">Q{n}</span>
@@ -389,45 +388,33 @@ function LinesRow({ n, q, a, open, onToggle }: { n: number; q: string; a: string
           <p>{a}</p>
         </div>
       </div>
-      {/* the stitching line under it, notched where it meets the guides */}
-      <span className="qp-stitch" aria-hidden="true">
-        <i className="is-l" />
-        <i className="is-r" />
-      </span>
+      {/* the stitching line under it */}
+      <span className="qp-stitch" aria-hidden="true" />
     </div>
   );
 }
 
 function PatternLines() {
-  const list = useRef<HTMLDivElement>(null);
-  const p = useProgress(list, 0.7, 0.4);
   const [open, setOpen] = useState(0);
   return (
     <Paper className="qp">
       <div className="qp-frame">
-        {/* the guides: fold lines, fading out top and bottom */}
+        {/* the guides: stitching lines, fading out top and bottom */}
         <div className="qp-guides" aria-hidden="true">
           <span className="qp-guide is-l" />
-          <span className="qp-guide is-m" style={{ "--p": p } as CSSProperties}>
-            <span className="qp-cut" />
-          </span>
+          <span className="qp-guide is-m" />
           <span className="qp-guide is-r" />
         </div>
         <div className="qp-side">
           <header data-in className="qp-head">
-            <span className="qp-hole is-head" aria-hidden="true" />
+            <span className="qp-mark is-head" aria-hidden="true" />
             <p className="qx-eyebrow">FAQ</p>
             <h2 className="qx-title">Before you cut.</h2>
-            <p className="qx-lede">The questions people ask before their first pattern.</p>
-            <p className="qp-grain" aria-hidden="true">
-              <span className="qp-grain__line" />
-              Grainline
-            </p>
+            <p className="qp-body">The questions people ask before their first pattern.</p>
           </header>
         </div>
-        <div ref={list} className="qp-list">
-          <Scissors open={snip(p, QA.length * 2)} className="qp-sc" style={{ top: `${p * 100}%` }} />
-          {QA.map((x, i) => (
+        <div className="qp-list">
+          {QA_SHORT.map((x, i) => (
             <LinesRow key={x.q} n={i + 1} q={x.q} a={x.a} open={open === i} onToggle={() => setOpen((o) => (o === i ? -1 : i))} />
           ))}
         </div>
