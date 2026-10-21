@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef } from "react";
 import { DitherEdge } from "../DitherEdge";
 import { PrimaryButton } from "../PrimaryButton";
 import { APP_URL, CTA_LABEL } from "@/lib/site";
@@ -8,9 +8,16 @@ import { useReveals } from "@/lib/useReveals";
 import "./made.css";
 
 /* 6. On the line (light; it was Made with Venty). "Sewn by real people, on their own bodies."
-   The makes hang on a line, pegged, swaying a little, drifting slowly past
-   (drag the line to look along it; it pauses under the pointer). Each card
-   says what was sewn, by whom, and the body it was drafted on.
+   The makes hang on a washing line that sags under the title, its ends
+   rising either side of it, so the line hugs the title. Each card is pegged
+   to the line at two points, so it sits on the curve and tilts with it
+   (placed every frame from the curve's own shape: both pegs always on the
+   line). The cards drift along it, right to left; drag the line to look
+   along it, and let go: it carries on with the speed of the drag, then eases
+   back to its drift (it pauses under a mouse). Each card says what was sewn,
+   by whom, and the body it was drafted on. The cards are the site's glass
+   (the composer's and How it works'): white glass, a 20px blur, a hairline,
+   28px corners.
 
    It rises over the end of What you can make with a stitched edge.
 
@@ -31,14 +38,19 @@ export const MAKES: Make[] = [
   { img: "/made/make-06.webp", garment: "Halter top", maker: "Maker's name · City", body: "Bust 86 · Waist 68", quote: "What they made, and how it fits." },
 ];
 
-const SPEED = 28; // px per second along the line
+const SPEED = 55; // px per second along the line, right to left
+/* the line: how far it sags from its ends to its middle (a share of the
+   screen's width), and how far under the title's foot its
+   middle hangs (px) */
+const SAG = 0.13;
+const UNDER = 40;
 
-function Card({ m, i, copy }: { m: Make; i: number; copy: boolean }) {
+function Card({ m, copy }: { m: Make; copy: boolean }) {
   return (
-    <li className="mw-card" style={{ "--i": i } as CSSProperties} aria-hidden={copy || undefined}>
+    <li className="mw-card" aria-hidden={copy || undefined}>
       <span className="mw-peg is-l" aria-hidden="true" />
       <span className="mw-peg is-r" aria-hidden="true" />
-      <div className="mw-card__paper">
+      <div className="mw-card__glass">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={m.img} alt="" loading="lazy" decoding="async" draggable={false} />
         <p className="mw-card__g">{m.garment}</p>
@@ -55,38 +67,89 @@ function Card({ m, i, copy }: { m: Make; i: number; copy: boolean }) {
 export function MadeWith() {
   const root = useRef<HTMLElement>(null);
   const line = useRef<HTMLDivElement>(null);
-  const track = useRef<HTMLUListElement>(null);
+  const cord = useRef<SVGPathElement>(null);
+  const head = useRef<HTMLElement>(null);
   useReveals(root);
 
-  // the drift, and the drag
+  // the line's curve, the drift, and the drag
   useEffect(() => {
     const ln = line.current;
-    const tr = track.current;
-    if (!ln || !tr) return;
+    const pa = cord.current;
+    const hd = head.current;
+    if (!ln || !pa || !hd) return;
+    const cards = [...ln.querySelectorAll<HTMLElement>(".mw-card")];
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let x = 0;
-    let v = 0; // speed now, eased toward the drift (or 0 under the pointer)
+
+    // this screen's numbers, from size()
+    let W = 0; // the line's width
+    let y0 = 0; // where the line's ends are (y, in the line's box)
+    let sag = 0; // how far below its ends it hangs in the middle
+    let cw = 0; // a card's width
+    let pitch = 0; // from one card to the next along the line
+    const at = (x: number) => {
+      const u = (x - W / 2) / (W / 2);
+      return y0 + sag * (1 - u * u); // the cord: lowest in the middle, rising to its ends
+    };
+    const slope = (x: number) => (-2 * sag * (x - W / 2)) / ((W / 2) * (W / 2));
+
+    const size = () => {
+      W = ln.clientWidth;
+      cw = cards[0]?.offsetWidth || 260;
+      pitch = cw + Math.max(18, Math.min(36, W * 0.024));
+      sag = W * SAG;
+      // the line's box starts at the title's top (it lies over the title):
+      // its middle hangs just under the title, its ends rise beside it
+      const foot = hd.offsetHeight;
+      ln.style.marginTop = `${-foot}px`;
+      y0 = Math.max(16, foot + UNDER - sag);
+      // the cord, drawn once for this width (a little past both edges)
+      const pts: string[] = [];
+      for (let k = 0; k <= 48; k++) {
+        const x = -W * 0.05 + (W * 1.1 * k) / 48;
+        pts.push(`${x.toFixed(1)} ${at(x).toFixed(1)}`);
+      }
+      pa.setAttribute("d", "M" + pts.join("L"));
+      // room for the cards hanging from the line's lowest point
+      ln.style.height = `${y0 + sag + (cards[0]?.offsetHeight || 460) + 40}px`;
+    };
+
+    let x = 0; // how far the line has run
+    let v = 0; // speed now, px a second (eased back to the drift after a drag)
     let held = false;
     let over = false;
     let lastX = 0;
+    let lastT = 0;
+    let dragV = 0;
     let raf = 0;
     let onScreen = false;
     let last = 0;
-    const half = () => tr.scrollWidth / 2;
-    const wrap = () => {
-      const h = half();
-      if (h > 0) x = ((x % h) + h) % h;
+
+    const place = () => {
+      const run = pitch * cards.length;
+      cards.forEach((el, i) => {
+        // where along the line it hangs: wrapped round, so the line runs on
+        const cx = ((((i * pitch - x) % run) + run) % run) - pitch + cw / 2;
+        if (cx < -cw || cx > W + cw) {
+          if (el.style.visibility !== "hidden") el.style.visibility = "hidden";
+          return;
+        }
+        if (el.style.visibility !== "visible") el.style.visibility = "visible";
+        // pegged at its middle-top, tilted with the cord, so both pegs sit on it
+        const a = Math.atan(slope(cx));
+        el.style.transform = `translate3d(${(cx - cw / 2).toFixed(1)}px, ${at(cx).toFixed(1)}px, 0) rotate(${a.toFixed(4)}rad)`;
+      });
     };
+
     const tick = (t: number) => {
       const dt = Math.min(0.05, (t - (last || t)) / 1000);
       last = t;
       if (!held) {
+        // after a drag it runs on at the drag's speed, then eases back
         const target = reduce || over ? 0 : SPEED;
-        v += (target - v) * Math.min(1, dt * 3);
+        v += (target - v) * Math.min(1, dt * 1.4);
         x += v * dt;
       }
-      wrap();
-      tr.style.transform = `translate3d(${-x}px, 0, 0)`;
+      place();
       raf = onScreen ? requestAnimationFrame(tick) : 0;
     };
     const io = new IntersectionObserver((e) => {
@@ -101,16 +164,27 @@ export function MadeWith() {
     const down = (e: PointerEvent) => {
       held = true;
       lastX = e.clientX;
+      lastT = performance.now();
+      dragV = 0;
       ln.setPointerCapture(e.pointerId);
       ln.dataset.held = "true";
     };
     const move = (e: PointerEvent) => {
       if (!held) return;
-      x -= e.clientX - lastX;
+      const now = performance.now();
+      const dx = e.clientX - lastX;
+      x -= dx;
+      // the drag's speed, smoothed over its last moves
+      const dtm = Math.max(1, now - lastT) / 1000;
+      dragV = dragV * 0.6 + (-dx / dtm) * 0.4;
       lastX = e.clientX;
+      lastT = now;
     };
     const up = () => {
+      if (!held) return;
       held = false;
+      // a pause before letting go means no fling
+      v = performance.now() - lastT > 80 ? 0 : Math.max(-4000, Math.min(4000, dragV));
       delete ln.dataset.held;
     };
     const enter = (e: PointerEvent) => e.pointerType === "mouse" && (over = true);
@@ -121,8 +195,19 @@ export function MadeWith() {
     ln.addEventListener("pointercancel", up);
     ln.addEventListener("pointerenter", enter);
     ln.addEventListener("pointerleave", leave);
+
+    size();
+    v = reduce ? 0 : SPEED;
+    place();
+    const ro = new ResizeObserver(() => {
+      size();
+      place();
+    });
+    ro.observe(ln);
+    ro.observe(hd);
     return () => {
       io.disconnect();
+      ro.disconnect();
       cancelAnimationFrame(raf);
       ln.removeEventListener("pointerdown", down);
       ln.removeEventListener("pointermove", move);
@@ -146,36 +231,42 @@ export function MadeWith() {
     >
       <DitherEdge color="#eff4ff" />
       <div className="mw-dots" aria-hidden="true" />
-      <header className="mw-head" data-reveal>
-        <p className="mw-eyebrow">
-          <span className="line-mask inline-block">
-            <span data-rise className="inline-block">
-              On the line
+      <div className="mw-scene">
+        <header ref={head} className="mw-head" data-reveal>
+          <p className="mw-eyebrow">
+            <span className="line-mask inline-block">
+              <span data-rise className="inline-block">
+                On the line
+              </span>
             </span>
-          </span>
-        </p>
-        <h2 id="mw-title" className="mw-title">
-          <span className="line-mask">
-            <span data-rise className="block">
-              Sewn by real people,
+          </p>
+          <h2 id="mw-title" className="mw-title">
+            <span className="line-mask">
+              <span data-rise className="block">
+                Sewn by real people,
+              </span>
             </span>
-          </span>
-          <span className="line-mask">
-            <span data-rise className="block">
-              on <em>their own bodies.</em>
+            <span className="line-mask">
+              <span data-rise className="block">
+                on <em>their own bodies.</em>
+              </span>
             </span>
-          </span>
-        </h2>
-      </header>
+          </h2>
+        </header>
 
-      <div ref={line} className="mw-line" data-reveal="top 85%" aria-label="Makes" role="region">
-        <div data-up className="mw-line__in">
-          <ul ref={track} className="mw-track">
-            {/* twice over, so the line runs on without a gap (the copy is hidden from screen readers) */}
-            {[...MAKES, ...MAKES].map((m, i) => (
-              <Card key={i} m={m} i={i} copy={i >= MAKES.length} />
-            ))}
-          </ul>
+        {/* the line, over the title's sides: its ends rise beside it */}
+        <div ref={line} className="mw-line" data-reveal="top 85%" aria-label="Makes" role="region">
+          <div data-up className="mw-line__in">
+            <svg className="mw-cord" aria-hidden="true">
+              <path ref={cord} />
+            </svg>
+            <ul className="mw-track">
+              {/* twice over, so the line runs on without a gap (the copy is hidden from screen readers) */}
+              {[...MAKES, ...MAKES].map((m, i) => (
+                <Card key={i} m={m} copy={i >= MAKES.length} />
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
 

@@ -42,52 +42,43 @@
 .mw-title em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--corn); }
 
 /* ---- the line -------------------------------------------------------- */
+/* the title and the line share the scene: the line's box lies over the title
+   (MadeWith.tsx pulls it up by the title's height), so its ends can rise
+   beside it. The title takes no pointer, so the whole line can be dragged */
+.mw-scene { position: relative; }
+.mw-scene > .mw-head { position: relative; z-index: 2; pointer-events: none; }
 .mw-line {
   position: relative;
+  z-index: 1;
   margin-top: clamp(40px, 7svh, 80px);
-  padding: 0 0 30px;
   overflow: hidden;
   cursor: grab;
   touch-action: pan-y;
   user-select: none;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
 }
 .mw-line[data-held] { cursor: grabbing; }
-/* the cord: the cards slide along it */
-.mw-line::before {
-  content: "";
-  position: absolute;
-  top: 15px;
-  left: 0;
-  right: 0;
-  height: 1.5px;
-  background: linear-gradient(180deg, rgb(56 76 101 / 0.5), rgb(56 76 101 / 0.2));
-  box-shadow: 0 3px 4px rgb(30 44 78 / 0.12);
-  pointer-events: none;
-}
-.mw-track {
-  display: flex;
-  gap: clamp(18px, 2.4vw, 36px);
-  width: max-content;
-  padding: 0 clamp(18px, 2.4vw, 36px) 0 0;
-  list-style: none;
-  will-change: transform;
-}
+.mw-line__in { position: absolute; inset: 0; }
+/* the cord: drawn to the curve by MadeWith.tsx; the cards slide along it */
+.mw-cord { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.mw-cord path { fill: none; stroke: rgb(56 76 101 / 0.45); stroke-width: 1.5; filter: drop-shadow(0 3px 2px rgb(30 44 78 / 0.14)); }
+.mw-track { position: absolute; inset: 0; list-style: none; }
+/* each card is placed and tilted with the cord by MadeWith.tsx, from its
+   top middle, so both its pegs sit on the line */
 .mw-card {
-  position: relative;
-  flex: none;
+  position: absolute;
+  left: 0;
+  top: 0;
   width: clamp(220px, 21vw, 300px);
-  padding-top: 14px;
+  padding-top: 12px;
   transform-origin: 50% 0;
-  animation: mw-sway 5.5s ease-in-out infinite alternate;
-  animation-delay: calc(var(--i) * -0.9s);
+  will-change: transform;
+  visibility: hidden;
 }
-.mw-card:nth-child(even) { margin-top: 18px; animation-duration: 6.4s; }
-@keyframes mw-sway { from { rotate: -1.6deg; } to { rotate: 1.4deg; } }
 .mw-peg {
   position: absolute;
-  top: 2px;
+  top: -9px;
   z-index: 2;
   width: 9px;
   height: 30px;
@@ -96,28 +87,32 @@
   box-shadow: -1px 2px 3px rgb(18 21 36 / 0.25);
 }
 .mw-peg::after { content: ""; position: absolute; left: 3px; top: 13px; width: 3px; height: 3px; border-radius: 50%; background: var(--cloud); }
-.mw-peg.is-l { left: 22%; rotate: -4deg; }
-.mw-peg.is-r { right: 22%; rotate: 5deg; }
-.mw-card__paper {
-  padding: 10px 10px 16px;
-  border-radius: 6px;
-  background: linear-gradient(225deg, #fff, #f5f7fd);
-  box-shadow: 0 0 0 0.5px rgb(18 21 36 / 0.08), -6px 14px 24px -12px rgb(30 44 78 / 0.4), -20px 34px 44px -26px rgb(30 44 78 / 0.32);
+.mw-peg.is-l { left: 22%; translate: -50% 0; rotate: -3deg; }
+.mw-peg.is-r { left: 78%; translate: -50% 0; rotate: 4deg; }
+/* the site's glass: white, a 20px blur, a hairline, 28px corners */
+.mw-card__glass {
+  padding: 12px 12px 18px;
+  border-radius: 28px;
+  background: rgb(255 255 255 / 0.62);
+  border: 1px solid rgb(18 21 36 / 0.1);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 30px 80px -36px rgb(56 76 101 / 0.45), 0 2px 6px -2px rgb(56 76 101 / 0.12);
 }
-.mw-card__paper img {
+.mw-card__glass img {
   display: block;
   width: 100%;
   aspect-ratio: 4 / 5;
   object-fit: cover;
-  border-radius: 3px;
+  border-radius: 18px;
   background: #dfe4f2;
   pointer-events: none;
 }
-.mw-card__g { margin-top: 12px; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: 22px; line-height: 1; letter-spacing: -0.01em; }
-.mw-card__who { margin-top: 6px; font-size: 12px; letter-spacing: -0.01em; color: var(--steel); }
-.mw-card__q { margin-top: 10px; font-size: 14px; line-height: 1.35; letter-spacing: -0.02em; color: var(--navy); }
+.mw-card__g { margin-top: 14px; padding: 0 6px; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: 22px; line-height: 1; letter-spacing: -0.01em; }
+.mw-card__who { margin-top: 6px; padding: 0 6px; font-size: 12px; letter-spacing: -0.01em; color: var(--steel); }
+.mw-card__q { margin-top: 10px; padding: 0 6px; font-size: 14px; line-height: 1.35; letter-spacing: -0.02em; color: var(--navy); }
 .mw-card__body {
-  margin-top: 12px;
+  margin: 12px 6px 0;
   padding-top: 10px;
   border-top: 1px dashed rgb(56 76 101 / 0.3);
   font-size: 11px;
@@ -133,6 +128,3 @@
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25), inset 0 1px 0 rgb(255 255 255 / 0.45), inset 0 0 10px 1px rgb(206 214 255 / 0.35), 0 10px 24px -10px rgb(104 126 245 / 0.7);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .mw-card { animation: none; }
-}
