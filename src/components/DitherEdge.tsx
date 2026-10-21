@@ -262,6 +262,13 @@ export function DitherEdge({
             canvas.width = w;
             canvas.height = h;
           }
+          // the shared canvas takes the size here too (set-up or a resize), not
+          // in the first frame a strip shows: resizing a WebGL canvas waits on
+          // the GPU (tens of ms). Every edge is this size, so it stays put
+          if (r.canvas.width !== w || r.canvas.height !== h) {
+            r.canvas.width = w;
+            r.canvas.height = h;
+          }
           lastTop = NaN;
         };
 

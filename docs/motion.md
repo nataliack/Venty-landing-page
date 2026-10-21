@@ -188,6 +188,13 @@ of it:
 - A scroll-scrubbed SVG scene is a stack of SVG layers, each moved as a
   whole with a CSS transform (the closing scene), not one SVG whose
   insides are animated.
+- Never transition an inherited property (`color`, a custom property) on
+  `<html>` or a big container: every element inherits each frame of it and
+  the whole page restyles, 50ms and more a frame. The theme switch fades
+  only backgrounds; text takes its colour from its own section.
+- A loop on something hidden (opacity 0) still repaints its layer: run it
+  only while it shows (the Mark up card's marching ants, which march while
+  their selection is on or fading out, and are paused otherwise).
 - Write to the DOM only when a value changes (the scrollbar, the glow).
 - Heavy setup (a WebGL context, a shader compile) never runs at load: it
   waits for idle time after the loader, or for its section to come near.

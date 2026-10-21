@@ -66,10 +66,14 @@
   --color-deep: var(--deep);
 }
 
+/* Only the background fades with the theme here. A fading color on <html>
+   is inherited by every element on the page, so each frame of the fade
+   restyled the whole document (50ms and more a frame); nothing on the page
+   shows <html>'s own color (every section sets its own), so it switches. */
 html {
   background: var(--bg);
   color: var(--fg);
-  transition: background-color 0.9s var(--ease-in-out-quart), color 0.9s var(--ease-in-out-quart);
+  transition: background-color 0.9s var(--ease-in-out-quart);
 }
 
 /* The window never scrolls; the page scrolls inside #scroller. That keeps

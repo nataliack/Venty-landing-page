@@ -99,21 +99,38 @@ const DETAILS = [
   { n: 3, note: "5 cm longer, straight hem", pin: [0.2, 0.655], at: [0.5, 0.69], z: 2.2, sel: null },
 ];
 const OUT_MS = 560; // the pull-out before pushing in to another detail
+const SEL_FADE_MS = 300; // a selection's fade out (.ftc-sel): its ants march until it's gone
 export function MarkCard() {
   const [tool, setTool] = useState("pen");
   const [on, setOn] = useState<number | null>(null);
   const [aim, setAim] = useState<number | null>(null); // where the zoom is centred (kept while pulling out)
+  const [fading, setFading] = useState<number | null>(null); // the detail whose selection is fading out
   const t = useRef(0);
-  useEffect(() => () => window.clearTimeout(t.current), []);
+  const fadeT = useRef(0);
+  useEffect(
+    () => () => {
+      window.clearTimeout(t.current);
+      window.clearTimeout(fadeT.current);
+    },
+    [],
+  );
+  // pull out of the detail in hand, if any
+  const out = () => {
+    if (on === null) return;
+    setFading(on);
+    window.clearTimeout(fadeT.current);
+    fadeT.current = window.setTimeout(() => setFading(null), SEL_FADE_MS);
+    setOn(null);
+  };
   const pick = (n: number | null) => {
     window.clearTimeout(t.current);
-    if (n === on || n === null) return setOn(null);
+    if (n === on || n === null) return out();
     if (on === null) {
       setAim(n);
       return setOn(n);
     }
     // out of this detail, then in to the next
-    setOn(null);
+    out();
     t.current = window.setTimeout(() => {
       setAim(n);
       setOn(n);
@@ -130,7 +147,7 @@ export function MarkCard() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/features/ref-jersey.webp" alt="The reference: a cropped jersey, marked up" draggable={false} loading="lazy" decoding="async" />
           <svg viewBox="0 0 880 1339" aria-hidden="true">
-            {DETAILS.map((x) => x.sel && <g key={x.n} className={`ftc-sel ${on === x.n ? "is-on" : ""}`}>{x.sel}</g>)}
+            {DETAILS.map((x) => x.sel && <g key={x.n} className={`ftc-sel ${on === x.n ? "is-on" : fading === x.n ? "is-fading" : ""}`}>{x.sel}</g>)}
             <g className={`ftc-hem ${on === 3 ? "is-on" : ""}`}>
               <path className="ftc-hem__now" d="M60 878 H820" />
               <path className="ftc-hem__new" d="M60 978 H820" />
