@@ -29,6 +29,16 @@ export type Experiment = {
 export const EXPERIMENTS: Experiment[] = [
   {
     group: "sections",
+    slug: "section-faq-lines",
+    no: 56,
+    title: "FAQ · Pattern lines",
+    note: "React Bits' FAQ 4, open, in Venty's colours: no cards, the questions float between guide lines on the app's graph paper. Every line is a pattern-making mark: fold lines for the guides, stitching lines between the questions, notches where they meet, a drill hole at each question, a grainline under the intro. The guides fade out top and bottom; the scissors cut down the one beside the questions as you scroll.",
+    tag: "Section · Concept",
+    date: "21 Oct",
+    kind: "native",
+  },
+  {
+    group: "sections",
     slug: "section-faq-piece",
     no: 55,
     title: "FAQ · Pattern piece",

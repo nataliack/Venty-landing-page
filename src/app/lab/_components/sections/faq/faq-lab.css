@@ -222,5 +222,140 @@
 .qx-3__piece.is-cut .qx-3__outline,
 .qx-3__piece.is-cut .qx-3__notch { opacity: 0; transition: opacity 0.6s ease; }
 
-@media (prefers-reduced-motion: reduce) {
+
+/* ---- 4. Pattern lines ------------------------------------------------------------- */
+.qp { --mark: rgb(56 76 101 / 0.42); --mid: 40%; }
+.qp-frame {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--mid) minmax(0, 1fr);
+  max-width: 1240px;
+  margin: 0 auto;
+}
+/* the guides run on past the content top and bottom, and fade out there */
+.qp-guides {
+  position: absolute;
+  inset: -120px 0;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent);
+}
+/* a fold line: a long dash and a dot, over and over */
+.qp-guide {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: repeating-linear-gradient(180deg, var(--mark) 0 14px, transparent 14px 19px, var(--mark) 19px 21px, transparent 21px 26px);
+}
+.qp-guide.is-l { left: 0; }
+.qp-guide.is-m { left: var(--mid); }
+.qp-guide.is-r { right: 0; }
+/* behind the scissors the middle guide is cut: a dark seam, its lit edge beside it */
+.qp-cut {
+  position: absolute;
+  left: 0;
+  top: 120px; /* the guides start 120px above the content */
+  width: 1.5px;
+  height: calc((100% - 240px) * var(--p));
+  background: rgb(18 21 36 / 0.62);
+  box-shadow: 1.5px 0 0 rgb(255 255 255 / 0.9);
+}
+
+.qp-side { position: relative; padding: 0 clamp(28px, 4vw, 64px) 0 clamp(28px, 3vw, 40px); }
+.qp-head { position: sticky; top: 20svh; display: flex; flex-direction: column; gap: 16px; padding-top: 6px; }
+.qp-head > :not(.qp-hole) { opacity: 0; translate: 0 18px; transition: opacity 1.2s var(--expo), translate 1.2s var(--expo); }
+.qp-head > .qx-title { transition-delay: 0.08s; }
+.qp-head > .qx-lede { transition-delay: 0.16s; }
+.qp-head > .qp-grain { transition-delay: 0.24s; }
+.qp-head.is-in > :not(.qp-hole) { opacity: 1; translate: 0 0; }
+/* the grainline: a straight line with an arrowhead at each end, named */
+.qp-grain { display: flex; align-items: center; gap: 12px; margin-top: 22px; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--steel); }
+.qp-grain__line { position: relative; width: min(160px, 40%); height: 1px; background: var(--mark); }
+.qp-grain__line::before,
+.qp-grain__line::after { content: ""; position: absolute; top: -3px; width: 0; height: 0; border-top: 3.5px solid transparent; border-bottom: 3.5px solid transparent; }
+.qp-grain__line::before { left: -1px; border-right: 6px solid rgb(56 76 101 / 0.6); }
+.qp-grain__line::after { right: -1px; border-left: 6px solid rgb(56 76 101 / 0.6); }
+
+/* a drill hole: a ring with a cross, sitting on the guide */
+.qp-hole {
+  position: absolute;
+  left: 0;
+  top: 33px;
+  z-index: 1;
+  width: 11px;
+  height: 11px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  border: 1px solid rgb(56 76 101 / 0.6);
+  background:
+    linear-gradient(rgb(56 76 101 / 0.6), rgb(56 76 101 / 0.6)) 50% 50% / 1px 100% no-repeat,
+    linear-gradient(rgb(56 76 101 / 0.6), rgb(56 76 101 / 0.6)) 50% 50% / 100% 1px no-repeat,
+    var(--cloud);
+}
+.qp-hole.is-head { left: calc(-1 * clamp(28px, 3vw, 40px)); top: 13px; }
+
+.qp-list { position: relative; }
+.qp-row { position: relative; padding: 0 0 0 clamp(28px, 3vw, 44px); }
+.qp-q {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 22px clamp(16px, 2vw, 28px) 22px 0;
+  text-align: left;
+  cursor: pointer;
+}
+.qp-n { font-size: 11px; letter-spacing: 0.02em; color: var(--steel); }
+.qp-t { font-size: clamp(17px, 1.4vw, 20px); font-weight: 500; line-height: 1.25; letter-spacing: -0.025em; color: var(--ink); }
+/* the button: a small rounded square, a plus that turns to a minus */
+.qp-btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: rgb(255 255 255 / 0.75);
+  box-shadow: inset 0 0 0 1px rgb(18 21 36 / 0.1), 0 2px 6px -3px rgb(56 76 101 / 0.25);
+  transition: background-color 0.35s ease;
+}
+.qp-btn::before,
+.qp-btn::after { content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 1.6px; border-radius: 1px; background: var(--ink); translate: -50% -50%; transition: rotate 0.5s var(--expo), background-color 0.35s ease; }
+.qp-btn::after { rotate: 90deg; }
+.qp-row.is-open .qp-btn { background: #4a5fd8; }
+.qp-row.is-open .qp-btn::before,
+.qp-row.is-open .qp-btn::after { background: #fff; }
+.qp-row.is-open .qp-btn::after { rotate: 0deg; }
+@media (hover: hover) { .qp-q:hover .qp-btn { background: #fff; } .qp-row.is-open .qp-q:hover .qp-btn { background: #4a5fd8; } }
+.qp-q:focus-visible { outline: 2px solid #4a5fd8; outline-offset: 2px; border-radius: 8px; }
+.qp-a { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.6s var(--expo); }
+.qp-row.is-open .qp-a { grid-template-rows: 1fr; }
+.qp-a__in { min-height: 0; overflow: hidden; }
+.qp-a p { max-width: 56ch; padding: 0 clamp(16px, 2vw, 28px) 26px 48px; font-size: 15px; line-height: 1.6; letter-spacing: -0.01em; color: var(--navy); }
+/* a stitching line under each question, across the column, notched at both guides */
+.qp-stitch {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, var(--mark) 0 6px, transparent 6px 11px);
+}
+.qp-stitch i { position: absolute; top: -4px; width: 1px; height: 9px; background: rgb(56 76 101 / 0.6); }
+.qp-stitch i.is-l { left: 0; }
+.qp-stitch i.is-r { right: 0; }
+.qp-row:last-child .qp-stitch { display: none; }
+/* the scissors, on the middle guide, pointing down the way they cut */
+.qp-sc { position: absolute; left: 0; width: 42px; translate: -50% -50%; rotate: 90deg; z-index: 2; }
+
+@media (max-width: 899px) {
+  .qp { --mid: 0px; }
+  .qp-frame { grid-template-columns: 1fr; gap: 48px; }
+  .qp-guide.is-l { display: none; }
+  .qp-side { padding: 0 0 0 28px; }
+  .qp-head { position: static; }
+  .qp-hole.is-head { left: -28px; }
+  .qp-a p { padding-left: 20px; }
+  .qp-q { grid-template-columns: 30px minmax(0, 1fr) auto; }
+  .qp-sc { width: 34px; }
 }

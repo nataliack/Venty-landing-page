@@ -363,6 +363,79 @@ function PatternPiece() {
   );
 }
 
+/* ---- 4. Pattern lines --------------------------------------------------------
+   React Bits' FAQ 4, open: no cards, the questions float between guide lines,
+   and every line is a pattern-making mark. The long guides are fold lines
+   (dash and dot), the lines between the questions stitching lines, a notch
+   where a stitching line meets a guide, a drill hole (a ring with a cross)
+   on the guide at each question, a grainline under the intro. The guides
+   fade out top and bottom. The scissors cut down the guide beside the
+   questions as you scroll: behind them, the fold line is cut. */
+
+function LinesRow({ n, q, a, open, onToggle }: { n: number; q: string; a: string; open: boolean; onToggle: () => void }) {
+  const id = useId();
+  return (
+    <div className={`qp-row ${open ? "is-open" : ""}`}>
+      <span className="qp-hole" aria-hidden="true" />
+      <h3>
+        <button type="button" className="qp-q" aria-expanded={open} aria-controls={id} onClick={onToggle}>
+          <span className="qp-n">Q{n}</span>
+          <span className="qp-t">{q}</span>
+          <span className="qp-btn" aria-hidden="true" />
+        </button>
+      </h3>
+      <div id={id} className="qp-a" role="region" aria-label={q}>
+        <div className="qp-a__in">
+          <p>{a}</p>
+        </div>
+      </div>
+      {/* the stitching line under it, notched where it meets the guides */}
+      <span className="qp-stitch" aria-hidden="true">
+        <i className="is-l" />
+        <i className="is-r" />
+      </span>
+    </div>
+  );
+}
+
+function PatternLines() {
+  const list = useRef<HTMLDivElement>(null);
+  const p = useProgress(list, 0.7, 0.4);
+  const [open, setOpen] = useState(0);
+  return (
+    <Paper className="qp">
+      <div className="qp-frame">
+        {/* the guides: fold lines, fading out top and bottom */}
+        <div className="qp-guides" aria-hidden="true">
+          <span className="qp-guide is-l" />
+          <span className="qp-guide is-m" style={{ "--p": p } as CSSProperties}>
+            <span className="qp-cut" />
+          </span>
+          <span className="qp-guide is-r" />
+        </div>
+        <div className="qp-side">
+          <header data-in className="qp-head">
+            <span className="qp-hole is-head" aria-hidden="true" />
+            <p className="qx-eyebrow">FAQ</p>
+            <h2 className="qx-title">Before you cut.</h2>
+            <p className="qx-lede">The questions people ask before their first pattern.</p>
+            <p className="qp-grain" aria-hidden="true">
+              <span className="qp-grain__line" />
+              Grainline
+            </p>
+          </header>
+        </div>
+        <div ref={list} className="qp-list">
+          <Scissors open={snip(p, QA.length * 2)} className="qp-sc" style={{ top: `${p * 100}%` }} />
+          {QA.map((x, i) => (
+            <LinesRow key={x.q} n={i + 1} q={x.q} a={x.a} open={open === i} onToggle={() => setOpen((o) => (o === i ? -1 : i))} />
+          ))}
+        </div>
+      </div>
+    </Paper>
+  );
+}
+
 /* ---- the lab's pages ------------------------------------------------------- */
 
 const Lead = () => <div className="qx-lead" aria-hidden="true" />;
@@ -394,6 +467,18 @@ export function FaqPatternPiece() {
     <Shell>
       <Lead />
       <PatternPiece />
+      <section className="hc-sec">
+        <End />
+      </section>
+    </Shell>
+  );
+}
+
+export function FaqPatternLines() {
+  return (
+    <Shell>
+      <Lead />
+      <PatternLines />
       <section className="hc-sec">
         <End />
       </section>
