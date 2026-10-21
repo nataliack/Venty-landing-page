@@ -1,4 +1,7 @@
-/* 7. FAQ (faq/Faq.tsx). Cloud, ink type, the questions on paper. Scoped to .fq. */
+/* 7. FAQ (faq/Faq.tsx), ported from the lab's Pattern lines
+   (src/app/lab/_components/sections/faq/faq-lab.css, .qp). Cloud, the app's
+   graph paper at half strength, the questions between guide lines that are
+   a dash and a dot. Scoped to .fq. */
 
 .fq {
   --ink: #121524;
@@ -6,166 +9,131 @@
   --steel: #485f88;
   --corn: #687ef5;
   --cloud: #eff4ff;
+  --deep: #4a5fd8; /* a deeper cornflower: white on it passes AA */
+  --mark: rgb(56 76 101 / 0.32);
   --expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --spring: cubic-bezier(0.2, 1.4, 0.4, 1);
+  --mid: 40%;
   position: relative;
   z-index: 10;
+  isolation: isolate;
+  overflow: clip;
   /* room at the end for the dark edge of Meet the maker to rise through */
-  padding: clamp(72px, 12svh, 140px) 16px calc(42svh + 72px);
+  padding: clamp(96px, 16svh, 170px) var(--gutter) calc(42svh + 72px);
   color: var(--ink);
   background: var(--cloud);
 }
-@media (min-width: 768px) { .fq { padding-left: 32px; padding-right: 32px; } }
-@media (min-width: 1280px) { .fq { padding-left: 48px; padding-right: 48px; } }
 
-.fq-grid { display: grid; gap: 40px; max-width: 1344px; margin: 0 auto; }
-@media (min-width: 1024px) {
-  .fq-grid { grid-template-columns: 5fr 7fr; gap: 48px; align-items: start; }
-  .fq-head { position: sticky; top: 18svh; }
-}
-.fq-head { display: flex; flex-direction: column; gap: 14px; }
-.fq-eyebrow { font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--navy); }
-.fq-title {
-  display: flex;
-  flex-direction: column;
-  font-weight: 400;
-  font-size: clamp(3.2rem, 8vw, 8.4rem);
-  line-height: 0.92;
-  letter-spacing: -0.055em;
-}
-
-/* ---- the cutting line ------------------------------------------------ */
-.fq-body { position: relative; display: grid; grid-template-columns: 24px 1fr; gap: 14px; }
-@media (min-width: 768px) { .fq-body { grid-template-columns: 32px 1fr; gap: 20px; } }
-.fq-cut {
-  --cut: 0;
-  position: relative;
-  margin: 8px 0;
-  background: repeating-linear-gradient(180deg, rgb(56 76 101 / 0.45) 0 7px, transparent 7px 13px) center / 1.5px 100% no-repeat;
-}
-/* behind the scissors the line is cut: it opens a hair */
-.fq-cut__done {
+/* the graph paper: the app's .light-mat at half strength (cornflower lines
+   every 96px at 6%, every 24px at 3%), mostly low down: barely there at the
+   top, strongest towards the foot, fading out at the very bottom */
+.fq-paper {
   position: absolute;
-  left: 50%;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(0deg, rgb(104 126 245 / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(104 126 245 / 0.06) 1px, transparent 1px),
+    linear-gradient(0deg, rgb(104 126 245 / 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(104 126 245 / 0.03) 1px, transparent 1px);
+  background-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px;
+  background-position: -1px 100%;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, rgb(0 0 0 / 0.12) 30%, #000 62%, #000 76%, transparent 96%);
+  mask-image: linear-gradient(180deg, transparent 0%, rgb(0 0 0 / 0.12) 30%, #000 62%, #000 76%, transparent 96%);
+}
+
+.fq-frame {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--mid) minmax(0, 1fr);
+  max-width: 1240px;
+  margin: 0 auto;
+}
+/* the guides run on past the content top and bottom, and fade out there */
+.fq-guides {
+  position: absolute;
+  inset: -120px 0;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent);
+}
+/* every line here: a dash, then a dot, over and over */
+.fq-guide {
+  position: absolute;
   top: 0;
-  width: 6px;
-  height: calc(var(--cut) * 100%);
-  translate: -50% 0;
-  background: var(--cloud);
-  box-shadow: inset 1.5px 0 0 rgb(56 76 101 / 0.35), inset -1.5px 0 0 rgb(56 76 101 / 0.35);
-  border-radius: 0 0 3px 3px;
+  bottom: 0;
+  width: 1px;
+  background: repeating-linear-gradient(180deg, var(--mark) 0 14px, transparent 14px 19px, var(--mark) 19px 21px, transparent 21px 26px);
 }
-.fq-cut__sc {
-  position: absolute;
-  left: 50%;
-  top: calc(var(--cut) * 100%);
-  width: 24px;
-  height: 24px;
-  translate: -50% -4px;
-  rotate: 90deg;
-  color: var(--ink);
-  background: var(--cloud);
-  border-radius: 50%;
-}
+.fq-guide.is-l { left: 0; }
+.fq-guide.is-m { left: var(--mid); }
+.fq-guide.is-r { right: 0; }
 
-/* ---- the questions --------------------------------------------------- */
-.fq-list { display: flex; flex-direction: column; gap: 12px; list-style: none; }
-.fq-item {
-  position: relative;
-  border-radius: 6px;
-  background: linear-gradient(225deg, #fff 0%, #f7f9fe 70%, #f1f4fb 100%);
-  box-shadow: 0 0 0 0.5px rgb(18 21 36 / 0.08), -6px 10px 18px -12px rgb(30 44 78 / 0.3);
-  transition: box-shadow 0.6s var(--expo), translate 0.6s var(--expo);
-}
-.fq-item.is-open { box-shadow: 0 0 0 0.5px rgb(18 21 36 / 0.1), -10px 20px 34px -16px rgb(30 44 78 / 0.4); }
-@media (hover: hover) { .fq-item:not(.is-open):hover { translate: 0 -2px; } }
-/* notches on the edge, like a pattern piece's */
-.fq-notch {
-  position: absolute;
-  left: -1px;
-  width: 0;
-  height: 0;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  border-left: 7px solid var(--cloud);
-}
-.fq-notch.is-a { top: 22px; }
-.fq-notch.is-b { top: 34px; }
+/* ---- the title ----------------------------------------------------------- */
+.fq-head { position: relative; display: flex; flex-direction: column; gap: 16px; padding: 30px clamp(28px, 4vw, 64px) 0 clamp(28px, 3vw, 40px); }
+.fq-eyebrow { font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--navy); }
+.fq-title { display: flex; flex-direction: column; font-weight: 400; font-size: clamp(2.8rem, 6vw, 5.4rem); line-height: 0.98; letter-spacing: -0.055em; }
+/* body text: the page's own (as Features' lede), wrapped without widows */
+.fq-body,
+.fq-a p { font-size: clamp(15px, 1.15vw, 17px); line-height: 1.55; letter-spacing: -0.01em; color: var(--navy); text-wrap: pretty; }
+.fq-body { max-width: 24ch; margin-top: clamp(14px, 1.6vw, 24px); text-wrap: balance; }
+
+/* ---- the questions ----------------------------------------------------------- */
+.fq-list { position: relative; }
+.fq-row { position: relative; padding: 0 0 0 clamp(28px, 3vw, 44px); }
 .fq-q {
   display: grid;
-  grid-template-columns: 34px 1fr 28px;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
+  gap: 16px;
   width: 100%;
-  padding: 22px 20px 22px 18px;
+  padding: 32px clamp(20px, 2.4vw, 32px) 32px 0;
   text-align: left;
   cursor: pointer;
 }
-@media (min-width: 768px) { .fq-q { grid-template-columns: 48px 1fr 32px; padding: 26px 26px 26px 22px; } }
-.fq-q:focus-visible { outline: 2px solid var(--corn); outline-offset: 2px; border-radius: 6px; }
-.fq-n { font-family: var(--font-bigilla), Georgia, serif; font-size: 20px; color: var(--corn); }
-.fq-q__t { font-size: clamp(18px, 1.7vw, 24px); line-height: 1.2; letter-spacing: -0.03em; }
-.fq-icon {
+/* the number: the page's eyebrow type */
+.fq-n { font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--steel); }
+/* the question: the body's navy, softer than ink */
+.fq-t { font-size: clamp(17px, 1.4vw, 20px); font-weight: 500; line-height: 1.25; letter-spacing: -0.025em; color: var(--navy); text-wrap: balance; }
+/* the button: a small rounded square, a plus that turns to a minus */
+.fq-btn {
   position: relative;
-  justify-self: end;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: rgb(18 21 36 / 0.05);
-  transition: background-color 0.4s, rotate 0.7s var(--spring);
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: rgb(255 255 255 / 0.75);
+  box-shadow: inset 0 0 0 1px rgb(18 21 36 / 0.1), 0 2px 6px -3px rgb(56 76 101 / 0.25);
+  transition: background-color 0.35s ease;
 }
-.fq-icon::before,
-.fq-icon::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 11px;
-  height: 1.5px;
-  translate: -50% -50%;
-  background: var(--ink);
-  transition: rotate 0.7s var(--spring), background-color 0.4s;
-}
-.fq-icon::after { rotate: 90deg; }
-.fq-item.is-open .fq-icon { rotate: 45deg; background: var(--corn); }
-.fq-item.is-open .fq-icon::before,
-.fq-item.is-open .fq-icon::after { background: var(--cloud); }
-@media (hover: hover) { .fq-q:hover .fq-icon { background: rgb(18 21 36 / 0.1); } .fq-item.is-open .fq-q:hover .fq-icon { background: var(--corn); } }
-
-/* the answer unfolds */
-.fq-a { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.7s var(--expo); }
-.fq-item.is-open .fq-a { grid-template-rows: 1fr; }
+.fq-btn::before,
+.fq-btn::after { content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 1.6px; border-radius: 1px; background: var(--ink); translate: -50% -50%; transition: rotate 0.5s var(--expo), background-color 0.35s ease; }
+.fq-btn::after { rotate: 90deg; }
+.fq-row.is-open .fq-btn { background: var(--deep); }
+.fq-row.is-open .fq-btn::before,
+.fq-row.is-open .fq-btn::after { background: #fff; }
+.fq-row.is-open .fq-btn::after { rotate: 0deg; }
+@media (hover: hover) { .fq-q:hover .fq-btn { background: #fff; } .fq-row.is-open .fq-q:hover .fq-btn { background: var(--deep); } }
+.fq-q:focus-visible { outline: 2px solid var(--deep); outline-offset: 2px; border-radius: 8px; }
+.fq-a { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.6s var(--expo); }
+.fq-row.is-open .fq-a { grid-template-rows: 1fr; }
 .fq-a__in { min-height: 0; overflow: hidden; }
-.fq-a p {
-  max-width: 58ch;
-  padding: 0 26px 26px 62px;
-  font-size: clamp(15px, 1.15vw, 17px);
-  line-height: 1.5;
-  letter-spacing: -0.015em;
-  color: var(--navy);
-  opacity: 0;
-  translate: 0 8px;
-  transition: opacity 0.5s var(--expo), translate 0.8s var(--expo);
-}
-@media (min-width: 768px) { .fq-a p { padding-left: 80px; } }
-.fq-item.is-open .fq-a p { opacity: 1; translate: 0 0; transition-delay: 0.12s; }
-.fq-stitch {
-  display: block;
+.fq-a p { max-width: 54ch; padding: 0 clamp(20px, 2.4vw, 32px) 34px 56px; }
+/* the line under each question, across the column */
+.fq-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   height: 1px;
-  margin: 0 26px 16px 62px;
-  background: repeating-linear-gradient(90deg, var(--corn) 0 5px, transparent 5px 10px);
-  scale: 0 1;
-  transform-origin: 0 50%;
-  transition: scale 0.9s var(--expo);
+  background: repeating-linear-gradient(90deg, var(--mark) 0 14px, transparent 14px 19px, var(--mark) 19px 21px, transparent 21px 26px);
 }
-@media (min-width: 768px) { .fq-stitch { margin-left: 80px; } }
-.fq-item.is-open .fq-stitch { scale: 1 1; transition-delay: 0.1s; }
+.fq-row:last-child .fq-line { display: none; }
 
-@media (prefers-reduced-motion: reduce) {
-  .fq *,
-  .fq *::before,
-  .fq *::after {
-    transition-duration: 0.01ms !important;
-    transition-delay: 0s !important;
-  }
+@media (max-width: 899px) {
+  .fq { --mid: 0px; }
+  .fq-frame { grid-template-columns: 1fr; gap: 40px; }
+  .fq-guide.is-l { display: none; }
+  .fq-head { padding: 30px 0 0 28px; }
+  .fq-a p { padding-left: 20px; }
+  .fq-q { grid-template-columns: 34px minmax(0, 1fr) auto; padding: 26px 16px 26px 0; }
 }

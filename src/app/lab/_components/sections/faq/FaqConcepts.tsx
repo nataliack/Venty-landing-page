@@ -464,9 +464,6 @@ export function FaqPatternLines() {
     <Shell>
       <Lead />
       <PatternLines />
-      <section className="hc-sec">
-        <End />
-      </section>
     </Shell>
   );
 }

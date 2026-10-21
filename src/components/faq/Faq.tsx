@@ -1,22 +1,31 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useId, useRef, useState } from "react";
 import { useReveals } from "@/lib/useReveals";
 import "./faq.css";
 
-gsap.registerPlugin(ScrollTrigger);
+/* 7. FAQ (light). "Before you cut." Ported from the lab's Pattern lines
+   (src/app/lab/_components/sections/faq/FaqConcepts.tsx), React Bits' FAQ 4
+   open, in Venty's colours: no cards, the questions float between guide
+   lines, every one a dash and a dot (as a pattern is marked), the guides
+   fading out top and bottom. Behind it all the app's graph paper (its light
+   hero's grid, venty-app globals.css .light-mat), at half strength, mostly
+   low down.
 
-/* 7. FAQ (light). "Before you cut." The title holds on the left with a
-   cutting line down beside the questions: a pair of scissors travels down
-   it as you read. Each question is a pattern piece, notched on its edge;
-   open one and its answer unfolds, its stitching line drawn along the top. */
+   At the end, empty room for the dark edge of Meet the maker to rise
+   through (docs/motion.md, hand-offs).
+
+   Every answer is something the page already says (How it works,
+   Features); nothing new is promised. */
 
 const QA = [
   {
     q: "How accurate is the fit?",
     a: "As accurate as the measurements you give it. Venty drafts every piece from your numbers, and each measure shows where the tape goes. For anything close-fitting, sew a quick test version first, adjust your body in Venty and draft again.",
+  },
+  {
+    q: "Which measurements do I need?",
+    a: "Four to start: bust, waist, hips and back length. Venty shows you where the tape goes for each one. Add more whenever you want a closer fit.",
   },
   {
     q: "What can I make?",
@@ -27,59 +36,62 @@ const QA = [
     a: "No. If you can cut along a line and sew a straight seam, you can start. Fit is described in plain words, and every piece is labelled with grainlines and notches.",
   },
   {
+    q: "Can I start from a photo?",
+    a: "Yes. Upload a photo of a garment you love, or describe it in a sentence. Circle what you like on the photo and pin a note, and Venty reads your marks.",
+  },
+  {
+    q: "Can I change the design once it's drafted?",
+    a: "Yes. Say what to change the way you'd say it, like longer sleeves, and Venty redrafts the pieces. Every version is kept with its notes.",
+  },
+  {
+    q: "How do I print my pattern?",
+    a: "On A4 at home, or A0 at a print shop. Move the pieces round the sheet to use less paper. The A4 pages come with a map for taping them together.",
+  },
+  {
     // TO CONFIRM against how the app actually handles data before launch
     q: "What happens to my photos and measurements?",
     a: "They're used to draft your patterns and are kept in your account. You can delete a photo or a body whenever you like.",
   },
 ];
 
-function Item({ n, q, a, open, onToggle }: { n: number; q: string; a: string; open: boolean; onToggle: () => void }) {
+function Row({ n, q, a, open, onToggle }: { n: number; q: string; a: string; open: boolean; onToggle: () => void }) {
   const id = useId();
   return (
-    <li data-up className={`fq-item ${open ? "is-open" : ""}`}>
-      <span className="fq-notch is-a" aria-hidden="true" />
-      <span className="fq-notch is-b" aria-hidden="true" />
+    <div data-up className={`fq-row ${open ? "is-open" : ""}`}>
       <h3>
         <button type="button" className="fq-q" aria-expanded={open} aria-controls={id} onClick={onToggle}>
-          <span className="fq-n">{String(n).padStart(2, "0")}</span>
-          <span className="fq-q__t">{q}</span>
-          <span className="fq-icon" aria-hidden="true" />
+          <span className="fq-n">Q{n}</span>
+          <span className="fq-t">{q}</span>
+          <span className="fq-btn" aria-hidden="true" />
         </button>
       </h3>
       <div id={id} className="fq-a" role="region" aria-label={q}>
         <div className="fq-a__in">
-          <span className="fq-stitch" aria-hidden="true" />
           <p>{a}</p>
         </div>
       </div>
-    </li>
+      {/* the line under it */}
+      <span className="fq-line" aria-hidden="true" />
+    </div>
   );
 }
 
 export function Faq() {
   const root = useRef<HTMLElement>(null);
-  const list = useRef<HTMLOListElement>(null);
   const [open, setOpen] = useState(0);
   useReveals(root);
 
-  // the scissors cut down the line as you read
-  useEffect(() => {
-    const el = list.current;
-    const sc = root.current?.querySelector<HTMLElement>(".fq-cut");
-    if (!el || !sc) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        sc,
-        { "--cut": 0 },
-        { "--cut": 1, ease: "none", scrollTrigger: { trigger: el, start: "top 70%", end: "bottom 60%", scrub: true } },
-      );
-    }, root);
-    return () => ctx.revert();
-  }, []);
-
   return (
     <section ref={root} id="faq" data-nav="FAQ" data-wing="perch" data-theme-zone="light" className="fq" aria-labelledby="fq-title">
-      <div className="fq-grid">
+      <div className="fq-paper" aria-hidden="true" />
+      <div className="fq-frame">
+        {/* the guides, fading out top and bottom */}
+        <div className="fq-guides" aria-hidden="true">
+          <span className="fq-guide is-l" />
+          <span className="fq-guide is-m" />
+          <span className="fq-guide is-r" />
+        </div>
+
         <header className="fq-head" data-reveal>
           <p className="fq-eyebrow">
             <span className="line-mask inline-block">
@@ -100,22 +112,15 @@ export function Faq() {
               </span>
             </span>
           </h2>
+          <p data-up className="fq-body">
+            The questions people ask before their first pattern.
+          </p>
         </header>
 
-        <div className="fq-body">
-          <div className="fq-cut" aria-hidden="true">
-            <span className="fq-cut__done" />
-            <svg viewBox="0 0 24 24" className="fq-cut__sc" fill="none">
-              <circle cx="6" cy="6" r="3" stroke="currentColor" strokeWidth="1.5" />
-              <circle cx="6" cy="18" r="3" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M8.6 7.6 20 16M8.6 16.4 20 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          </div>
-          <ol ref={list} className="fq-list" data-reveal="top 80%">
-            {QA.map((x, i) => (
-              <Item key={x.q} n={i + 1} q={x.q} a={x.a} open={open === i} onToggle={() => setOpen((o) => (o === i ? -1 : i))} />
-            ))}
-          </ol>
+        <div className="fq-list" data-reveal="top 82%">
+          {QA.map((x, i) => (
+            <Row key={x.q} n={i + 1} q={x.q} a={x.a} open={open === i} onToggle={() => setOpen((o) => (o === i ? -1 : i))} />
+          ))}
         </div>
       </div>
     </section>
