@@ -14,7 +14,7 @@ import "./made.css";
    (placed every frame from the curve's own shape: both pegs always on the
    line). The cards drift along it, right to left; drag the line to look
    along it, and let go: it carries on with the speed of the drag, then eases
-   back to its drift (it pauses under a mouse). Each card says what was sewn,
+   back to its drift (it never stops for a hover). Each card says what was sewn,
    by whom, and the body it was drafted on. The cards are the site's glass
    (the composer's and How it works'): white glass, a 20px blur, a hairline,
    28px corners.
@@ -43,7 +43,8 @@ const SPEED = 55; // px per second along the line, right to left
    screen's width), and how far under the title's foot its
    middle hangs (px) */
 const SAG = 0.13;
-const UNDER = 40;
+const UNDER = 96; // phones: UNDER_PHONE
+const UNDER_PHONE = 56;
 
 function Card({ m, copy }: { m: Make; copy: boolean }) {
   return (
@@ -67,7 +68,7 @@ function Card({ m, copy }: { m: Make; copy: boolean }) {
 export function MadeWith() {
   const root = useRef<HTMLElement>(null);
   const line = useRef<HTMLDivElement>(null);
-  const cord = useRef<SVGPathElement>(null);
+  const cord = useRef<SVGGElement>(null);
   const head = useRef<HTMLElement>(null);
   useReveals(root);
 
@@ -101,14 +102,15 @@ export function MadeWith() {
       // its middle hangs just under the title, its ends rise beside it
       const foot = hd.offsetHeight;
       ln.style.marginTop = `${-foot}px`;
-      y0 = Math.max(16, foot + UNDER - sag);
+      y0 = Math.max(16, foot + (W < 700 ? UNDER_PHONE : UNDER) - sag);
       // the cord, drawn once for this width (a little past both edges)
       const pts: string[] = [];
       for (let k = 0; k <= 48; k++) {
         const x = -W * 0.05 + (W * 1.1 * k) / 48;
         pts.push(`${x.toFixed(1)} ${at(x).toFixed(1)}`);
       }
-      pa.setAttribute("d", "M" + pts.join("L"));
+      const d = "M" + pts.join("L");
+      pa.querySelectorAll("path").forEach((p) => p.setAttribute("d", d));
       // room for the cards hanging from the line's lowest point
       ln.style.height = `${y0 + sag + (cards[0]?.offsetHeight || 460) + 40}px`;
     };
@@ -116,7 +118,6 @@ export function MadeWith() {
     let x = 0; // how far the line has run
     let v = 0; // speed now, px a second (eased back to the drift after a drag)
     let held = false;
-    let over = false;
     let lastX = 0;
     let lastT = 0;
     let dragV = 0;
@@ -145,7 +146,7 @@ export function MadeWith() {
       last = t;
       if (!held) {
         // after a drag it runs on at the drag's speed, then eases back
-        const target = reduce || over ? 0 : SPEED;
+        const target = reduce ? 0 : SPEED;
         v += (target - v) * Math.min(1, dt * 1.4);
         x += v * dt;
       }
@@ -187,14 +188,10 @@ export function MadeWith() {
       v = performance.now() - lastT > 80 ? 0 : Math.max(-4000, Math.min(4000, dragV));
       delete ln.dataset.held;
     };
-    const enter = (e: PointerEvent) => e.pointerType === "mouse" && (over = true);
-    const leave = () => (over = false);
     ln.addEventListener("pointerdown", down);
     ln.addEventListener("pointermove", move);
     ln.addEventListener("pointerup", up);
     ln.addEventListener("pointercancel", up);
-    ln.addEventListener("pointerenter", enter);
-    ln.addEventListener("pointerleave", leave);
 
     size();
     v = reduce ? 0 : SPEED;
@@ -213,8 +210,6 @@ export function MadeWith() {
       ln.removeEventListener("pointermove", move);
       ln.removeEventListener("pointerup", up);
       ln.removeEventListener("pointercancel", up);
-      ln.removeEventListener("pointerenter", enter);
-      ln.removeEventListener("pointerleave", leave);
     };
   }, []);
 
@@ -257,8 +252,23 @@ export function MadeWith() {
         {/* the line, over the title's sides: its ends rise beside it */}
         <div ref={line} className="mw-line" data-reveal="top 85%" aria-label="Makes" role="region">
           <div data-up className="mw-line__in">
+            {/* the cord, a twisted rope: its shadow on the wall behind, its
+                shaded underside, the rope and its strands, and the light along
+                its top (one curve, set by size()) */}
             <svg className="mw-cord" aria-hidden="true">
-              <path ref={cord} />
+              <defs>
+                {/* the twist: strands running round the rope, on the slant */}
+                <pattern id="mw-twist" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(58)">
+                  <rect width="4" height="4" fill="#8f9bb4" />
+                  <rect width="1.7" height="4" fill="#5f6d89" />
+                </pattern>
+              </defs>
+              <g ref={cord}>
+                <path className="is-shadow" />
+                <path className="is-under" />
+                <path className="is-rope" />
+                <path className="is-light" />
+              </g>
             </svg>
             <ul className="mw-track">
               {/* twice over, so the line runs on without a gap (the copy is hidden from screen readers) */}
