@@ -76,7 +76,7 @@ const OBJECTS: ({ src: string; w: number; h: number; s: number } | null)[] = [
   { src: "/lab/orbit/objects/1-measure.webp", w: 900, h: 1000, s: 1 },
   { src: "/lab/orbit/objects/2-describe.webp", w: 1312, h: 1000, s: 0.8 },
   { src: "/lab/orbit/objects/3-draft.webp", w: 842, h: 1000, s: 1 },
-  null,
+  { src: "/lab/orbit/objects/4-print.webp", w: 968, h: 1000, s: 0.92 },
 ];
 
 /* the valley behind (1792 x 1943, its sky cleared to the page's own pale):
