@@ -1,0 +1,390 @@
+"use client";
+
+import { useEffect, useId, useRef, useState, type CSSProperties, type RefObject } from "react";
+import { End, Shell, useBox } from "../hc/parts";
+import "./faq-lab.css";
+
+/* FAQ, three concepts (lab). All three on the app's graph paper (its light
+   hero's grid, venty-app globals.css .light-mat: cornflower lines every 96px
+   at 12%, every 24px at 6%), lit softly, with the questions as the site's
+   glass cards (white glass, a 20px blur, a hairline, 28px corners), and a
+   pair of scissors that cuts as you scroll: its blades close and open, snip
+   by snip, as it goes.
+
+   1. Cut line: the React Bits FAQ 4 layout. The title holds on the left;
+      down between it and the questions runs a cutting line, and the
+      scissors cut down it as you read.
+   2. Cut out: each question is cut out of the paper as it comes into view
+      (the scissors run round its edge), then lifts off it.
+   3. Pattern piece: the questions sit inside one pattern piece, its outline
+      dashed on the paper; the scissors cut all the way round it as you
+      scroll, and once round, the piece lifts free. */
+
+const QA = [
+  {
+    q: "How accurate is the fit?",
+    a: "As accurate as the measurements you give it. Venty drafts every piece from your numbers, and each measure shows where the tape goes. For anything close-fitting, sew a quick test version first, adjust your body in Venty and draft again.",
+  },
+  {
+    q: "What can I make?",
+    a: "Dresses, tops, trousers and skirts. Start from a photo or a few words, choose how close it should sit, and Venty drafts the pieces.",
+  },
+  {
+    q: "Do I need to be an experienced sewist?",
+    a: "No. If you can cut along a line and sew a straight seam, you can start. Fit is described in plain words, and every piece is labelled with grainlines and notches.",
+  },
+  {
+    // TO CONFIRM against how the app actually handles data before launch
+    q: "What happens to my photos and measurements?",
+    a: "They're used to draft your patterns and are kept in your account. You can delete a photo or a body whenever you like.",
+  },
+];
+
+/* ---- shared pieces ------------------------------------------------------- */
+
+/** The scissors, drawn pointing right, pivot at the middle. open: 0 shut, 1 wide. */
+function Scissors({ open, className = "", style }: { open: number; className?: string; style?: CSSProperties }) {
+  const uid = useId().replace(/:/g, "");
+  const a = 2 + open * 17; // each blade's angle off the line, in degrees
+  const half = (flip: boolean) => (
+    <g transform={`${flip ? "scale(1 -1) " : ""}rotate(${-a})`}>
+      {/* the handle: a ring behind the pivot, on its arm */}
+      <path d="M-4 -2 C -14 -6 -20 -10 -24 -14" stroke={`url(#${uid}-h)`} strokeWidth="5.5" strokeLinecap="round" fill="none" />
+      <ellipse cx="-36" cy="-17" rx="14" ry="9.5" transform="rotate(-18 -36 -17)" fill="none" stroke={`url(#${uid}-h)`} strokeWidth="5.5" />
+      {/* the blade: steel, tapering to its point */}
+      <path d="M-5 -3.2 L 58 -1.8 Q 66 -0.6 58 0.6 L -5 2 Z" fill={`url(#${uid}-b)`} stroke="rgb(18 21 36 / 0.35)" strokeWidth="0.6" />
+      <path d="M2 -2.4 L 56 -1.4" stroke="rgb(255 255 255 / 0.85)" strokeWidth="0.7" />
+    </g>
+  );
+  return (
+    <svg viewBox="-60 -40 130 80" className={`qx-sc ${className}`} style={style} aria-hidden="true">
+      <defs>
+        <linearGradient id={`${uid}-b`} x1="0" y1="-4" x2="0" y2="3" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#f4f6fb" />
+          <stop offset="0.55" stopColor="#b9c2d8" />
+          <stop offset="1" stopColor="#7d89a6" />
+        </linearGradient>
+        <linearGradient id={`${uid}-h`} x1="-50" y1="-28" x2="-10" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#8c9cf8" />
+          <stop offset="0.6" stopColor="#687ef5" />
+          <stop offset="1" stopColor="#4a5fd8" />
+        </linearGradient>
+      </defs>
+      <g className="qx-sc__shadow">
+        {half(false)}
+        {half(true)}
+      </g>
+      {half(true)}
+      {half(false)}
+      <circle r="3.4" fill="#c9d0e2" stroke="rgb(18 21 36 / 0.4)" strokeWidth="0.6" />
+      <circle r="1.1" fill="#5d6a86" />
+    </svg>
+  );
+}
+
+/** snips: open, shut, open... as t runs 0 to 1, n times */
+const snip = (t: number, n: number) => 0.5 - 0.5 * Math.cos(t * n * Math.PI * 2);
+
+/** how far through an element the scroll is: 0 as its top reaches `from`
+    of the box's height, 1 as its bottom reaches `to` */
+function useProgress(ref: RefObject<HTMLElement | null>, from = 0.75, to = 0.5) {
+  const box = useBox();
+  const [p, setP] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!box || !el) return;
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      const r = el.getBoundingClientRect();
+      const b = box.getBoundingClientRect();
+      const start = b.top + b.height * from; // the element's top here: 0
+      const end = b.top + b.height * to; // its bottom here: 1
+      const total = r.height + (start - end);
+      setP(Math.min(1, Math.max(0, (start - r.top) / Math.max(1, total))));
+    };
+    const on = () => {
+      if (!raf) raf = requestAnimationFrame(read);
+    };
+    read();
+    box.addEventListener("scroll", on, { passive: true });
+    window.addEventListener("resize", on);
+    return () => {
+      cancelAnimationFrame(raf);
+      box.removeEventListener("scroll", on);
+      window.removeEventListener("resize", on);
+    };
+  }, [box, ref, from, to]);
+  return p;
+}
+
+/** an element's size, kept up to date */
+function useSize(ref: RefObject<HTMLElement | null>) {
+  const [s, setS] = useState({ w: 0, h: 0 });
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setS({ w: el.offsetWidth, h: el.offsetHeight }));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ref]);
+  return s;
+}
+
+/** a rounded rectangle's outline (x, y from its box's corner, `inset` in),
+    as SVG draws a rect: from the top edge's start, clockwise. Its length,
+    and the point (and the way the outline runs there) at a share `p` of it */
+function along(w: number, h: number, r: number, inset: number, p: number) {
+  const W = Math.max(0, w - inset * 2);
+  const H = Math.max(0, h - inset * 2);
+  const rr = Math.min(r, W / 2, H / 2);
+  const arc = (Math.PI * rr) / 2;
+  const segs = [W - 2 * rr, arc, H - 2 * rr, arc, W - 2 * rr, arc, H - 2 * rr, arc];
+  const len = segs.reduce((s, x) => s + x, 0);
+  let d = Math.min(len, Math.max(0, p * len));
+  const o = inset;
+  // corners' centres, clockwise from the top right
+  const C = [
+    [o + W - rr, o + rr],
+    [o + W - rr, o + H - rr],
+    [o + rr, o + H - rr],
+    [o + rr, o + rr],
+  ];
+  for (let k = 0; k < 8; k++) {
+    const s = segs[k];
+    if (d <= s || k === 7) {
+      const f = s ? d / s : 0;
+      if (k % 2 === 0) {
+        // a straight edge: top (right), right (down), bottom (left), left (up)
+        const e = k / 2;
+        if (e === 0) return { len, x: o + rr + f * s, y: o, a: 0 };
+        if (e === 1) return { len, x: o + W, y: o + rr + f * s, a: 90 };
+        if (e === 2) return { len, x: o + W - rr - f * s, y: o + H, a: 180 };
+        return { len, x: o, y: o + H - rr - f * s, a: 270 };
+      }
+      // a corner: turning a quarter
+      const c = (k - 1) / 2;
+      const start = -90 + c * 90; // the angle round its centre where it begins
+      const th = ((start + f * 90) * Math.PI) / 180;
+      const [cx, cy] = C[c];
+      return { len, x: cx + rr * Math.cos(th), y: cy + rr * Math.sin(th), a: start + f * 90 + 90 };
+    }
+    d -= s;
+  }
+  return { len, x: o + rr, y: o, a: 0 };
+}
+
+function Head({ center = false }: { center?: boolean }) {
+  return (
+    <header data-in className={`qx-head ${center ? "is-center" : ""}`}>
+      <p className="qx-eyebrow">
+        <span className="qx-eyebrow__dot" aria-hidden="true" />
+        FAQ
+      </p>
+      <h2 className="qx-title">Before you cut.</h2>
+      <p className="qx-lede">The questions people ask before their first pattern.</p>
+    </header>
+  );
+}
+
+function Item({ n, q, a, open, onToggle }: { n: number; q: string; a: string; open: boolean; onToggle: () => void }) {
+  const id = useId();
+  return (
+    <div className={`qx-item ${open ? "is-open" : ""}`}>
+      <h3>
+        <button type="button" className="qx-q" aria-expanded={open} aria-controls={id} onClick={onToggle}>
+          <span className="qx-q__n">Q{n}</span>
+          <span className="qx-q__t">{q}</span>
+          <span className="qx-q__icon" aria-hidden="true" />
+        </button>
+      </h3>
+      <div id={id} className="qx-a" role="region" aria-label={q}>
+        <div className="qx-a__in">
+          <p>{a}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Paper({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <section className={`qx ${className}`}>
+      <div className="qx-paper" aria-hidden="true" />
+      <div className="qx-light" aria-hidden="true" />
+      {children}
+    </section>
+  );
+}
+
+/* ---- 1. Cut line ------------------------------------------------------- */
+
+function CutLine() {
+  const list = useRef<HTMLDivElement>(null);
+  const p = useProgress(list, 0.7, 0.45);
+  const [open, setOpen] = useState(0);
+  return (
+    <Paper className="qx-1">
+      <div className="qx-1__grid">
+        <div className="qx-1__side">
+          <Head />
+        </div>
+        <div ref={list} className="qx-1__list">
+          {/* the cutting line, cut behind the scissors, dashed ahead of them */}
+          <div className="qx-1__line" aria-hidden="true" style={{ "--p": p } as CSSProperties}>
+            <span className="qx-1__cut" />
+            <Scissors open={snip(p, QA.length * 2)} className="qx-1__sc" />
+          </div>
+          <div data-in className="qx-items">
+            {QA.map((x, i) => (
+              <Item key={x.q} n={i + 1} q={x.q} a={x.a} open={open === i} onToggle={() => setOpen((o) => (o === i ? -1 : i))} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </Paper>
+  );
+}
+
+/* ---- 2. Cut out ---------------------------------------------------------- */
+
+function CutCard({ n, x, open, onToggle }: { n: number; x: (typeof QA)[number]; open: boolean; onToggle: () => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const p = useProgress(ref, 0.92, 0.72);
+  const size = useSize(ref);
+  const pt = along(size.w, size.h, 28, 1, p);
+  const len = pt.len;
+  const done = p >= 1;
+  return (
+    <div ref={ref} className={`qx-2__slot ${done ? "is-cut" : ""}`}>
+      {/* the outline on the paper: cut behind the scissors, dashed ahead */}
+      <svg className="qx-2__outline" aria-hidden="true">
+        <rect x="1" y="1" rx="28" className="qx-2__dash" width={Math.max(0, size.w - 2)} height={Math.max(0, size.h - 2)} />
+        <rect
+          x="1"
+          y="1"
+          rx="28"
+          className="qx-2__cutpath"
+          width={Math.max(0, size.w - 2)}
+          height={Math.max(0, size.h - 2)}
+          style={{ strokeDasharray: `${len * p} ${len}` }}
+        />
+      </svg>
+      {!done && p > 0 && (
+        <Scissors
+          open={snip(p, 10)}
+          className="qx-2__sc"
+          style={{ transform: `translate(${pt.x}px, ${pt.y}px) translate(-50%, -50%) rotate(${pt.a}deg)` }}
+        />
+      )}
+      <div className="qx-2__card">
+        <Item n={n} q={x.q} a={x.a} open={open} onToggle={onToggle} />
+      </div>
+    </div>
+  );
+}
+
+function CutOut() {
+  const [open, setOpen] = useState(-1);
+  return (
+    <Paper className="qx-2">
+      <div className="qx-2__in">
+        <Head center />
+        <div className="qx-2__list">
+          {QA.map((x, i) => (
+            <CutCard key={x.q} n={i + 1} x={x} open={open === i} onToggle={() => setOpen((o) => (o === i ? -1 : i))} />
+          ))}
+        </div>
+      </div>
+    </Paper>
+  );
+}
+
+/* ---- 3. Pattern piece ------------------------------------------------------- */
+
+function PatternPiece() {
+  const piece = useRef<HTMLDivElement>(null);
+  const p = useProgress(piece, 0.8, 0.55);
+  const size = useSize(piece);
+  const pt = along(size.w, size.h, 40, 2, p);
+  const len = pt.len;
+  const [open, setOpen] = useState(0);
+  const done = p >= 1;
+  return (
+    <Paper className="qx-3">
+      <div className="qx-3__in">
+        <Head center />
+        <div ref={piece} className={`qx-3__piece ${done ? "is-cut" : ""}`}>
+          <svg className="qx-3__outline" aria-hidden="true">
+            <rect x="2" y="2" rx="40" className="qx-3__dash" width={Math.max(0, size.w - 4)} height={Math.max(0, size.h - 4)} />
+            <rect
+                  x="2"
+              y="2"
+              rx="40"
+              className="qx-3__cutpath"
+              width={Math.max(0, size.w - 4)}
+              height={Math.max(0, size.h - 4)}
+              style={{ strokeDasharray: `${len * p} ${len}` }}
+            />
+          </svg>
+          {/* notches along the edge, as a printed pattern piece has */}
+          <span className="qx-3__notch is-a" aria-hidden="true" />
+          <span className="qx-3__notch is-b" aria-hidden="true" />
+          <span className="qx-3__grain" aria-hidden="true">
+            Grainline
+          </span>
+          {!done && p > 0 && (
+            <Scissors
+              open={snip(p, 24)}
+              className="qx-3__sc"
+              style={{ transform: `translate(${pt.x}px, ${pt.y}px) translate(-50%, -50%) rotate(${pt.a}deg)` }}
+            />
+          )}
+          <div className="qx-3__sheet">
+            {QA.map((x, i) => (
+              <Item key={x.q} n={i + 1} q={x.q} a={x.a} open={open === i} onToggle={() => setOpen((o) => (o === i ? -1 : i))} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </Paper>
+  );
+}
+
+/* ---- the lab's pages ------------------------------------------------------- */
+
+const Lead = () => <div className="qx-lead" aria-hidden="true" />;
+
+export function FaqCutLine() {
+  return (
+    <Shell>
+      <Lead />
+      <CutLine />
+      <section className="hc-sec">
+        <End />
+      </section>
+    </Shell>
+  );
+}
+export function FaqCutOut() {
+  return (
+    <Shell>
+      <Lead />
+      <CutOut />
+      <section className="hc-sec">
+        <End />
+      </section>
+    </Shell>
+  );
+}
+export function FaqPatternPiece() {
+  return (
+    <Shell>
+      <Lead />
+      <PatternPiece />
+      <section className="hc-sec">
+        <End />
+      </section>
+    </Shell>
+  );
+}

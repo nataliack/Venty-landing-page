@@ -30,6 +30,7 @@ import { SameOutfit } from "./sections/wy/SameOutfit";
 import { DitherRise } from "./exp/DitherRise";
 import { FilamentLab } from "./loaders/Filament";
 import { MarkFlight } from "./exp/MarkFlight";
+import { FaqCutLine, FaqCutOut, FaqPatternPiece } from "./sections/faq/FaqConcepts";
 
 /* Loader concepts run inside the harness: stand-in page, simulated
    network, Replay. */
@@ -113,6 +114,9 @@ export const NATIVE: Record<string, ComponentType> = {
   "section-hiw-zigzag": HcZigzag,
   "section-hiw-tags": HcTags,
   "section-hiw-orbit": HcOrbit,
+  "section-faq-cutline": FaqCutLine,
+  "section-faq-cutout": FaqCutOut,
+  "section-faq-piece": FaqPatternPiece,
   "section-features-turn": FzTurn,
   "section-features-flip": FzFlip,
   "section-features-zoom": FzZoom,

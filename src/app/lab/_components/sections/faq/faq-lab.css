@@ -1,0 +1,254 @@
+/* FAQ, three concepts (FaqConcepts.tsx). The app's graph paper, lit softly;
+   the questions as the site's glass; scissors that cut as you scroll.
+   Scoped to .qx. */
+
+.qx-lead { height: 40svh; background: var(--cloud); }
+
+.qx {
+  --deep: #4a5fd8; /* a deeper cornflower: white on it passes AA */
+  --glass: rgb(255 255 255 / 0.62);
+  --hair: rgb(18 21 36 / 0.1);
+  --lift: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 30px 80px -36px rgb(56 76 101 / 0.45), 0 2px 6px -2px rgb(56 76 101 / 0.12);
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  color: var(--ink);
+  padding: clamp(96px, 16svh, 170px) var(--gutter) clamp(110px, 18svh, 200px);
+  /* the app's light hero, its paper colour */
+  background: linear-gradient(180deg, #f6f7fd 0%, #eceffd 55%, #e1e6fd 100%);
+}
+/* the graph paper: the app's .light-mat (cornflower lines every 96px at 12%,
+   every 24px at 6%), whole squares on the bottom edge, fading out up the
+   page and towards the sides */
+.qx-paper {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image:
+    linear-gradient(0deg, rgb(104 126 245 / 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(104 126 245 / 0.12) 1px, transparent 1px),
+    linear-gradient(0deg, rgb(104 126 245 / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(104 126 245 / 0.06) 1px, transparent 1px);
+  background-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px;
+  background-position: -1px 100%;
+  -webkit-mask-image: linear-gradient(0deg, #000 0%, rgb(0 0 0 / 0.55) 55%, transparent 96%), radial-gradient(ellipse 75% 90% at 50% 100%, #000 40%, transparent 100%);
+  mask-image: linear-gradient(0deg, #000 0%, rgb(0 0 0 / 0.55) 55%, transparent 96%), radial-gradient(ellipse 75% 90% at 50% 100%, #000 40%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+/* the light: a cool pool low in the middle, and a soft brightness drifting
+   across the top, slowly */
+.qx-light {
+  position: absolute;
+  inset: -10%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(40% 32% at 50% 78%, rgb(104 126 245 / 0.16), transparent 70%),
+    radial-gradient(30% 24% at 30% 10%, rgb(255 255 255 / 0.7), transparent 70%);
+  animation: qx-drift 16s ease-in-out infinite alternate;
+}
+@keyframes qx-drift { from { translate: -4% 0; } to { translate: 4% 2%; } }
+
+/* ---- the title ------------------------------------------------------------ */
+.qx-head { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 30rem; }
+.qx-head.is-center { align-items: center; max-width: none; text-align: center; }
+.qx-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  padding: 6px 12px 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 14px;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--navy);
+  background: var(--glass);
+  border: 1px solid var(--hair);
+}
+.qx-eyebrow__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--corn); box-shadow: 0 0 0 3px rgb(104 126 245 / 0.18); }
+.qx-title { font-weight: 400; font-size: clamp(2.8rem, 6vw, 5.4rem); line-height: 0.98; letter-spacing: -0.055em; text-wrap: balance; }
+.qx-lede { max-width: 30ch; font-size: clamp(1.05rem, 1.4vw, 1.25rem); line-height: 1.35; letter-spacing: -0.02em; color: var(--steel); }
+/* the title's entrance: up from below, one after another */
+.qx-head > * { opacity: 0; translate: 0 18px; transition: opacity 1.2s var(--expo), translate 1.2s var(--expo); }
+.qx-head > :nth-child(2) { transition-delay: 0.08s; }
+.qx-head > :nth-child(3) { transition-delay: 0.16s; }
+.qx-head.is-in > * { opacity: 1; translate: 0 0; }
+
+/* ---- a question: the site's glass ------------------------------------------- */
+.qx-items { display: flex; flex-direction: column; gap: 12px; }
+.qx-item {
+  border-radius: 28px;
+  background: var(--glass);
+  border: 1px solid var(--hair);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: var(--lift);
+  transition: box-shadow 0.35s ease;
+}
+.qx-q {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 18px 18px 18px 20px;
+  text-align: left;
+  cursor: pointer;
+}
+.qx-q__n {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--deep);
+  background: rgb(104 126 245 / 0.12);
+}
+.qx-q__t { font-size: clamp(16px, 1.35vw, 19px); line-height: 1.25; letter-spacing: -0.02em; color: var(--ink); }
+.qx-q__icon {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.8);
+  box-shadow: inset 0 0 0 1px var(--hair);
+  transition: background-color 0.35s ease, rotate 0.6s var(--expo);
+}
+.qx-q__icon::before,
+.qx-q__icon::after { content: ""; position: absolute; left: 50%; top: 50%; width: 14px; height: 1.6px; border-radius: 1px; background: var(--ink); translate: -50% -50%; transition: background-color 0.35s ease; }
+.qx-q__icon::after { rotate: 90deg; }
+.qx-item.is-open .qx-q__icon { rotate: 45deg; background: var(--deep); }
+.qx-item.is-open .qx-q__icon::before,
+.qx-item.is-open .qx-q__icon::after { background: #fff; }
+@media (hover: hover) { .qx-q:hover .qx-q__icon { background: #fff; } .qx-item.is-open .qx-q:hover .qx-q__icon { background: var(--deep); } }
+.qx-q:focus-visible { outline: 2px solid var(--deep); outline-offset: -2px; border-radius: 28px; }
+.qx-a { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.6s var(--expo); }
+.qx-item.is-open .qx-a { grid-template-rows: 1fr; }
+.qx-a__in { min-height: 0; overflow: hidden; }
+.qx-a p { max-width: 58ch; padding: 0 24px 22px 74px; font-size: 15px; line-height: 1.55; letter-spacing: -0.01em; color: var(--navy); }
+@media (max-width: 699px) { .qx-a p { padding-left: 20px; } }
+
+/* ---- the scissors ------------------------------------------------------------- */
+.qx-sc { display: block; overflow: visible; pointer-events: none; }
+/* their shadow on the paper, a little below and to the right */
+.qx-sc__shadow { transform: translate(3px, 9px); opacity: 0.22; filter: brightness(0) blur(2.5px); }
+
+/* ---- 1. Cut line --------------------------------------------------------------- */
+.qx-1__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
+  gap: clamp(64px, 9vw, 140px);
+  max-width: 1240px;
+  margin: 0 auto;
+}
+.qx-1__side { position: relative; }
+.qx-1__side > .qx-head { position: sticky; top: 22svh; }
+.qx-1__list { position: relative; }
+/* the cutting line: dashed on the paper, down the list's left */
+.qx-1__line {
+  position: absolute;
+  top: -40px;
+  bottom: -40px;
+  left: calc(clamp(64px, 9vw, 140px) / -2);
+  width: 2px;
+  translate: -50% 0;
+  background: repeating-linear-gradient(180deg, rgb(56 76 101 / 0.4) 0 7px, transparent 7px 14px);
+}
+/* behind the scissors, cut: a dark seam with the paper's lit edge beside it */
+.qx-1__cut {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2px;
+  height: calc(var(--p) * 100%);
+  background: rgb(18 21 36 / 0.62);
+  box-shadow: 1.5px 0 0 rgb(255 255 255 / 0.95), -2px 0 6px rgb(30 44 78 / 0.25);
+}
+.qx-1__sc {
+  position: absolute;
+  left: 1px;
+  top: calc(var(--p) * 100%);
+  width: 118px;
+  translate: -50% -50%;
+  rotate: 90deg;
+}
+@media (max-width: 899px) {
+  .qx-1__grid { grid-template-columns: 1fr; gap: 56px; }
+  .qx-1__side > .qx-head { position: static; }
+  .qx-1__list { padding-left: 34px; }
+  .qx-1__line { left: 10px; }
+  .qx-1__sc { width: 86px; }
+}
+
+/* ---- 2. Cut out ---------------------------------------------------------------- */
+.qx-2__in { display: flex; flex-direction: column; gap: clamp(48px, 8svh, 80px); max-width: 860px; margin: 0 auto; }
+.qx-2__list { display: flex; flex-direction: column; gap: 22px; }
+.qx-2__slot { position: relative; }
+.qx-2__outline { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.qx-2__dash { fill: none; stroke: rgb(56 76 101 / 0.38); stroke-width: 1.2; stroke-dasharray: 7 7; }
+.qx-2__cutpath { fill: none; stroke: rgb(18 21 36 / 0.6); stroke-width: 1.5; filter: drop-shadow(1px 1px 0 rgb(255 255 255 / 0.9)); }
+.qx-2__sc { position: absolute; left: 0; top: 0; z-index: 3; width: 84px; transform-origin: 50% 50%; }
+/* not cut yet: the question lies printed on the paper. Cut: it is glass,
+   lifting off */
+.qx-2__card { position: relative; z-index: 2; transition: translate 0.9s var(--expo); }
+.qx-2__slot:not(.is-cut) .qx-item { background: transparent; border-color: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.qx-2__slot:not(.is-cut) .qx-q__t { color: var(--navy); }
+.qx-2__slot.is-cut .qx-2__card { translate: 0 -6px; }
+.qx-2__slot.is-cut .qx-2__outline { opacity: 0; transition: opacity 0.6s ease; }
+.qx-2__slot .qx-item { transition: background-color 0.6s ease, border-color 0.6s ease, box-shadow 0.9s var(--expo), backdrop-filter 0.6s ease; }
+
+/* ---- 3. Pattern piece -------------------------------------------------------------- */
+.qx-3__in { display: flex; flex-direction: column; gap: clamp(48px, 8svh, 80px); max-width: 900px; margin: 0 auto; }
+.qx-3__piece { position: relative; padding: clamp(44px, 6vw, 64px) clamp(18px, 4vw, 48px) clamp(48px, 6vw, 68px); transition: translate 1s var(--expo); }
+.qx-3__outline { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.qx-3__dash { fill: none; stroke: rgb(56 76 101 / 0.4); stroke-width: 1.3; stroke-dasharray: 8 8; }
+.qx-3__cutpath { fill: none; stroke: rgb(18 21 36 / 0.6); stroke-width: 1.6; filter: drop-shadow(1px 1px 0 rgb(255 255 255 / 0.9)); }
+.qx-3__sc { position: absolute; left: 0; top: 0; z-index: 3; width: 104px; transform-origin: 50% 50%; }
+/* the piece's markings: notches on its edge, a grainline across it */
+.qx-3__notch { position: absolute; width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; }
+.qx-3__notch.is-a { left: 30%; top: 2px; border-top: 10px solid rgb(56 76 101 / 0.45); }
+.qx-3__notch.is-b { right: 30%; bottom: 2px; border-bottom: 10px solid rgb(56 76 101 / 0.45); }
+.qx-3__grain {
+  position: absolute;
+  left: clamp(18px, 4vw, 48px);
+  top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+.qx-3__grain::after { content: ""; width: 120px; height: 1px; background: rgb(56 76 101 / 0.45); }
+.qx-3__sheet { position: relative; z-index: 2; display: flex; flex-direction: column; }
+/* inside the piece, the questions are rows on it, not cards of their own */
+.qx-3__sheet .qx-item { border: 0; border-radius: 0; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; border-bottom: 1px dashed rgb(56 76 101 / 0.22); }
+.qx-3__sheet .qx-item:last-child { border-bottom: 0; }
+/* cut out: the piece is glass, lifting free of the paper */
+.qx-3__piece::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  z-index: 1;
+  border-radius: 40px;
+  background: transparent;
+  transition: background-color 0.8s ease, box-shadow 1s var(--expo), backdrop-filter 0.8s ease;
+}
+.qx-3__piece.is-cut { translate: 0 -10px; }
+.qx-3__piece.is-cut::before {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: inset 0 0 0 1px var(--hair), inset 0 1px 0 rgb(255 255 255 / 0.9), 0 40px 90px -40px rgb(56 76 101 / 0.55), 0 2px 6px -2px rgb(56 76 101 / 0.12);
+}
+.qx-3__piece.is-cut .qx-3__outline,
+.qx-3__piece.is-cut .qx-3__notch { opacity: 0; transition: opacity 0.6s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qx-light { animation: none; }
+}
