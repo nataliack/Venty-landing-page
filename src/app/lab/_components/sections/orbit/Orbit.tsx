@@ -70,13 +70,15 @@ const filmAt = (deg: number) => {
   return a.length - 1;
 };
 /* what floats behind the cards, one per step (1000px tall, transparent):
-   its size against the others (s: the wide collage a little smaller, so it
-   doesn't swamp the cards). null: a placeholder until its image is made */
-const OBJECTS: ({ src: string; w: number; h: number; s: number } | null)[] = [
-  { src: "/lab/orbit/objects/1-measure.webp", w: 900, h: 1000, s: 1 },
-  { src: "/lab/orbit/objects/2-describe.webp", w: 1312, h: 1000, s: 0.8 },
-  { src: "/lab/orbit/objects/3-draft.webp", w: 842, h: 1000, s: 1 },
-  { src: "/lab/orbit/objects/4-print.webp", w: 968, h: 1000, s: 0.92 },
+   s, its size in the band; y, how far it sits up (-) or down from the
+   band's middle, as a share of the band. Tuned by eye: the dress form high
+   enough that its tape doesn't peek out under the card, the collage well up
+   so its photos show over the card. null: a placeholder */
+const OBJECTS: ({ src: string; w: number; h: number; s: number; y: number } | null)[] = [
+  { src: "/lab/orbit/objects/1-measure.webp", w: 900, h: 1000, s: 0.84, y: -0.085 },
+  { src: "/lab/orbit/objects/2-describe.webp", w: 1312, h: 1000, s: 0.7, y: -0.17 },
+  { src: "/lab/orbit/objects/3-draft.webp", w: 842, h: 1000, s: 0.86, y: -0.05 },
+  { src: "/lab/orbit/objects/4-print.webp", w: 968, h: 1000, s: 0.8, y: -0.06 },
 ];
 
 /* the valley behind (1792 x 1943, its sky cleared to the page's own pale):
@@ -621,7 +623,7 @@ function Orbit() {
                   src={o.src}
                   width={o.w}
                   height={o.h}
-                  style={{ "--s": o.s } as CSSProperties}
+                  style={{ "--s": o.s, "--y": o.y } as CSSProperties}
                   alt=""
                   decoding="async"
                 />

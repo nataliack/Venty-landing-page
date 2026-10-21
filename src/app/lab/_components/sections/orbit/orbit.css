@@ -137,8 +137,8 @@
 .or-object {
   position: absolute;
   left: 50%;
-  /* its own size (--s), centred in the band */
-  top: calc(var(--obj-top) + var(--obj-h) * (1 - var(--s, 1)) / 2);
+  /* its own size (--s), centred in the band, then nudged up or down (--y) */
+  top: calc(var(--obj-top) + var(--obj-h) * ((1 - var(--s, 1)) / 2 + var(--y, 0)));
   z-index: 5;
   height: calc(var(--obj-h) * var(--s, 1));
   width: auto;
