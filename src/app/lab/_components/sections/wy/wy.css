@@ -176,7 +176,8 @@
 /* phones: the four stay in a row, smaller; the chips say less */
 @media (max-width: 640px) {
   .wy-bar { gap: 4px; }
-  .wy-arrow { width: 36px; height: 36px; }
+  /* phones swipe the row instead, so the four chips fit */
+  .wy-arrow { display: none; }
   .wy-chip { height: 36px; padding: 0 12px 0 10px; font-size: 12.5px; }
   .wy-chip__name .is-full { display: none; }
   .wy-chip__name .is-short { display: inline; }
