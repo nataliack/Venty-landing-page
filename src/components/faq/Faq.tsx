@@ -96,7 +96,7 @@ export function Faq() {
             </span>
             <span className="line-mask">
               <span data-rise className="block">
-                <em>you cut.</em>
+                you cut.
               </span>
             </span>
           </h2>

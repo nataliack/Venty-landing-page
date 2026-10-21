@@ -39,7 +39,6 @@
   line-height: 1.02;
   letter-spacing: -0.05em;
 }
-.mw-title em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--corn); }
 
 /* ---- the line -------------------------------------------------------- */
 /* the title and the line share the scene: the line's box lies over the title

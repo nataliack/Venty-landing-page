@@ -33,7 +33,6 @@
   line-height: 0.92;
   letter-spacing: -0.055em;
 }
-.fq-title em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--corn); }
 
 /* ---- the cutting line ------------------------------------------------ */
 .fq-body { position: relative; display: grid; grid-template-columns: 24px 1fr; gap: 14px; }

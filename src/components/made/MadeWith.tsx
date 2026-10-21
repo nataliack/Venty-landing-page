@@ -248,7 +248,7 @@ export function MadeWith() {
             </span>
             <span className="line-mask">
               <span data-rise className="block">
-                on <em>their own bodies.</em>
+                on their own bodies.
               </span>
             </span>
           </h2>
