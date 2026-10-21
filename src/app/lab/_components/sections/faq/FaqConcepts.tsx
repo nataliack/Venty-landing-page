@@ -369,7 +369,7 @@ function PatternPiece() {
    and bottom, as the graph paper (quieter here) does. Six questions, the
    ones asked first. */
 
-const QA_SHORT = [0, 1, 2, 3, 7, 11].map((i) => QA[i]);
+const QA_SHORT = [0, 1, 2, 3, 4, 5, 7, 11].map((i) => QA[i]);
 
 function LinesRow({ n, q, a, open, onToggle }: { n: number; q: string; a: string; open: boolean; onToggle: () => void }) {
   const id = useId();
