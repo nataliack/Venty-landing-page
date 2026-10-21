@@ -149,7 +149,8 @@ export function SwapImage({ src, alt, pair, onSwap }: { src: string; alt: string
           if (far[k] > reach) continue;
           const bayer = BAYER[(j % 4) * 4 + (i % 4)] / 16;
           const thr = bayer * 0.5 + (j / rows) * 0.38 + rand() * 0.12;
-          (bayer < 0.3 ? on1 : on0).push(i * cell * dpr, j * cell * dpr, thr);
+          // the second colour falls in soft clusters, not a checker
+          (noise(i * 1.3 + ox * 2, j * 1.3, 2.4) + bayer * 0.18 > 0.66 ? on1 : on0).push(i * cell * dpr, j * cell * dpr, thr);
         }
       const size = cell * dpr + 0.5; // a hair over, so no seams show
       const t0 = performance.now();

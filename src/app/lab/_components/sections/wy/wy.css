@@ -119,13 +119,14 @@
   pointer-events: none;
   -webkit-mask-size: 100% 100%;
   mask-size: 100% 100%;
-  background: radial-gradient(42% 30% at 50% 14%, rgb(239 244 255 / 0.34), transparent 70%);
+  background: radial-gradient(42% 30% at 50% 14%, rgb(239 244 255 / 0.34), transparent 70%) 50% 0 / 120% 100% no-repeat;
   mix-blend-mode: soft-light;
+  /* the light moves inside her; the mask (her) stays put */
   animation: wy-onher var(--sway, 9s) ease-in-out var(--sway-at, 0s) infinite alternate;
 }
 @keyframes wy-onher {
-  from { translate: -6% 0; }
-  to { translate: 6% 0; }
+  from { background-position: 30% 0; }
+  to { background-position: 70% 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .wy-spot, .wy-spot__cone, .wy-spot__in.is-flick, .wy-onher { animation: none; }
