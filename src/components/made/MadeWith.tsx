@@ -43,8 +43,11 @@ const SPEED = 55; // px per second along the line, right to left
    screen's width), and how far under the title's foot its
    middle hangs (px) */
 const SAG = 0.13;
-const UNDER = 96; // phones: UNDER_PHONE
-const UNDER_PHONE = 56;
+const UNDER = 150; // phones: UNDER_PHONE
+const UNDER_PHONE = 84;
+/* room under the cards inside the line's box for their soft shadows (the box
+   clips; pulled back up after, so the page below doesn't move) */
+const SHADOW_ROOM = 130;
 
 function Card({ m, copy }: { m: Make; copy: boolean }) {
   return (
@@ -111,8 +114,10 @@ export function MadeWith() {
       }
       const d = "M" + pts.join("L");
       pa.querySelectorAll("path").forEach((p) => p.setAttribute("d", d));
-      // room for the cards hanging from the line's lowest point
-      ln.style.height = `${y0 + sag + (cards[0]?.offsetHeight || 460) + 40}px`;
+      // room for the cards hanging from the line's lowest point, and for their
+      // shadows below them
+      ln.style.height = `${y0 + sag + (cards[0]?.offsetHeight || 460) + 40 + SHADOW_ROOM}px`;
+      ln.style.marginBottom = `${-SHADOW_ROOM}px`;
     };
 
     let x = 0; // how far the line has run
