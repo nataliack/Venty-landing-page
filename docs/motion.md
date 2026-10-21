@@ -157,7 +157,7 @@ and one shader (`DitherEdge`, `getRenderer`).
 | From → to | Rising | Over |
 | --- | --- | --- |
 | Hero → Made to measure | cloud | the pinned video |
-| How it works → Features | night | the held end of the table (desktop), or of the last step (phones) |
+| How it works → Features | night | the held last step, 1.3 screens: its layers part as you scroll (the meadow, cards and objects fly up at 0.9x, the valley rises at 0.55x so its peaks come into view); Features rises over the last screen of it |
 | What you can make → On the line | cloud | the held last garment (desktop) |
 | FAQ → The designer | night | the FAQ's empty foot |
 | Closing scene → footer | cloud | the held last line |

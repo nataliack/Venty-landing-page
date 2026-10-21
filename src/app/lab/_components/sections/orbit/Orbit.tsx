@@ -2,7 +2,7 @@
 
 import { memo, useEffect, useRef, useState, type CSSProperties } from "react";
 import { createSequence } from "@/lib/sequence";
-import islandFilm from "../../../../../../public/lab/orbit/island/manifest.json";
+import islandFilm from "../../../../../../public/how/orbit/island/manifest.json";
 import { End, Shell, useBox } from "../hc/parts";
 import "./orbit.css";
 
@@ -54,7 +54,7 @@ const STEPS = [
 const STEP = 58; // degrees between cards round the cylinder: the next one turned well round at the side
 const SLICES = 12; // strips per card: enough that the bend reads smooth
 /* the meadow: the turning film, every one of its frames from the first step
-   to the cards' full turn (public/lab/orbit/island/: AVIF, keyed with a
+   to the cards' full turn (public/how/orbit/island/: AVIF, keyed with a
    loose soft mask round it, 1400px and 900px for phones). Played by the
    site's sequence engine (src/lib/sequence.ts): downloaded once, the frames
    just ahead of the turn first, only a few decoded at a time, always one
@@ -75,10 +75,10 @@ const filmAt = (deg: number) => {
    enough that its tape doesn't peek out under the card, the collage well up
    so its photos show over the card. null: a placeholder */
 const OBJECTS: ({ src: string; w: number; h: number; s: number; y: number } | null)[] = [
-  { src: "/lab/orbit/objects/1-measure.webp", w: 900, h: 1000, s: 0.84, y: -0.085 },
-  { src: "/lab/orbit/objects/2-describe.webp", w: 1312, h: 1000, s: 0.7, y: -0.17 },
-  { src: "/lab/orbit/objects/3-draft.webp", w: 842, h: 1000, s: 0.86, y: -0.05 },
-  { src: "/lab/orbit/objects/4-print.webp", w: 968, h: 1000, s: 0.8, y: -0.06 },
+  { src: "/how/orbit/objects/1-measure.webp", w: 900, h: 1000, s: 0.84, y: -0.085 },
+  { src: "/how/orbit/objects/2-describe.webp", w: 1312, h: 1000, s: 0.7, y: -0.17 },
+  { src: "/how/orbit/objects/3-draft.webp", w: 842, h: 1000, s: 0.86, y: -0.05 },
+  { src: "/how/orbit/objects/4-print.webp", w: 968, h: 1000, s: 0.8, y: -0.06 },
 ];
 
 /* the valley behind (1792 x 1943, its sky cleared to the page's own pale):
@@ -303,7 +303,7 @@ function Orbit() {
 
     // the meadow's film
     const film = st.querySelector<HTMLCanvasElement>(".or-island")!;
-    const seq = createSequence(islandFilm, `/lab/orbit/island/${st.clientWidth < 700 ? 900 : 1400}`, { opening: 24, ext: "avif" });
+    const seq = createSequence(islandFilm, `/how/orbit/island/${st.clientWidth < 700 ? 900 : 1400}`, { opening: 24, ext: "avif" });
     // one real frame at a time, never two laid over each other: with every
     // frame of the film here, the steps between them are too small to see
     // (skim: a fast scroll decodes only the frames it can show, so it never
@@ -608,7 +608,7 @@ function Orbit() {
             {/* the meadow, turning with the cards, and a placeholder figure standing on it */}
             {/* the valley behind it all (a first placement, not final) */}
             <div className="or-valley" aria-hidden="true">
-              <img src="/lab/orbit/valley.webp?v=2" width={1792} height={1943} alt="" decoding="async" />
+              <img src="/how/orbit/valley.webp" width={1792} height={1943} alt="" decoding="async" />
             </div>
             {/* the meadow, turning with the cards */}
             <canvas className="or-island" aria-hidden="true" />
