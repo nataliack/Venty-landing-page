@@ -6,7 +6,7 @@ import "./faq-lab.css";
 
 /* FAQ, three concepts (lab). All three on the app's graph paper (its light
    hero's grid, venty-app globals.css .light-mat: cornflower lines every 96px
-   at 12%, every 24px at 6%), lit softly, with the questions as the site's
+   at 12%, every 24px at 6%) on the page's own cloud, with the questions as the site's
    glass cards (white glass, a 20px blur, a hairline, 28px corners), and a
    pair of scissors that cuts as you scroll: its blades close and open, snip
    by snip, as it goes.
@@ -20,10 +20,17 @@ import "./faq-lab.css";
       dashed on the paper; the scissors cut all the way round it as you
       scroll, and once round, the piece lifts free. */
 
+/* Every answer here is something the landing page already says (How it
+   works, Features); nothing new is promised. Anything about the app's
+   handling of data, pricing or units needs the app's facts first. */
 const QA = [
   {
     q: "How accurate is the fit?",
     a: "As accurate as the measurements you give it. Venty drafts every piece from your numbers, and each measure shows where the tape goes. For anything close-fitting, sew a quick test version first, adjust your body in Venty and draft again.",
+  },
+  {
+    q: "Which measurements do I need?",
+    a: "Four to start: bust, waist, hips and back length. Venty shows you where the tape goes for each one. Add more whenever you want a closer fit.",
   },
   {
     q: "What can I make?",
@@ -34,6 +41,34 @@ const QA = [
     a: "No. If you can cut along a line and sew a straight seam, you can start. Fit is described in plain words, and every piece is labelled with grainlines and notches.",
   },
   {
+    q: "Can I start from a photo?",
+    a: "Yes. Upload a photo of a garment you love, or describe it in a sentence. Circle what you like on the photo and pin a note, and Venty reads your marks.",
+  },
+  {
+    q: "Can I change the design once it's drafted?",
+    a: "Yes. Say what to change the way you'd say it, like longer sleeves, and Venty redrafts the pieces. Every version is kept with its notes.",
+  },
+  {
+    q: "Can I see it before I print?",
+    a: "Yes. Venty shows the garment on your body in 3D. Turn it round, then see the flat pieces it's cut from.",
+  },
+  {
+    q: "How do I print my pattern?",
+    a: "On A4 at home, or A0 at a print shop. Move the pieces round the sheet to use less paper. The A4 pages come with a map for taping them together.",
+  },
+  {
+    q: "What's marked on each piece?",
+    a: "Grainlines, notches and labels on every piece, so you know which way it goes on the fabric and how the pieces meet.",
+  },
+  {
+    q: "Can I make patterns for someone else?",
+    a: "Yes. Measure anyone you sew for and keep their body in your library, saved and dated, next to your own.",
+  },
+  {
+    q: "Can I print a pattern again later?",
+    a: "Any time. Every pattern stays in your library with its versions and notes.",
+  },
+  {
     // TO CONFIRM against how the app actually handles data before launch
     q: "What happens to my photos and measurements?",
     a: "They're used to draft your patterns and are kept in your account. You can delete a photo or a body whenever you like.",
@@ -42,42 +77,23 @@ const QA = [
 
 /* ---- shared pieces ------------------------------------------------------- */
 
-/** The scissors, drawn pointing right, pivot at the middle. open: 0 shut, 1 wide. */
+/** The scissors: the line icon (two rings, two blades), pointing right with
+    the pivot in the middle. Its two halves turn about the pivot, so it snips:
+    open, 0 shut, 1 wide. */
 function Scissors({ open, className = "", style }: { open: number; className?: string; style?: CSSProperties }) {
-  const uid = useId().replace(/:/g, "");
-  const a = 2 + open * 17; // each blade's angle off the line, in degrees
+  const a = 3 + open * 19; // each half's turn off the line, in degrees
+  // one half: its ring behind the pivot, its blade through it to the point
   const half = (flip: boolean) => (
-    <g transform={`${flip ? "scale(1 -1) " : ""}rotate(${-a})`}>
-      {/* the handle: a ring behind the pivot, on its arm */}
-      <path d="M-4 -2 C -14 -6 -20 -10 -24 -14" stroke={`url(#${uid}-h)`} strokeWidth="5.5" strokeLinecap="round" fill="none" />
-      <ellipse cx="-36" cy="-17" rx="14" ry="9.5" transform="rotate(-18 -36 -17)" fill="none" stroke={`url(#${uid}-h)`} strokeWidth="5.5" />
-      {/* the blade: steel, tapering to its point */}
-      <path d="M-5 -3.2 L 58 -1.8 Q 66 -0.6 58 0.6 L -5 2 Z" fill={`url(#${uid}-b)`} stroke="rgb(18 21 36 / 0.35)" strokeWidth="0.6" />
-      <path d="M2 -2.4 L 56 -1.4" stroke="rgb(255 255 255 / 0.85)" strokeWidth="0.7" />
+    <g transform={`${flip ? "scale(1 -1) " : ""}rotate(${a})`}>
+      <circle cx="-10" cy="-5" r="3.6" />
+      <path d="M-7 -3.4 L 0 0 L 13 1.2" />
     </g>
   );
   return (
-    <svg viewBox="-60 -40 130 80" className={`qx-sc ${className}`} style={style} aria-hidden="true">
-      <defs>
-        <linearGradient id={`${uid}-b`} x1="0" y1="-4" x2="0" y2="3" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#f4f6fb" />
-          <stop offset="0.55" stopColor="#b9c2d8" />
-          <stop offset="1" stopColor="#7d89a6" />
-        </linearGradient>
-        <linearGradient id={`${uid}-h`} x1="-50" y1="-28" x2="-10" y2="0" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#8c9cf8" />
-          <stop offset="0.6" stopColor="#687ef5" />
-          <stop offset="1" stopColor="#4a5fd8" />
-        </linearGradient>
-      </defs>
-      <g className="qx-sc__shadow">
-        {half(false)}
-        {half(true)}
-      </g>
-      {half(true)}
+    <svg viewBox="-16 -12 32 24" className={`qx-sc ${className}`} style={style} aria-hidden="true" fill="none">
       {half(false)}
-      <circle r="3.4" fill="#c9d0e2" stroke="rgb(18 21 36 / 0.4)" strokeWidth="0.6" />
-      <circle r="1.1" fill="#5d6a86" />
+      {half(true)}
+      <circle r="0.9" className="qx-sc__pin" />
     </svg>
   );
 }
@@ -177,10 +193,7 @@ function along(w: number, h: number, r: number, inset: number, p: number) {
 function Head({ center = false }: { center?: boolean }) {
   return (
     <header data-in className={`qx-head ${center ? "is-center" : ""}`}>
-      <p className="qx-eyebrow">
-        <span className="qx-eyebrow__dot" aria-hidden="true" />
-        FAQ
-      </p>
+      <p className="qx-eyebrow">FAQ</p>
       <h2 className="qx-title">Before you cut.</h2>
       <p className="qx-lede">The questions people ask before their first pattern.</p>
     </header>
@@ -211,7 +224,6 @@ function Paper({ children, className = "" }: { children: React.ReactNode; classN
   return (
     <section className={`qx ${className}`}>
       <div className="qx-paper" aria-hidden="true" />
-      <div className="qx-light" aria-hidden="true" />
       {children}
     </section>
   );
