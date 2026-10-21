@@ -364,10 +364,10 @@ function PatternPiece() {
 }
 
 /* ---- 4. Pattern lines --------------------------------------------------------
-   React Bits' FAQ 4, open: no cards, the questions float between dashed
-   guide lines (stitching lines), a small mark on the guide at each one. The
-   guides fade out top and bottom, as the graph paper does. Six questions,
-   the ones asked first. */
+   React Bits' FAQ 4, open: no cards, the questions float between guide
+   lines, every one a dash and a dot, over and over. The guides fade out top
+   and bottom, as the graph paper (quieter here) does. Six questions, the
+   ones asked first. */
 
 const QA_SHORT = [0, 1, 2, 3, 7, 11].map((i) => QA[i]);
 
@@ -375,7 +375,6 @@ function LinesRow({ n, q, a, open, onToggle }: { n: number; q: string; a: string
   const id = useId();
   return (
     <div className={`qp-row ${open ? "is-open" : ""}`}>
-      <span className="qp-mark" aria-hidden="true" />
       <h3>
         <button type="button" className="qp-q" aria-expanded={open} aria-controls={id} onClick={onToggle}>
           <span className="qp-n">Q{n}</span>
@@ -388,7 +387,7 @@ function LinesRow({ n, q, a, open, onToggle }: { n: number; q: string; a: string
           <p>{a}</p>
         </div>
       </div>
-      {/* the stitching line under it */}
+      {/* the line under it */}
       <span className="qp-stitch" aria-hidden="true" />
     </div>
   );
@@ -399,7 +398,7 @@ function PatternLines() {
   return (
     <Paper className="qp">
       <div className="qp-frame">
-        {/* the guides: stitching lines, fading out top and bottom */}
+        {/* the guides, fading out top and bottom */}
         <div className="qp-guides" aria-hidden="true">
           <span className="qp-guide is-l" />
           <span className="qp-guide is-m" />
@@ -407,7 +406,6 @@ function PatternLines() {
         </div>
         <div className="qp-side">
           <header data-in className="qp-head">
-            <span className="qp-mark is-head" aria-hidden="true" />
             <p className="qx-eyebrow">FAQ</p>
             <h2 className="qx-title">Before you cut.</h2>
             <p className="qp-body">The questions people ask before their first pattern.</p>
