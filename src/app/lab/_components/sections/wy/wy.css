@@ -52,21 +52,85 @@
 
 /* the words keep a gutter; the line-up runs edge to edge */
 .wy-eyebrow, .wy-bar, .wy-lede { padding-left: 16px; padding-right: 16px; }
-.wy-eyebrow { margin: 0 0 clamp(18px, 3svh, 30px); text-align: center; }
+.wy-eyebrow { margin: 0 0 clamp(14px, 2.4svh, 24px); text-align: center; }
 
 /* ---- the line-up ----------------------------------------------------------
    Full bleed, columns flush: four across (desktop), three (tablet), two
    (phone), the rest a swipe away, snapping to each girl. Three layers on
    one grid cell: the backgrounds, the title (held still across the visible
    width while the line-up scrolls under it), the girls. */
-.wy-track { --n: 4; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.wy-track { --n: 4; --t: clamp(2.2rem, 7.6vw, 8.6rem); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; }
 .wy-track::-webkit-scrollbar { display: none; }
-@media (max-width: 1023px) { .wy-track { --n: 3; } }
-@media (max-width: 640px) { .wy-track { --n: 2; } }
-.wy-strip { display: grid; width: calc(100% * 4 / var(--n)); }
+@media (max-width: 1023px) { .wy-track { --n: 3; --t: clamp(2rem, 9vw, 5.4rem); } }
+@media (max-width: 640px) { .wy-track { --n: 2; --t: clamp(1.9rem, 10.5vw, 3rem); } }
+/* room above the images for the title's first line */
+.wy-strip { display: grid; width: calc(100% * 4 / var(--n)); padding-top: calc(var(--t) * 1.05); }
 .wy-strip > * { grid-area: 1 / 1; }
 .wy-bgs, .wy-girls { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.wy-bg { aspect-ratio: 2 / 3; }
+.wy-bg { position: relative; aspect-ratio: 2 / 3; overflow: hidden; }
+
+/* the light from above: a soft cone from a point over her head, a pool at
+   her feet, both swaying a little from the top (each light at its own pace) */
+.wy-spot { position: absolute; inset: 0; transform-origin: 50% -8%; animation: wy-sway var(--sway, 9s) ease-in-out var(--sway-at, 0s) infinite alternate; }
+@keyframes wy-sway {
+  from { rotate: -4deg; }
+  to { rotate: 4deg; }
+}
+.wy-spot__in { position: absolute; inset: 0; }
+.wy-spot__cone {
+  position: absolute;
+  left: 50%;
+  top: -8%;
+  width: 92%;
+  height: 112%;
+  translate: -50% 0;
+  background: linear-gradient(180deg, rgb(239 244 255 / 0.3), rgb(214 220 243 / 0.12) 45%, rgb(157 172 205 / 0.04) 80%, transparent);
+  clip-path: polygon(46% 0, 54% 0, 100% 100%, 0 100%);
+  filter: blur(10px);
+  mix-blend-mode: screen;
+  animation: wy-breathe 5s ease-in-out infinite alternate;
+}
+@keyframes wy-breathe { to { opacity: 0.82; } }
+.wy-spot__pool {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  width: 70%;
+  height: 9%;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(239 244 255 / 0.26), rgb(157 172 205 / 0.08) 60%, transparent);
+  filter: blur(4px);
+  mix-blend-mode: screen;
+}
+/* as she changes, the light catches: a quick dip and back */
+.wy-spot__in.is-flick { animation: wy-flick 0.9s steps(1) both; }
+@keyframes wy-flick {
+  0% { opacity: 1; }
+  12% { opacity: 0.35; }
+  20% { opacity: 0.9; }
+  30% { opacity: 0.5; }
+  45%, 100% { opacity: 1; }
+}
+/* the light on her alone (masked by her cutout), following the sway */
+.wy-onher {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  background: radial-gradient(42% 30% at 50% 14%, rgb(239 244 255 / 0.34), transparent 70%);
+  mix-blend-mode: soft-light;
+  animation: wy-onher var(--sway, 9s) ease-in-out var(--sway-at, 0s) infinite alternate;
+}
+@keyframes wy-onher {
+  from { translate: -6% 0; }
+  to { translate: 6% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wy-spot, .wy-spot__cone, .wy-spot__in.is-flick, .wy-onher { animation: none; }
+}
+
 .wy-girls { position: relative; z-index: 2; }
 .wy-cell { position: relative; aspect-ratio: 2 / 3; scroll-snap-align: start; }
 /* the title: across the visible line-up, high, round their heads, behind them */
@@ -79,9 +143,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: clamp(10px, 3.2vw, 56px) 0 0;
+  margin: calc(var(--t) * -1.05) 0 0;
   font-weight: 400;
-  font-size: clamp(2.2rem, 7.6vw, 8.6rem);
+  font-size: var(--t);
   line-height: 0.92;
   letter-spacing: -0.055em;
   text-align: center;
@@ -89,8 +153,6 @@
   pointer-events: none;
 }
 .wy-title span:last-child { color: rgb(239 244 255 / 0.5); }
-@media (max-width: 1023px) { .wy-title { font-size: clamp(2rem, 9vw, 5.4rem); } }
-@media (max-width: 640px) { .wy-title { font-size: clamp(1.9rem, 10.5vw, 3rem); } }
 /* her: the cutout, the swap's canvas over it */
 .wy-swap { position: absolute; inset: 0; }
 .wy-swap img, .wy-swap canvas { position: absolute; inset: 0; width: 100%; height: 100%; }

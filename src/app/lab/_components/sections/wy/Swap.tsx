@@ -2,29 +2,30 @@
 
 import { useEffect, useRef, useState } from "react";
 
-/* The outfit swap, after the loading screen's way out (FilamentLoader: the
-   screen breaks into squares that clear row by row). Here the pieces are
-   small diamonds and they only gather over the girl, never the room behind
-   her:
+/* The outfit swap, in the page's own dither: the squares the sections rise
+   with (DitherEdge's Bayer order) and the loading screen's way out (rows
+   from the top, a little scatter). Two colours only. The pixels gather only
+   over her, in a loose halo that hugs her (its edge broken by noise, never a
+   clean shape), never the whole room:
 
-     cover   diamonds grow in from her middle outwards, in a diamond wave,
-             until she is covered (a diamond round her, its edge a little
-             ragged, and always every part of her, the old outfit and the new)
+     cover   pixels switch on in dither order, top to bottom, until she is
+             covered (the old outfit and the new, every edge)
      swap    under them her cutout changes
-     open    they shrink away from her middle outwards, so the new outfit
-             opens from the centre
+     open    they switch off in the same order, uncovering the new one
 
-   One canvas per girl, drawn only while a swap runs (about a second), all
-   four at once. Cover colour, for the test: the night, cornflower, or her
-   own colours (the old outfit's going in, the new one's coming out). */
+   One canvas per girl, drawn only while a swap runs (under a second), all
+   four at once; two fills a frame. */
 
-export type Cover = "night" | "corn" | "her";
-export type Shape = "diamond" | "silhouette";
+export type Pair = "night-corn" | "night-cloud" | "corn-peri";
+export const PAIRS: Record<Pair, [string, string]> = {
+  "night-corn": ["#0b0c15", "#687ef5"],
+  "night-cloud": ["#0b0c15", "#eff4ff"],
+  "corn-peri": ["#687ef5", "#9daccd"],
+};
 
-const COVER_S = 0.42; // diamonds growing in until she is covered
-const GAP_S = 0.08; // covered: the swap happens in here
-const OPEN_S = 0.55; // diamonds shrinking away
-const EDGE = 0.24; // how much of a phase each diamond takes (the rest is its wait)
+const COVER_S = 0.38;
+const GAP_S = 0.08;
+const OPEN_S = 0.46;
 
 const load = (src: string) =>
   new Promise<HTMLImageElement>((ok) => {
@@ -33,31 +34,51 @@ const load = (src: string) =>
     im.onerror = () => ok(im);
     im.src = src;
   });
-const clamp = (v: number) => Math.min(1, Math.max(0, v));
-const ease = (v: number) => 1 - (1 - v) * (1 - v);
 
-/** the image at grid resolution: [r, g, b, a] per cell, or null if it can't be read */
-function sample(im: HTMLImageElement, cols: number, rows: number) {
+function alphaOf(im: HTMLImageElement, cols: number, rows: number) {
   try {
     const c = document.createElement("canvas");
     c.width = cols;
     c.height = rows;
     const x = c.getContext("2d", { willReadFrequently: true })!;
     x.drawImage(im, 0, 0, cols, rows);
-    return x.getImageData(0, 0, cols, rows).data;
+    const d = x.getImageData(0, 0, cols, rows).data;
+    const a = new Uint8Array(cols * rows);
+    for (let i = 0; i < a.length; i++) a[i] = d[i * 4 + 3];
+    return a;
   } catch {
     return null;
   }
 }
+// the 4 x 4 Bayer order (0..15), as DitherEdge
+const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+const hash = (x: number, y: number) => {
+  const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+  return s - Math.floor(s);
+};
+/** smooth noise, about `k` cells across a blob */
+const noise = (x: number, y: number, k: number) => {
+  const u = x / k;
+  const v = y / k;
+  const i = Math.floor(u);
+  const j = Math.floor(v);
+  const fu = u - i;
+  const fv = v - j;
+  const su = fu * fu * (3 - 2 * fu);
+  const sv = fv * fv * (3 - 2 * fv);
+  const a = hash(i, j) + (hash(i + 1, j) - hash(i, j)) * su;
+  const b = hash(i, j + 1) + (hash(i + 1, j + 1) - hash(i, j + 1)) * su;
+  return a + (b - a) * sv;
+};
 
-export function SwapImage({ src, alt, cover, shape }: { src: string; alt: string; cover: Cover; shape: Shape }) {
+export function SwapImage({ src, alt, pair, onSwap }: { src: string; alt: string; pair: Pair; onSwap?: () => void }) {
   const [shown, setShown] = useState(src);
   const shownRef = useRef(src);
   const box = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const opts = useRef({ cover, shape });
+  const opts = useRef({ pair, onSwap });
   useEffect(() => {
-    opts.current = { cover, shape };
+    opts.current = { pair, onSwap };
   });
 
   useEffect(() => {
@@ -76,92 +97,85 @@ export function SwapImage({ src, alt, cover, shape }: { src: string; alt: string
     let dead = false;
     let raf = 0;
     const ctx = cv.getContext("2d")!;
+    opts.current.onSwap?.();
     Promise.all([load(from), load(src)]).then(([a, b]) => {
       if (dead) return;
-      const { cover: mode, shape: form } = opts.current;
+      const [c0, c1] = PAIRS[opts.current.pair];
       const W = el.clientWidth;
       const H = el.clientHeight;
       const dpr = Math.min(2, window.devicePixelRatio || 1);
       cv.width = Math.round(W * dpr);
       cv.height = Math.round(H * dpr);
-      const cell = W < 220 ? 7 : 9; // css px: small
+      const cell = W < 220 ? 11 : 15; // css px
       const cols = Math.ceil(W / cell);
       const rows = Math.ceil(H / cell);
-      const A = sample(a, cols, rows);
-      const B = sample(b, cols, rows);
-      const alphaAt = (i: number, j: number) => {
-        if (i < 0 || j < 0 || i >= cols || j >= rows) return 0;
-        const k = (j * cols + i) * 4 + 3;
-        return Math.max(A ? A[k] : 0, B ? B[k] : 0);
-      };
-      // her, a cell wider all round, so the cover never misses an edge
-      const onHer = (i: number, j: number) => {
-        for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) if (alphaAt(i + di, j + dj) > 24) return true;
-        return false;
-      };
-      let seed = 11;
+      const A = alphaOf(a, cols, rows);
+      const B = alphaOf(b, cols, rows);
+      // how far each cell is from her (old or new), in cells
+      const far = new Float32Array(cols * rows).fill(1e9);
+      const q: number[] = [];
+      for (let k = 0; k < far.length; k++)
+        if ((A ? A[k] : 0) > 24 || (B ? B[k] : 0) > 24 || (!A && !B)) {
+          far[k] = 0;
+          q.push(k);
+        }
+      for (let h = 0; h < q.length; h++) {
+        const k = q[h];
+        const i = k % cols;
+        const j = (k - i) / cols;
+        const d = far[k] + 1;
+        if (d > 6) continue;
+        for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const ni = i + di;
+          const nj = j + dj;
+          if (ni < 0 || nj < 0 || ni >= cols || nj >= rows) continue;
+          const nk = nj * cols + ni;
+          if (far[nk] > d) {
+            far[nk] = d;
+            q.push(nk);
+          }
+        }
+      }
+      let seed = 5;
       const rand = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
-      const night = (v: number) => `rgb(${11 + v * 10} ${12 + v * 11} ${21 + v * 18})`;
-      const corn = (v: number) => `rgb(${104 - v * 18} ${126 - v * 14} ${245 - v * 12})`;
-      const colourOf = (S: Uint8ClampedArray | null, k: number, v: number) => {
-        if (mode === "corn") return corn(v);
-        if (mode === "night") return night(v);
-        if (!S) return corn(v); // her colours, where the image can't be read
-        return S[k + 3] > 24 ? `rgb(${S[k]} ${S[k + 1]} ${S[k + 2]})` : night(v);
-      };
-      type T = { x: number; y: number; o: number; ca: string; cb: string };
-      const tiles: T[] = [];
-      let dmax = 0;
-      const pending: { i: number; j: number; d: number; v: number }[] = [];
+      const ox = Math.random() * 50; // a different halo each time
+      const on0: number[] = []; // [x, y, threshold] for each colour
+      const on1: number[] = [];
       for (let j = 0; j < rows; j++)
         for (let i = 0; i < cols; i++) {
-          const u = (i + 0.5) / cols;
-          const v = (j + 0.5) / rows;
-          // the diamond round her: its corners on the middles of the sides
-          const d = Math.abs(u - 0.5) * 2 + Math.abs(v - 0.52) * 2;
-          const jit = rand();
-          const inDiamond = form === "diamond" && d <= 1 + (jit - 0.5) * 0.14;
-          if (!inDiamond && !onHer(i, j)) continue;
-          pending.push({ i, j, d, v: jit });
-          dmax = Math.max(dmax, d);
+          const k = j * cols + i;
+          // the halo: up to four cells out, its reach broken by noise
+          const reach = 0.6 + noise(i + ox, j, 3.2) * 3.4;
+          if (far[k] > reach) continue;
+          const bayer = BAYER[(j % 4) * 4 + (i % 4)] / 16;
+          const thr = bayer * 0.5 + (j / rows) * 0.38 + rand() * 0.12;
+          (bayer < 0.3 ? on1 : on0).push(i * cell * dpr, j * cell * dpr, thr);
         }
-      for (const p of pending) {
-        const k = (p.j * cols + p.i) * 4;
-        tiles.push({
-          x: (p.i + 0.5) * cell * dpr,
-          y: (p.j + 0.5) * cell * dpr,
-          o: (p.d / (dmax || 1)) * 0.8 + p.v * 0.2,
-          ca: colourOf(A, k, p.v),
-          cb: colourOf(B, k, p.v),
-        });
-      }
-      const half = cell * dpr; // a diamond this size covers its cell
+      const size = cell * dpr + 0.5; // a hair over, so no seams show
       const t0 = performance.now();
       let swapped = false;
+      const draw = (list: number[], colour: string, cover: number, open: number) => {
+        ctx.fillStyle = colour;
+        ctx.beginPath();
+        for (let n = 0; n < list.length; n += 3) {
+          const thr = list[n + 2];
+          if (cover >= thr && open < thr) ctx.rect(list[n], list[n + 1], size, size);
+        }
+        ctx.fill();
+      };
       const frame = (now: number) => {
         if (dead) return;
         const t = (now - t0) / 1000;
-        ctx.clearRect(0, 0, cv.width, cv.height);
-        const late = t > COVER_S + GAP_S / 2;
-        if (late && !swapped) {
+        const cover = t / COVER_S;
+        const open = (t - COVER_S - GAP_S) / OPEN_S;
+        if (!swapped && t > COVER_S + GAP_S / 2) {
           swapped = true;
           swap();
         }
-        for (const p of tiles) {
-          const inn = ease(clamp((t - p.o * COVER_S * (1 - EDGE)) / (COVER_S * EDGE)));
-          const out = ease(clamp((t - COVER_S - GAP_S - p.o * OPEN_S * (1 - EDGE)) / (OPEN_S * EDGE)));
-          const s = inn * (1 - out);
-          if (s <= 0.01) continue;
-          const h = half * s;
-          ctx.fillStyle = late ? p.cb : p.ca;
-          ctx.beginPath();
-          ctx.moveTo(p.x, p.y - h);
-          ctx.lineTo(p.x + h, p.y);
-          ctx.lineTo(p.x, p.y + h);
-          ctx.lineTo(p.x - h, p.y);
-          ctx.fill();
-        }
-        if (t < COVER_S + GAP_S + OPEN_S) raf = requestAnimationFrame(frame);
+        ctx.clearRect(0, 0, cv.width, cv.height);
+        draw(on0, c0, cover, open);
+        draw(on1, c1, cover, open);
+        if (open < 1.01) raf = requestAnimationFrame(frame);
         else ctx.clearRect(0, 0, cv.width, cv.height);
       };
       raf = requestAnimationFrame(frame);
@@ -177,6 +191,8 @@ export function SwapImage({ src, alt, cover, shape }: { src: string; alt: string
     <div ref={box} className="wy-swap">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={shown} alt={alt} draggable={false} />
+      {/* the light falls on her only: a highlight masked by her own cutout */}
+      <span className="wy-onher" style={{ WebkitMaskImage: `url(${shown})`, maskImage: `url(${shown})` }} aria-hidden="true" />
       <canvas ref={canvas} aria-hidden="true" />
     </div>
   );

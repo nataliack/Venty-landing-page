@@ -21,12 +21,12 @@ export const OUTFITS: { k: OutfitKey; name: string; short: string; icon: string 
   { k: "puffer", name: "Cropped puffer, A-line skirt", short: "Puffer", icon: "M6 4h12l1 7H5zM8 12h8l3 9H5z" },
 ];
 
-/** placeholder backgrounds: a dark room, a light from above, each its own tone */
+/** placeholder backgrounds: a dark room, each its own tone (the light from above is in code, Swap and wy.css) */
 export const BACKDROPS = [
-  "radial-gradient(60% 40% at 50% 0%, rgb(157 172 205 / 0.32), transparent 70%), radial-gradient(70% 30% at 50% 96%, rgb(104 126 245 / 0.16), transparent 70%), linear-gradient(180deg, #161a2b, #0b0c15)",
-  "radial-gradient(60% 40% at 50% 0%, rgb(192 200 219 / 0.3), transparent 70%), radial-gradient(70% 30% at 50% 96%, rgb(72 95 136 / 0.22), transparent 70%), linear-gradient(180deg, #121627, #0b0c15)",
-  "radial-gradient(60% 40% at 50% 0%, rgb(157 172 205 / 0.28), transparent 70%), radial-gradient(70% 30% at 50% 96%, rgb(104 126 245 / 0.2), transparent 70%), linear-gradient(180deg, #181b2e, #0b0c15)",
-  "radial-gradient(60% 40% at 50% 0%, rgb(192 200 219 / 0.3), transparent 70%), radial-gradient(70% 30% at 50% 96%, rgb(56 76 101 / 0.24), transparent 70%), linear-gradient(180deg, #131628, #0b0c15)",
+  "radial-gradient(70% 30% at 50% 96%, rgb(104 126 245 / 0.16), transparent 70%), linear-gradient(180deg, #161a2b, #0b0c15)",
+  "radial-gradient(70% 30% at 50% 96%, rgb(72 95 136 / 0.22), transparent 70%), linear-gradient(180deg, #121627, #0b0c15)",
+  "radial-gradient(70% 30% at 50% 96%, rgb(104 126 245 / 0.2), transparent 70%), linear-gradient(180deg, #181b2e, #0b0c15)",
+  "radial-gradient(70% 30% at 50% 96%, rgb(56 76 101 / 0.24), transparent 70%), linear-gradient(180deg, #131628, #0b0c15)",
 ];
 
 /* ---- the figure, drawn from the body ------------------------------------ */

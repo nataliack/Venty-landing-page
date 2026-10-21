@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { BACKDROPS, BODIES, OUTFITS, cutout } from "./figures";
-import { SwapImage, type Cover, type Shape } from "./Swap";
+import { SwapImage, type Pair } from "./Swap";
 import "./wy.css";
 
 /* 5. What you can make: "Same idea. A different body every time." (Jose's
@@ -23,10 +23,22 @@ import "./wy.css";
    the pill's foot), arrows, keys, then one short line. It plays by itself
    while on screen until you choose one.
 
+   The light: a spotlight from above on each girl, in code (a soft cone, a
+   pool at her feet, a highlight on her alone, masked by her own cutout). It
+   sways slowly, each at its own pace; as she changes it catches, dips and
+   comes back.
+
    PLACEHOLDERS (figures.ts): the backgrounds are gradients and the cutouts
    are figures drawn from each body's measures; Jose's images replace them. */
 
 const PLAY_MS = 5200;
+// each light sways at its own pace, so the four never move together
+const SWAY = [
+  { "--sway": "8.5s", "--sway-at": "-1.2s" },
+  { "--sway": "10s", "--sway-at": "-4.6s" },
+  { "--sway": "9.2s", "--sway-at": "-2.8s" },
+  { "--sway": "11s", "--sway-at": "-6.4s" },
+];
 
 export function SameOutfit() {
   const root = useRef<HTMLElement>(null);
@@ -34,9 +46,8 @@ export function SameOutfit() {
   const [auto, setAuto] = useState(true);
   const [seen, setSeen] = useState(false);
   const [n, setN] = useState(0);
-  // the lab's test: what the diamonds are and where they gather
-  const [cover, setCover] = useState<Cover>("her");
-  const [shape, setShape] = useState<Shape>("diamond");
+  // the lab's test: the swap's two colours
+  const [pair, setPair] = useState<Pair>("night-corn");
   const atRef = useRef(0);
 
   const go = useCallback((i: number, byHand = true) => {
@@ -104,16 +115,24 @@ export function SameOutfit() {
           <div className="wy-strip">
             <div className="wy-bgs" aria-hidden="true">
               {BODIES.map((b, i) => (
-                <div key={b.id} className="wy-bg" style={{ background: BACKDROPS[i] }} />
+                <div key={b.id} className="wy-bg" style={{ background: BACKDROPS[i], ...SWAY[i] } as CSSProperties}>
+                  {/* the light from above: it sways a little; as she changes it catches */}
+                  <div className="wy-spot">
+                    <div key={n} className={`wy-spot__in ${n ? "is-flick" : ""}`}>
+                      <span className="wy-spot__cone" />
+                      <span className="wy-spot__pool" />
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
             <h2 id="wy-title" className="wy-title">
               <span>Same idea.</span> <span>A different body every time.</span>
             </h2>
             <ol className="wy-girls">
-              {BODIES.map((b) => (
-                <li key={b.id} className="wy-cell">
-                  {ready && <SwapImage src={cutout(b, o.k)} alt={`${b.name} in the ${o.name.toLowerCase()}`} cover={cover} shape={shape} />}
+              {BODIES.map((b, i) => (
+                <li key={b.id} className="wy-cell" style={SWAY[i] as CSSProperties}>
+                  {ready && <SwapImage src={cutout(b, o.k)} alt={`${b.name} in the ${o.name.toLowerCase()}`} pair={pair} />}
                   <p className="wy-label">
                     {b.name} <span>{b.h} cm</span>
                   </p>
@@ -161,26 +180,15 @@ export function SameOutfit() {
 
         {/* the lab's test panel: not part of the section */}
         <div className="wy-test" aria-label="Test the swap">
-          <span>Cover</span>
+          <span>Swap colours</span>
           {(
             [
-              ["night", "Night"],
-              ["corn", "Cornflower"],
-              ["her", "Her colours"],
+              ["night-corn", "Night, cornflower"],
+              ["night-cloud", "Night, cloud"],
+              ["corn-peri", "Cornflower, periwinkle"],
             ] as const
           ).map(([k, label]) => (
-            <button key={k} type="button" aria-pressed={cover === k} onClick={() => setCover(k)}>
-              {label}
-            </button>
-          ))}
-          <span>Shape</span>
-          {(
-            [
-              ["diamond", "Diamond"],
-              ["silhouette", "Silhouette"],
-            ] as const
-          ).map(([k, label]) => (
-            <button key={k} type="button" aria-pressed={shape === k} onClick={() => setShape(k)}>
+            <button key={k} type="button" aria-pressed={pair === k} onClick={() => setPair(k)}>
               {label}
             </button>
           ))}
