@@ -222,7 +222,7 @@ export function SameOutfit() {
                 <div className="wy-person">
                   <Figure b={b} />
                   {prev !== null && (
-                    <div className="wy-layer is-prev">
+                    <div key={`p${n}`} className="wy-layer is-prev">
                       <Outfit b={b} k={OUTFITS[prev].k} />
                     </div>
                   )}

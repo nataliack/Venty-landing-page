@@ -95,7 +95,12 @@
 /* the change: the new outfit pulls on from the top, column by column, a
    cornflower hem line running down ahead of it */
 .wy-layer { position: absolute; inset: 0; z-index: 1; }
-.wy-layer.is-prev { z-index: 1; }
+.wy-layer.is-prev { z-index: 1; animation: wy-off 0.95s var(--pull) calc(var(--i) * 110ms) both; }
+/* the old one goes in step under the hem line: above the line the new outfit, below it the old */
+@keyframes wy-off {
+  from { clip-path: inset(0 0 0 0); }
+  to { clip-path: inset(100% 0 0 0); }
+}
 .wy-layer.is-in { z-index: 2; animation: wy-pull 0.95s var(--pull) calc(var(--i) * 110ms) both; }
 @keyframes wy-pull {
   from { clip-path: inset(0 0 100% 0); }
@@ -201,7 +206,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wy-layer.is-in, .wy-hem, .wy-pill__fill, .wy-chip.is-on svg { animation: none; }
+  .wy-layer.is-in, .wy-layer.is-prev, .wy-hem, .wy-pill__fill, .wy-chip.is-on svg { animation: none; }
   .wy-pill { transition: none; }
   .wy-hem { display: none; }
 }
