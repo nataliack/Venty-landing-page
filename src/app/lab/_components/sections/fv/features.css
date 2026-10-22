@@ -181,9 +181,23 @@
   font-size: 11px;
   font-weight: 600;
   box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.6);
-  transition: background-color 0.25s, color 0.25s, scale 0.3s;
+  transition: background-color 0.25s, color 0.25s, scale 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .fvc-pin { scale: calc(1 / var(--fvc-z)); }
+/* hovered, a pin swells a little and sends out waves, two rings in its own shape */
+.fvc-pin::before,
+.fvc-pin::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: 0 0 0 1.5px var(--corn); opacity: 0; pointer-events: none; }
+@media (hover: hover) {
+  .fvc-pin:not(.is-away):hover { scale: calc(1.18 / var(--fvc-z)); }
+  .fvc-pin:not(.is-away):hover::before,
+  .fvc-pin:not(.is-away):hover::after { animation: fvc-wave 1.4s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
+  .fvc-pin:not(.is-away):hover::after { animation-delay: 0.7s; }
+}
+@keyframes fvc-wave {
+  0% { opacity: 0.9; scale: 1; }
+  100% { opacity: 0; scale: 2.3; }
+}
+@media (prefers-reduced-motion: reduce) { .fvc-pin::before, .fvc-pin::after { animation: none !important; } }
 .fvc-pin.is-on { background: var(--corn); color: #fff; scale: calc(1.12 / var(--fvc-z)); }
 .fvc-pin.is-away { opacity: 0; pointer-events: none; }
 /* the selection round a detail, once the push-in lands: a fine line drawn
@@ -575,8 +589,11 @@
 /* a clip: over the still, in the same box, so its first frame sits exactly
    on it; shown (data-show, set as it plays) only while it plays or has
    landed, its last frame then shown sharp over it */
-.fvc-clip { position: absolute; left: 0; top: 0; z-index: 1; width: var(--wf); aspect-ratio: 1493 / 2000; translate: var(--l) var(--t); visibility: hidden; pointer-events: none; }
-.fvc-clip[data-show] { visibility: visible; }
+/* A clip's first frame is the still re-rendered (a touch softer, a touch
+   more colour), so it dissolves in over its first few frames, while it has
+   barely begun to move, and back out over the still at the end of a pull-out. */
+.fvc-clip { position: absolute; left: 0; top: 0; z-index: 1; width: var(--wf); aspect-ratio: 1493 / 2000; translate: var(--l) var(--t); opacity: 0; pointer-events: none; transition: opacity 0.18s ease-out; }
+.fvc-clip[data-show] { opacity: 1; transition-duration: 0.14s; }
 .fvc-clip video, .fvc-clip__end { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
 .fvc-clip video[data-show], .fvc-clip.is-landed .fvc-clip__end { opacity: 1; }
 /* a soft shade at the foot, under the comment, so it always reads */
@@ -614,13 +631,14 @@
 /* the notes by name, under the picture: four tabs in a row */
 .fvc-tabs { flex: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: rgb(239 244 255 / 0.03); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.06); }
 .fvc-tabs button { display: flex; align-items: center; justify-content: center; gap: 7px; min-width: 0; padding: 9px 6px; border-radius: 10px; font-size: 13px; color: rgb(157 172 205 / 0.85); white-space: nowrap; transition: background-color 0.25s, color 0.25s, box-shadow 0.25s; }
-.fvc-tabs__n { display: grid; place-items: center; flex: none; width: 18px; height: 18px; border-radius: 50% 50% 50% 3px; font-size: 10px; font-weight: 600; color: var(--ink); background: rgb(239 244 255 / 0.85); transition: background-color 0.25s, color 0.25s; }
+.fvc-tabs__n { display: grid; place-items: center; flex: none; width: 18px; height: 18px; border-radius: 50% 50% 50% 3px; font-size: 10px; font-weight: 600; color: var(--ink); background: rgb(239 244 255 / 0.85); transition: background-color 0.25s, color 0.25s, scale 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .fvc-tabs button.is-on { color: var(--cloud); background: rgb(104 126 245 / 0.14); box-shadow: inset 0 0 0 1px rgb(104 126 245 / 0.45); }
 .fvc-tabs button.is-on .fvc-tabs__n { color: #fff; background: var(--corn); }
 /* hovering a note (its tab, or its pin on the photo) turns it cornflower: it can be pressed */
 @media (hover: hover) {
   .fvc-tabs button:not(.is-on):hover { color: var(--cloud); background: rgb(239 244 255 / 0.04); }
   .fvc-tabs button:hover .fvc-tabs__n, .fvc-pin:hover { color: #fff; background: var(--corn); }
+  .fvc-tabs button:hover .fvc-tabs__n { scale: 1.15; }
 }
 .fvc-pin { cursor: pointer; }
 .fvc-tabs button:focus-visible, .fvc-pin:focus-visible, .fvc-mark__out:focus-visible { outline: 2px solid var(--corn); outline-offset: 2px; }
