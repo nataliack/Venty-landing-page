@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as RPointerEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties, type PointerEvent as RPointerEvent, type ReactNode } from "react";
 import { MARK, MARK_BOUNDS } from "@/lib/markFlight";
 import { TURN, turnPosition } from "@/lib/turnSequence";
 
@@ -91,16 +91,33 @@ function Bird({ size = 14 }: { size?: number }) {
    ending on its macro; going back out plays it in reverse. The selections
    stay drawn in code so they're always sharp. The photo's units: 1493 x
    2000 (the cream tweed suit). tab: the note's name on its tab; note: the
-   comment, typed out once the push-in lands. */
+   comment, typed out once the push-in lands.
+
+   A detail with a macro (macro.src, the clip's last frame, also 1493 x
+   2000) lands on it: the macro sits inside the photo at macro.box (its
+   left and top, and its size, as shares of the photo), so pushing in to
+   1 / size lands exactly on it and it fades up over the still. Its
+   outline is traced on the macro, in the macro's own units, and the rest
+   of the macro dims a little round it. cy: how far down the frame the
+   detail lands (0.5 for a macro, so it fills the frame). */
 const DETAILS = [
   {
     n: 1,
     tab: "Collar",
     note: "Keep this round collar exactly as it is: the soft rounded points, sitting flat. Same tweed as the jacket.",
-    pin: [0.69, 0.27],
-    at: [0.55, 0.285],
-    z: 2.8,
-    sel: <ellipse cx="830" cy="575" rx="165" ry="82" />,
+    pin: [0.606, 0.28],
+    at: [0.5453, 0.3076],
+    z: 1 / 0.24,
+    cy: 0.5,
+    macro: { src: "/lab/features/macro-collar.webp", box: [0.4253, 0.1876, 0.24] },
+    // both halves of the collar, traced on the macro
+    trace: (
+      <>
+        <path pathLength={1} d="M412 462C434 448 475 452 494 469C513 486 516 532 525 562C534 592 538 617 550 650C562 683 581 727 600 762C619 797 642 836 662 862C682 888 702 905 719 919C736 933 756 937 762 944C768 951 758 951 756 962C754 973 753 998 750 1012C747 1026 745 1034 737 1044C729 1054 717 1065 700 1075C683 1085 662 1097 637 1106C612 1115 579 1126 550 1131C521 1136 489 1139 462 1137C435 1135 408 1127 387 1119C366 1111 350 1100 337 1087C324 1074 316 1064 310 1040C304 1016 305 976 304 940C303 904 302 869 306 825C310 781 316 721 325 675C334 629 348 586 362 550C376 514 390 476 412 462Z" />
+        <path pathLength={1} d="M1162 506C1145 502 1114 521 1100 537C1086 553 1086 575 1075 600C1064 625 1052 660 1037 687C1022 714 1004 739 987 762C970 785 954 806 937 825C920 844 904 860 887 875C870 890 850 902 837 912C824 922 812 929 806 937C800 945 800 952 800 962C800 972 802 985 806 1000C810 1015 816 1036 825 1050C834 1064 845 1074 862 1087C879 1100 902 1114 925 1125C948 1136 977 1148 1000 1156C1023 1164 1041 1172 1062 1175C1083 1178 1104 1177 1125 1175C1146 1173 1166 1169 1187 1162C1208 1155 1232 1144 1250 1131C1268 1118 1286 1100 1294 1087C1302 1074 1301 1079 1300 1050C1299 1021 1293 956 1287 912C1281 868 1270 829 1262 787C1254 745 1247 700 1237 662C1227 624 1212 588 1200 562C1188 536 1179 510 1162 506Z" />
+      </>
+    ),
+    sel: null,
   },
   {
     n: 2,
@@ -109,7 +126,7 @@ const DETAILS = [
     pin: [0.63, 0.42],
     at: [0.555, 0.41],
     z: 2.5,
-    sel: <rect x="752" y="660" width="156" height="330" rx="62" />,
+    sel: <rect pathLength={1} x="752" y="660" width="156" height="330" rx="62" />,
   },
   {
     n: 3,
@@ -120,8 +137,8 @@ const DETAILS = [
     z: 2.3,
     sel: (
       <>
-        <rect x="588" y="886" width="186" height="144" rx="24" />
-        <rect x="898" y="886" width="186" height="144" rx="24" />
+        <rect pathLength={1} x="588" y="886" width="186" height="144" rx="24" />
+        <rect pathLength={1} x="898" y="886" width="186" height="144" rx="24" />
       </>
     ),
   },
@@ -129,21 +146,17 @@ const DETAILS = [
 ];
 const HEM = 4; // the detail drawn as a hem, not a selection
 const OUT_MS = 560; // the pull-out before pushing in to another detail
-const SEL_FADE_MS = 300; // a selection's fade out (.fvc-sel): its ants march until it's gone
 const TYPE_AFTER_MS = 750; // the comment starts typing once the push-in has landed
 const TYPE_MS = 24; // a character
 export function MarkCard() {
   const [on, setOn] = useState<number | null>(null);
   const [aim, setAim] = useState<number | null>(null); // where the zoom is centred (kept while pulling out)
-  const [fading, setFading] = useState<number | null>(null); // the detail whose selection is fading out
   const [typed, setTyped] = useState(0); // how much of the comment is typed
   const t = useRef(0);
-  const fadeT = useRef(0);
   const typeT = useRef(0);
   useEffect(
     () => () => {
       window.clearTimeout(t.current);
-      window.clearTimeout(fadeT.current);
       window.clearTimeout(typeT.current);
     },
     [],
@@ -169,9 +182,6 @@ export function MarkCard() {
   const out = () => {
     if (on === null) return;
     window.clearTimeout(typeT.current);
-    setFading(on);
-    window.clearTimeout(fadeT.current);
-    fadeT.current = window.setTimeout(() => setFading(null), SEL_FADE_MS);
     setOn(null);
   };
   const pick = (n: number | null) => {
@@ -184,23 +194,48 @@ export function MarkCard() {
   };
   const a = DETAILS.find((x) => x.n === (on ?? aim)) ?? DETAILS[0];
   const done = typed >= a.note.length;
+  const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   return (
     <div className="fvc-mark">
       <div className={`fvc-mark__frame ${on ? "is-in" : ""}`}>
         <div
           className="fvc-mark__fig"
-          style={{ "--fvc-z": on ? a.z : 1, "--fvc-on": on ? 1 : 0, "--ax": a.at[0], "--ay": a.at[1], transformOrigin: `${a.at[0] * 100}% ${a.at[1] * 100}%` } as CSSProperties}
+          style={{ "--fvc-z": on ? a.z : 1, "--fvc-on": on ? 1 : 0, "--ax": a.at[0], "--ay": a.at[1], "--cy": a.cy ?? 0.4, transformOrigin: `${a.at[0] * 100}% ${a.at[1] * 100}%` } as CSSProperties}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/lab/features/ref-tweed.webp" alt="The reference: a cream tweed suit, marked up" draggable={false} loading="lazy" decoding="async" />
           <svg viewBox="0 0 1493 2000" aria-hidden="true">
-            {DETAILS.map((x) => x.sel && <g key={x.n} className={`fvc-sel ${on === x.n ? "is-on" : fading === x.n ? "is-fading" : ""}`}>{x.sel}</g>)}
+            {DETAILS.map((x) => x.sel && <g key={x.n} className={`fvc-sel ${on === x.n ? "is-on" : ""}`}>{x.sel}</g>)}
             <g className={`fvc-hem ${on === HEM ? "is-on" : ""}`}>
               <path className="fvc-hem__now" d="M520 1362 L1052 1338" />
               <path className="fvc-hem__new" d="M520 1442 L1052 1418" />
               <path className="fvc-hem__arrow" d="M972 1346 V1414 M952 1394 L972 1416 L992 1394" />
             </g>
           </svg>
+          {/* the macros, each where it sits in the photo, its outline traced on it */}
+          {DETAILS.map(
+            (x) =>
+              x.macro && (
+                <div
+                  key={x.n}
+                  className={`fvc-macro ${on === x.n ? "is-on" : ""}`}
+                  style={{ left: `${x.macro.box[0] * 100}%`, top: `${x.macro.box[1] * 100}%`, width: `${x.macro.box[2] * 100}%`, height: `${x.macro.box[2] * 100}%` }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={x.macro.src} alt="" draggable={false} loading="lazy" decoding="async" />
+                  <svg viewBox="0 0 1493 2000" aria-hidden="true">
+                    <defs>
+                      <mask id={`${uid}-m${x.n}`}>
+                        <rect width="1493" height="2000" fill="#fff" />
+                        <g fill="#000">{x.trace}</g>
+                      </mask>
+                    </defs>
+                    <rect className="fvc-macro__shade" width="1493" height="2000" mask={`url(#${uid}-m${x.n})`} />
+                    <g className={`fvc-sel fvc-sel--trace ${on === x.n ? "is-on" : ""}`}>{x.trace}</g>
+                  </svg>
+                </div>
+              ),
+          )}
           <span className={`fvc-chip ${on === HEM ? "is-on" : ""}`} style={{ left: "65%", top: "74.5%" }}>
             +5 cm
           </span>
@@ -218,19 +253,14 @@ export function MarkCard() {
             </button>
           ))}
         </div>
-        <button type="button" className="fvc-mark__out" onClick={() => pick(null)} tabIndex={on ? 0 : -1}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" />
+        {/* back out to the whole photo */}
+        <button type="button" className="fvc-mark__out" onClick={() => pick(null)} tabIndex={on ? 0 : -1} aria-label="Back to the whole photo" title="Back to the whole photo">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M19 12H5M11 18l-6-6 6-6" />
           </svg>
-          Whole look
         </button>
         {/* the note, typed out over the picture once it has pushed in */}
         <div className={`fvc-comment ${on ? "is-on" : ""}`}>
-          <div className="fvc-comment__head" aria-hidden="true">
-            <span className="fvc-comment__n">{a.n}</span>
-            <span className="fvc-comment__who">Natalia</span>
-            <span className="fvc-comment__tab">{a.tab}</span>
-          </div>
           {/* the whole comment holds the room; the typed part sits over it */}
           <p className="fvc-comment__text" aria-hidden="true">
             <span className="fvc-comment__ghost">{a.note}</span>
