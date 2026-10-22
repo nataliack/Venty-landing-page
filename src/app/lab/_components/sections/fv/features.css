@@ -194,55 +194,10 @@
    hidden, they would still repaint the whole grid every frame */
 .fvc-sel.is-on > *, .fvc-sel.is-fading > * { animation-play-state: running; }
 @keyframes fvc-ants { to { stroke-dashoffset: -24; } }
-/* Whole look: back out, shown while pushed in */
-.fvc-mark__out { position: absolute; left: 50%; bottom: 10px; z-index: 3; translate: -50% 8px; padding: 6px 12px; border-radius: 999px; font-size: 11.5px; color: var(--cloud); background: rgb(11 12 21 / 0.7); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.14); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transition: opacity 0.3s, translate 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-.fvc-mark__frame.is-in .fvc-mark__out { opacity: 1; translate: -50% 0; pointer-events: auto; }
-.fvc-mark__frame.is-in .fvc-tools { opacity: 0; pointer-events: none; }
-.fvc-tools { transition: opacity 0.3s; }
-.fvc-tools {
-  position: absolute;
-  left: 8px;
-  top: 50%;
-  translate: 0 -50%;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 4px;
-  border-radius: 999px;
-  background: rgb(11 12 21 / 0.72);
-  box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.1);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-}
-.fvc-tools button { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: var(--peri); transition: background-color 0.2s, color 0.2s; }
-.fvc-tools button[aria-pressed="true"] { background: var(--corn); color: #fff; }
-.fvc-mark__side { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-.fvc-notes { display: flex; flex-direction: column; gap: 6px; }
-.fvc-notes button {
-  display: flex;
-  width: 100%;
-  text-align: left;
-  gap: 10px;
-  align-items: flex-start;
-  padding: 10px 12px;
-  border-radius: 12px;
-  font-size: 13.5px;
-  line-height: 1.35;
-  color: rgb(239 244 255 / 0.85);
-  background: rgb(239 244 255 / 0.025);
-  box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.06);
-  cursor: pointer;
-  transition: box-shadow 0.25s, background-color 0.25s;
-}
-.fvc-notes button.is-on { background: rgb(104 126 245 / 0.08); box-shadow: inset 0 0 0 1px rgb(104 126 245 / 0.5); }
-.fvc-notes__n { display: grid; place-items: center; flex: none; width: 18px; height: 18px; border-radius: 50%; font-size: 10.5px; background: rgb(239 244 255 / 0.1); color: var(--cloud); }
-.fvc-notes button.is-on .fvc-notes__n { background: var(--corn); }
-.fvc-refs { display: flex; gap: 6px; }
-.fvc-refs__thumb, .fvc-refs__add { width: 40px; height: 40px; border-radius: 10px; overflow: hidden; }
-.fvc-refs__thumb { background: #161b33; box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.08); }
-.fvc-refs__thumb.is-on { box-shadow: 0 0 0 1.5px var(--corn); }
-.fvc-refs__thumb img { width: 100%; height: 160%; object-fit: cover; object-position: top; }
-.fvc-refs__add { display: grid; place-items: center; color: var(--peri); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.12); border: 1px dashed transparent; }
+/* Whole look: back out, shown while pushed in, at the frame's top corner */
+.fvc-mark__out { position: absolute; right: 10px; top: 10px; z-index: 3; display: inline-flex; align-items: center; gap: 6px; translate: 0 -6px; padding: 7px 12px; border-radius: 999px; font-size: 12px; color: var(--cloud); background: rgb(11 12 21 / 0.62); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.14); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); opacity: 0; pointer-events: none; transition: opacity 0.3s, translate 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s; }
+.fvc-mark__frame.is-in .fvc-mark__out { opacity: 1; translate: 0 0; pointer-events: auto; }
+@media (hover: hover) { .fvc-mark__out:hover { background: rgb(11 12 21 / 0.8); } }
 
 /* ---- Refine: a chat ---- */
 .fvc-chat { position: absolute; inset: 0; display: flex; flex-direction: column; border-radius: 14px; background: rgb(239 244 255 / 0.02); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.06); overflow: hidden; }
@@ -392,7 +347,6 @@
 
 /* ---- narrow cards ---- */
 @media (max-width: 640px) {
-  .fvc-refs, .fvc-mark__side .fvc-label:last-of-type { display: none; }
 }
 
 /* Pattern library, on the phone. The screen is the app's own: bg #0b0c15,
@@ -582,15 +536,16 @@
 /* in the lab it starts on its own, not risen over How it works */
 .fv { margin-top: 0; }
 
-/* ---- Mark up, the big card: the picture large, the notes under it ---- */
-.fvb-card--mark .fvc-mark { display: flex; flex-direction: column; gap: 14px; }
+/* ---- Mark up, the big card: the picture fills it, the notes' tabs under it ---- */
+.fvb-card--mark .fvc-mark { display: flex; flex-direction: column; gap: 10px; }
 .fvb-card--mark .fvc-mark__frame { flex: 1; min-height: 0; height: auto; container-type: size; }
 /* the photo fills the frame (as object-fit: cover), held high so her face
    and the collar always stay in; the pins ride on the photo as before.
-   Pushing in, the detail is also carried to the middle of the frame (as far
-   as it can go without showing an edge), so a detail low on the photo, like
-   the hem, never ends up under the frame's foot. --ax/--ay: the detail, as a
-   share of the photo; --fvc-on eases 0 to 1 with the scale. */
+   Pushing in, the detail is also carried to the middle of the frame (a
+   little above it, clear of the comment; as far as it can go without
+   showing an edge), so a detail low on the photo, like the hem, never ends
+   up under the frame's foot. --ax/--ay: the detail, as a share of the
+   photo; --fvc-on eases 0 to 1 with the scale. */
 @property --fvc-on { syntax: "<number>"; inherits: true; initial-value: 0; }
 .fvb-card--mark .fvc-mark__fig {
   --wf: max(100cqw, 100cqh * 1493 / 2000);
@@ -600,7 +555,7 @@
   --px: calc(var(--l) + var(--ax) * var(--wf));
   --py: calc(var(--t) + var(--ay) * var(--hf));
   --x: clamp(calc(100cqw - (1 - var(--ax)) * var(--wf) * var(--fvc-z)), 50cqw, calc(var(--ax) * var(--wf) * var(--fvc-z)));
-  --y: clamp(calc(100cqh - (1 - var(--ay)) * var(--hf) * var(--fvc-z)), 50cqh, calc(var(--ay) * var(--hf) * var(--fvc-z)));
+  --y: clamp(calc(100cqh - (1 - var(--ay)) * var(--hf) * var(--fvc-z)), 40cqh, calc(var(--ay) * var(--hf) * var(--fvc-z)));
   left: 0;
   top: 0;
   width: var(--wf);
@@ -609,9 +564,49 @@
   translate: calc(var(--l) + var(--fvc-on) * (var(--x) - var(--px))) calc(var(--t) + var(--fvc-on) * (var(--y) - var(--py)));
   transition: --fvc-z 0.95s cubic-bezier(0.65, 0, 0.35, 1), --fvc-on 0.95s cubic-bezier(0.65, 0, 0.35, 1);
 }
-.fvb-card--mark .fvc-mark__side { flex: none; }
-.fvb-card--mark .fvc-notes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-.fvb-card--mark .fvc-notes button { height: 100%; }
+/* a soft shade at the foot, under the comment, so it always reads */
+.fvb-card--mark .fvc-mark__frame::after { content: ""; position: absolute; inset: 50% 0 0; z-index: 1; pointer-events: none; background: linear-gradient(180deg, transparent, rgb(11 12 21 / 0.5)); opacity: 0; transition: opacity 0.4s; }
+.fvb-card--mark .fvc-mark__frame.is-in::after { opacity: 1; transition-delay: 0.5s; }
+
+/* the comment: the note as it was written, typed out over the picture */
+.fvc-comment {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+  max-width: 440px;
+  padding: 12px 14px 13px;
+  border-radius: 16px;
+  background: rgb(14 16 30 / 0.66);
+  box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.12), 0 18px 40px -16px rgb(0 0 0 / 0.7);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  opacity: 0;
+  translate: 0 10px;
+  pointer-events: none;
+  transition: opacity 0.25s, translate 0.25s;
+}
+.fvc-comment.is-on { opacity: 1; translate: 0 0; transition: opacity 0.4s 0.55s, translate 0.6s 0.55s cubic-bezier(0.16, 1, 0.3, 1); }
+.fvc-comment__head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px; }
+.fvc-comment__n { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50% 50% 50% 4px; font-size: 10.5px; font-weight: 600; color: #fff; background: var(--corn); }
+.fvc-comment__who { font-weight: 500; color: var(--cloud); }
+.fvc-comment__tab { margin-left: auto; padding: 2px 8px; border-radius: 999px; font-size: 11px; color: var(--peri); background: rgb(239 244 255 / 0.06); }
+.fvc-comment__text { display: grid; font-size: clamp(13.5px, 1.05vw, 15px); line-height: 1.45; letter-spacing: -0.01em; color: rgb(239 244 255 / 0.92); text-wrap: pretty; }
+.fvc-comment__ghost, .fvc-comment__typed { grid-area: 1 / 1; }
+.fvc-comment__ghost { visibility: hidden; }
+.fvc-comment__caret { display: inline-block; width: 1.5px; height: 1.05em; margin-left: 1px; vertical-align: -0.15em; background: var(--corn); animation: fvc-caret 1s steps(1) infinite; }
+@keyframes fvc-caret { 50% { opacity: 0; } }
+
+/* the notes by name, under the picture: four tabs in a row */
+.fvc-tabs { flex: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: rgb(239 244 255 / 0.03); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.06); }
+.fvc-tabs button { display: flex; align-items: center; justify-content: center; gap: 7px; min-width: 0; padding: 9px 6px; border-radius: 10px; font-size: 13px; color: rgb(157 172 205 / 0.85); white-space: nowrap; transition: background-color 0.25s, color 0.25s, box-shadow 0.25s; }
+.fvc-tabs__n { display: grid; place-items: center; flex: none; width: 18px; height: 18px; border-radius: 50% 50% 50% 3px; font-size: 10px; font-weight: 600; color: var(--ink); background: rgb(239 244 255 / 0.85); transition: background-color 0.25s, color 0.25s; }
+.fvc-tabs button.is-on { color: var(--cloud); background: rgb(104 126 245 / 0.14); box-shadow: inset 0 0 0 1px rgb(104 126 245 / 0.45); }
+.fvc-tabs button.is-on .fvc-tabs__n { color: #fff; background: var(--corn); }
+@media (hover: hover) { .fvc-tabs button:not(.is-on):hover { color: var(--cloud); background: rgb(239 244 255 / 0.04); } }
+.fvc-tabs button:focus-visible, .fvc-pin:focus-visible, .fvc-mark__out:focus-visible { outline: 2px solid var(--corn); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .fvc-comment__caret { animation: none; } }
 
 /* ---- See it on your body, the wide card: her, and a panel beside her ---- */
 .fvc-turn { display: grid; grid-template-columns: minmax(0, 1fr) minmax(170px, 0.42fr); gap: 16px; }
@@ -635,15 +630,15 @@
 .fvc-turn__deg span { margin-left: 2px; font-size: 0.45em; vertical-align: top; color: var(--peri); }
 .fvc-turn__panel .fvc-slider { flex: none; }
 
-/* small tablet: the big card is narrow, the notes one under another */
+/* small tablet: the big card is narrow, its tabs two to a row */
 @media (min-width: 641px) and (max-width: 899px) {
-  .fvb-card--mark .fvc-notes { grid-template-columns: minmax(0, 1fr); }
+  .fvc-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 /* phone: one column; the big card tall enough for the picture and the notes,
    the turn's panel under her */
 @media (max-width: 640px) {
   .fvb-card--mark { height: 640px; }
-  .fvb-card--mark .fvc-notes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fvc-tabs button { gap: 5px; padding: 9px 2px; font-size: 12px; }
   .fvb-card--body { height: 520px; }
   .fvc-turn { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
   .fvc-turn__deg { display: none; }

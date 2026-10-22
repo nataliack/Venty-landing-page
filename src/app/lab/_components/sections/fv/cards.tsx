@@ -12,9 +12,6 @@ import { TURN, turnPosition } from "@/lib/turnSequence";
 /* ---- icons (24 x 24, currentColor) ---- */
 const I = {
   plus: "M12 5v14M5 12h14",
-  pen: "M4 20l4-1L19 8a2.1 2.1 0 0 0-3-3L5 16l-1 4zM14 6l3 3",
-  erase: "M7 20h10M5.5 13.5l7-7a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L12 17H8z",
-  pin: "M12 21s-6-5.6-6-11a6 6 0 0 1 12 0c0 5.4-6 11-6 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z",
   print: "M7 9V4h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v6H7z",
 };
 function Icon({ d, size = 18, weight = 1.6 }: { d: string; size?: number; weight?: number }) {
@@ -65,7 +62,6 @@ function useTurn(near: React.RefObject<HTMLElement | null>) {
   return [img, set] as const;
 }
 
-const CIRCLE = "M12 4a8 8 0 1 0 0 16a8 8 0 0 0 0-16z";
 const SEND = "M12 19V5M5.5 11.5L12 5l6.5 6.5";
 // turning a piece: a sheet with an arrow round its corner, each way
 const TURN_L = "M12 5h6a2 2 0 0 1 2 2v3M15 8l-3-3 3-3M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2";
@@ -83,22 +79,42 @@ function Bird({ size = 14 }: { size?: number }) {
 }
 
 /* ---- Mark up your references -------------------------------------------
-   A prototype of Jose's idea: the reference sits whole; tap a note (or its
-   pin) and the picture pushes in to that detail, macro, and a selection is
-   drawn round it. Tap another and it pulls back out first, then pushes in
-   to the next; tap the same again, or "Whole look", to pull out.
+   A prototype of Jose's idea: the reference fills the card, its notes
+   pinned on it. Tap a pin (or its tab under the picture) and the picture
+   pushes in to that detail, macro, a selection is drawn round it and the
+   note is typed out in a comment over the picture, as it was written. Tap
+   another and it pulls back out first, then pushes in to the next; tap the
+   same again, or "Whole look", to pull out.
 
    Here the push-in is the still photo scaled (a stand-in). The real thing
    is one short clip per detail, each starting on this exact still and
-   ending on its macro; going back out plays it in reverse. See DETAILS for
-   what each clip ends on. The selections stay drawn in code so they're
-   always sharp. The photo's units: 1493 x 2000 (the cream tweed suit). */
+   ending on its macro; going back out plays it in reverse. The selections
+   stay drawn in code so they're always sharp. The photo's units: 1493 x
+   2000 (the cream tweed suit). tab: the note's name on its tab; note: the
+   comment, typed out once the push-in lands. */
 const DETAILS = [
-  { n: 1, note: "Keep this round collar", pin: [0.69, 0.27], at: [0.55, 0.285], z: 2.8, sel: <ellipse cx="830" cy="575" rx="165" ry="82" /> },
-  { n: 2, note: "Covered buttons, in the same tweed", pin: [0.63, 0.42], at: [0.555, 0.41], z: 2.5, sel: <rect x="752" y="660" width="156" height="330" rx="62" /> },
+  {
+    n: 1,
+    tab: "Collar",
+    note: "Keep this round collar exactly as it is: the soft rounded points, sitting flat. Same tweed as the jacket.",
+    pin: [0.69, 0.27],
+    at: [0.55, 0.285],
+    z: 2.8,
+    sel: <ellipse cx="830" cy="575" rx="165" ry="82" />,
+  },
+  {
+    n: 2,
+    tab: "Buttons",
+    note: "Covered buttons in the same tweed, spaced just like these, all the way down the front.",
+    pin: [0.63, 0.42],
+    at: [0.555, 0.41],
+    z: 2.5,
+    sel: <rect x="752" y="660" width="156" height="330" rx="62" />,
+  },
   {
     n: 3,
-    note: "Both flap pockets, as they are",
+    tab: "Pockets",
+    note: "Both flap pockets as they are, the flaps sitting just above the hip.",
     pin: [0.35, 0.47],
     at: [0.555, 0.485],
     z: 2.3,
@@ -109,28 +125,50 @@ const DETAILS = [
       </>
     ),
   },
-  { n: 4, note: "5 cm longer, same A-line", pin: [0.26, 0.66], at: [0.45, 0.67], z: 1.9, sel: null },
+  { n: 4, tab: "Hem", note: "Make the skirt 5 cm longer, so it sits just above the knee. Keep the same A-line.", pin: [0.26, 0.66], at: [0.48, 0.67], z: 1.7, sel: null },
 ];
 const HEM = 4; // the detail drawn as a hem, not a selection
 const OUT_MS = 560; // the pull-out before pushing in to another detail
 const SEL_FADE_MS = 300; // a selection's fade out (.fvc-sel): its ants march until it's gone
+const TYPE_AFTER_MS = 750; // the comment starts typing once the push-in has landed
+const TYPE_MS = 24; // a character
 export function MarkCard() {
-  const [tool, setTool] = useState("pen");
   const [on, setOn] = useState<number | null>(null);
   const [aim, setAim] = useState<number | null>(null); // where the zoom is centred (kept while pulling out)
   const [fading, setFading] = useState<number | null>(null); // the detail whose selection is fading out
+  const [typed, setTyped] = useState(0); // how much of the comment is typed
   const t = useRef(0);
   const fadeT = useRef(0);
+  const typeT = useRef(0);
   useEffect(
     () => () => {
       window.clearTimeout(t.current);
       window.clearTimeout(fadeT.current);
+      window.clearTimeout(typeT.current);
     },
     [],
   );
+  // type a detail's comment out, a character at a time (all at once, reduced motion)
+  const type = (n: number) => {
+    window.clearTimeout(typeT.current);
+    const len = DETAILS.find((x) => x.n === n)?.note.length ?? 0;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return setTyped(len);
+    setTyped(0);
+    const step = (i: number) => {
+      setTyped(i);
+      if (i < len) typeT.current = window.setTimeout(() => step(i + 1), TYPE_MS);
+    };
+    typeT.current = window.setTimeout(() => step(1), TYPE_AFTER_MS);
+  };
+  const go = (n: number) => {
+    setAim(n);
+    setOn(n);
+    type(n);
+  };
   // pull out of the detail in hand, if any
   const out = () => {
     if (on === null) return;
+    window.clearTimeout(typeT.current);
     setFading(on);
     window.clearTimeout(fadeT.current);
     fadeT.current = window.setTimeout(() => setFading(null), SEL_FADE_MS);
@@ -139,18 +177,13 @@ export function MarkCard() {
   const pick = (n: number | null) => {
     window.clearTimeout(t.current);
     if (n === on || n === null) return out();
-    if (on === null) {
-      setAim(n);
-      return setOn(n);
-    }
+    if (on === null) return go(n);
     // out of this detail, then in to the next
     out();
-    t.current = window.setTimeout(() => {
-      setAim(n);
-      setOn(n);
-    }, OUT_MS);
+    t.current = window.setTimeout(() => go(n), OUT_MS);
   };
   const a = DETAILS.find((x) => x.n === (on ?? aim)) ?? DETAILS[0];
+  const done = typed >= a.note.length;
   return (
     <div className="fvc-mark">
       <div className={`fvc-mark__frame ${on ? "is-in" : ""}`}>
@@ -178,43 +211,46 @@ export function MarkCard() {
               className={`fvc-pin ${on === x.n ? "is-on" : ""} ${on && on !== x.n ? "is-away" : ""}`}
               style={{ left: `${x.pin[0] * 100}%`, top: `${x.pin[1] * 100}%` }}
               onClick={() => pick(x.n)}
-              aria-label={`Note ${x.n}: ${x.note}`}
+              aria-label={`Note ${x.n}, ${x.tab}: ${x.note}`}
               aria-pressed={on === x.n}
             >
               {x.n}
             </button>
           ))}
         </div>
-        <div className="fvc-tools" role="toolbar" aria-label="Mark-up tools">
-          {[
-            ["pen", I.pen, "Draw"],
-            ["ring", CIRCLE, "Ring"],
-            ["pin", I.pin, "Pin a note"],
-            ["erase", I.erase, "Erase"],
-          ].map(([k, dd, label]) => (
-            <button key={k} type="button" aria-pressed={tool === k} onClick={() => setTool(k)} aria-label={label} title={label}>
-              <Icon d={dd} size={15} />
-            </button>
-          ))}
-        </div>
         <button type="button" className="fvc-mark__out" onClick={() => pick(null)} tabIndex={on ? 0 : -1}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" />
+          </svg>
           Whole look
         </button>
+        {/* the note, typed out over the picture once it has pushed in */}
+        <div className={`fvc-comment ${on ? "is-on" : ""}`}>
+          <div className="fvc-comment__head" aria-hidden="true">
+            <span className="fvc-comment__n">{a.n}</span>
+            <span className="fvc-comment__who">Natalia</span>
+            <span className="fvc-comment__tab">{a.tab}</span>
+          </div>
+          {/* the whole comment holds the room; the typed part sits over it */}
+          <p className="fvc-comment__text" aria-hidden="true">
+            <span className="fvc-comment__ghost">{a.note}</span>
+            <span className="fvc-comment__typed">
+              {a.note.slice(0, typed)}
+              <span className={`fvc-comment__caret ${done ? "is-done" : ""}`} />
+            </span>
+          </p>
+        </div>
       </div>
-      <div className="fvc-mark__side">
-        <p className="fvc-label">
-          Notes <span>{DETAILS.length}</span>
-        </p>
-        <ol className="fvc-notes">
-          {DETAILS.map((x) => (
-            <li key={x.n}>
-              <button type="button" className={on === x.n ? "is-on" : ""} onClick={() => pick(x.n)} aria-pressed={on === x.n}>
-                <span className="fvc-notes__n">{x.n}</span>
-                {x.note}
-              </button>
-            </li>
-          ))}
-        </ol>
+      {/* the notes, by name: each pushes in to its detail */}
+      <div className="fvc-tabs" role="group" aria-label="Notes">
+        {DETAILS.map((x) => (
+          <button key={x.n} type="button" className={on === x.n ? "is-on" : ""} onClick={() => pick(x.n)} aria-pressed={on === x.n} aria-label={`${x.tab}: ${x.note}`}>
+            <span className="fvc-tabs__n" aria-hidden="true">
+              {x.n}
+            </span>
+            {x.tab}
+          </button>
+        ))}
       </div>
     </div>
   );
