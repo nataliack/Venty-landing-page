@@ -39,8 +39,9 @@ import "./wy.css";
 
 export type Photo = { src: string; srcSet: string; alt: string };
 // where each woman stands across the photo (share of its width), so a
-// phone's swipe stops on each of them
-const STANDS = [0.218, 0.408, 0.583, 0.762];
+// phone's swipe stops on each of them and her name sits under her; left to
+// right, the four bodies (figures.ts)
+const STANDS = [0.265, 0.4215, 0.57, 0.7225];
 
 const PLAY_MS = 5200;
 // each light sways at its own pace, so the four never move together
@@ -131,10 +132,18 @@ export function SameOutfit({ photo }: { photo?: Photo } = {}) {
             <div className="wyp-stage">
               <div className="wyp-photo">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photo.src} srcSet={photo.srcSet} sizes="(max-width: 640px) 230vw, (max-width: 1023px) 150vw, 100vw" alt={photo.alt} draggable={false} />
+                <img src={photo.src} srcSet={photo.srcSet} sizes="(max-width: 640px) 274vw, (max-width: 1023px) 178vw, 172vw" alt={photo.alt} draggable={false} />
                 {STANDS.map((x) => (
                   <span key={x} className="wyp-stand" style={{ left: `${x * 100}%` }} aria-hidden="true" />
                 ))}
+                {/* her name and height, on the floor just under her feet */}
+                <ol className="wyp-names">
+                  {BODIES.map((b, i) => (
+                    <li key={b.id} className="wy-label wyp-name" style={{ left: `${STANDS[i] * 100}%` }}>
+                      {b.name} <span>{b.h} cm</span>
+                    </li>
+                  ))}
+                </ol>
               </div>
             </div>
           </>
