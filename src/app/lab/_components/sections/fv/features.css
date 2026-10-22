@@ -592,7 +592,8 @@
 .fvc-outline.is-on { opacity: 1; transition: none; }
 .fvc-outline__fill { fill: var(--corn); fill-opacity: 0; transition: fill-opacity 0.18s; }
 .fvc-outline.is-on .fvc-outline__fill { fill-opacity: 0.22; transition: fill-opacity 0.8s 1.15s cubic-bezier(0.22, 1, 0.36, 1); }
-.fvc-outline__line { fill: none; stroke: var(--corn); stroke-width: 10; }
+/* the line: short dashes with round ends, along the shape (his units) */
+.fvc-outline__line { fill: none; stroke: var(--corn); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 6 20; }
 .fvc-outline__trim { fill: none; stroke: #fff; stroke-width: 34; stroke-linecap: round; stroke-dasharray: 1 1; stroke-dashoffset: 1; transition: stroke-dashoffset 0.18s; }
 .fvc-outline.is-on .fvc-outline__trim { stroke-dashoffset: 0; transition: stroke-dashoffset 1.25s 0.05s cubic-bezier(0.65, 0, 0.35, 1); }
 /* a soft shade at the foot, under the comment, so it always reads */
