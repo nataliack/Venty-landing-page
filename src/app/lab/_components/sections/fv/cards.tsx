@@ -864,26 +864,24 @@ function PhoneBird({ size = 16 }: { size?: number }) {
   );
 }
 
-/** the device: a titanium frame (its antenna bands, the buttons on its
-    sides), the black border round the glass, the island, a sheen across
-    the glass; the screen is its child */
-function Device({ children, className = "" }: { children: ReactNode; className?: string }) {
+/** the device (features.css, .ftp): the titanium band with its antenna
+    bands and buttons, the black border round the screen, the island with
+    the camera in it (open into a live activity when `live` is given), a
+    sheen across the glass; the screen is its child */
+function Device({ children, className = "", live }: { children: ReactNode; className?: string; live?: ReactNode }) {
   return (
     <div className={`ftp ${className}`} aria-hidden={className.includes("is-back") || undefined}>
-      <span className="ftp__btn is-l1" />
-      <span className="ftp__btn is-l2" />
-      <span className="ftp__btn is-l3" />
-      <span className="ftp__btn is-r1" />
-      <span className="ftp__band is-tl" />
-      <span className="ftp__band is-tr" />
-      <span className="ftp__band is-bl" />
-      <span className="ftp__band is-br" />
+      <span className="ftp__btns">
+        <span className="ftp__btn is-l1" />
+        <span className="ftp__btn is-l2" />
+        <span className="ftp__btn is-l3" />
+        <span className="ftp__btn is-r1" />
+      </span>
       <div className="ftp__glass">
-        <div className="ftp__screen">
-          <span className="ftp__island" />
-          {children}
-        </div>
+        <div className="ftp__screen">{children}</div>
         <span className="ftp__sheen" />
+        <span className={`ftp__island ${live ? "is-live" : ""}`}>{live}</span>
+        <span className="ftp__camera" />
       </div>
     </div>
   );
@@ -950,13 +948,33 @@ export function PhoneCard() {
     };
   }, []);
 
+  const drafting = rows.find((r) => r.drafting);
   return (
     <div ref={root} className="ftp-stage">
       <span className="ftp-dots" aria-hidden="true" />
       <span className="ftp-glow" aria-hidden="true" />
       <Ghost side="l" />
       <Ghost side="r" />
-      <Device className="is-front">
+      <Device
+        className="is-front"
+        live={
+          drafting && (
+            // what's drafting, in the island, for as long as it drafts
+            <span key={drafting.id} className="ftp__live">
+              <span className="ftp__live-tile">
+                <PhoneBird size={13} />
+              </span>
+              <span className="ftp__live-text">
+                <b>Drafting</b>
+                <span>
+                  {drafting.name} · {drafting.who}
+                </span>
+              </span>
+              <span className="ftp__live-bar" />
+            </span>
+          )
+        }
+      >
         <div className="ftp__status">
           <span>9:41</span>
           <span className="ftp__status-icons" aria-hidden="true">
@@ -1010,7 +1028,6 @@ export function PhoneCard() {
             </li>
           ))}
         </ul>
-        <span className="ftp__home" aria-hidden="true" />
       </Device>
     </div>
   );
