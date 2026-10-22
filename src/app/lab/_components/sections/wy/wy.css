@@ -193,16 +193,17 @@
 }
 
 /* ---- with a photo (Lineup.tsx): one wide image of all four --------------
-   --w is the photo's width. On desktop it's wider than the page, so the four
-   spread out towards the edges (each near the middle of a quarter) and the
-   empty dark at its sides falls off the screen; held down on short screens
-   so their feet stay about at the fold. Wider still on tablets and phones,
-   a swipe across. The photo's top is night, so it slides up under the
-   title, the lights just below it; its foot fades into the page. Its own
-   shape: 1.103 wide to 1 tall. Half a screen of night above and below, to
-   scroll it in and out and see it blend. */
+   --w is the photo's width. On desktop it's much wider than the page, so the
+   four spread out to near the edges and the empty dark at its sides falls
+   off the screen. Wider still on tablets and phones, a swipe across. The
+   whole height of the photo shows: its top and foot are already night (the
+   foot fading out under their reflections), and a short fade at the top
+   takes care of the rest; it slides up under the title, the lights just
+   below it. Its own shape: 1.015 wide to 1 tall, the lights 17.5% down.
+   Half a screen of night above and below, to scroll it in and out. */
 .wy.is-photo {
-  --w: min(125cqw, calc((100svh - 120px) * 2.3));
+  --w: min(145cqw, calc(100svh * 2.4));
+  --ph: calc(var(--w) / 1.015);
   container-type: inline-size;
   padding-top: calc(50svh + clamp(28px, 5svh, 56px));
   padding-bottom: 50svh;
@@ -222,17 +223,16 @@
 }
 .wyp-title span:last-child { color: rgb(239 244 255 / 0.5); }
 @media (max-width: 1023px) { .wyp-title { font-size: clamp(2rem, 7vw, 3.6rem); } .wyp-title span { display: block; } }
-/* the stage: the photo's height down to just past their reflections */
+/* the stage: the whole photo */
 .wyp-stage {
   position: relative;
-  height: calc(var(--w) / 1.103 * 0.8);
-  margin-top: calc(var(--w) / 1.103 * -0.125 + 24px);
+  margin-top: calc(var(--ph) * -0.175 + 24px);
   overflow-x: hidden;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
-  -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent);
-  mask-image: linear-gradient(to bottom, #000 80%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 7%, #000 90%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 7%, #000 90%, transparent);
 }
 .wyp-stage::-webkit-scrollbar { display: none; }
 /* centred, its sides past the screen's edges */
@@ -246,9 +246,6 @@
   width: 100%;
   height: auto;
   user-select: none;
-  /* its sides (a little darker than the page) fade into the night */
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
-  mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
 }
 .wyp-stand { position: absolute; top: 0; width: 1px; height: 1px; scroll-snap-align: center; }
-.wy.is-photo .wy-bar { margin-top: clamp(4px, 1svh, 14px); }
+.wy.is-photo .wy-bar { margin-top: calc(var(--ph) * -0.06); position: relative; }

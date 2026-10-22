@@ -6,8 +6,8 @@ export function Lineup() {
   return (
     <SameOutfit
       photo={{
-        src: "/lab/make/lineup-wine-1600.webp",
-        srcSet: "/lab/make/lineup-wine-1600.webp 1600w, /lab/make/lineup-wine-3200.webp 3200w",
+        src: "/lab/make/lineup-wine-full-1600.webp",
+        srcSet: "/lab/make/lineup-wine-full-1600.webp 1600w, /lab/make/lineup-wine-full-3200.webp 3200w",
         alt: "Four women of different heights and builds, each in the same red wine satin halter gown, each under her own spotlight in a dark studio",
       }}
     />
