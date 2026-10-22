@@ -324,7 +324,7 @@ export function MarkCard() {
       <div ref={frame} className={`fvc-mark__frame ${on ? "is-in" : ""}`}>
         <div
           className="fvc-mark__fig"
-          style={{ "--fvc-z": still ? a.z : 1, "--fvc-on": still ? 1 : 0, "--ax": a.at[0], "--ay": a.at[1], transformOrigin: `${a.at[0] * 100}% ${a.at[1] * 100}%` } as CSSProperties}
+          style={{ "--fvc-z": still ? a.z : 1, "--fvc-on": still ? 1 : 0, "--ax": a.at[0], "--ay": a.at[1], "--cy": 0.4, transformOrigin: `${a.at[0] * 100}% ${a.at[1] * 100}%` } as CSSProperties}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/lab/features/ref-tweed.webp" alt="The reference: a cream tweed suit, marked up" draggable={false} loading="lazy" decoding="async" />
