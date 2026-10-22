@@ -30,7 +30,17 @@ import "./wy.css";
    runs down her rays.
 
    PLACEHOLDERS (figures.ts): the backgrounds are gradients and the cutouts
-   are figures drawn from each body's measures; Jose's images replace them. */
+   are figures drawn from each body's measures; Jose's images replace them.
+
+   With a `photo` (Lineup.tsx): one wide photograph of all four instead of
+   the columns, a preview until the room and the cutouts come apart. Its
+   edges are the page's night, so it fades into it; the outfit bar is there
+   to see the section whole, the photo stays as it is. */
+
+export type Photo = { src: string; srcSet: string; alt: string };
+// where each woman stands across the photo (share of its width), so a
+// phone's swipe stops on each of them
+const STANDS = [0.218, 0.408, 0.583, 0.762];
 
 const PLAY_MS = 5200;
 // each light sways at its own pace, so the four never move together
@@ -41,7 +51,7 @@ const SWAY = [
   { "--sway": "11s", "--sway-at": "-6.4s" },
 ];
 
-export function SameOutfit() {
+export function SameOutfit({ photo }: { photo?: Photo } = {}) {
   const root = useRef<HTMLElement>(null);
   const [at, setAt] = useState(0);
   const [auto, setAuto] = useState(true);
@@ -69,10 +79,10 @@ export function SameOutfit() {
     return () => io.disconnect();
   }, []);
   useEffect(() => {
-    if (!auto || !seen || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (photo || !auto || !seen || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const t = window.setTimeout(() => go(atRef.current + 1, false), PLAY_MS);
     return () => window.clearTimeout(t);
-  }, [auto, seen, at, go]);
+  }, [photo, auto, seen, at, go]);
 
   // the pill: measured off the chip it's on; it stretches the way it's going
   const chips = useRef<HTMLDivElement>(null);
@@ -102,61 +112,84 @@ export function SameOutfit() {
     <div data-lenis-prevent className="absolute inset-0 overflow-y-auto overflow-x-hidden">
       <section
         ref={root}
-        className="wy"
+        className={`wy ${photo ? "is-photo" : ""}`}
         aria-labelledby="wy-title"
         onKeyDown={(e) => {
           if (e.key === "ArrowRight") go(at + 1);
           if (e.key === "ArrowLeft") go(at - 1);
         }}
       >
-        <p className="wy-eyebrow">What you can make</p>
-
-        {/* the line-up: full bleed; a swipe on smaller screens */}
-        <div className="wy-track">
-          <div className="wy-strip">
-            <div className="wy-bgs" aria-hidden="true">
-              {BODIES.map((b, i) => (
-                <div key={b.id} className="wy-bg" style={{ background: BACKDROPS[i], ...SWAY[i] } as CSSProperties}>
-                  {/* the light from above (React Bits' LightRays, in Venty's cloud): as
-                      she changes, a wave of light runs down it */}
-                  <LightRays
-                    className="wy-rays"
-                    raysOrigin="top-center"
-                    raysColor="#dfe6ff"
-                    raysSpeed={0.7}
-                    lightSpread={0.5}
-                    rayLength={2.4}
-                    rayDensity={1.1}
-                    glow={0.75}
-                    haze={0.35}
-                    atmosphere={0.55}
-                    intensity={1.25}
-                    fadeDistance={1.6}
-                    followMouse={false}
-                    cursorShadow={false}
-                    clickPulse={false}
-                    maxDevicePixelRatio={1.5}
-                    pulse={n}
-                  />
-                  <span className="wy-pool" />
-                </div>
-              ))}
+        {photo ? (
+          <>
+            <header className="wyp-head">
+              <p className="wy-eyebrow">What you can make</p>
+              <h2 id="wy-title" className="wyp-title">
+                <span>Same idea.</span> <span>A different body every time.</span>
+              </h2>
+            </header>
+            {/* the photo: its dark top runs up under the title; a swipe on smaller screens */}
+            <div className="wyp-stage">
+              <div className="wyp-photo">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={photo.src} srcSet={photo.srcSet} sizes="(max-width: 640px) 230vw, (max-width: 1023px) 150vw, 100vw" alt={photo.alt} draggable={false} />
+                {STANDS.map((x) => (
+                  <span key={x} className="wyp-stand" style={{ left: `${x * 100}%` }} aria-hidden="true" />
+                ))}
+              </div>
             </div>
-            <h2 id="wy-title" className="wy-title">
-              <span>Same idea.</span> <span>A different body every time.</span>
-            </h2>
-            <ol className="wy-girls">
-              {BODIES.map((b, i) => (
-                <li key={b.id} className="wy-cell" style={SWAY[i] as CSSProperties}>
-                  {ready && <SwapImage src={cutout(b, o.k)} alt={`${b.name} in the ${o.name.toLowerCase()}`} pair={pair} />}
-                  <p className="wy-label">
-                    {b.name} <span>{b.h} cm</span>
-                  </p>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
+          </>
+        ) : (
+          <>
+            <p className="wy-eyebrow">What you can make</p>
+
+            {/* the line-up: full bleed; a swipe on smaller screens */}
+            <div className="wy-track">
+              <div className="wy-strip">
+                <div className="wy-bgs" aria-hidden="true">
+                  {BODIES.map((b, i) => (
+                    <div key={b.id} className="wy-bg" style={{ background: BACKDROPS[i], ...SWAY[i] } as CSSProperties}>
+                      {/* the light from above (React Bits' LightRays, in Venty's cloud): as
+                          she changes, a wave of light runs down it */}
+                      <LightRays
+                        className="wy-rays"
+                        raysOrigin="top-center"
+                        raysColor="#dfe6ff"
+                        raysSpeed={0.7}
+                        lightSpread={0.5}
+                        rayLength={2.4}
+                        rayDensity={1.1}
+                        glow={0.75}
+                        haze={0.35}
+                        atmosphere={0.55}
+                        intensity={1.25}
+                        fadeDistance={1.6}
+                        followMouse={false}
+                        cursorShadow={false}
+                        clickPulse={false}
+                        maxDevicePixelRatio={1.5}
+                        pulse={n}
+                      />
+                      <span className="wy-pool" />
+                    </div>
+                  ))}
+                </div>
+                <h2 id="wy-title" className="wy-title">
+                  <span>Same idea.</span> <span>A different body every time.</span>
+                </h2>
+                <ol className="wy-girls">
+                  {BODIES.map((b, i) => (
+                    <li key={b.id} className="wy-cell" style={SWAY[i] as CSSProperties}>
+                      {ready && <SwapImage src={cutout(b, o.k)} alt={`${b.name} in the ${o.name.toLowerCase()}`} pair={pair} />}
+                      <p className="wy-label">
+                        {b.name} <span>{b.h} cm</span>
+                      </p>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* the outfit bar */}
         <div className="wy-bar">
@@ -195,6 +228,7 @@ export function SameOutfit() {
         </p>
 
         {/* the lab's test panel: not part of the section */}
+        {!photo && (
         <div className="wy-test" aria-label="Test the swap">
           <span>Swap colours</span>
           {(
@@ -209,6 +243,7 @@ export function SameOutfit() {
             </button>
           ))}
         </div>
+        )}
       </section>
     </div>
   );

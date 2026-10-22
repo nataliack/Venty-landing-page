@@ -191,3 +191,52 @@
   .wy-pill__fill, .wy-chip.is-on svg { animation: none; }
   .wy-pill { transition: none; }
 }
+
+/* ---- with a photo (Lineup.tsx): one wide image of all four --------------
+   --w is the photo's width: the page's width on desktop, held down on short
+   screens so the title, the lights and their feet fit the first screen;
+   wider than the screen on tablets and phones, a swipe across. The photo's
+   top is night, so it slides up under the title; its sides and foot fade
+   into the page. Its own shape: 1.103 wide to 1 tall. */
+.wy.is-photo { --w: min(100cqw, calc((100svh - 150px) * 1.7)); container-type: inline-size; padding-top: clamp(28px, 5svh, 56px); }
+@media (max-width: 1023px) { .wy.is-photo { --w: 150cqw; } }
+@media (max-width: 640px) { .wy.is-photo { --w: 230cqw; } }
+.wyp-head { position: relative; z-index: 1; text-align: center; pointer-events: none; }
+.wyp-head .wy-eyebrow { margin-bottom: clamp(10px, 1.6svh, 16px); }
+.wyp-title {
+  margin: 0 auto;
+  padding: 0 16px;
+  font-weight: 400;
+  font-size: clamp(2rem, calc(var(--w) * 0.04), 4.6rem);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  color: var(--cloud);
+}
+.wyp-title span:last-child { color: rgb(239 244 255 / 0.5); }
+@media (max-width: 1023px) { .wyp-title { font-size: clamp(2rem, 7vw, 3.6rem); } .wyp-title span { display: block; } }
+/* the stage: the photo's height down to just past their reflections */
+.wyp-stage {
+  position: relative;
+  height: calc(var(--w) / 1.103 * 0.76);
+  margin-top: calc(var(--w) / 1.103 * -0.1);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent);
+  mask-image: linear-gradient(to bottom, #000 80%, transparent);
+}
+.wyp-stage::-webkit-scrollbar { display: none; }
+.wyp-photo { position: relative; width: var(--w); margin: 0 auto; }
+.wyp-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  /* its sides (a little darker than the page) fade into the night */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+}
+.wyp-stand { position: absolute; top: 0; width: 1px; height: 1px; scroll-snap-align: center; }
+.wy.is-photo .wy-bar { margin-top: clamp(4px, 1svh, 14px); }

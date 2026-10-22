@@ -29,6 +29,16 @@ export type Experiment = {
 export const EXPERIMENTS: Experiment[] = [
   {
     group: "sections",
+    slug: "section-make-lineup",
+    no: 58,
+    title: "What you can make · The photo",
+    note: "Jose's first photograph in the section: the four of them in the red wine halter gown, each under her own light, as one wide image that fades into the page's night. The title sits in its dark top; on tablets and phones it's a swipe across, stopping on each of them. A preview before the room and the cutouts come apart, so the outfit bar doesn't change the photo yet.",
+    tag: "Section · Preview",
+    date: "22 Oct",
+    kind: "native",
+  },
+  {
+    group: "sections",
     slug: "section-features-swap",
     no: 57,
     title: "Features · Mark up first",
