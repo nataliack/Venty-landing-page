@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type CSSProperties, type PointerEvent as RPointerEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as RPointerEvent, type ReactNode } from "react";
 import { MARK, MARK_BOUNDS } from "@/lib/markFlight";
 import { TURN, turnPosition } from "@/lib/turnSequence";
 
@@ -81,43 +81,29 @@ function Bird({ size = 14 }: { size?: number }) {
 /* ---- Mark up your references -------------------------------------------
    A prototype of Jose's idea: the reference fills the card, its notes
    pinned on it. Tap a pin (or its tab under the picture) and the picture
-   pushes in to that detail, macro, a selection is drawn round it and the
-   note is typed out in a comment over the picture, as it was written. Tap
-   another and it pulls back out first, then pushes in to the next; tap the
-   same again, or "Whole look", to pull out.
+   pushes in to that detail, macro, and the note is typed out in a comment
+   over the picture, as it was written. Tap another and it pulls back out
+   first, then pushes in to the next; tap the same again, or the arrow, to
+   pull out.
 
-   Here the push-in is the still photo scaled (a stand-in). The real thing
-   is one short clip per detail, each starting on this exact still and
-   ending on its macro; going back out plays it in reverse. The selections
-   stay drawn in code so they're always sharp. The photo's units: 1493 x
-   2000 (the cream tweed suit). tab: the note's name on its tab; note: the
-   comment, typed out once the push-in lands.
-
-   A detail with a macro (macro.src, the clip's last frame, also 1493 x
-   2000) lands on it: the macro sits inside the photo at macro.box (its
-   left and top, and its size, as shares of the photo), so pushing in to
-   1 / size lands exactly on it and it fades up over the still. Its
-   outline is traced on the macro, in the macro's own units, and the rest
-   of the macro dims a little round it. cy: how far down the frame the
-   detail lands (0.5 for a macro, so it fills the frame). */
+   A detail with a clip (public/lab/features/clips/<clip>-in.mp4) pushes in
+   with it: the clip starts on this exact still and ends on the macro;
+   <clip>-out.mp4 is the same reversed, for pulling out, and <clip>-end.webp
+   its last frame, sharp, shown once it lands. A detail without one yet
+   pushes in on the still, scaled (a stand-in), with its selection drawn in
+   code (in the photo's units, 1493 x 2000, the cream tweed suit). tab: the
+   note's name on its tab; note: the comment, typed out once it lands. */
 const DETAILS = [
   {
     n: 1,
     tab: "Collar",
     note: "Keep this round collar exactly as it is: the soft rounded points, sitting flat. Same tweed as the jacket.",
-    pin: [0.606, 0.28],
-    at: [0.5453, 0.3076],
-    z: 1 / 0.24,
-    cy: 0.5,
-    macro: { src: "/lab/features/macro-collar.webp", box: [0.4253, 0.1876, 0.24] },
-    // both halves of the collar, traced on the macro
-    trace: (
-      <>
-        <path pathLength={1} d="M412 462C434 448 475 452 494 469C513 486 516 532 525 562C534 592 538 617 550 650C562 683 581 727 600 762C619 797 642 836 662 862C682 888 702 905 719 919C736 933 756 937 762 944C768 951 758 951 756 962C754 973 753 998 750 1012C747 1026 745 1034 737 1044C729 1054 717 1065 700 1075C683 1085 662 1097 637 1106C612 1115 579 1126 550 1131C521 1136 489 1139 462 1137C435 1135 408 1127 387 1119C366 1111 350 1100 337 1087C324 1074 316 1064 310 1040C304 1016 305 976 304 940C303 904 302 869 306 825C310 781 316 721 325 675C334 629 348 586 362 550C376 514 390 476 412 462Z" />
-        <path pathLength={1} d="M1162 506C1145 502 1114 521 1100 537C1086 553 1086 575 1075 600C1064 625 1052 660 1037 687C1022 714 1004 739 987 762C970 785 954 806 937 825C920 844 904 860 887 875C870 890 850 902 837 912C824 922 812 929 806 937C800 945 800 952 800 962C800 972 802 985 806 1000C810 1015 816 1036 825 1050C834 1064 845 1074 862 1087C879 1100 902 1114 925 1125C948 1136 977 1148 1000 1156C1023 1164 1041 1172 1062 1175C1083 1178 1104 1177 1125 1175C1146 1173 1166 1169 1187 1162C1208 1155 1232 1144 1250 1131C1268 1118 1286 1100 1294 1087C1302 1074 1301 1079 1300 1050C1299 1021 1293 956 1287 912C1281 868 1270 829 1262 787C1254 745 1247 700 1237 662C1227 624 1212 588 1200 562C1188 536 1179 510 1162 506Z" />
-      </>
-    ),
-    sel: null,
+    pin: [0.69, 0.27],
+    at: [0.55, 0.285],
+    z: 2.8,
+    clip: "collar",
+    // the stand-in, only if the clip can't play
+    sel: <ellipse pathLength={1} cx="830" cy="575" rx="165" ry="82" />,
   },
   {
     n: 2,
@@ -145,97 +131,211 @@ const DETAILS = [
   { n: 4, tab: "Hem", note: "Make the skirt 5 cm longer, so it sits just above the knee. Keep the same A-line.", pin: [0.26, 0.66], at: [0.48, 0.67], z: 1.7, sel: null },
 ];
 const HEM = 4; // the detail drawn as a hem, not a selection
-const OUT_MS = 560; // the pull-out before pushing in to another detail
-const TYPE_AFTER_MS = 750; // the comment starts typing once the push-in has landed
+const OUT_MS = 560; // the pull-out on the still, before pushing in to another detail
+const TYPE_AFTER_MS = 750; // on the still, the comment starts typing once the push-in has landed
 const TYPE_MS = 24; // a character
+const clipSrc = (clip: string, part: string) => `/lab/features/clips/${clip}-${part}`;
+
+/* One detail's clip: in and out, two <video>s stacked. Either way starts
+   from wherever the other has got to, so a change of mind mid-way turns
+   straight round. Fetched when the card comes near (in first, then out).
+   run() resolves "ok" at the end it's heading for, "lost" if overtaken by
+   another run, "error" if the clip can't play (the detail then falls back
+   to the still). */
+class ClipPlayer {
+  in: HTMLVideoElement | null = null;
+  out: HTMLVideoElement | null = null;
+  box: HTMLDivElement | null = null;
+  failed = false;
+  private token = 0;
+  private on: HTMLVideoElement | null = null; // the one showing
+  warm() {
+    const a = this.in;
+    const b = this.out;
+    if (!a || !b || a.preload === "auto") return;
+    a.preload = "auto";
+    a.load();
+    a.addEventListener("canplaythrough", () => b.preload !== "auto" && ((b.preload = "auto"), b.load()), { once: true });
+  }
+  // how far in it is, in seconds of the way in
+  private at() {
+    if (this.on && this.on === this.in) return this.on.currentTime;
+    if (this.on && this.on === this.out) return this.on.duration - this.on.currentTime;
+    return 0;
+  }
+  private ready(v: HTMLVideoElement) {
+    if (v.readyState >= 2) return Promise.resolve(true);
+    if (v.preload !== "auto") {
+      v.preload = "auto";
+      v.load();
+    }
+    return new Promise<boolean>((res) => {
+      v.addEventListener("loadeddata", () => res(true), { once: true });
+      v.addEventListener("error", () => res(false), { once: true });
+    });
+  }
+  hide() {
+    this.on = null;
+    if (this.box) delete this.box.dataset.show;
+    this.in?.removeAttribute("data-show");
+    this.out?.removeAttribute("data-show");
+  }
+  async run(dir: 1 | -1): Promise<"ok" | "lost" | "error"> {
+    const token = ++this.token;
+    const v = dir === 1 ? this.in : this.out;
+    const other = dir === 1 ? this.out : this.in;
+    if (!v || !other || !this.box) return "error";
+    if (dir === -1 && !this.on) return "ok"; // already out
+    const from = this.at();
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (dir === -1) return this.hide(), "ok";
+    }
+    if (!(await this.ready(v))) return (this.failed = true), "error";
+    if (token !== this.token) return "lost";
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const t = reduce ? v.duration : dir === 1 ? from : v.duration - from;
+    if (Math.abs(v.currentTime - t) > 0.01) {
+      v.currentTime = t;
+      await new Promise((res) => v.addEventListener("seeked", res, { once: true }));
+      if (token !== this.token) return "lost";
+    }
+    v.dataset.show = "";
+    other.pause();
+    other.removeAttribute("data-show");
+    this.on = v;
+    this.box.dataset.show = "";
+    if (v.duration - v.currentTime < 0.02) return "ok";
+    const end = new Promise<void>((res) => {
+      const done = () => {
+        v.removeEventListener("ended", done);
+        v.removeEventListener("pause", done);
+        res();
+      };
+      v.addEventListener("ended", done);
+      v.addEventListener("pause", done);
+    });
+    try {
+      await v.play();
+    } catch {
+      return token === this.token ? ((this.failed = true), this.hide(), "error") : "lost";
+    }
+    await end;
+    return token === this.token && v.ended ? "ok" : "lost";
+  }
+}
+
 export function MarkCard() {
   const [on, setOn] = useState<number | null>(null);
   const [aim, setAim] = useState<number | null>(null); // where the zoom is centred (kept while pulling out)
+  const [landed, setLanded] = useState<number | null>(null); // a clip that has reached its macro
   const [typed, setTyped] = useState(0); // how much of the comment is typed
-  const t = useRef(0);
+  const [players] = useState(() => new Map<number, ClipPlayer>());
+  const frame = useRef<HTMLDivElement>(null);
   const typeT = useRef(0);
-  useEffect(
-    () => () => {
-      window.clearTimeout(t.current);
-      window.clearTimeout(typeT.current);
-    },
-    [],
-  );
+  const seq = useRef(0); // each pick; anything still waiting on an older one gives up
+  const leaving = useRef<{ n: number; done: Promise<void> } | null>(null); // the detail pulling out
+  const player = (n: number) => {
+    let p = players.get(n);
+    if (!p) players.set(n, (p = new ClipPlayer()));
+    return p;
+  };
+  const byN = (n: number) => DETAILS.find((x) => x.n === n) ?? DETAILS[0];
+  // the detail's clip, if it has one that plays
+  const clipOf = (n: number | null) => (n !== null && byN(n).clip && !player(n).failed ? player(n) : null);
+  useEffect(() => () => window.clearTimeout(typeT.current), []);
+  // the clips load when the card comes within a screen of view
+  useEffect(() => {
+    const el = frame.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        players.forEach((p) => p.warm());
+        io.disconnect();
+      },
+      { rootMargin: "100% 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [players]);
   // type a detail's comment out, a character at a time (all at once, reduced motion)
-  const type = (n: number) => {
+  const type = (n: number, after: number) => {
     window.clearTimeout(typeT.current);
-    const len = DETAILS.find((x) => x.n === n)?.note.length ?? 0;
+    const len = byN(n).note.length;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return setTyped(len);
     setTyped(0);
     const step = (i: number) => {
       setTyped(i);
       if (i < len) typeT.current = window.setTimeout(() => step(i + 1), TYPE_MS);
     };
-    typeT.current = window.setTimeout(() => step(1), TYPE_AFTER_MS);
+    typeT.current = window.setTimeout(() => step(1), after);
   };
-  const go = (n: number) => {
+  const go = async (n: number) => {
+    const my = seq.current;
+    const p = clipOf(n);
+    // wait for the one pulling out, unless it's this one: then turn round
+    const l = leaving.current;
+    if (l && !(p && l.n === n)) {
+      await l.done;
+      if (my !== seq.current) return;
+    }
     setAim(n);
     setOn(n);
-    type(n);
+    setLanded(null);
+    if (!p) return type(n, TYPE_AFTER_MS);
+    const r = await p.run(1);
+    if (my !== seq.current) return;
+    if (r === "ok") {
+      setLanded(n);
+      type(n, 0);
+    } else if (r === "error") type(n, TYPE_AFTER_MS); // on the still instead
   };
   // pull out of the detail in hand, if any
   const out = () => {
-    if (on === null) return;
+    const m = on;
+    if (m === null) return;
     window.clearTimeout(typeT.current);
     setOn(null);
+    setLanded(null);
+    const p = clipOf(m);
+    const done: Promise<void> = p
+      ? p.run(-1).then((r) => {
+          if (r === "ok") p.hide();
+        })
+      : new Promise((res) => window.setTimeout(res, OUT_MS));
+    leaving.current = { n: m, done };
+    done.then(() => {
+      if (leaving.current?.done === done) leaving.current = null;
+    });
   };
   const pick = (n: number | null) => {
-    window.clearTimeout(t.current);
-    if (n === on || n === null) return out();
-    if (on === null) return go(n);
-    // out of this detail, then in to the next
+    seq.current++;
+    if (n === null || n === on) return out();
     out();
-    t.current = window.setTimeout(() => go(n), OUT_MS);
+    void go(n);
   };
-  const a = DETAILS.find((x) => x.n === (on ?? aim)) ?? DETAILS[0];
+  const a = byN(on ?? aim ?? 1);
+  const film = clipOf(on) !== null; // pushed in on a clip, not the still
+  const still = on !== null && !film; // pushed in on the still
+  const said = on !== null && (!film || landed === on); // the comment shows
   const done = typed >= a.note.length;
-  const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   return (
     <div className="fvc-mark">
-      <div className={`fvc-mark__frame ${on ? "is-in" : ""}`}>
+      <div ref={frame} className={`fvc-mark__frame ${on ? "is-in" : ""}`}>
         <div
           className="fvc-mark__fig"
-          style={{ "--fvc-z": on ? a.z : 1, "--fvc-on": on ? 1 : 0, "--ax": a.at[0], "--ay": a.at[1], "--cy": a.cy ?? 0.4, transformOrigin: `${a.at[0] * 100}% ${a.at[1] * 100}%` } as CSSProperties}
+          style={{ "--fvc-z": still ? a.z : 1, "--fvc-on": still ? 1 : 0, "--ax": a.at[0], "--ay": a.at[1], transformOrigin: `${a.at[0] * 100}% ${a.at[1] * 100}%` } as CSSProperties}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/lab/features/ref-tweed.webp" alt="The reference: a cream tweed suit, marked up" draggable={false} loading="lazy" decoding="async" />
           <svg viewBox="0 0 1493 2000" aria-hidden="true">
-            {DETAILS.map((x) => x.sel && <g key={x.n} className={`fvc-sel ${on === x.n ? "is-on" : ""}`}>{x.sel}</g>)}
+            {DETAILS.map((x) => x.sel && <g key={x.n} className={`fvc-sel ${still && on === x.n ? "is-on" : ""}`}>{x.sel}</g>)}
             <g className={`fvc-hem ${on === HEM ? "is-on" : ""}`}>
               <path className="fvc-hem__now" d="M520 1362 L1052 1338" />
               <path className="fvc-hem__new" d="M520 1442 L1052 1418" />
               <path className="fvc-hem__arrow" d="M972 1346 V1414 M952 1394 L972 1416 L992 1394" />
             </g>
           </svg>
-          {/* the macros, each where it sits in the photo, its outline traced on it */}
-          {DETAILS.map(
-            (x) =>
-              x.macro && (
-                <div
-                  key={x.n}
-                  className={`fvc-macro ${on === x.n ? "is-on" : ""}`}
-                  style={{ left: `${x.macro.box[0] * 100}%`, top: `${x.macro.box[1] * 100}%`, width: `${x.macro.box[2] * 100}%`, height: `${x.macro.box[2] * 100}%` }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={x.macro.src} alt="" draggable={false} loading="lazy" decoding="async" />
-                  <svg viewBox="0 0 1493 2000" aria-hidden="true">
-                    <defs>
-                      <mask id={`${uid}-m${x.n}`}>
-                        <rect width="1493" height="2000" fill="#fff" />
-                        <g fill="#000">{x.trace}</g>
-                      </mask>
-                    </defs>
-                    <rect className="fvc-macro__shade" width="1493" height="2000" mask={`url(#${uid}-m${x.n})`} />
-                    <g className={`fvc-sel fvc-sel--trace ${on === x.n ? "is-on" : ""}`}>{x.trace}</g>
-                  </svg>
-                </div>
-              ),
-          )}
           <span className={`fvc-chip ${on === HEM ? "is-on" : ""}`} style={{ left: "65%", top: "74.5%" }}>
             +5 cm
           </span>
@@ -243,7 +343,7 @@ export function MarkCard() {
             <button
               key={x.n}
               type="button"
-              className={`fvc-pin ${on === x.n ? "is-on" : ""} ${on && on !== x.n ? "is-away" : ""}`}
+              className={`fvc-pin ${on === x.n && still ? "is-on" : ""} ${on && (film || on !== x.n) ? "is-away" : ""}`}
               style={{ left: `${x.pin[0] * 100}%`, top: `${x.pin[1] * 100}%` }}
               onClick={() => pick(x.n)}
               aria-label={`Note ${x.n}, ${x.tab}: ${x.note}`}
@@ -253,6 +353,44 @@ export function MarkCard() {
             </button>
           ))}
         </div>
+        {/* the clips, over the still, framed as it is; each shows only while it plays or has landed */}
+        {DETAILS.map(
+          (x) =>
+            x.clip && (
+              <div
+                key={x.n}
+                ref={(el) => {
+                  player(x.n).box = el;
+                }}
+                className={`fvc-clip ${landed === x.n ? "is-landed" : ""}`}
+                aria-hidden="true"
+              >
+                <video
+                  ref={(el) => {
+                    player(x.n).in = el;
+                  }}
+                  src={clipSrc(x.clip, "in.mp4")}
+                  muted
+                  playsInline
+                  preload="none"
+                  disablePictureInPicture
+                />
+                <video
+                  ref={(el) => {
+                    player(x.n).out = el;
+                  }}
+                  src={clipSrc(x.clip, "out.mp4")}
+                  muted
+                  playsInline
+                  preload="none"
+                  disablePictureInPicture
+                />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className="fvc-clip__end" src={clipSrc(x.clip, "end.webp")} alt="" loading="lazy" decoding="async" />
+                {/* the outline goes here, traced on the last frame */}
+              </div>
+            ),
+        )}
         {/* back out to the whole photo */}
         <button type="button" className="fvc-mark__out" onClick={() => pick(null)} tabIndex={on ? 0 : -1} aria-label="Back to the whole photo" title="Back to the whole photo">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -260,7 +398,7 @@ export function MarkCard() {
           </svg>
         </button>
         {/* the note, typed out over the picture once it has pushed in */}
-        <div className={`fvc-comment ${on ? "is-on" : ""}`}>
+        <div className={`fvc-comment ${said ? "is-on" : ""} ${film ? "is-now" : ""}`}>
           {/* the whole comment holds the room; the typed part sits over it */}
           <p className="fvc-comment__text" aria-hidden="true">
             <span className="fvc-comment__ghost">{a.note}</span>
