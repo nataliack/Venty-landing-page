@@ -531,10 +531,6 @@
   .fvb-card--lib:hover .ftp-glow { translate: -50% -50px; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .ftp { transition: none; }
-  .ftp__list.is-shifting, .ftp__row.is-new, .ftp__bar::after, .ftp__row.is-drafting .ftp__dot { animation: none; }
-}
 
 
 /* ==== the lab's arrangement ========================================================= */
@@ -588,18 +584,17 @@
 .fvc-clip video, .fvc-clip__end { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
 .fvc-clip video[data-show], .fvc-clip.is-landed .fvc-clip__end { opacity: 1; }
 /* the outline on the last frame (Jose's): the dashed line drawn round as
-   it lands (a trim: its mask, the shape's path, drawn on), then the wash.
-   Pulling out, it goes at once. */
-.fvc-outline { position: absolute; overflow: visible; pointer-events: none; opacity: 0; transition: opacity 0.18s; }
+   it lands (a trim: its mask, the shape's path, drawn on), the frame dimming
+   round it as it draws, then the wash. Pulling out, it goes at once. */
+.fvc-outline { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; opacity: 0; transition: opacity 0.18s; }
+.fvc-outline__shade { fill: rgb(11 12 21 / 0.46); opacity: 0; transition: opacity 0.18s; }
+.fvc-outline.is-on .fvc-outline__shade { opacity: 1; transition: opacity 1s 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
 .fvc-outline.is-on { opacity: 1; transition: none; }
 .fvc-outline__fill { fill: var(--corn); fill-opacity: 0; transition: fill-opacity 0.18s; }
 .fvc-outline.is-on .fvc-outline__fill { fill-opacity: 0.22; transition: fill-opacity 0.8s 1.15s cubic-bezier(0.22, 1, 0.36, 1); }
-.fvc-outline__line { fill: none; stroke: var(--corn); stroke-width: 7; }
-.fvc-outline__trim { fill: none; stroke: #fff; stroke-width: 26; stroke-linecap: round; stroke-dasharray: 1 1; stroke-dashoffset: 1; transition: stroke-dashoffset 0.18s; }
+.fvc-outline__line { fill: none; stroke: var(--corn); stroke-width: 10; }
+.fvc-outline__trim { fill: none; stroke: #fff; stroke-width: 34; stroke-linecap: round; stroke-dasharray: 1 1; stroke-dashoffset: 1; transition: stroke-dashoffset 0.18s; }
 .fvc-outline.is-on .fvc-outline__trim { stroke-dashoffset: 0; transition: stroke-dashoffset 1.25s 0.05s cubic-bezier(0.65, 0, 0.35, 1); }
-@media (prefers-reduced-motion: reduce) {
-  .fvc-outline.is-on .fvc-outline__trim, .fvc-outline.is-on .fvc-outline__fill { transition: none; }
-}
 /* a soft shade at the foot, under the comment, so it always reads */
 .fvb-card--mark .fvc-mark__frame::after { content: ""; position: absolute; inset: 50% 0 0; z-index: 1; pointer-events: none; background: linear-gradient(180deg, transparent, rgb(11 12 21 / 0.5)); opacity: 0; transition: opacity 0.4s; }
 .fvb-card--mark .fvc-mark__frame.is-in::after { opacity: 1; transition-delay: 0.5s; }
@@ -646,7 +641,6 @@
 }
 .fvc-pin { cursor: pointer; }
 .fvc-tabs button:focus-visible, .fvc-pin:focus-visible, .fvc-mark__out:focus-visible { outline: 2px solid var(--corn); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { .fvc-comment__caret { animation: none; } }
 
 /* ---- See it on your body, the wide card: her, and a panel beside her ---- */
 .fvc-turn { display: grid; grid-template-columns: minmax(0, 1fr) minmax(170px, 0.42fr); gap: 16px; }
