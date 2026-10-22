@@ -89,7 +89,8 @@ function Bird({ size = 14 }: { size?: number }) {
 
    A detail with a clip (public/lab/features/clips/<clip>-in.mp4) pushes in
    with it: the clip starts on this exact still and ends on the macro;
-   <clip>-out.mp4 is the same reversed, for pulling out, and <clip>-end.webp
+   <clip>-out.mp4 is the same reversed at twice the speed (every other
+   frame), so moving on to another note is quick, and <clip>-end.webp
    its last frame, sharp, shown once it lands, with the detail's outline
    (Jose's, drawn on that last frame: see OUTLINES) traced round it. A
    detail without one yet
@@ -174,10 +175,10 @@ class ClipPlayer {
     a.load();
     a.addEventListener("canplaythrough", () => b.preload !== "auto" && ((b.preload = "auto"), b.load()), { once: true });
   }
-  // how far in it is, in seconds of the way in
+  // how far in it is, as a share of the way in (0 out, 1 in)
   private at() {
-    if (this.on && this.on === this.in) return this.on.currentTime;
-    if (this.on && this.on === this.out) return this.on.duration - this.on.currentTime;
+    if (this.on && this.on === this.in) return this.on.currentTime / this.on.duration;
+    if (this.on && this.on === this.out) return 1 - this.on.currentTime / this.on.duration;
     return 0;
   }
   private ready(v: HTMLVideoElement) {
@@ -206,7 +207,7 @@ class ClipPlayer {
     const from = this.at();
     if (!(await this.ready(v))) return (this.failed = true), "error";
     if (token !== this.token) return "lost";
-    const t = dir === 1 ? from : v.duration - from;
+    const t = (dir === 1 ? from : 1 - from) * v.duration;
     if (Math.abs(v.currentTime - t) > 0.01) {
       v.currentTime = t;
       await new Promise((res) => v.addEventListener("seeked", res, { once: true }));
