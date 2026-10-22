@@ -126,7 +126,6 @@
   color: var(--cloud);
   pointer-events: none;
 }
-.wy-title span:last-child { color: rgb(239 244 255 / 0.5); }
 /* her: the cutout, the swap's canvas over it */
 .wy-swap { position: absolute; inset: 0; }
 .wy-swap img, .wy-swap canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -199,7 +198,7 @@
    whole height of the photo shows: its top and foot are already night (the
    foot fading out under their reflections), and a short fade at the top
    takes care of the rest; it slides up under the title, the lights just
-   below it. Its own shape: 1.015 wide to 1 tall, the lights 17.5% down.
+   below it, a little way under. Its own shape: 1.015 wide to 1 tall, the lights 17.5% down.
    Half a screen of night above and below, to scroll it in and out. */
 .wy.is-photo {
   --w: min(145cqw, calc(100svh * 2.4));
@@ -221,12 +220,11 @@
   letter-spacing: -0.05em;
   color: var(--cloud);
 }
-.wyp-title span:last-child { color: rgb(239 244 255 / 0.5); }
 @media (max-width: 1023px) { .wyp-title { font-size: clamp(2rem, 7vw, 3.6rem); } .wyp-title span { display: block; } }
 /* the stage: the whole photo */
 .wyp-stage {
   position: relative;
-  margin-top: calc(var(--ph) * -0.175 + 24px);
+  margin-top: calc(var(--ph) * -0.175 + clamp(72px, 11svh, 130px));
   overflow-x: hidden;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
@@ -248,4 +246,8 @@
   user-select: none;
 }
 .wyp-stand { position: absolute; top: 0; width: 1px; height: 1px; scroll-snap-align: center; }
-.wy.is-photo .wy-bar { margin-top: calc(var(--ph) * -0.06); position: relative; }
+/* the labels on the dark floor just past the pools of light (68% down) */
+.wyp-label { right: auto; bottom: auto; top: 68%; translate: -50% 0; }
+/* the outfit bar and the line under it sit on the photo's floor, under the labels (74% down) */
+.wy.is-photo .wy-bar { position: relative; margin-top: calc(var(--ph) * -0.26); }
+.wy.is-photo .wy-lede { position: relative; }

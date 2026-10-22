@@ -38,8 +38,8 @@ import "./wy.css";
    to see the section whole, the photo stays as it is. */
 
 export type Photo = { src: string; srcSet: string; alt: string };
-// where each woman stands across the photo (share of its width), so a
-// phone's swipe stops on each of them
+// where each woman stands across the photo (share of its width): her label
+// sits there, and a phone's swipe stops on each of them
 const STANDS = [0.218, 0.408, 0.583, 0.762];
 
 const PLAY_MS = 5200;
@@ -134,6 +134,12 @@ export function SameOutfit({ photo }: { photo?: Photo } = {}) {
                 <img src={photo.src} srcSet={photo.srcSet} sizes="(max-width: 640px) 230vw, (max-width: 1023px) 150vw, 100vw" alt={photo.alt} draggable={false} />
                 {STANDS.map((x) => (
                   <span key={x} className="wyp-stand" style={{ left: `${x * 100}%` }} aria-hidden="true" />
+                ))}
+                {/* her name and height, on the floor under her feet */}
+                {BODIES.map((b, i) => (
+                  <p key={b.id} className="wy-label wyp-label" style={{ left: `${STANDS[i] * 100}%` }}>
+                    {b.name} <span>{b.h} cm</span>
+                  </p>
                 ))}
               </div>
             </div>
