@@ -114,6 +114,8 @@ const DETAILS = [
     pin: [0.63, 0.42],
     at: [0.555, 0.41],
     z: 2.5,
+    clip: "buttons",
+    // the stand-in, only if the clip can't play
     sel: <rect pathLength={1} x="752" y="660" width="156" height="330" rx="62" />,
   },
   {
