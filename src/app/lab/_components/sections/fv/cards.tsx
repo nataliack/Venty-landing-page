@@ -132,9 +132,19 @@ const DETAILS = [
       </>
     ),
   },
-  { n: 4, tab: "Hem", note: "Make the skirt 5 cm longer, so it sits just above the knee. Keep the same A-line.", pin: [0.26, 0.66], at: [0.48, 0.67], z: 1.7, sel: null },
+  {
+    n: 4,
+    tab: "Texture",
+    note: "This exact tweed: the soft cream bouclé with its loose, looped weave. Same fabric for the jacket and the skirt.",
+    // on the skirt front, where the clip's push-in is centred
+    pin: [0.46, 0.585],
+    at: [0.45, 0.59],
+    z: 3,
+    clip: "texture",
+    // the stand-in, only if the clip can't play
+    sel: <ellipse pathLength={1} cx="672" cy="1180" rx="130" ry="95" />,
+  },
 ];
-const HEM = 4; // the detail drawn as a hem, not a selection
 const OUT_MS = 560; // the pull-out on the still, before pushing in to another detail
 const TYPE_AFTER_MS = 750; // on the still, the comment starts typing once the push-in has landed
 const TYPE_MS = 24; // a character
@@ -373,15 +383,7 @@ export function MarkCard() {
           <img src="/lab/features/ref-tweed.webp" alt="The reference: a cream tweed suit, marked up" draggable={false} loading="lazy" decoding="async" />
           <svg viewBox="0 0 1493 2000" aria-hidden="true">
             {DETAILS.map((x) => x.sel && <g key={x.n} className={`fvc-sel ${still && on === x.n ? "is-on" : ""}`}>{x.sel}</g>)}
-            <g className={`fvc-hem ${on === HEM ? "is-on" : ""}`}>
-              <path className="fvc-hem__now" d="M520 1362 L1052 1338" />
-              <path className="fvc-hem__new" d="M520 1442 L1052 1418" />
-              <path className="fvc-hem__arrow" d="M972 1346 V1414 M952 1394 L972 1416 L992 1394" />
-            </g>
           </svg>
-          <span className={`fvc-chip ${on === HEM ? "is-on" : ""}`} style={{ left: "65%", top: "74.5%" }}>
-            +5 cm
-          </span>
           {DETAILS.map((x) => (
             <button
               key={x.n}
