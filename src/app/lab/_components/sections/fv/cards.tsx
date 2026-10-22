@@ -276,10 +276,9 @@ function Outline({ id, o, on }: { id: string; o: OutlineData; on: boolean }) {
       </defs>
       <rect className="fvc-outline__shade" width={FRAME[0]} height={FRAME[1]} mask={`url(#${id}-shade)`} />
       <g transform={place}>
-        {o.wash !== false &&
-          o.fills.map((d, i) => (
-            <path key={i} className="fvc-outline__fill" d={d} />
-          ))}
+        {o.fills.map((d, i) => (
+          <path key={i} className="fvc-outline__fill" d={d} />
+        ))}
         <g mask={`url(#${id}-trim)`}>
           {o.lines.map((l, i) => (
             <path key={i} className="fvc-outline__line" d={l.d} style={l.from ? { stroke: `url(#${id}-g${i})` } : undefined} />

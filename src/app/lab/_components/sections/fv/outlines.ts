@@ -5,8 +5,8 @@
    at: where his drawing's origin sits on the clip's last frame (FRAME, the
    frame's pixels) and its scale, fitted to the frame's edges (the collar,
    the buttons); the texture has no edges to fit, so it's set on the open
-   fabric, clear of her leg. fills: the shapes, washed (unless wash is
-   false: the pocket, drawn as lines only), the frame dimmed round them. lines: drawn dashed along them; a closed line is a fill's own
+   fabric, clear of her leg. fills: the shapes, washed, the frame dimmed
+   round them (the pocket's came as lines only: its flap's line is its fill). lines: drawn dashed along them; a closed line is a fill's own
    edge, an open one (from, to: its ends) fades out at both ends. His
    exported dashes are chained back into continuous lines (the dashes are
    drawn in code, even, with round ends). */
@@ -16,7 +16,6 @@ export const FRAME = [1244, 1664] as const;
 export type Outline = {
   at: [number, number, number];
   fills: string[];
-  wash?: boolean;
   lines: { d: string; from?: [number, number]; to?: [number, number] }[];
 };
 
@@ -29,7 +28,7 @@ const BUTTON_HIGH = "M21.6675 126.5C20.8675 41.7 100.667 9.16667 140.667 3.5C205
 export const OUTLINES: Record<string, Outline> = {
   collar: { at: [203, 374, 0.692], fills: [COLLAR], lines: [{ d: COLLAR }] },
   buttons: { at: [562, 376, 0.6941], fills: [BUTTON_HIGH, BUTTON_LOW], lines: [{ d: BUTTON_HIGH }, { d: BUTTON_LOW }] },
-  pockets: { at: [330, 449, 0.695], fills: [POCKET, POCKET_BUTTON], wash: false, lines: [{ d: POCKET }, { d: POCKET_BUTTON }] },
+  pockets: { at: [330, 449, 0.695], fills: [POCKET], lines: [{ d: POCKET }, { d: POCKET_BUTTON }] },
   texture: {
     at: [52, 335, 0.6911],
     fills: ["M370.112 1072.53C301.806 770.895 173.349 479.116 94.2963 325.523C218.564 160.637 562.067 -13.2756 1013.43 123.086C1157.6 237.548 1396.69 465.55 1548.38 662.946C1104.38 574.652 564.99 872.338 370.112 1072.53Z"],
