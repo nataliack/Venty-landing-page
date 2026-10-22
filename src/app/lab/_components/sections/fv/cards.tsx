@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, type CSSProperties, type PointerEvent as RPointerEvent, type ReactNode } from "react";
 import { MARK, MARK_BOUNDS } from "@/lib/markFlight";
 import { TURN, turnPosition } from "@/lib/turnSequence";
+import { FRAME, OUTLINES, type Outline as OutlineData } from "./outlines";
 
 /* Features: the bento's cards, each a small working piece of the app
    (ported from the lab, src/app/lab/_components/sections/fz). Content is
@@ -122,9 +123,11 @@ const DETAILS = [
     n: 3,
     tab: "Pockets",
     note: "Both flap pockets as they are, the flaps sitting just above the hip.",
-    pin: [0.35, 0.47],
+    // on the flap pocket the clip pushes in to
+    pin: [0.425, 0.468],
     at: [0.555, 0.485],
     z: 2.3,
+    clip: "pockets",
     sel: (
       <>
         <rect pathLength={1} x="588" y="886" width="186" height="144" rx="24" />
@@ -149,22 +152,6 @@ const OUT_MS = 560; // the pull-out on the still, before pushing in to another d
 const TYPE_AFTER_MS = 750; // on the still, the comment starts typing once the push-in has landed
 const TYPE_MS = 24; // a character
 const clipSrc = (clip: string, part: string) => `/lab/features/clips/${clip}-${part}`;
-
-/* Each clip's outline, as Jose drew it (fill, its shape, in his own units),
-   washed and edged with a dashed line drawn along it (even dashes with
-   round ends: his exported dashes, as cut, read ragged), and where it sits on the
-   clip's last frame (at: left and top in the frame's pixels, 1244 x 1664,
-   and the scale). Fitted to the frame's edges: the collar's is at 0.692
-   scale, 203, 374 in. Once the clip lands the line is drawn round (the
-   dashes revealed along the shape), the rest of the frame dims round it,
-   then the wash fills it. */
-const FRAME = [1244, 1664] as const; // a clip's frame
-const OUTLINES: Record<string, { at: [number, number, number]; fill: string }> = {
-  collar: {
-    at: [203, 374, 0.692],
-    fill: "M199.513 20.0596C225.513 20.0596 278.68 9.72624 302.013 4.55957C293.513 50.5596 327.013 149.06 331.013 157.06C335.013 165.06 333.013 179.56 335.513 185.06C338.013 190.56 348.513 192.56 353.013 199.06C357.513 205.56 346.513 209.56 353.013 213.56C359.513 217.56 364.013 224.56 359.013 229.56C354.013 234.56 365.013 243.56 367.013 259.56C369.013 275.56 384.013 280.56 386.513 286.06C389.013 291.56 387.513 301.56 393.013 314.06C398.513 326.56 413.013 355.06 424.013 370.06C432.813 382.06 444.68 409.06 449.513 421.06C453.18 423.726 461.713 430.86 466.513 438.06C472.513 447.06 478.513 462.06 481.513 468.56C484.513 475.06 504.013 491.06 510.513 504.56C517.013 518.06 538.013 553.56 543.013 563.06C548.013 572.56 572.013 593.56 590.013 607.06C608.013 620.56 617.513 621.56 622.013 638.56C625.613 652.16 641.513 649.226 649.013 646.06C651.513 641.06 657.613 629.16 662.013 621.56C667.513 612.06 664.513 606.06 675.513 593.56C684.313 583.56 695.513 591.726 700.013 597.06L733.513 563.06C859.513 431.06 870.013 411.06 945.513 303.56C1021.01 196.06 1044.01 114.06 1044.51 108.56C1044.91 104.16 1047.68 99.7262 1049.01 98.0596C1162.01 83.0596 1231.51 39.5596 1238.51 36.5596C1244.18 39.5596 1256.41 46.3596 1260.01 49.5596C1349.01 108.06 1361.01 139.06 1372.01 210.06C1383.01 281.06 1363.51 387.56 1330.01 486.56C1296.51 585.56 1242.01 688.06 1231.51 704.56C1221.01 721.06 1217.01 732.56 1156.51 791.56C1096.01 850.56 1034.01 870.56 1002.01 878.06C970.013 885.56 931.513 877.06 919.013 878.06C906.513 879.06 876.013 864.56 866.013 863.56C856.013 862.56 840.513 846.56 806.013 836.56C771.513 826.56 738.513 780.06 723.513 767.06C708.513 754.06 695.013 737.06 691.513 733.56C688.013 730.06 683.513 726.56 682.013 716.06C680.513 705.56 674.013 708.06 670.513 703.06C667.013 698.06 670.013 684.06 656.513 664.56C643.013 645.06 626.013 658.06 617.513 660.06C609.013 662.06 600.513 671.06 594.013 688.56C588.813 702.56 577.18 705.393 572.013 705.06C566.68 713.06 555.113 729.96 551.513 733.56C547.013 738.06 531.513 746.56 521.013 751.56C510.513 756.56 483.013 774.06 467.013 786.56C451.013 799.06 389.513 830.06 367.513 836.56C345.513 843.06 308.013 851.47 225.513 827.06C83.1132 787.06 27.8465 576.393 18.0132 476.06C-31.4868 285.06 60.0132 135.56 78.5132 109.56C104.129 73.5596 164.846 38.3929 199.513 20.0596Z",
-  },
-};
 
 /* One detail's clip: in and out, two <video>s stacked. Either way starts
    from wherever the other has got to, so a change of mind mid-way turns
@@ -250,28 +237,54 @@ class ClipPlayer {
   }
 }
 
-/** a clip's outline on its last frame: the dashed line revealed along the
-    shape (a mask, the shape's own path drawn on), the frame dimmed round
-    the shape, then the wash */
-function Outline({ id, o, on }: { id: string; o: (typeof OUTLINES)[string]; on: boolean }) {
+/** a clip's outline on its last frame (outlines.ts): the lines revealed
+    along their shapes (a mask, each line's own path drawn on), the frame
+    dimmed round the fills, then the wash. Open lines fade out at both ends. */
+function Outline({ id, o, on }: { id: string; o: OutlineData; on: boolean }) {
   const [x, y, s] = o.at;
   const place = `translate(${x} ${y}) scale(${s})`;
   return (
     <svg className={`fvc-outline ${on ? "is-on" : ""}`} viewBox={`0 0 ${FRAME[0]} ${FRAME[1]}`} preserveAspectRatio="none" aria-hidden="true">
       <defs>
-        {/* the shade: everywhere but the shape */}
+        {/* the shade: everywhere but the shapes */}
         <mask id={`${id}-shade`} maskUnits="userSpaceOnUse" x={0} y={0} width={FRAME[0]} height={FRAME[1]}>
           <rect width={FRAME[0]} height={FRAME[1]} fill="#fff" />
-          <path d={o.fill} transform={place} fill="#000" />
+          <g transform={place} fill="#000">
+            {o.fills.map((d, i) => (
+              <path key={i} d={d} />
+            ))}
+          </g>
         </mask>
-        <mask id={`${id}-trim`} maskUnits="userSpaceOnUse" x={-40} y={-40} width={2400} height={2400}>
-          <path className="fvc-outline__trim" d={o.fill} pathLength={1} />
+        <mask id={`${id}-trim`} maskUnits="userSpaceOnUse" x={-200} y={-200} width={3000} height={3000}>
+          {o.lines.map((l, i) => (
+            <path key={i} className="fvc-outline__trim" d={l.d} pathLength={1} />
+          ))}
         </mask>
+        {/* an open line's colour, faded out at its two ends */}
+        {o.lines.map(
+          (l, i) =>
+            l.from &&
+            l.to && (
+              <linearGradient key={i} id={`${id}-g${i}`} gradientUnits="userSpaceOnUse" x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]}>
+                <stop offset="0" stopColor="#687ef5" stopOpacity="0" />
+                <stop offset="0.18" stopColor="#687ef5" />
+                <stop offset="0.82" stopColor="#687ef5" />
+                <stop offset="1" stopColor="#687ef5" stopOpacity="0" />
+              </linearGradient>
+            ),
+        )}
       </defs>
       <rect className="fvc-outline__shade" width={FRAME[0]} height={FRAME[1]} mask={`url(#${id}-shade)`} />
       <g transform={place}>
-        <path className="fvc-outline__fill" d={o.fill} />
-        <path className="fvc-outline__line" d={o.fill} mask={`url(#${id}-trim)`} />
+        {o.wash !== false &&
+          o.fills.map((d, i) => (
+            <path key={i} className="fvc-outline__fill" d={d} />
+          ))}
+        <g mask={`url(#${id}-trim)`}>
+          {o.lines.map((l, i) => (
+            <path key={i} className="fvc-outline__line" d={l.d} style={l.from ? { stroke: `url(#${id}-g${i})` } : undefined} />
+          ))}
+        </g>
       </g>
     </svg>
   );
