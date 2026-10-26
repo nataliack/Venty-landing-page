@@ -1,0 +1,57 @@
+/* venty.au/video: the film over everything the root layout draws (the grain
+   at z-index 60, our scrollbar at 90), on black, with no toolbar strip */
+:root:has(.film),
+:root:has(.film) body {
+  background: #000;
+}
+:root:has(.film) .safari-bar {
+  display: none;
+}
+
+.film {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #000;
+}
+.film video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+/* the play button, while the browser holds back playback: the cloud disc
+   from the site's light buttons, the triangle in navy */
+.film__play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 84px;
+  height: 84px;
+  translate: -50% -50%;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--color-cloud);
+  box-shadow: 0 12px 32px -10px rgb(0 0 0 / 0.6), inset 0 -1px 0 rgb(18 21 36 / 0.12);
+  cursor: pointer;
+  transition: scale 0.25s var(--ease-out-quart, ease-out);
+}
+.film__play:hover {
+  scale: 1.06;
+}
+.film__play:focus-visible {
+  outline: 2px solid var(--color-cornflower);
+  outline-offset: 4px;
+}
+.film__play svg {
+  width: 34px;
+  height: 34px;
+  margin-left: 4px;
+  fill: var(--color-navy);
+}
+@media (prefers-reduced-motion: reduce) {
+  .film__play { transition: none; }
+}
