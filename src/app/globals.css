@@ -41,17 +41,17 @@
   color-scheme: dark;
 }
 
+/* Light: only the few things that show the page's own colour change (the
+   page behind, the scroller, the scrollbar, Safari's bars, below). The
+   theme's custom properties stay on :root as they are: changing them there,
+   or color or color-scheme, is inherited by every element, so each switch
+   between a dark and a light section restyled the whole page (40 to 50ms,
+   a visible hitch at every hand-off). */
 :root[data-theme="light"] {
-  --bg: var(--color-cloud);
-  --fg: var(--color-ink);
-  --muted: var(--color-navy);
-  --faint: var(--color-steel);
-  --line: color-mix(in srgb, var(--color-ink) 10%, transparent);
-  --line-strong: color-mix(in srgb, var(--color-ink) 22%, transparent);
-  --glass: color-mix(in srgb, var(--color-ink) 5%, transparent);
-  --glow: var(--color-cornflower);
-  --deep: var(--color-mist);
-  color-scheme: light;
+  background: var(--color-cloud);
+}
+:root[data-theme="light"] .scroller {
+  background: var(--color-cloud);
 }
 
 @theme inline {
@@ -145,6 +145,9 @@ body {
   .scrollbar[data-dragging="true"] .scrollbar__thumb {
     cursor: grabbing;
   }
+  :root[data-theme="light"] .scrollbar:not(:hover):not([data-dragging="true"]) .scrollbar__thumb {
+    background: var(--color-ink);
+  }
 }
 
 /* Safari 26 bar colours. It ignores theme-color and samples, in order: a
@@ -163,7 +166,7 @@ body {
   transition: background-color 0.9s var(--ease-in-out-quart);
 }
 :root[data-theme="light"] body {
-  background-color: var(--bg);
+  background-color: var(--color-cloud);
 }
 .safari-bar {
   display: none;
@@ -178,7 +181,7 @@ body {
   transition: background-color 0.9s var(--ease-in-out-quart);
 }
 :root[data-theme="light"] .safari-bar {
-  background-color: var(--bg);
+  background-color: var(--color-cloud);
 }
 /* iPhone Safari only: the class is set by a script in layout.tsx */
 :root.iphone-safari .safari-bar {
@@ -473,12 +476,15 @@ html[data-announce="on"] {
   transition: top var(--dur-base) var(--ease-out-expo);
 }
 
-/* Section menu: a compact glass pill (phones smaller still). The pill and
-   the list it opens share one frosted glass: a light 10% fill and edge over
-   a 40px blur of whatever is behind. */
+/* Section menu: a compact pill (phones smaller still), built as the app's
+   dark secondary button (venty-app .pill-dark): its card colour, lit from
+   the top (a faint white wash down the face, a bright line along the top
+   edge, a darker one along the bottom), a fine light rim; over a 40px blur
+   so it still reads over the photographs. The list it opens is the same. */
 .section-nav__glass {
-  background-color: color-mix(in srgb, var(--color-cloud) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-cloud) 10%, transparent);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.06), rgb(255 255 255 / 0) 60%) rgb(27 28 38 / 0.86);
+  border: 1px solid transparent;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1), inset 0 1px 0 rgb(255 255 255 / 0.2), inset 0 -1px 0 rgb(0 0 0 / 0.35), inset 0 0 14px 1px rgb(255 255 255 / 0.04), 0 8px 20px -10px rgb(0 0 0 / 0.6);
   -webkit-backdrop-filter: blur(40px);
   backdrop-filter: blur(40px);
 }
@@ -498,8 +504,7 @@ html[data-announce="on"] {
    ease apart, an invitation to open it */
 @media (hover: hover) {
   .section-nav__btn:hover {
-    background-color: color-mix(in srgb, var(--color-cloud) 17%, transparent);
-    border-color: color-mix(in srgb, var(--color-cloud) 26%, transparent);
+    background-color: rgb(35 36 47 / 0.92);
   }
   .section-nav__btn:hover .section-nav__text {
     color: var(--color-cloud);
@@ -1253,10 +1258,15 @@ html[data-announce="off"] .announce {
   visibility: hidden;
 }
 
-/* the section menu on light sections: ink glass, navy and ink type */
+/* the section menu on light sections: the app's white secondary (a fine
+   ink rim, a white line along the top, a deeper snow along the bottom, a
+   soft light inside, a soft drop shadow), navy and ink type */
 html[data-theme="light"] .section-nav__glass {
-  background-color: color-mix(in srgb, var(--color-ink) 5%, transparent);
-  border-color: color-mix(in srgb, var(--color-ink) 10%, transparent);
+  background: rgb(240 244 254 / 0.9);
+  box-shadow: inset 0 0 0 1px rgb(19 21 35 / 0.06), inset 0 1px 0 #fff, inset 0 -1px 0 rgb(19 21 35 / 0.1), inset 0 0 12px 1px rgb(255 255 255 / 0.75), 0 1px 2px rgb(19 21 35 / 0.1), 0 6px 14px -6px rgb(19 21 35 / 0.22);
+}
+@media (hover: hover) {
+  html[data-theme="light"] .section-nav__btn:hover { background-color: #fff; }
 }
 html[data-theme="light"] .section-nav .text-periwinkle { color: var(--color-navy); }
 html[data-theme="light"] .section-nav .text-cloud { color: var(--color-ink); }

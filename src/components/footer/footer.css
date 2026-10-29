@@ -90,11 +90,9 @@
   font-size: 14px;
   letter-spacing: -0.02em;
   color: var(--ink);
-  background: rgb(255 255 255 / 0.62);
-  border: 1px solid var(--line);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 8px 20px -12px rgb(56 76 101 / 0.5);
+  /* the app's white secondary, raised off the sky */
+  background: #f0f4fe;
+  box-shadow: inset 0 0 0 1px rgb(19 21 35 / 0.06), inset 0 1px 0 #fff, inset 0 -1px 0 rgb(19 21 35 / 0.1), inset 0 0 12px 1px rgb(255 255 255 / 0.75), 0 1px 2px rgb(19 21 35 / 0.1), 0 6px 14px -6px rgb(19 21 35 / 0.22);
   cursor: pointer;
   transition: color 0.35s var(--expo), translate 0.5s var(--expo);
 }
@@ -187,8 +185,8 @@
 }
 @media (prefers-reduced-motion: reduce) { .fo-fog__bank { animation: none; } }
 
-/* ---- on the horizon: two panels of frosted glass, level -------------
-   The Made to measure composer's glass. Above the bird, which flies behind
+/* ---- on the horizon: the two cards ------------------------------------
+   Made by Natalia and Vote for Venty. Above the bird, which flies behind
    them (and over the sky's words) */
 .fo-horizon {
   position: relative;
@@ -204,62 +202,104 @@
     position: absolute;
     inset: 14% 0 auto;
     flex-direction: row;
-    align-items: flex-end;
+    align-items: stretch; /* the pair, the same height */
     justify-content: space-between;
     max-width: 1440px;
     margin: 0 auto;
   }
 }
-.fo-panel {
-  position: relative;
-  width: min(100%, 380px);
-  padding: 24px;
-  border-radius: 24px;
-  color: var(--ink);
-  background: rgb(255 255 255 / 0.62);
-  border: 1px solid var(--line);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
-  backdrop-filter: blur(20px) saturate(140%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 30px 80px -36px rgb(56 76 101 / 0.45), 0 2px 6px -2px rgb(56 76 101 / 0.12);
-}
 .fo-k { font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--steel); }
 
-/* Made by Natalia */
-.fo-maker {
-  display: grid;
-  grid-template-columns: 92px minmax(0, 1fr);
-  align-items: center;
-  gap: 20px;
-  transition: box-shadow 0.5s var(--expo), translate 0.6s var(--expo);
-}
-@media (hover: hover) { .fo-maker:hover { translate: 0 -3px; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 36px 80px -34px rgb(56 76 101 / 0.55), 0 2px 6px -2px rgb(56 76 101 / 0.12); } }
-.fo-maker:focus-visible { outline: 2px solid var(--corn); outline-offset: 4px; }
-/* her portrait in dots, in a night arch, as in The designer */
-.fo-maker__face {
+/* ---- the two cards: the app's raised white card, the same size -------- */
+.fo-card {
   position: relative;
-  display: block;
-  height: 118px;
-  overflow: hidden;
-  border-radius: 48px 48px 10px 10px;
-  background: #0b0c15;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 380px);
+  padding: 22px;
+  border-radius: 28px;
+  color: var(--ink);
+  background: #f0f4fe;
+  box-shadow:
+    inset 0 0 0 1px rgb(19 21 35 / 0.06),
+    inset 0 1px 0 #fff,
+    inset 0 -1px 0 rgb(19 21 35 / 0.1),
+    inset 0 0 18px 2px rgb(255 255 255 / 0.75),
+    0 1px 2px rgb(19 21 35 / 0.1),
+    0 6px 14px -6px rgb(19 21 35 / 0.22),
+    0 32px 60px -28px rgb(56 76 101 / 0.55);
 }
-.fo-maker__face > * { position: absolute; inset: 0; }
-.fo-maker__text { display: flex; flex-direction: column; min-width: 0; text-align: left; }
-.fo-maker__name { margin-top: 8px; font-size: 28px; line-height: 1; letter-spacing: -0.045em; }
-.fo-maker__name em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--corn); }
-.fo-maker__role { margin-top: 6px; font-size: 13px; letter-spacing: -0.01em; color: var(--steel); }
-.fo-maker__url { display: inline-flex; align-items: center; gap: 4px; margin-top: 14px; font-size: 13px; letter-spacing: -0.01em; color: var(--corn); }
-.fo-maker__url svg { width: 13px; height: 13px; }
+/* pressed into the card (the app's pressed build on cloud: a shadow
+   inside along the top, a white lip along the bottom) */
+.fo-well {
+  border-radius: 14px;
+  background: rgb(24 30 70 / 0.05);
+  box-shadow: inset 0 3px 7px rgb(24 30 70 / 0.15), inset 0 1px 1.5px rgb(24 30 70 / 0.14), inset 0 -1px 0 rgb(255 255 255 / 0.9), 0 1px 0 rgb(255 255 255 / 0.7);
+}
+/* raised out of the card (the app's white secondary) */
+.fo-raised {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 44px;
+  margin-top: auto;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  background: #f0f4fe;
+  box-shadow: inset 0 0 0 1px rgb(19 21 35 / 0.06), inset 0 1px 0 #fff, inset 0 -1px 0 rgb(19 21 35 / 0.1), inset 0 0 12px 1px rgb(255 255 255 / 0.75), 0 1px 2px rgb(19 21 35 / 0.1), 0 6px 14px -6px rgb(19 21 35 / 0.22);
+  transition: translate 0.5s var(--expo), scale 0.12s;
+}
+.fo-raised svg { width: 14px; height: 14px; }
+@media (hover: hover) { .fo-raised:hover { translate: 0 -2px; } }
+.fo-raised:active { scale: 0.965; }
+.fo-raised:focus-visible { outline: 2px solid var(--corn); outline-offset: 3px; }
 
-/* Vote for Venty */
-.fo-vote__head { display: flex; align-items: flex-end; gap: 14px; }
-/* its bars come down from the panel's top edge: the mark starts there,
-   over the padding */
-.fo-vote__head .vote__mark { flex: none; width: 24px; height: auto; margin-top: -24px; }
-.fo-vote__head p { display: flex; flex-direction: column; gap: 3px; padding-bottom: 2px; font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--ink); }
-.fo-vote__head p span { text-transform: none; color: var(--steel); }
-/* the QUT mark builds as it arrives: the bars grow down from the top edge,
-   left to right, then the square and the letters come in */
+/* Made by Natalia */
+.fo-made__head { display: flex; align-items: center; gap: 14px; }
+.fo-made__photo {
+  position: relative;
+  flex: none;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+  border-radius: 18px;
+  background:
+    radial-gradient(70% 55% at 50% 30%, #9aa8fb 0%, rgb(154 168 251 / 0) 70%),
+    linear-gradient(180deg, #687ef5 0%, #4a5fd8 60%, #2f3e9e 100%);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.95);
+}
+.fo-made__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0%; scale: 1.3; transform-origin: 56% 4%; }
+.fo-made__photo::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 3px 6px rgb(24 30 70 / 0.35), inset 0 0 0 1px rgb(24 30 70 / 0.12); }
+.fo-made__who { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.fo-made__name { font-size: 28px; font-weight: 400; line-height: 1; letter-spacing: -0.045em; }
+.fo-made__name em,
+.fo-vote__title em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; }
+.fo-made__rows { margin: 18px 0 18px; padding: 2px 14px; }
+.fo-made__rows div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; font-size: 14px; letter-spacing: -0.015em; }
+.fo-made__rows div + div { border-top: 1px solid rgb(24 30 70 / 0.08); }
+.fo-made__rows dt { color: var(--steel); }
+.fo-made__rows dd { margin: 0; text-align: right; }
+
+/* Vote for Venty: the award on a label pressed into the card */
+.fo-vote__label {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 14px;
+  background: rgb(24 30 70 / 0.05);
+  box-shadow: inset 0 2px 5px rgb(24 30 70 / 0.16), inset 0 1px 1.5px rgb(24 30 70 / 0.16), inset 0 -1px 0 rgb(255 255 255 / 0.9), 0 1px 0 rgb(255 255 255 / 0.9);
+}
+.fo-vote__label .vote__mark { width: 22px; height: auto; border-radius: 3px; }
+.fo-vote__label p { display: flex; flex-direction: column; gap: 2px; font-size: 11px; line-height: 13px; letter-spacing: -0.01em; text-transform: uppercase; color: var(--ink); }
+.fo-vote__label p span { text-transform: none; color: var(--steel); }
+/* the QUT mark builds as it arrives: the bars grow down, left to right,
+   then the square and the letters come in */
 .fo-vote [data-qut-bar] { transform-box: fill-box; transform-origin: 50% 0; scale: 1 0; transition: scale 0.9s var(--expo); }
 .fo-vote [data-square],
 .fo-vote [data-letter] { opacity: 0; transition: opacity 0.6s var(--expo); }
@@ -272,33 +312,47 @@
 .fo-vote [data-qut-bar]:nth-of-type(4) { transition-delay: 0.74s; }
 .fo-vote [data-square] { transition-delay: 0.8s; }
 .fo-vote [data-letter] { transition-delay: 0.95s; }
-.fo-vote__title { margin-top: 22px; font-weight: 400; font-size: clamp(2.2rem, 3vw, 2.8rem); line-height: 1; letter-spacing: -0.055em; text-align: left; }
-.fo-vote__title em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--corn); }
-/* the days to the festival, the numbers in Bigilla */
-.fo-count { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 20px; padding: 10px 0; border-block: 1px solid var(--line); }
-.fo-count span { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 0; }
-.fo-count span + span { border-left: 1px solid var(--line); }
-.fo-count b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: 28px; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.fo-vote__title { margin-top: 18px; font-weight: 400; font-size: clamp(2rem, 2.6vw, 2.5rem); line-height: 1; letter-spacing: -0.055em; text-align: left; }
+/* the days to the festival, each number in a tile pressed into the card */
+.fo-count { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 16px; }
+.fo-count span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 9px 0 7px;
+  border-radius: 12px;
+  background: rgb(24 30 70 / 0.05);
+  box-shadow: inset 0 3px 7px rgb(24 30 70 / 0.16), inset 0 1px 1.5px rgb(24 30 70 / 0.14), inset 0 -1px 0 rgb(255 255 255 / 0.9), 0 1px 0 rgb(255 255 255 / 0.7);
+}
+.fo-count b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: 26px; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--ink); }
 .fo-count small { font-size: 11px; letter-spacing: -0.01em; color: var(--steel); }
-.fo-vote__when { margin-top: 12px; font-size: 13px; letter-spacing: -0.01em; color: var(--steel); text-align: left; }
-.fo-vote__go { display: flex; gap: 8px; margin-top: 20px; list-style: none; }
+.fo-vote__when { margin-top: 12px; font-size: 13px; letter-spacing: -0.01em; color: var(--navy); text-align: left; }
+.fo-vote__go { display: flex; gap: 8px; margin-top: auto; padding-top: 16px; list-style: none; }
 .fo-vote__go li { flex: 1; }
+/* the vote links: the app's primary button (a periwinkle core, light
+   pooling at the edges, a fine dot grid) */
 .fo-go {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 42px;
+  height: 44px;
   border-radius: 999px;
   font-size: 14px;
-  letter-spacing: -0.02em;
-  color: var(--cloud);
-  background: var(--ink);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #fff;
+  background-color: #687ef5;
+  background-image: radial-gradient(rgb(255 255 255 / 0.16) 0.8px, transparent 1.1px), linear-gradient(180deg, #7387f6, #687ef5 55%, #6479f2);
+  background-size: 5px 5px, 100% 100%;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3), inset 0 1px 0 rgb(255 255 255 / 0.6), inset 0 0 18px 3px rgb(206 214 255 / 0.55), 0 10px 24px -10px rgb(104 126 245 / 0.6);
   cursor: pointer;
-  transition: background-color 0.35s var(--expo), translate 0.5s var(--expo);
+  transition: filter 0.35s var(--expo), translate 0.5s var(--expo), scale 0.12s;
 }
 .fo-go svg { width: 14px; height: 14px; }
-@media (hover: hover) { .fo-go:hover { background: var(--corn); translate: 0 -2px; } }
+@media (hover: hover) { .fo-go:hover { filter: brightness(1.06); translate: 0 -2px; } }
+.fo-go:active { scale: 0.965; }
 .fo-go:focus-visible { outline: 2px solid var(--corn); outline-offset: 3px; }
 
 /* ---- the lockup over the flowers, and its bird ----------------------- */

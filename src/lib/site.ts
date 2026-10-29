@@ -20,10 +20,15 @@ export const VOTE_LINKS: { label: string; href: string }[] = [
   { label: "VisCom", href: "" },
 ];
 
-/* Natalia's socials, in the footer, as icons. Empty until she gives them;
-   they show, but go nowhere yet. Email as "mailto:...", phone as "tel:...". */
+/* Natalia's LinkedIn and email, as on her business cards and in the app's
+   About Venty */
+export const LINKEDIN_URL = "https://www.linkedin.com/in/natalia-c-8201a8226/";
+export const MAKER_EMAIL = "natalia.chamom@gmail.com";
+
+/* Natalia's socials, in the footer, as icons. An empty one shows, but goes
+   nowhere yet. Email as "mailto:...", phone as "tel:...". */
 export const SOCIAL_LINKS: { label: string; icon: "linkedin" | "email" | "phone"; href: string }[] = [
-  { label: "LinkedIn", icon: "linkedin", href: "" },
-  { label: "Email", icon: "email", href: "" },
+  { label: "LinkedIn", icon: "linkedin", href: LINKEDIN_URL },
+  { label: "Email", icon: "email", href: `mailto:${MAKER_EMAIL}` },
   { label: "Phone", icon: "phone", href: "" },
 ];

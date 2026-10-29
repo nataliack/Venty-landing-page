@@ -1,22 +1,51 @@
-/* 8. Meet the maker (maker/Maker.tsx). Night. Scoped to .mk. */
+/* 8. The designer (maker/Maker.tsx). Night. Scoped to .mk. The heading in
+   one line; her things as a flat lay (the Venty pattern envelope with her
+   on the front, its tissue, her two business cards, the tailor's chalk:
+   paper with real grain, /texture/paper.webp, and table shadows) in a tray
+   built as the app's; the cards' Turn over buttons; then her profile as the
+   app's About Venty. Every raised and pressed build is the app's (venty-app
+   globals.css: .pill-dark and .rb, .ruler-track, .iconbadge, .card-soft,
+   and the paper's "Saved to your bodies" label, in the dark). */
 
 .mk {
   --night: #0b0c15;
+  --ink: #121524;
+  --navy: #384c65;
   --steel: #485f88;
   --peri: #9daccd;
   --corn: #687ef5;
   --cloud: #eff4ff;
+  --paper: #f3f5fa;
+  --grain: url("/texture/paper.webp");
   --expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --gut: 16px;
   position: relative;
   z-index: 10;
   isolation: isolate;
-  overflow-x: clip; /* the turning ring and the glows; the dithered edge above still shows */
-  padding: clamp(96px, 16svh, 180px) 16px clamp(96px, 14svh, 160px);
+  overflow-x: clip;
+  padding: clamp(96px, 14svh, 160px) var(--gut) clamp(96px, 14svh, 160px);
   color: var(--cloud);
   background: var(--night);
 }
-@media (min-width: 768px) { .mk { padding-left: 32px; padding-right: 32px; } }
-@media (min-width: 1280px) { .mk { padding-left: 48px; padding-right: 48px; } }
+@media (min-width: 768px) { .mk { --gut: 32px; } }
+@media (min-width: 1280px) { .mk { --gut: 48px; } }
+
+/* the app's graph paper, in light on the dark (the FAQ's, inverted) */
+.mk-paper {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image:
+    linear-gradient(0deg, rgb(157 172 205 / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(157 172 205 / 0.06) 1px, transparent 1px),
+    linear-gradient(0deg, rgb(157 172 205 / 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(157 172 205 / 0.025) 1px, transparent 1px);
+  background-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px;
+  background-position: 50% 0;
+  -webkit-mask-image: radial-gradient(55% 40% at 50% 32%, #000 0%, rgb(0 0 0 / 0.4) 60%, transparent 100%);
+  mask-image: radial-gradient(55% 40% at 50% 32%, #000 0%, rgb(0 0 0 / 0.4) 60%, transparent 100%);
+}
 .mk-glow {
   position: absolute;
   inset: 0;
@@ -24,102 +53,407 @@
   overflow: hidden;
   pointer-events: none;
 }
-/* two soft lights drifting: gradient discs (the light of a blurred circle,
-   without a blur for the GPU to redo on every frame of the drift) */
-.mk-glow::before,
+/* a soft light drifting low on the left: a gradient disc, not a blur (no
+   light behind the heading) */
 .mk-glow::after {
   content: "";
   position: absolute;
   border-radius: 50%;
   will-change: transform;
 }
-.mk-glow::before { left: -16%; top: 12%; width: 72vw; aspect-ratio: 1; background: radial-gradient(closest-side, rgb(104 126 245 / 0.18) 0%, rgb(104 126 245 / 0.15) 45%, rgb(104 126 245 / 0.05) 78%, transparent 100%); animation: mk-drift 16s ease-in-out infinite alternate; }
-.mk-glow::after { right: -21%; bottom: -18%; width: 62vw; aspect-ratio: 1; background: radial-gradient(closest-side, rgb(79 99 224 / 0.14) 0%, rgb(79 99 224 / 0.11) 45%, rgb(79 99 224 / 0.04) 78%, transparent 100%); animation: mk-drift 19s ease-in-out infinite alternate-reverse; }
-@keyframes mk-drift { from { translate: 0 0; } to { translate: 12% -10%; } }
+.mk-glow::after { left: -21%; bottom: -18%; width: 62vw; aspect-ratio: 1; background: radial-gradient(closest-side, rgb(79 99 224 / 0.12) 0%, rgb(79 99 224 / 0.08) 45%, rgb(79 99 224 / 0.03) 78%, transparent 100%); animation: mk-drift 19s ease-in-out infinite alternate-reverse; }
+@keyframes mk-drift { from { translate: 0 0; } to { translate: -10% 8%; } }
 
-.mk-grid { display: grid; gap: 56px; max-width: 1344px; margin: 0 auto; align-items: center; }
-@media (min-width: 1024px) { .mk-grid { grid-template-columns: 5fr 7fr; gap: 64px; } }
-
-/* ---- the portrait ---------------------------------------------------- */
-.mk-portrait { position: relative; width: min(100%, 440px); margin: 0 auto; aspect-ratio: 1; display: grid; place-items: center; }
-.mk-arch {
-  position: relative;
-  width: 66%;
-  aspect-ratio: 126 / 150;
-  overflow: hidden;
-  border-radius: 999px 999px 18px 18px;
-  background: radial-gradient(80% 70% at 50% 30%, #1b2035, var(--night));
-  box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.12), 0 0 80px -10px rgb(104 126 245 / 0.45);
+/* ---- the stage: the heading, the tray, the turn buttons ----------------- */
+.mk-stage { display: flex; flex-direction: column; align-items: center; gap: clamp(20px, 3svh, 32px); }
+.mk-title {
+  max-width: 100%;
+  margin: 0;
+  font-weight: 400;
+  font-size: clamp(2.5rem, 6.4vw, 7.4rem);
+  line-height: 1;
+  letter-spacing: -0.055em;
+  text-align: center;
+  text-wrap: balance;
 }
-.mk-tone { position: absolute; inset: 0; }
-.mk-ring {
+@media (min-width: 1024px) { .mk-title { white-space: nowrap; } }
+.mk-title em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--cloud); }
+
+/* ---- the table: a fixed stage scaled to fit ----------------------------
+   Phones: 460 x 820, tall; wide: 1100 x 620 */
+.mk-table { --s: 0.68; --dw: 460px; --dh: 820px; position: relative; width: calc(var(--dw) * var(--s)); height: calc(var(--dh) * var(--s)); perspective: 1800px; }
+@media (min-width: 480px) { .mk-table { --s: 0.8; } }
+@media (min-width: 1024px) { .mk-table { --s: 0.8; --dw: 1100px; --dh: 620px; flex: none; } }
+@media (min-width: 1180px) { .mk-table { --s: 0.84; } }
+@media (min-width: 1180px) and (min-height: 860px) { .mk-table { --s: 0.9; } }
+@media (min-width: 1440px) and (min-height: 980px) { .mk-table { --s: 1.04; } }
+
+/* the tray, as the app's pattern tray in the dark: a rim raised round a
+   surface pressed down into it (the dark secondary's build for the rim,
+   the measuring track's for the well), the well ruled with the grid */
+.mk-tray {
+  position: relative;
+  padding: 12px;
+  border-radius: 34px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.06), rgb(255 255 255 / 0) 60%) #1b1c26;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1), inset 0 1px 0 rgb(255 255 255 / 0.2), inset 0 -1px 0 rgb(0 0 0 / 0.35), inset 0 0 14px 1px rgb(255 255 255 / 0.04), 0 30px 60px -30px rgb(0 0 0 / 0.8);
+}
+.mk-tray .mk-table {
+  border-radius: 24px;
+  background:
+    linear-gradient(0deg, rgb(157 172 205 / 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(157 172 205 / 0.09) 1px, transparent 1px),
+    linear-gradient(0deg, rgb(157 172 205 / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(157 172 205 / 0.04) 1px, transparent 1px),
+    linear-gradient(180deg, #121320 0%, #171823 100%);
+  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px, 100% 100%;
+  background-position: 50% 50%;
+  box-shadow: inset 0 3px 7px rgb(0 0 0 / 0.65), inset 0 1px 1.5px rgb(0 0 0 / 0.55), inset 0 -1px 0 rgb(255 255 255 / 0.06);
+}
+/* the things lie on the well, its edge passing over them */
+.mk-tray .mk-table::after { content: ""; position: absolute; inset: 0; z-index: 5; border-radius: inherit; pointer-events: none; box-shadow: inset 0 3px 7px rgb(0 0 0 / 0.5), inset 0 0 0 1px rgb(0 0 0 / 0.35); }
+
+/* the cards' Turn over buttons: two of the app's dark secondary, raised in
+   a track pressed into the page (the measuring track's build) */
+.mk-turns {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #121320 0%, #171823 100%);
+  box-shadow: inset 0 3px 7px rgb(0 0 0 / 0.65), inset 0 1px 1.5px rgb(0 0 0 / 0.55), inset 0 -1px 0 rgb(255 255 255 / 0.06), 0 1px 0 rgb(255 255 255 / 0.07);
+}
+.mk-turn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 18px 0 14px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: var(--cloud);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.06), rgb(255 255 255 / 0) 60%) #1b1c26;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1), inset 0 1px 0 rgb(255 255 255 / 0.2), inset 0 -1px 0 rgb(0 0 0 / 0.35), inset 0 0 14px 1px rgb(255 255 255 / 0.04), 0 4px 10px rgb(0 0 0 / 0.45);
+  cursor: pointer;
+  transition: scale 0.35s cubic-bezier(0.2, 1.4, 0.4, 1), background-color 0.3s;
+}
+.mk-turn svg { width: 18px; height: 18px; color: var(--peri); transition: rotate 0.6s var(--expo); }
+.mk-turn[aria-pressed="true"] svg { rotate: 180deg; }
+@media (hover: hover) { .mk-turn:hover { background-color: #23242f; } }
+.mk-turn:active { scale: 0.965; transition-duration: 0.12s; }
+.mk-turn:focus-visible { outline: 2px solid var(--corn); outline-offset: 3px; }
+@media (max-width: 479px) { .mk-turn { height: 40px; padding: 0 14px 0 11px; font-size: 13.5px; } .mk-turn svg { width: 16px; height: 16px; } }
+
+.mk-fit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--dw);
+  height: var(--dh);
+  transform-origin: 0 0;
+  scale: var(--s);
+  transform-style: preserve-3d;
+}
+.mk-desk { position: absolute; inset: 0; transform-style: preserve-3d; }
+
+/* where everything lies (phones, then wide) */
+.mk-env { left: 62px; top: 150px; }
+.mk-tissue { left: 112px; top: 96px; }
+.mk-card { left: 196px; top: 20px; width: 262px; }
+.mk-card.is-natalia { left: -8px; top: 640px; }
+.mk-chalk { left: 372px; top: 690px; }
+@media (min-width: 1024px) {
+  .mk-env { left: 382px; top: 36px; }
+  .mk-tissue { left: 486px; top: 8px; }
+  .mk-card { left: 706px; top: 70px; width: 340px; }
+  .mk-card.is-natalia { left: 58px; top: 330px; }
+  .mk-chalk { left: 800px; top: 452px; }
+}
+
+/* paper: the grain multiplied in, lit from the top left */
+.mk-env,
+.mk-tissue {
+  background-image: linear-gradient(135deg, rgb(255 255 255 / 0.5), rgb(255 255 255 / 0) 45%, rgb(18 21 36 / 0.05)), var(--grain);
+  background-size: 100% 100%, 384px 384px;
+  background-blend-mode: normal, multiply;
+}
+
+/* the tissue: thin, a little see-through, folded in quarters to fit the
+   envelope; printed with a bodice front */
+.mk-tissue {
+  position: absolute;
+  z-index: 1;
+  width: 300px;
+  height: 380px;
+  border-radius: 2px;
+  background-color: rgb(228 233 247 / 0.94);
+  box-shadow: 0 1px 1px rgb(0 0 0 / 0.25), 0 14px 30px -12px rgb(0 0 0 / 0.55);
+}
+/* the folds: a crease down the middle and one across */
+.mk-tissue::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 10px), rgb(18 21 36 / 0.07) calc(50% - 1px), rgb(255 255 255 / 0.55) 50%, transparent calc(50% + 12px)),
+    linear-gradient(180deg, transparent calc(50% - 10px), rgb(18 21 36 / 0.06) calc(50% - 1px), rgb(255 255 255 / 0.5) 50%, transparent calc(50% + 12px));
+}
+.mk-tissue__print { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.mk-tissue__print path { fill: none; stroke-linejoin: round; }
+.mk-tissue__print .is-cut { stroke: var(--navy); stroke-width: 1.1; }
+.mk-tissue__print .is-seam { stroke: var(--corn); stroke-width: 0.9; stroke-dasharray: 4 4; }
+.mk-tissue__print .is-grain,
+.mk-tissue__print .is-notch { stroke: var(--navy); stroke-width: 1; }
+.mk-tissue__label {
+  position: absolute;
+  left: 58%;
+  top: 16%;
+  translate: -50% 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  color: var(--navy);
+}
+.mk-tissue__label b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: 17px; letter-spacing: -0.02em; color: var(--ink); }
+
+/* the envelope: matt card, its maker on the front */
+.mk-env {
+  position: absolute;
+  z-index: 2;
+  width: 336px;
+  margin: 0;
+  padding: 16px 16px 14px;
+  border-radius: 3px;
+  color: var(--ink);
+  background-color: var(--paper);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.8),
+    inset 0 0 0 1px rgb(18 21 36 / 0.04),
+    0 1px 1px rgb(0 0 0 / 0.3),
+    0 8px 14px -6px rgb(0 0 0 / 0.45),
+    0 34px 60px -18px rgb(0 0 0 / 0.65);
+}
+/* the thumb cut at the top, the tissue's edge showing inside it */
+.mk-env::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -1px;
+  width: 52px;
+  height: 22px;
+  margin-left: -26px;
+  border-radius: 0 0 26px 26px;
+  background: linear-gradient(180deg, #c9d0e3, #dfe4f2);
+  box-shadow: inset 0 3px 4px -2px rgb(18 21 36 / 0.35);
+}
+.mk-env__top { display: flex; align-items: flex-end; justify-content: space-between; height: 26px; }
+.mk-env__word { height: 22px; width: auto; color: var(--ink); }
+.mk-env__no { font-size: 11px; letter-spacing: -0.01em; color: var(--steel); }
+.mk-env__no b { margin-left: 2px; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: 20px; line-height: 1; color: var(--ink); }
+/* the photograph, printed on the card: her on a cornflower backdrop */
+.mk-env__photo {
+  position: relative;
+  aspect-ratio: 1 / 1.02;
+  margin-top: 12px;
+  overflow: hidden;
+  border-radius: 1px;
+  background:
+    radial-gradient(70% 55% at 50% 30%, #9aa8fb 0%, rgb(154 168 251 / 0) 70%),
+    linear-gradient(180deg, #687ef5 0%, #4a5fd8 60%, #2f3e9e 100%);
+}
+/* a little larger than the print, from the top: the hem and the sunglasses in her hand fall outside it */
+.mk-env__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0%; scale: 1.16; transform-origin: 56% 6%; }
+/* the print: the card's grain through the ink, a little sheen */
+.mk-env__photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.14), transparent 40%), var(--grain);
+  background-size: 100% 100%, 384px 384px;
+  mix-blend-mode: multiply;
+  opacity: 0.7;
+  box-shadow: inset 0 0 0 1px rgb(18 21 36 / 0.08);
+}
+.mk-env__name {
+  margin-top: 12px;
+  font-family: var(--font-bigilla), Georgia, serif;
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+.mk-env__name em { font-style: normal; }
+.mk-env__details { display: grid; grid-template-columns: 1fr 1fr; column-gap: 14px; margin: 10px 0 0; }
+.mk-env__details div { padding: 6px 0; border-top: 1px solid rgb(18 21 36 / 0.14); }
+.mk-env__details dt { font-size: 10px; line-height: 12px; letter-spacing: -0.01em; text-transform: uppercase; color: var(--steel); }
+.mk-env__details dd { margin: 2px 0 0; font-size: 12.5px; line-height: 1.2; letter-spacing: -0.015em; }
+
+/* her business cards: two faces; a tap (or its Turn button) turns one over
+   (their angles on the table are set as they are laid, Maker.tsx) */
+.mk-card {
+  position: absolute;
+  z-index: 3;
+  aspect-ratio: 1000 / 611;
+  perspective: 1400px;
+  border-radius: 4px;
+  box-shadow: 0 1px 1px rgb(0 0 0 / 0.35), 0 10px 18px -8px rgb(0 0 0 / 0.5), 0 30px 50px -22px rgb(0 0 0 / 0.6);
+}
+.mk-card { padding: 0; cursor: pointer; transition: box-shadow 0.4s var(--expo); }
+@media (hover: hover) { .mk-card:hover { box-shadow: 0 1px 1px rgb(0 0 0 / 0.35), 0 16px 26px -10px rgb(0 0 0 / 0.55), 0 40px 64px -22px rgb(0 0 0 / 0.65); } }
+.mk-card:focus-visible { outline: 2px solid var(--corn); outline-offset: 4px; }
+.mk-card__flip { position: absolute; inset: 0; display: block; transform-style: preserve-3d; }
+/* a tap turns it over: up a little, over, and down, with a small spring */
+.mk-card__flip { transition: transform 0.8s cubic-bezier(0.3, 1.25, 0.45, 1); }
+.mk-card__flip.is-over { transform: rotateY(180deg); }
+.mk-card:active .mk-card__flip { scale: 0.98; }
+@media (prefers-reduced-motion: reduce) { .mk-card__flip { transition-duration: 0.01ms; } }
+.mk-card__face {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  overflow: visible;
-  fill: var(--peri);
-  font-size: 7.4px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  animation: mk-turn 40s linear infinite;
+  border-radius: 4px;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
 }
-@keyframes mk-turn { to { rotate: 360deg; } }
+.mk-card__face.is-back { transform: rotateY(180deg); }
+.mk-card.is-natalia .mk-card__face { box-shadow: 0 1px 0 #d9cfb6; }
 
-/* ---- the words ------------------------------------------------------- */
-.mk-text { display: flex; flex-direction: column; }
-.mk-eyebrow { font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--peri); }
-.mk-name {
-  display: flex;
-  flex-direction: column;
-  margin-top: 18px;
-  font-family: var(--font-bigilla), Georgia, serif;
-  font-weight: 700;
-  font-size: clamp(3.6rem, 10vw, 10rem);
-  line-height: 0.86;
-  letter-spacing: -0.02em;
+/* the chalk, by the envelope */
+.mk-chalk {
+  position: absolute;
+  z-index: 4;
+  width: 78px;
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.35)) drop-shadow(4px 10px 10px rgb(0 0 0 / 0.45));
 }
-.mk-name .line-mask:last-child span { padding-left: 0.6em; color: var(--corn); }
-.mk-role { margin-top: 20px; font-size: 14px; letter-spacing: -0.01em; color: var(--peri); }
-.mk-lead {
-  margin-top: clamp(28px, 5svh, 48px);
-  max-width: 24ch;
-  font-size: clamp(1.6rem, 2.6vw, 2.6rem);
-  line-height: 1.12;
-  letter-spacing: -0.04em;
+
+/* ---- her profile, as the app's About Venty ------------------------------
+   A raised card (the app's .card-soft, lit as its dark secondary). Wide:
+   her photograph on the left, and beside it her label and name over her
+   words and Reach her, side by side. Phones: one column */
+.mk-profile {
+  display: grid;
+  gap: 28px;
+  max-width: 1240px;
+  margin: clamp(40px, 7svh, 72px) auto 0;
+  padding: 22px;
+  border-radius: 32px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0) 50%) #15161f;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08), inset 0 1px 0 rgb(255 255 255 / 0.14), inset 0 -1px 0 rgb(0 0 0 / 0.35), 0 30px 60px -30px rgb(0 0 0 / 0.85);
 }
-.mk-story {
-  margin-top: 20px;
-  max-width: 46ch;
-  font-size: clamp(16px, 1.25vw, 19px);
-  line-height: 1.5;
-  letter-spacing: -0.015em;
-  color: var(--peri);
+@media (min-width: 1024px) {
+  .mk-profile { grid-template-columns: clamp(260px, 25vw, 340px) minmax(0, 1fr); column-gap: clamp(28px, 3.4vw, 52px); align-items: stretch; padding: 24px; }
 }
-.mk-link {
+.mk-profile__main { display: flex; flex-direction: column; gap: 26px; min-width: 0; }
+@media (min-width: 1024px) { .mk-profile__main { padding: 8px 8px 4px 0; } }
+.mk-profile__cols { display: grid; gap: 28px; }
+@media (min-width: 768px) { .mk-profile__cols { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); column-gap: clamp(24px, 3vw, 48px); align-items: start; } }
+
+/* her photograph: a raised frame round a well pressed into the card, the
+   photograph in the well on the cornflower backdrop, lit from the top */
+.mk-portrait {
+  display: block;
+  width: 100%;
+  max-width: 340px;
+  align-self: start;
+  padding: 8px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0) 60%) #1e1f2a;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1), inset 0 1px 0 rgb(255 255 255 / 0.22), inset 0 -1px 0 rgb(0 0 0 / 0.4), 0 10px 24px -10px rgb(0 0 0 / 0.7);
+}
+.mk-portrait__well {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 21px;
+  background:
+    radial-gradient(70% 55% at 50% 30%, #9aa8fb 0%, rgb(154 168 251 / 0) 70%),
+    linear-gradient(180deg, #687ef5 0%, #4a5fd8 60%, #2f3e9e 100%);
+}
+.mk-portrait__well img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0%; scale: 1.18; transform-origin: 56% 4%; }
+/* pressed in: a shadow inside along the top, a faint lip of light below */
+.mk-portrait__well::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 4px 10px rgb(0 0 0 / 0.55), inset 0 1px 2px rgb(0 0 0 / 0.5), inset 0 -1px 0 rgb(255 255 255 / 0.12); }
+
+.mk-profile__who { display: flex; flex-direction: column; align-items: flex-start; }
+/* a label pressed into the card, the bird on a small raised knob (the app's
+   "Saved to your bodies", in the dark) */
+.mk-label {
   display: inline-flex;
-  align-self: flex-start;
   align-items: center;
-  gap: 8px;
-  margin-top: 32px;
-  padding: 12px 18px;
-  border-radius: 999px;
-  font-size: 15px;
-  letter-spacing: -0.02em;
+  gap: 9px;
+  height: 36px;
+  padding: 0 14px 0 6px;
+  border-radius: 12px;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  color: rgb(239 244 255 / 0.75);
+  background: rgb(0 0 0 / 0.24);
+  box-shadow: inset 0 2px 5px rgb(0 0 0 / 0.6), inset 0 1px 1.5px rgb(0 0 0 / 0.5), inset 0 -1px 0 rgb(255 255 255 / 0.07), 0 1px 0 rgb(255 255 255 / 0.06);
+}
+.mk-label__knob {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
   color: var(--cloud);
-  background: rgb(239 244 255 / 0.06);
-  box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.16);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  transition: background-color 0.35s, box-shadow 0.35s;
+  background: linear-gradient(180deg, #8193f7, #5a6fe8);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.5), inset 0 1px 0 rgb(255 255 255 / 0.45), inset 0 -1px 0 rgb(0 0 0 / 0.25);
 }
-.mk-link svg { width: 14px; height: 14px; transition: translate 0.5s var(--expo); }
-@media (hover: hover) {
-  .mk-link:hover { background: rgb(239 244 255 / 0.12); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.3); }
-  .mk-link:hover svg { translate: 2px -2px; }
+.mk-label__knob svg { width: 14px; height: auto; }
+.mk-profile__name { margin-top: 16px; font-size: clamp(2rem, 2.6vw, 2.6rem); font-weight: 400; line-height: 1; letter-spacing: -0.05em; }
+.mk-profile__where { margin-top: 8px; font-size: 14px; letter-spacing: -0.01em; color: rgb(239 244 255 / 0.55); }
+
+.mk-profile__words { display: flex; flex-direction: column; gap: 14px; }
+.mk-lead { max-width: 22ch; font-size: clamp(1.45rem, 1.9vw, 1.9rem); line-height: 1.15; letter-spacing: -0.04em; text-wrap: balance; }
+.mk-story { max-width: 46ch; font-size: clamp(15.5px, 1.1vw, 17px); line-height: 1.55; letter-spacing: -0.015em; color: var(--peri); text-wrap: pretty; }
+
+.mk-reach__t { font-size: 15px; font-weight: 400; letter-spacing: -0.015em; color: rgb(239 244 255 / 0.55); }
+/* the rows, pressed into the card (the measuring track's build) */
+.mk-reach__list {
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 22px;
+  list-style: none;
+  background: rgb(0 0 0 / 0.2);
+  box-shadow: inset 0 3px 7px rgb(0 0 0 / 0.55), inset 0 1px 1.5px rgb(0 0 0 / 0.45), inset 0 -1px 0 rgb(255 255 255 / 0.06), 0 1px 0 rgb(255 255 255 / 0.05);
 }
-.mk-link:focus-visible { outline: 2px solid var(--corn); outline-offset: 3px; }
+.mk-reach__list li + li { border-top: 1px solid rgb(255 255 255 / 0.06); }
+.mk-row { display: flex; align-items: center; gap: 14px; min-height: 62px; padding: 11px 14px; transition: background-color 0.3s; }
+@media (hover: hover) { .mk-row:hover { background: rgb(255 255 255 / 0.03); } .mk-row:hover .mk-row__chev { translate: 2px 0; } }
+.mk-row:focus-visible { outline: 2px solid var(--corn); outline-offset: -2px; border-radius: 22px; }
+/* the icon tile: raised out of the pressed list (the dark secondary's build) */
+.mk-row__tile {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  color: rgb(193 200 230 / 0.75);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.06), rgb(255 255 255 / 0) 60%) #1e1f2a;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1), inset 0 1px 0 rgb(255 255 255 / 0.2), inset 0 -1px 0 rgb(0 0 0 / 0.35), 0 3px 6px rgb(0 0 0 / 0.45);
+}
+.mk-row__tile svg { width: 17px; height: 17px; }
+.mk-row__text { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.mk-row__k { font-size: 13px; color: rgb(239 244 255 / 0.5); }
+.mk-row__v { overflow: hidden; font-size: 15.5px; letter-spacing: -0.015em; text-overflow: ellipsis; white-space: nowrap; }
+.mk-row__chev { flex: none; width: 18px; height: 18px; color: rgb(239 244 255 / 0.4); transition: translate 0.4s var(--expo); }
 
 @media (prefers-reduced-motion: reduce) {
-  .mk-ring, .mk-glow::before, .mk-glow::after { animation: none; }
+  .mk-glow::after { animation: none; }
+  .mk-env { rotate: -3deg; }
+  .mk-tissue { rotate: 6deg; }
+  .mk-card.is-venty { rotate: 8deg; }
+  .mk-card.is-natalia { rotate: -9deg; }
+  .mk-chalk { rotate: 14deg; }
 }

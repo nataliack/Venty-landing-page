@@ -55,13 +55,8 @@
   line-height: 0.98;
   letter-spacing: -0.05em;
 }
-.ft-title em {
-  font-style: normal;
-  font-family: var(--font-bigilla), Georgia, serif;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--corn);
-}
+.ft-title em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--cloud); }
+
 .ft-lede {
   justify-self: end;
   width: min(36ch, 100%);
@@ -126,12 +121,15 @@
   min-height: 0;
   border-radius: 22px;
 }
-/* a breath lighter than the night, lit a little from above */
+/* the app's raised card (venty-app .card-soft, lit as its dark secondary):
+   its card colour, a faint white wash down the face, a fine light rim, a
+   bright line along the top edge, a darker one along the bottom, and a
+   shadow onto the night */
 .ftb-card {
   padding: 18px;
   overflow: hidden;
-  background: linear-gradient(180deg, rgb(239 244 255 / 0.034), rgb(239 244 255 / 0.012) 55%, rgb(239 244 255 / 0.008));
-  box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.055), inset 0 1px 0 rgb(239 244 255 / 0.05);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.045), rgb(255 255 255 / 0) 55%) #15161f;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08), inset 0 1px 0 rgb(255 255 255 / 0.14), inset 0 -1px 0 rgb(0 0 0 / 0.35), 0 14px 34px -20px rgb(0 0 0 / 0.85);
 }
 .ftb-copy { max-width: 42ch; font-size: clamp(14px, 1.05vw, 16px); line-height: 1.4; letter-spacing: -0.01em; color: rgb(157 172 205 / 0.75); }
 .ftb-copy b { font-weight: 400; color: rgb(239 244 255 / 0.92); }
@@ -143,7 +141,9 @@
 .ftc-label { display: flex; align-items: center; gap: 6px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: rgb(157 172 205 / 0.6); }
 .ftc-label span { padding: 1px 6px; border-radius: 999px; background: rgb(239 244 255 / 0.06); letter-spacing: 0; color: var(--peri); }
 .ftc-tag { padding: 2px 7px; border-radius: 999px; font-size: 11px; color: var(--peri); background: rgb(239 244 255 / 0.05); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.07); white-space: nowrap; }
-.ftc-panel { border-radius: 14px; background: rgb(239 244 255 / 0.025); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.06); }
+/* pressed into the card (the app's measuring track: a shadow inside along
+   the top, a faint lip of light along the bottom) */
+.ftc-panel { border-radius: 14px; background: rgb(0 0 0 / 0.22); box-shadow: inset 0 3px 7px rgb(0 0 0 / 0.55), inset 0 1px 1.5px rgb(0 0 0 / 0.45), inset 0 -1px 0 rgb(255 255 255 / 0.06), 0 1px 0 rgb(255 255 255 / 0.05); }
 
 /* ---- Mark up ---- */
 .ftc-mark { position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
@@ -229,12 +229,13 @@
   font-size: 13.5px;
   line-height: 1.35;
   color: rgb(239 244 255 / 0.85);
-  background: rgb(239 244 255 / 0.025);
-  box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.06);
+  /* raised, as the app's dark secondary */
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.06), rgb(255 255 255 / 0) 60%) #1b1c26;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1), inset 0 1px 0 rgb(255 255 255 / 0.18), inset 0 -1px 0 rgb(0 0 0 / 0.35), 0 4px 10px -6px rgb(0 0 0 / 0.6);
   cursor: pointer;
   transition: box-shadow 0.25s, background-color 0.25s;
 }
-.ftc-notes button.is-on { background: rgb(104 126 245 / 0.08); box-shadow: inset 0 0 0 1px rgb(104 126 245 / 0.5); }
+.ftc-notes button.is-on { background: linear-gradient(180deg, rgb(255 255 255 / 0.06), rgb(255 255 255 / 0) 60%) #1f2236; box-shadow: inset 0 0 0 1px rgb(104 126 245 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.18), inset 0 -1px 0 rgb(0 0 0 / 0.35), 0 4px 10px -6px rgb(0 0 0 / 0.6); }
 .ftc-notes__n { display: grid; place-items: center; flex: none; width: 18px; height: 18px; border-radius: 50%; font-size: 10.5px; background: rgb(239 244 255 / 0.1); color: var(--cloud); }
 .ftc-notes button.is-on .ftc-notes__n { background: var(--corn); }
 .ftc-refs { display: flex; gap: 6px; }
@@ -245,7 +246,7 @@
 .ftc-refs__add { display: grid; place-items: center; color: var(--peri); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.12); border: 1px dashed transparent; }
 
 /* ---- Refine: a chat ---- */
-.ftc-chat { position: absolute; inset: 0; display: flex; flex-direction: column; border-radius: 14px; background: rgb(239 244 255 / 0.02); box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.06); overflow: hidden; }
+.ftc-chat { position: absolute; inset: 0; display: flex; flex-direction: column; border-radius: 14px; background: rgb(0 0 0 / 0.22); box-shadow: inset 0 3px 7px rgb(0 0 0 / 0.55), inset 0 1px 1.5px rgb(0 0 0 / 0.45), inset 0 -1px 0 rgb(255 255 255 / 0.06), 0 1px 0 rgb(255 255 255 / 0.05); overflow: hidden; }
 .ftc-chat__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 12px; border-bottom: 1px solid rgb(239 244 255 / 0.06); font-size: 12.5px; color: rgb(239 244 255 / 0.85); }
 .ftc-chat__file { display: flex; align-items: center; gap: 7px; }
 .ftc-chat__file::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--corn); box-shadow: 0 0 8px var(--corn); }

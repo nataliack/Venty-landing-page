@@ -25,17 +25,19 @@ import "./made.css";
    the maker's permission) before this goes in front of people. Real makes
    only: invented makers or quotes would mislead (Australian Consumer Law).
    IMAGES: /made/make-01.webp to make-06.webp (4:5 portrait, the maker
-   wearing it). */
+   wearing it). For now, the looks from the app's editorial shoot (Higgsfield
+   and Gemini) not used elsewhere on the site, the garment names matched to
+   them; swap in photos of real makes. */
 
 export type Make = { img: string; garment: string; maker: string; body: string; quote: string };
 
 export const MAKES: Make[] = [
   { img: "/made/make-01.webp", garment: "Bias slip dress", maker: "Maker's name · City", body: "Bust 88 · Waist 70 · Hip 96", quote: "A line from the maker, in their own words." },
-  { img: "/made/make-02.webp", garment: "Wrap top", maker: "Maker's name · City", body: "Bust 101 · Waist 86 · Hip 108", quote: "What they made, and how it fits." },
-  { img: "/made/make-03.webp", garment: "Wide-leg trousers", maker: "Maker's name · City", body: "Waist 78 · Hip 104 · Inseam 79", quote: "A line from the maker, in their own words." },
-  { img: "/made/make-04.webp", garment: "A-line skirt", maker: "Maker's name · City", body: "Waist 72 · Hip 99", quote: "What they made, and how it fits." },
-  { img: "/made/make-05.webp", garment: "Shirt dress", maker: "Maker's name · City", body: "Bust 94 · Waist 80 · Hip 102", quote: "A line from the maker, in their own words." },
-  { img: "/made/make-06.webp", garment: "Halter top", maker: "Maker's name · City", body: "Bust 86 · Waist 68", quote: "What they made, and how it fits." },
+  { img: "/made/make-02.webp", garment: "Crop top and maxi skirt", maker: "Maker's name · City", body: "Bust 101 · Waist 86 · Hip 108", quote: "What they made, and how it fits." },
+  { img: "/made/make-03.webp", garment: "Tweed jacket and skirt", maker: "Maker's name · City", body: "Waist 78 · Hip 104 · Inseam 79", quote: "A line from the maker, in their own words." },
+  { img: "/made/make-04.webp", garment: "Lace-up corset dress", maker: "Maker's name · City", body: "Waist 72 · Hip 99", quote: "What they made, and how it fits." },
+  { img: "/made/make-05.webp", garment: "Bow-cuff shirt", maker: "Maker's name · City", body: "Bust 94 · Waist 80 · Hip 102", quote: "A line from the maker, in their own words." },
+  { img: "/made/make-06.webp", garment: "Zip-front top", maker: "Maker's name · City", body: "Bust 86 · Waist 68", quote: "What they made, and how it fits." },
 ];
 
 const SPEED = 55; // px per second along the line, right to left

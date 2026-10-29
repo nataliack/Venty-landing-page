@@ -251,10 +251,20 @@ export function Hero() {
         <div
           data-glow
           aria-hidden
-          className="pointer-events-none absolute rounded-[50%] bg-cornflower"
+          className="pointer-events-none absolute"
           // centred by position, not translate: GSAP moves it with transforms
-          // and would clear a CSS translate
-          style={{ width: "109vw", height: "79vh", left: "-4.5vw", bottom: "-68vh", opacity: 0.95, filter: "blur(85px)" }}
+          // and would clear a CSS translate. The light of the blurred ellipse
+          // as a gradient (a blur(85px) this size stuttered as it rose); the
+          // box is grown by the blur's reach so the light ends where it did
+          style={{
+            width: "calc(109vw + 170px)",
+            height: "calc(79vh + 170px)",
+            left: "calc(-4.5vw - 85px)",
+            bottom: "calc(-68vh - 85px)",
+            opacity: 0.95,
+            background: "radial-gradient(closest-side, rgb(104 126 245) 0%, rgb(104 126 245 / 0.92) 55%, rgb(104 126 245 / 0.5) 78%, rgb(104 126 245 / 0.15) 92%, transparent 100%)",
+            willChange: "transform, opacity",
+          }}
         />
 
         {/* 1.1: the announcement bar (the logo and the section menu sit under

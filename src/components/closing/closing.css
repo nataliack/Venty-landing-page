@@ -135,5 +135,5 @@
   line-height: 1;
   letter-spacing: -0.055em;
 }
-.cl-final__h em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--corn); }
+.cl-final__h em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--cloud); }
 .cl-final__cta { visibility: hidden; }

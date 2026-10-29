@@ -5,7 +5,6 @@ import { gsap } from "gsap";
 import { DitherEdge } from "../DitherEdge";
 import { PrimaryButton } from "../PrimaryButton";
 import { QutMark } from "../VoteTab";
-import { Halftone } from "../maker/Halftone";
 import { scrollToElement } from "../SmoothScroll";
 import { APP_URL, CTA_LABEL, FESTIVAL_AT, MAKER_URL, SOCIAL_LINKS, VOTE_LINKS } from "@/lib/site";
 import { FOOTER_IN, FOOTER_IN_NARROW, FOOTER_OUT, FOOTER_OUT_NARROW, MARK, MARK_BOUNDS, MARK_CENTRE, flightRoute, type Place } from "@/lib/markFlight";
@@ -22,11 +21,9 @@ import "./footer.css";
 
    In the sky, one centred column: the line, the page's sections, Natalia's
    socials (each with its icon), then the button.
-   On the horizon, level, two panels of frosted glass (the Made to measure
-   composer's): Made by Natalia (her portrait in dots in a night arch, as in
-   The designer) and Vote for Venty (the QUT mark, its bars coming down from
-   the panel's top edge; the People's Choice Award, the days to the
-   festival, a link to vote per discipline).
+   On the horizon, two matching cards in the app's raised and pressed
+   builds: Made by Natalia, and Vote for Venty (the People's Choice Award,
+   the days to the festival, a link to vote per discipline).
    Over the flowers: the Venty lockup in white. Its bird comes and goes,
    left to right (useBird), cornflower while it flies and white like the
    wordmark while it rests in it. */
@@ -182,30 +179,56 @@ function Fog() {
   );
 }
 
-/* ---- Made by Natalia --------------------------------------------------- */
+/* ---- the two cards on the horizon -------------------------------------
+   A pair, built as the app's raised white cards (its white secondary: a
+   fine ink rim, a white line along the top, a deeper snow along the bottom,
+   a soft light inside, a drop shadow), the same size; what is in them
+   pressed in (the app's pressed build on cloud, as on Add to home screen),
+   the links raised. */
+
+/* Made by Natalia: her photograph pressed into the card, her name and what
+   she does, the details in a pressed panel, her site as a raised button */
 function Maker() {
   return (
-    <a data-up href={MAKER_URL} target="_blank" rel="noopener noreferrer" className="fo-panel fo-maker">
-      <span className="fo-maker__face">
-        <Halftone src="/maker/natalia.webp" label="Portrait of Natalia Chamon, drawn in dots" />
-      </span>
-      <span className="fo-maker__text">
-        <span className="fo-k">Made by</span>
-        <span className="fo-maker__name">
-          Natalia <em>Chamon</em>
+    <section data-up className="fo-card fo-made" aria-labelledby="fo-made-title">
+      <div className="fo-made__head">
+        <span className="fo-made__photo">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/maker/natalia-portrait.webp" alt="" loading="lazy" decoding="async" />
         </span>
-        <span className="fo-maker__role">Designer of Venty · QUT, Brisbane</span>
-        <span className="fo-maker__url">
-          nataliachamon.com
-          <Arrow />
+        <span className="fo-made__who">
+          <span className="fo-k">Made by</span>
+          <h2 id="fo-made-title" className="fo-made__name">
+            Natalia <em>Chamon</em>
+          </h2>
         </span>
-      </span>
-      <span className="sr-only">(opens in a new tab)</span>
-    </a>
+      </div>
+      <dl className="fo-well fo-made__rows">
+        <div>
+          <dt>Role</dt>
+          <dd>Designer of Venty</dd>
+        </div>
+        <div>
+          <dt>Studies</dt>
+          <dd>Interaction Design, QUT</dd>
+        </div>
+        <div>
+          <dt>Based in</dt>
+          <dd>Brisbane</dd>
+        </div>
+      </dl>
+      <a href={MAKER_URL} target="_blank" rel="noopener noreferrer" className="fo-raised">
+        nataliachamon.com
+        <Arrow />
+        <span className="sr-only">(opens in a new tab)</span>
+      </a>
+    </section>
   );
 }
 
-/* ---- Vote for Venty ---------------------------------------------------- */
+/* Vote for Venty: the award on a label pressed into the card (the QUT
+   mark on it), the days to the festival in pressed tiles, a link to vote
+   per discipline (the app's primary button) */
 function Vote() {
   const left = useCountdown();
   const parts: [string, number | undefined][] = [
@@ -215,10 +238,9 @@ function Vote() {
     ["sec", left?.s],
   ];
   return (
-    <section data-up className="fo-panel fo-vote" aria-labelledby="fo-vote-title">
-      <div className="fo-vote__head">
-        {/* its four bars come down from the panel's top edge */}
-        <QutMark reach={30} />
+    <section data-up className="fo-card fo-vote" aria-labelledby="fo-vote-title">
+      <div className="fo-vote__label">
+        <QutMark />
         <p>
           QUT Design Festival
           <span>People&apos;s Choice Award</span>

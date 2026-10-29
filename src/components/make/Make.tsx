@@ -19,31 +19,40 @@ gsap.registerPlugin(ScrollTrigger);
    Phones: a row of cards to swipe through, all open.
 
    IMAGES (replace the files, keep the names; 3:4 portrait, garment on a
-   body, dark or low-key backgrounds read best on this section):
+   body): the app's editorial looks (its sign-up gallery, generated with
+   Higgsfield, 896 x 1200), one per kind by what she wears: the rust halter
+   dress, the green fitted top, the wide-leg trousers, the burgundy maxi
+   skirt. Each has its own focus (pos), so the wide crop keeps her.
      /make/dresses.webp  /make/tops.webp  /make/trousers.webp  /make/skirts.webp */
 
 const GARMENTS = [
   {
     name: "Dresses",
     img: "/make/dresses.webp",
-    pieces: "Bodice front · Bodice back · Skirt",
-    d: "M40 12 Q60 18 80 12 L86 62 L104 168 Q60 176 16 168 L34 62 Z",
+    pos: "50% 45%",
+    pieces: "Dress front · Dress back · Neck facing",
+    // a halter dress front, in one piece: the halter straps, the V neck,
+    // the armholes, a fitted waist and a full hem
+    d: "M44 8 L52 8 Q57 30 60 40 Q63 30 68 8 L76 8 Q79 30 92 42 Q85 56 86 70 Q86 78 89 84 L106 168 Q60 176 14 168 L31 84 Q34 78 34 70 Q35 56 28 42 Q41 30 44 8 Z",
   },
   {
     name: "Tops",
     img: "/make/tops.webp",
+    pos: "50% 30%",
     pieces: "Front · Back · Sleeve",
     d: "M28 26 L48 14 Q60 22 72 14 L92 26 L104 58 L86 64 L82 46 L82 132 L38 132 L38 46 L34 64 L16 58 Z",
   },
   {
     name: "Trousers",
     img: "/make/trousers.webp",
+    pos: "50% 50%",
     pieces: "Front leg · Back leg · Waistband",
     d: "M30 12 L90 12 L98 170 L68 170 L60 66 L52 170 L22 170 Z",
   },
   {
     name: "Skirts",
     img: "/make/skirts.webp",
+    pos: "50% 22%",
     pieces: "Front · Back · Waistband",
     d: "M38 14 L82 14 L106 160 Q60 170 14 160 Z",
   },
@@ -132,7 +141,7 @@ export function Make() {
               <li key={g.name} data-up className={`wm-panel ${on ? "is-on" : ""}`} style={{ "--i": i } as CSSProperties}>
                 <button type="button" className="wm-panel__hit" onClick={() => go(i)} aria-label={g.name} aria-current={wide && i === active ? "true" : undefined} tabIndex={wide ? 0 : -1} />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={g.img} alt="" loading="lazy" decoding="async" className="wm-panel__img" />
+                <img src={g.img} alt="" loading="lazy" decoding="async" className="wm-panel__img" style={{ objectPosition: g.pos }} />
                 <span className="wm-panel__shade" aria-hidden="true" />
                 <span className="wm-panel__n" aria-hidden="true">
                   {String(i + 1).padStart(2, "0")}

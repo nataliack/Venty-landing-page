@@ -62,7 +62,7 @@
   letter-spacing: -0.05em;
 }
 @media (min-width: 1024px) { .wm-title { max-width: none; } }
-.wm-title em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--corn); }
+.wm-title em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--cloud); }
 .wm-count {
   display: none;
   position: absolute;
