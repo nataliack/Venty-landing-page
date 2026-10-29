@@ -81,7 +81,7 @@
 
 /* ---- the table: a fixed stage scaled to fit ----------------------------
    Phones: 460 x 820, tall; wide: 1100 x 620 */
-.mk-table { --s: 0.68; --dw: 460px; --dh: 820px; position: relative; width: calc(var(--dw) * var(--s)); height: calc(var(--dh) * var(--s)); perspective: 1800px; }
+.mk-table { --s: 0.68; --dw: 460px; --dh: 820px; position: relative; width: calc(var(--dw) * var(--s)); height: calc(var(--dh) * var(--s)); }
 @media (min-width: 480px) { .mk-table { --s: 0.8; } }
 @media (min-width: 1024px) { .mk-table { --s: 0.8; --dw: 1100px; --dh: 620px; flex: none; } }
 @media (min-width: 1180px) { .mk-table { --s: 0.84; } }
@@ -154,9 +154,8 @@
   height: var(--dh);
   transform-origin: 0 0;
   scale: var(--s);
-  transform-style: preserve-3d;
 }
-.mk-desk { position: absolute; inset: 0; transform-style: preserve-3d; }
+.mk-desk { position: absolute; inset: 0; }
 
 /* where everything lies (phones, then wide) */
 .mk-env { left: 62px; top: 150px; }
@@ -301,30 +300,27 @@
   position: absolute;
   z-index: 3;
   aspect-ratio: 1000 / 611;
-  perspective: 1400px;
   border-radius: 4px;
-  box-shadow: 0 1px 1px rgb(0 0 0 / 0.35), 0 10px 18px -8px rgb(0 0 0 / 0.5), 0 30px 50px -22px rgb(0 0 0 / 0.6);
 }
-.mk-card { padding: 0; cursor: pointer; transition: box-shadow 0.4s var(--expo); }
-@media (hover: hover) { .mk-card:hover { box-shadow: 0 1px 1px rgb(0 0 0 / 0.35), 0 16px 26px -10px rgb(0 0 0 / 0.55), 0 40px 64px -22px rgb(0 0 0 / 0.65); } }
+.mk-card__flip { box-shadow: 0 1px 1px rgb(0 0 0 / 0.35), 0 10px 18px -8px rgb(0 0 0 / 0.5), 0 30px 50px -22px rgb(0 0 0 / 0.6); }
+.mk-card { padding: 0; cursor: pointer; }
+.mk-card__flip { transition: box-shadow 0.4s var(--expo); }
+@media (hover: hover) { .mk-card:hover .mk-card__flip { box-shadow: 0 1px 1px rgb(0 0 0 / 0.35), 0 16px 26px -10px rgb(0 0 0 / 0.55), 0 40px 64px -22px rgb(0 0 0 / 0.65); } }
 .mk-card:focus-visible { outline: 2px solid var(--corn); outline-offset: 4px; }
-.mk-card__flip { position: absolute; inset: 0; display: block; transform-style: preserve-3d; }
-/* a tap turns it over: up a little, over, and down, with a small spring */
-.mk-card__flip { transition: transform 0.8s cubic-bezier(0.3, 1.25, 0.45, 1); }
-.mk-card__flip.is-over { transform: rotateY(180deg); }
-.mk-card:active .mk-card__flip { scale: 0.98; }
-@media (prefers-reduced-motion: reduce) { .mk-card__flip { transition-duration: 0.01ms; } }
+.mk-card__flip { position: absolute; inset: 0; display: block; border-radius: 4px; will-change: transform; }
+
 .mk-card__face {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   border-radius: 4px;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
 }
-.mk-card__face.is-back { transform: rotateY(180deg); }
+/* the face showing: the front, or the back once turned (swapped edge on) */
+.mk-card__flip .mk-card__face.is-back,
+.mk-card__flip.is-back .mk-card__face.is-front { visibility: hidden; }
+.mk-card__flip.is-back .mk-card__face.is-back { visibility: visible; }
 .mk-card.is-natalia .mk-card__face { box-shadow: 0 1px 0 #d9cfb6; }
 
 /* the chalk, by the envelope */
@@ -336,9 +332,8 @@
 }
 
 /* ---- her profile, as the app's About Venty ------------------------------
-   A raised card (the app's .card-soft, lit as its dark secondary). Wide:
-   her photograph on the left, and beside it her label and name over her
-   words and Reach her, side by side. Phones: one column */
+   A raised card (the app's .card-soft, lit as its dark secondary): her
+   label and name, then her words and Reach her, side by side when wide */
 .mk-profile {
   display: grid;
   gap: 28px;
@@ -349,39 +344,10 @@
   background: linear-gradient(180deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0) 50%) #15161f;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08), inset 0 1px 0 rgb(255 255 255 / 0.14), inset 0 -1px 0 rgb(0 0 0 / 0.35), 0 30px 60px -30px rgb(0 0 0 / 0.85);
 }
-@media (min-width: 1024px) {
-  .mk-profile { grid-template-columns: clamp(260px, 25vw, 340px) minmax(0, 1fr); column-gap: clamp(28px, 3.4vw, 52px); align-items: stretch; padding: 24px; }
-}
+@media (min-width: 1024px) { .mk-profile { padding: 32px 36px; } }
 .mk-profile__main { display: flex; flex-direction: column; gap: 26px; min-width: 0; }
-@media (min-width: 1024px) { .mk-profile__main { padding: 8px 8px 4px 0; } }
 .mk-profile__cols { display: grid; gap: 28px; }
 @media (min-width: 768px) { .mk-profile__cols { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); column-gap: clamp(24px, 3vw, 48px); align-items: start; } }
-
-/* her photograph: a raised frame round a well pressed into the card, the
-   photograph in the well on the cornflower backdrop, lit from the top */
-.mk-portrait {
-  display: block;
-  width: 100%;
-  max-width: 340px;
-  align-self: start;
-  padding: 8px;
-  border-radius: 28px;
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0) 60%) #1e1f2a;
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1), inset 0 1px 0 rgb(255 255 255 / 0.22), inset 0 -1px 0 rgb(0 0 0 / 0.4), 0 10px 24px -10px rgb(0 0 0 / 0.7);
-}
-.mk-portrait__well {
-  position: relative;
-  display: block;
-  aspect-ratio: 1;
-  overflow: hidden;
-  border-radius: 21px;
-  background:
-    radial-gradient(70% 55% at 50% 30%, #9aa8fb 0%, rgb(154 168 251 / 0) 70%),
-    linear-gradient(180deg, #687ef5 0%, #4a5fd8 60%, #2f3e9e 100%);
-}
-.mk-portrait__well img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0%; scale: 1.18; transform-origin: 56% 4%; }
-/* pressed in: a shadow inside along the top, a faint lip of light below */
-.mk-portrait__well::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 4px 10px rgb(0 0 0 / 0.55), inset 0 1px 2px rgb(0 0 0 / 0.5), inset 0 -1px 0 rgb(255 255 255 / 0.12); }
 
 .mk-profile__who { display: flex; flex-direction: column; align-items: flex-start; }
 /* a label pressed into the card, the bird on a small raised knob (the app's

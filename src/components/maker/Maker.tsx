@@ -21,21 +21,21 @@ gsap.registerPlugin(ScrollTrigger);
    raised round a surface pressed into it, with the grid.
 
    As the section comes up, the things slide onto the table, and stay there.
-   The cards turn over only when she wants: tap a card, or its Turn over
-   button under the tray (the app's dark secondary, with its turn icon).
+   The cards turn over only when she wants: tap a card, or its Turn button
+   under the tray (the app's dark secondary, with its turn icon); each tap
+   spins it over, and the next back.
 
    Then her profile, built as the app's About Venty in the dark: a raised
-   card; her photograph set into it on a raised frame round a pressed well,
-   a pressed label (Founder of Venty, the bird on a raised knob), her name
-   and her words; and Reach her, rows pressed into the card (an inset icon
-   tile, the words, a chevron).
+   card; a pressed label (Founder of Venty, the bird on a raised knob), her
+   name and her words; and Reach her, rows pressed into the card (an inset
+   icon tile, the words, a chevron). Her photograph is on the envelope only.
 
    The objects are paper: the grain is /texture/paper.webp, the shadows are
-   layered as on a table under a soft light, and the table leans a little
-   towards the pointer.
+   layered as on a table under a soft light. (No 3D lean towards the
+   pointer: in Safari it moved the cards out from under a click.)
 
    IMAGES: /maker/natalia-portrait.webp (her, cut out, graded cool, printed
-   on the envelope and in her profile over a cornflower backdrop);
+   on the envelope over a cornflower backdrop);
    /maker/cards/*.webp (the cards' faces, saved from the app's cards screen).
    DRAFT copy: Natalia to confirm her words before launch. */
 
@@ -111,7 +111,10 @@ const CARDS: Record<Side, { label: string; turn: string }> = {
   },
 };
 
-/* a card: lies face up; a tap turns it over, and back */
+/* a card: lies face up; each tap spins it over, and back. GSAP turns it
+   with its own perspective (so no browser flattens it): up off the table
+   and edge on, the other face swapped in there, then down on its new side
+   with a small settle. No backface-visibility, which some browsers drop */
 function Card({
   name,
   over,
@@ -121,6 +124,46 @@ function Card({
   over: boolean;
   onTurn: () => void;
 }) {
+  const flip = useRef<HTMLSpanElement>(null);
+  const [shown, setShown] = useState(over); // the face showing
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    const el = flip.current;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setShown(over);
+      return;
+    }
+    const tl = gsap
+      .timeline()
+      .to(el, {
+        rotationY: 90,
+        scale: 1.08,
+        y: -10,
+        transformPerspective: 900,
+        duration: 0.24,
+        ease: "power2.in",
+      })
+      .call(() => setShown(over))
+      .fromTo(
+        el,
+        { rotationY: -90 },
+        {
+          rotationY: 0,
+          scale: 1,
+          y: 0,
+          transformPerspective: 900,
+          duration: 0.42,
+          ease: "back.out(1.7)",
+        },
+      );
+    return () => {
+      tl.kill();
+    };
+  }, [over]);
   return (
     <button
       type="button"
@@ -129,12 +172,12 @@ function Card({
       aria-pressed={over}
       onClick={onTurn}
     >
-      <span className={`mk-card__flip${over ? " is-over" : ""}`}>
+      <span ref={flip} className={`mk-card__flip${shown ? " is-back" : ""}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={`/maker/cards/${name}-front.webp`}
           alt=""
-          className="mk-card__face"
+          className="mk-card__face is-front"
           loading="lazy"
           decoding="async"
           draggable={false}
@@ -254,31 +297,7 @@ export function Maker() {
       );
     });
 
-    // the table leans towards the pointer, as paper lifts off it
-    const tx = gsap.quickTo(el, "rotationY", {
-      duration: 0.9,
-      ease: "power3.out",
-    });
-    const ty = gsap.quickTo(el, "rotationX", {
-      duration: 0.9,
-      ease: "power3.out",
-    });
-    const move = (e: PointerEvent) => {
-      const r = el.getBoundingClientRect();
-      tx(((e.clientX - r.left) / r.width - 0.5) * 5);
-      ty(((e.clientY - r.top) / r.height - 0.5) * -5);
-    };
-    const leave = () => (tx(0), ty(0));
-    const fine = window.matchMedia("(hover: hover)").matches;
-    if (fine) {
-      el.addEventListener("pointermove", move);
-      el.addEventListener("pointerleave", leave);
-    }
-    return () => {
-      mm.revert();
-      el.removeEventListener("pointermove", move);
-      el.removeEventListener("pointerleave", leave);
-    };
+    return () => mm.revert();
   }, []);
 
   return (
@@ -426,17 +445,6 @@ export function Maker() {
 
       {/* her profile, as the app's About Venty: a raised card */}
       <article className="mk-profile" data-reveal>
-        <span data-up className="mk-portrait">
-          <span className="mk-portrait__well">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/maker/natalia-portrait.webp"
-              alt="Natalia Chamon"
-              loading="lazy"
-              decoding="async"
-            />
-          </span>
-        </span>
         <div className="mk-profile__main">
           <div className="mk-profile__who">
             <span data-up className="mk-label">
