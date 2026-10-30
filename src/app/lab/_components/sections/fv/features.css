@@ -987,3 +987,171 @@
     mask-image: linear-gradient(180deg, #000 calc(100% - 225px), rgb(0 0 0 / 0.78) calc(100% - 190px), rgb(0 0 0 / 0.45) calc(100% - 160px), rgb(0 0 0 / 0.17) calc(100% - 132px), rgb(0 0 0 / 0.04) calc(100% - 110px), transparent calc(100% - 94px));
   }
 }
+
+
+/* ==== the app's screens on the phones (fva-) =======================================
+   Drawn at the app's own size: --u is a 402th of the screen's width (the
+   app's px), so every measure below is the app's (venty-app main,
+   src/screens/library.tsx and globals.css) and the screen scales into each
+   phone. The builds are the section's (.fv's --b-*), the app's own. */
+.ftp__screen.is-app { padding: 0; container-type: inline-size; }
+.fva {
+  --u: calc(100cqw / 402);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: #fff;
+  background: #0b0c15;
+  font-family: var(--font-familjen), system-ui, sans-serif;
+  letter-spacing: -0.005em;
+  pointer-events: none;
+  user-select: none;
+}
+.fva img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.fva svg { display: block; }
+.fva-status { display: flex; align-items: center; justify-content: space-between; height: calc(54 * var(--u)); padding: calc(4 * var(--u)) calc(34 * var(--u)) 0 calc(46 * var(--u)); font-size: calc(17 * var(--u)); font-weight: 600; letter-spacing: -0.02em; }
+.fva-status__icons { display: flex; align-items: center; gap: calc(7 * var(--u)); }
+.fva-status__icons svg { width: calc(18 * var(--u)); }
+.fva-battery { display: block; width: calc(27 * var(--u)); height: calc(13 * var(--u)); padding: calc(2 * var(--u)); border-radius: calc(4 * var(--u)); box-shadow: inset 0 0 0 calc(1 * var(--u)) rgb(255 255 255 / 0.5); }
+.fva-battery span { display: block; width: 75%; height: 100%; border-radius: calc(2 * var(--u)); background: #fff; }
+.fva-page { padding: calc(11 * var(--u)) calc(24 * var(--u)) 0; }
+.fva-head { display: flex; align-items: center; justify-content: space-between; gap: calc(12 * var(--u)); min-height: calc(44 * var(--u)); }
+.fva-head__side { display: flex; align-items: center; gap: calc(8 * var(--u)); }
+.fva-h1 { font-size: calc(34 * var(--u)); line-height: 1.06; letter-spacing: -0.035em; white-space: nowrap; }
+/* the primary (Create), the round dark secondary (.rb), the pressed track and knob */
+.fva-create, .fva-pill { display: inline-flex; align-items: center; justify-content: center; gap: calc(6 * var(--u)); border-radius: 999px; color: #fff; font-weight: 500; background: var(--b-primary); background-size: calc(5 * var(--u)) calc(5 * var(--u)), 100% 100%; box-shadow: var(--b-primary-sh); }
+.fva-create { height: calc(40 * var(--u)); padding: 0 calc(16 * var(--u)); font-size: calc(15 * var(--u)); }
+.fva-create svg { width: calc(18 * var(--u)); }
+.fva-pill { height: calc(56 * var(--u)); margin-top: calc(16 * var(--u)); padding: 0 calc(28 * var(--u)); font-size: calc(16 * var(--u)); }
+.fva-rb { display: grid; place-items: center; width: calc(40 * var(--u)); height: calc(40 * var(--u)); border-radius: 50%; background: var(--b-raise); box-shadow: var(--b-raise-sh); }
+.fva-rb svg { width: calc(18 * var(--u)); }
+/* the two tabs: the app's Segmented, a white pill sliding in a solid card-colour track */
+.fva-tabs { position: relative; display: flex; height: calc(48 * var(--u)); margin-top: calc(16 * var(--u)); padding: calc(4 * var(--u)); border-radius: 999px; background: #1b1c26; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08); }
+.fva-tabs::before { content: ""; position: absolute; top: calc(4 * var(--u)); bottom: calc(4 * var(--u)); left: calc(4 * var(--u) + var(--t) * (100% - 8 * var(--u)) / 2); width: calc((100% - 8 * var(--u)) / 2); border-radius: 999px; background: #fff; }
+.fva-tabs span { position: relative; display: grid; flex: 1; place-items: center; font-size: calc(14 * var(--u)); font-weight: 500; color: rgb(255 255 255 / 0.7); }
+.fva-tabs span.is-on { font-weight: 600; color: #0b0c15; }
+.fva-tools { display: flex; align-items: center; justify-content: space-between; height: calc(40 * var(--u)); margin-top: calc(16 * var(--u)); }
+.fva-tools > span { display: flex; align-items: center; gap: calc(8 * var(--u)); }
+.fva-view { display: flex; align-items: center; height: calc(40 * var(--u)); padding: calc(4 * var(--u)); border-radius: 999px; background: var(--b-track); box-shadow: var(--b-press); }
+.fva-view span { display: grid; place-items: center; width: calc(44 * var(--u)); height: calc(32 * var(--u)); border-radius: 999px; color: rgb(255 255 255 / 0.45); }
+.fva-view span.is-on { color: #fff; background: var(--b-knob); box-shadow: var(--b-knob-sh); }
+.fva-view svg { width: calc(16 * var(--u)); }
+
+/* the tall trays: the dark tray's rim, the photo pressed into it, the pattern small in a pressed tile beside its name */
+.fva-track { display: flex; gap: calc(12 * var(--u)); padding: calc(10 * var(--u)) calc(24 * var(--u)) 0; }
+.fva-track.is-shifting { animation: fva-shift 1s cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes fva-shift { from { translate: calc(-296 * var(--u)) 0; } }
+.fva-track.is-shifting .fva-tall:first-child { animation: fva-in 0.7s ease 0.15s both; }
+@keyframes fva-in { from { opacity: 0; } }
+.fva-tall { display: flex; flex: none; flex-direction: column; width: calc(284 * var(--u)); height: calc(400 * var(--u)); padding: calc(7 * var(--u)); border-radius: calc(30 * var(--u)); background: var(--b-rim); box-shadow: 0 calc(18 * var(--u)) calc(36 * var(--u)) calc(-16 * var(--u)) rgb(0 0 0 / 0.8), inset 0 0 0 1px rgb(255 255 255 / 0.07), inset 0 1px 0 rgb(255 255 255 / 0.1), inset 0 -1px 0 rgb(0 0 0 / 0.35); }
+.fva-tall__pic, .fva-frame__pic, .fva-kind__pic { position: relative; display: block; overflow: hidden; }
+.fva-tall__pic { flex: 1; min-height: 0; border-radius: calc(25 * var(--u)); }
+.fva-tall__pic::after, .fva-frame__pic::after, .fva-kind__pic::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 3px 7px rgb(0 0 0 / 0.65), inset 0 1px 1.5px rgb(0 0 0 / 0.55), inset 0 -1px 0 rgb(255 255 255 / 0.07); }
+.fva-tall__band { display: flex; flex: none; align-items: center; gap: calc(12 * var(--u)); height: calc(65 * var(--u)); padding: 0 calc(8 * var(--u)); }
+.fva-tile { display: grid; flex: none; place-items: center; width: calc(42 * var(--u)); height: calc(50 * var(--u)); border-radius: calc(12 * var(--u)); color: rgb(193 200 230 / 0.75); background: var(--b-floor); box-shadow: var(--b-press); }
+.fva-tile svg { width: calc(30 * var(--u)); }
+.fva-tall__words { min-width: 0; }
+.fva-name { display: block; overflow: hidden; font-size: calc(18 * var(--u)); line-height: 1.2; letter-spacing: -0.01em; white-space: nowrap; text-overflow: ellipsis; }
+.fva-line { display: flex; align-items: center; gap: calc(7 * var(--u)); margin-top: calc(4 * var(--u)); font-size: calc(13 * var(--u)); color: rgb(255 255 255 / 0.55); white-space: nowrap; }
+.fva-dot { flex: none; width: calc(8 * var(--u)); height: calc(8 * var(--u)); border-radius: 50%; }
+.fva-dot.is-printed { background: #687ef5; }
+.fva-dot.is-fitting { background: #8c9cf8; }
+.fva-dot.is-draft { background: rgb(255 255 255 / 0.4); }
+.fva-bars { display: flex; align-items: flex-end; gap: calc(2 * var(--u)); }
+.fva-bars i { width: calc(3 * var(--u)); border-radius: 999px; background: rgb(255 255 255 / 0.2); }
+.fva-bars i.is-on { background: #8c9cf8; }
+
+/* no patterns yet: the snow card, three looks rising over its top and sides */
+.fva-first { position: relative; height: calc(420 * var(--u)); margin-top: calc(58 * var(--u)); border-radius: calc(30 * var(--u)); background: linear-gradient(180deg, #ffffff, #e7eaf3); box-shadow: 0 calc(18 * var(--u)) calc(36 * var(--u)) calc(-16 * var(--u)) rgb(0 0 0 / 0.7), inset 0 1px 0 #fff, inset 0 -1px 0 rgb(28 36 84 / 0.2); }
+.fva-fan { position: absolute; left: 0; right: 0; top: calc(-34 * var(--u)); }
+.fva-fan__look {
+  --y: calc((1 - var(--i) * var(--i)) * 0 + var(--i) * var(--i) * 22 * var(--u));
+  position: absolute;
+  left: 50%;
+  top: 0;
+  z-index: calc(2 - var(--i) * var(--i));
+  width: calc((176 - var(--i) * var(--i) * 26) * var(--u));
+  height: calc((232 - var(--i) * var(--i) * 32) * var(--u));
+  overflow: hidden;
+  border-radius: calc(16 * var(--u));
+  box-shadow: 0 calc(16 * var(--u)) calc(30 * var(--u)) calc(-12 * var(--u)) rgb(0 0 0 / 0.7);
+  transform: translate(calc(-50% + var(--i) * 104 * var(--u)), var(--y)) rotate(calc(var(--i) * 10deg));
+  animation: fva-float 4.6s ease-in-out calc(var(--i) * -1.4s - 1.4s) infinite alternate;
+}
+@keyframes fva-float { to { translate: 0 calc(-7 * var(--u)); } }
+.fva-first__words { position: absolute; left: calc(20 * var(--u)); right: calc(20 * var(--u)); top: calc(214 * var(--u)); bottom: calc(20 * var(--u)); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.fva-first__title { margin: 0; font-size: calc(24 * var(--u)); line-height: 1.12; letter-spacing: -0.025em; color: #131523; }
+.fva-first__lead { margin: calc(8 * var(--u)) 0 0; font-size: calc(15 * var(--u)); line-height: 1.375; color: #3c4b63; }
+
+/* patterns to make: the kinds as square photos pressed into the page, the chosen one on a snow card */
+.fva-kinds { --k: 0; position: relative; display: flex; gap: calc(6 * var(--u)); margin-top: calc(20 * var(--u)); }
+.fva-kinds__on { position: absolute; top: 0; bottom: 0; left: calc(var(--k) * 73 * var(--u)); width: calc(67 * var(--u)); border-radius: calc(20 * var(--u)); background: #f0f4fe; transition: left 0.55s cubic-bezier(0.2, 1.4, 0.4, 1); }
+.fva-kind { position: relative; display: flex; flex: none; flex-direction: column; align-items: center; gap: calc(8 * var(--u)); width: calc(67 * var(--u)); padding: calc(5 * var(--u)) 0 calc(10 * var(--u)); font-size: calc(13 * var(--u)); line-height: 1; color: rgb(255 255 255 / 0.6); transition: color 0.3s; }
+.fva-kind.is-on { font-weight: 500; color: #131523; }
+.fva-kind__pic { width: calc(57 * var(--u)); height: calc(57 * var(--u)); border-radius: calc(15 * var(--u)); }
+.fva-kind.is-on .fva-kind__pic::after { box-shadow: inset 0 3px 8px rgb(28 36 84 / 0.34), inset 0 1px 2px rgb(28 36 84 / 0.3), inset 0 -1px 0 rgb(255 255 255 / 0.7); }
+.fva-sec { display: flex; align-items: baseline; gap: calc(8 * var(--u)); margin-top: calc(26 * var(--u)); }
+.fva-sec__title { font-size: calc(20 * var(--u)); letter-spacing: -0.02em; }
+.fva-sec__n { font-size: calc(15 * var(--u)); color: rgb(255 255 255 / 0.45); }
+.fva-sec__all { margin-left: auto; font-size: calc(15 * var(--u)); font-weight: 500; color: #8c9cf8; }
+.fva-row { display: flex; gap: calc(12 * var(--u)); padding: calc(12 * var(--u)) calc(24 * var(--u)) 0; animation: fva-in 0.5s ease both; }
+.fva-frame { display: block; flex: none; width: calc(150 * var(--u)); padding: calc(5 * var(--u)); border-radius: calc(22 * var(--u)); background: var(--b-rim); box-shadow: 0 calc(18 * var(--u)) calc(36 * var(--u)) calc(-16 * var(--u)) rgb(0 0 0 / 0.8), inset 0 0 0 1px rgb(255 255 255 / 0.07), inset 0 1px 0 rgb(255 255 255 / 0.1), inset 0 -1px 0 rgb(0 0 0 / 0.35); }
+.fva-frame__pic { height: calc(188 * var(--u)); border-radius: calc(18 * var(--u)); }
+.fva-frame__name { display: block; overflow: hidden; padding: calc(9 * var(--u)) calc(7 * var(--u)) 0; font-size: calc(15 * var(--u)); line-height: 1.2; white-space: nowrap; text-overflow: ellipsis; }
+.fva-frame .fva-line { padding: 0 calc(7 * var(--u)) calc(7 * var(--u)); margin-top: calc(5 * var(--u)); }
+
+/* the front phone rises only a little on hover: it just meets the card above */
+@media (hover: hover) {
+  .fvb-card--lib:hover .ftp.is-front { translate: -50% -26px; }
+}
+
+/* ==== Body library: a deck of the app's body cards, chosen by name (fvbd-) ==== */
+.fvbd { position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: center; }
+.fvbd-deck { position: relative; height: 100%; }
+.fvbd-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  flex-direction: column;
+  width: min(132px, 68%);
+  padding: 5px;
+  border-radius: 22px;
+  background: var(--b-rim);
+  box-shadow: var(--b-rim-sh);
+  transform: translate(-50%, -50%);
+  transition: transform 0.75s cubic-bezier(0.34, 1.32, 0.64, 1), filter 0.6s ease;
+}
+/* in front, then behind it to the right, then to the left */
+.fvbd-card[data-pos="0"] { z-index: 3; }
+.fvbd-card[data-pos="1"] { z-index: 2; transform: translate(-30%, -52%) rotate(6deg) scale(0.86); filter: brightness(0.62) saturate(0.8); }
+.fvbd-card[data-pos="2"] { z-index: 1; transform: translate(-70%, -52%) rotate(-6deg) scale(0.86); filter: brightness(0.62) saturate(0.8); }
+.fvbd-card__stage { position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 18px; background: #131523; }
+.fvbd-card__stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.fvbd-card__stage::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 3px 7px rgb(0 0 0 / 0.65), inset 0 1px 1.5px rgb(0 0 0 / 0.55), inset 0 -1px 0 rgb(255 255 255 / 0.07); }
+.fvbd-card__h { position: absolute; left: 0; right: 0; bottom: 7px; z-index: 1; font-size: 10px; text-align: center; color: rgb(255 255 255 / 0.85); text-shadow: 0 1px 6px rgb(19 21 35 / 0.5); }
+.fvbd-card__h b, .fvbd-card__m b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: 0; }
+.fvbd-card__h b { font-size: 14px; color: #fff; }
+.fvbd-card__name { display: block; padding: 8px 4px 0; font-size: 14px; line-height: 1.2; text-align: center; color: var(--cloud); }
+.fvbd-card__m { display: flex; justify-content: space-evenly; padding: 6px 0 4px; }
+.fvbd-card__m > span { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.fvbd-card__m small { font-size: 9px; line-height: 1; color: rgb(255 255 255 / 0.45); }
+.fvbd-card__m b { font-size: 13px; line-height: 1; color: var(--cloud); }
+/* the names: a pressed well, the chosen body raised in snow (the app's chosen card) */
+.fvbd-names { display: flex; flex-direction: column; gap: 4px; padding: 5px; border-radius: 16px; background: var(--b-floor); box-shadow: var(--b-press); }
+.fvbd-names button, .fvbd-names__new { display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px; border-radius: 12px; text-align: left; transition: background-color 0.35s, box-shadow 0.35s, color 0.35s; }
+.fvbd-names button { color: var(--cloud); cursor: pointer; }
+.fvbd-names button.is-on { color: #131523; background: #f0f4fe; box-shadow: inset 0 0 0 1px rgb(19 21 35 / 0.06), inset 0 1px 0 #fff, inset 0 -1px 0 rgb(19 21 35 / 0.1), 0 1px 2px rgb(0 0 0 / 0.35), 0 6px 14px -6px rgb(0 0 0 / 0.6); }
+@media (hover: hover) { .fvbd-names button:not(.is-on):hover { background: rgb(239 244 255 / 0.05); } }
+.fvbd-names button:focus-visible { outline: 2px solid var(--corn); outline-offset: 2px; }
+.fvbd-names__pic { position: relative; flex: none; width: 34px; height: 34px; overflow: hidden; border-radius: 10px; background: #131523; }
+.fvbd-names__pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 20%; }
+.fvbd-names__pic::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 2px 5px rgb(0 0 0 / 0.55), inset 0 -1px 0 rgb(255 255 255 / 0.07); }
+.fvbd-names button.is-on .fvbd-names__pic::after { box-shadow: inset 0 2px 5px rgb(28 36 84 / 0.34), inset 0 -1px 0 rgb(255 255 255 / 0.7); }
+.fvbd-names__words { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fvbd-names__words b { font-weight: 500; font-size: 14px; line-height: 1.15; }
+.fvbd-names__words small { overflow: hidden; font-size: 11px; color: rgb(157 172 205 / 0.75); white-space: nowrap; text-overflow: ellipsis; }
+.fvbd-names button.is-on small { color: #485f88; }
+.fvbd-names__new { font-size: 13px; color: rgb(157 172 205 / 0.7); }
+.fvbd-names__plus { display: grid; flex: none; place-items: center; width: 34px; height: 34px; border-radius: 10px; color: var(--peri); background: var(--b-floor); box-shadow: var(--b-press); }
+@media (max-width: 1099px) { .fvbd-names__words small { white-space: normal; } }

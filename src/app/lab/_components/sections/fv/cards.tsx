@@ -606,76 +606,91 @@ export function TurnCard() {
 }
 
 /* ---- Body library -------------------------------------------------------------
-   The person you're drafting for on a dress form drawn from her own
-   measurements (switch person and the form reshapes to them), her three
-   measurements drawn across it and listed beside it, the date they were
-   taken; the others saved, as avatars to switch to. A photo can take the
-   form's place later. */
-const BODIES = [
-  { id: "natalia", name: "Natalia", when: "Measured 12 Oct", m: [92, 74, 98] },
-  { id: "mei", name: "Mei", when: "Measured 3 Sep", m: [86, 68, 92] },
-  { id: "amara", name: "Amara", when: "Measured 28 Aug", m: [101, 86, 106] },
+   You choose a body, not a measure: the names beside a small deck of the
+   app's own body cards (venty-app main, src/screens/bodies.tsx BodyCard: the
+   dark tray's rim, Jose's mannequin picture pressed into a 4:5 stage, the
+   height on it, then the name and bust, waist, hips). Choose a name and
+   that body's card springs to the front, the others fanning out behind it.
+   The bodies are the app's own starting ones (Mum and Tom) and Natalia.
+   It goes round by itself while on screen, until you choose. */
+const BODY_SET = [
+  { id: "natalia", name: "Natalia", pic: "/lab/features/app/female-1.webp", h: 168, m: [92, 74, 98], when: "Measured 12 Oct" },
+  { id: "mum", name: "Mum", pic: "/lab/features/app/female-2.webp", h: 162, m: [96, 82, 104], when: "Measured 3 Oct" },
+  { id: "tom", name: "Tom", pic: "/lab/features/app/male-1.webp", h: 181, m: [98, 84, 100], when: "Measured 28 Sep" },
 ];
-/** a dress form, 100 x 160, from bust, waist and hip in cm. Half-widths
-    grow from Natalia's (92, 74, 98) at a little more than true scale, so
-    the difference between people reads at this size */
-function formOf([bust, waist, hip]: number[]) {
-  const c = 50;
-  const B = 33 + (bust - 92) * 0.9;
-  const W = 26.6 + (waist - 74) * 0.9;
-  const H = 35.3 + (hip - 98) * 0.9;
-  const S = B * 0.9;
-  const p = (n: number) => n.toFixed(1);
-  return {
-    d: `M${p(c - 6)} 8 H${p(c + 6)} V15 Q${p(c + S * 0.55)} 17 ${p(c + S)} 30 Q${p(c + B + 2)} 42 ${p(c + B)} 52 Q${p(c + B - 1)} 72 ${p(c + W)} 88 Q${p(c + W)} 102 ${p(c + H)} 118 Q${p(c + H + 1)} 129 ${p(c + H - 5)} 135 H${p(c - H + 5)} Q${p(c - H - 1)} 129 ${p(c - H)} 118 Q${p(c - W)} 102 ${p(c - W)} 88 Q${p(c - B + 1)} 72 ${p(c - B)} 52 Q${p(c - B - 2)} 42 ${p(c - S)} 30 Q${p(c - S * 0.55)} 17 ${p(c - 6)} 15 Z`,
-    lines: [
-      { y: 52, r: B + 4 },
-      { y: 88, r: W + 4 },
-      { y: 118, r: H + 4 },
-    ].map(({ y, r }) => `M${p(c - r)} ${y} H${p(c + r)} M${p(c - r)} ${y - 3} V${y + 3} M${p(c + r)} ${y - 3} V${y + 3}`),
-  };
-}
+const BODY_EVERY = 3600;
+// the deck with body i brought to the front, the rest in the order they were
+const toFront = (i: number) => (o: number[]) => [i, ...o.filter((x) => x !== i)];
 export function BodiesCard() {
-  const [at, setAt] = useState(0);
-  const b = BODIES[at];
-  const form = formOf(b.m);
-  // the path in CSS too, so the form reshapes smoothly where the browser can
-  const d = (s: string) => ({ d: `path("${s}")` }) as CSSProperties;
+  const root = useRef<HTMLDivElement>(null);
+  const [auto, setAuto] = useState(true);
+  // the deck, front first: the chosen body is the one in front; the one that
+  // was there steps back behind it (to the right), the other behind that
+  const [order, setOrder] = useState([0, 1, 2]);
+  const at = order[0];
+  const pick = (i: number) => {
+    setAuto(false);
+    setOrder(toFront(i));
+  };
+  useEffect(() => {
+    const el = root.current;
+    if (!el || !auto) return;
+    let t = 0;
+    const io = new IntersectionObserver(([e]) => {
+      window.clearInterval(t);
+      if (e.isIntersecting) t = window.setInterval(() => setOrder((o) => toFront((o[0] + 1) % BODY_SET.length)(o)), BODY_EVERY);
+    });
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      window.clearInterval(t);
+    };
+  }, [auto]);
   return (
-    <div className="fvc-bodies">
-      <svg viewBox="0 0 100 160" className="fvc-form" aria-hidden="true">
-        <path d={form.d} style={d(form.d)} className="fvc-form__body" />
-        <path d="M50 135 V152 M36 154 H64" className="fvc-form__stand" />
-        {form.lines.map((l, i) => (
-          <path key={i} d={l} style={d(l)} className="fvc-form__m" />
-        ))}
-      </svg>
-      <div className="fvc-bodies__side">
-        <p className="fvc-person">
-          {b.name}
-          <span>{b.when}</span>
-        </p>
-        <dl className="fvc-measures">
-          {["Bust", "Waist", "Hip"].map((k, i) => (
-            <div key={k}>
-              <dt>{k}</dt>
-              <dd>
-                {b.m[i]}
-                <small> cm</small>
-              </dd>
-            </div>
-          ))}
-        </dl>
-        <div className="fvc-people" role="group" aria-label="Saved bodies">
-          {BODIES.map((p, i) => (
-            <button key={p.id} type="button" aria-pressed={i === at} onClick={() => setAt(i)} title={p.name}>
-              {p.name[0]}
-            </button>
-          ))}
-          <span className="fvc-people__add" aria-hidden="true">
-            <Icon d={I.plus} size={13} />
+    <div ref={root} className="fvbd">
+      <div className="fvbd-deck" aria-hidden="true">
+        {BODY_SET.map((b, i) => (
+          <span key={b.id} className="fvbd-card" data-pos={order.indexOf(i)}>
+            <span className="fvbd-card__stage">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={b.pic} alt="" draggable={false} loading="lazy" decoding="async" />
+              <span className="fvbd-card__h">
+                <b>{b.h}</b> cm
+              </span>
+            </span>
+            <span className="fvbd-card__name">{b.name}</span>
+            <span className="fvbd-card__m">
+              {["Bust", "Waist", "Hips"].map((k, j) => (
+                <span key={k}>
+                  <small>{k}</small>
+                  <b>{b.m[j]}</b>
+                </span>
+              ))}
+            </span>
           </span>
-        </div>
+        ))}
+      </div>
+      <div className="fvbd-names" role="group" aria-label="Your bodies">
+        {BODY_SET.map((b, i) => (
+          <button key={b.id} type="button" className={i === at ? "is-on" : ""} aria-pressed={i === at} onClick={() => pick(i)}>
+            <span className="fvbd-names__pic">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={b.pic} alt="" draggable={false} loading="lazy" decoding="async" />
+            </span>
+            <span className="fvbd-names__words">
+              <b>{b.name}</b>
+              <small>
+                {b.h} cm · {b.when}
+              </small>
+            </span>
+          </button>
+        ))}
+        <span className="fvbd-names__new" aria-hidden="true">
+          <span className="fvbd-names__plus">
+            <Icon d={I.plus} size={14} />
+          </span>
+          New body
+        </span>
       </div>
     </div>
   );
@@ -839,8 +854,21 @@ export function PrintCard() {
 }
 
 
-/* ---- Pattern library, on the phone ------------------------------------------- */
-type Row = { id: number; name: string; who: string; status: "Printed" | "Fitting" | "Draft"; g: string; drafting?: boolean };
+/* ---- Pattern library, on the phone -------------------------------------------
+   Three phones, each showing the app's own Pattern library as it is now
+   (venty-app main, src/screens/library.tsx), drawn at the app's size: a
+   402px-wide screen, every measure in its px (the --u unit, a 402th of the
+   screen), so it scales into each phone exactly.
+   - left: Your patterns with none yet: the snow card, three looks rising
+     over it, "If you can imagine it, you can wear it."
+   - front: Your patterns with some: the tall trays in a carousel. Every few
+     seconds a new one drafts: the island says so, then its tray slides in
+     at the front.
+   - right: Patterns to make: the kinds as pressed photo tiles, the chosen
+     one moving along, the row under them that kind's patterns.
+   Photos: the app's stand-ins, as it uses them (LOOK, KIND_PIC). */
+type Made = { id: number; key: string; name: string; status: "Printed" | "Fitting" | "Draft" };
+type Up = { key: string; name: string; who: string };
 
 // the garments, flat (24 x 24 sketches)
 const G: Record<string, string> = {
@@ -849,21 +877,53 @@ const G: Record<string, string> = {
   shirt: "M8 3l4 2 4-2 4 3-2 4-2-1v11H8V9L6 10 4 6z",
   trousers: "M7 3h10l1 18h-4l-2-11-2 11H6z",
   top: "M8 4l4 1 4-1 3 4-3 2v10H8V10L5 8z",
-  jacket: "M8 3l4 3 4-3 4 4-2 3v11H6V10L4 7z",
 };
-const SEED: Row[] = [
-  { id: 1, name: "Flutter midi dress", who: "Natalia", status: "Printed", g: "dress" },
-  { id: 2, name: "Bias slip skirt", who: "Natalia", status: "Fitting", g: "skirt" },
-  { id: 3, name: "Camp collar shirt", who: "Mei", status: "Draft", g: "shirt" },
-  { id: 4, name: "Wide-leg trousers", who: "Amara", status: "Printed", g: "trousers" },
-  { id: 5, name: "Wrap top", who: "Mei", status: "Fitting", g: "top" },
+const APP = "/lab/features/app";
+const PIC = {
+  green: `${APP}/look-street-green.webp`,
+  mauve: `${APP}/look-limo-mauve.webp`,
+  rust: `${APP}/look-cliff-rust.webp`,
+  burgundy: `${APP}/look-street-burgundy.webp`,
+  zip: `${APP}/detail-zip.webp`,
+  corset: `${APP}/detail-corset.webp`,
+  hems: `${APP}/detail-hems.webp`,
+  bows: `${APP}/detail-bows.webp`,
+  meadow: `${APP}/meadow-640.webp`,
+};
+// the app's patterns to make (src/lib/data.ts TEMPLATES), with their photo, sketch and level
+const TPL: Record<string, { name: string; kind: string; pic: string; flat: string; level: 1 | 2 | 3 }> = {
+  slip: { name: "Slip dress", kind: "Dresses", pic: PIC.mauve, flat: G.dress, level: 1 },
+  wrap: { name: "Wrap dress", kind: "Dresses", pic: PIC.green, flat: G.dress, level: 2 },
+  aline: { name: "A-line midi", kind: "Dresses", pic: PIC.rust, flat: G.dress, level: 1 },
+  cami: { name: "Cami", kind: "Tops", pic: PIC.corset, flat: G.top, level: 1 },
+  tee: { name: "Boxy tee", kind: "Tops", pic: PIC.burgundy, flat: G.top, level: 1 },
+  shirt: { name: "Shirt", kind: "Tops", pic: PIC.bows, flat: G.shirt, level: 3 },
+  wideleg: { name: "Wide-leg trouser", kind: "Trousers", pic: PIC.hems, flat: G.trousers, level: 2 },
+  straight: { name: "Straight pant", kind: "Trousers", pic: PIC.zip, flat: G.trousers, level: 2 },
+  biasskirt: { name: "Bias midi skirt", kind: "Skirts", pic: PIC.rust, flat: G.skirt, level: 1 },
+  mini: { name: "A-line mini", kind: "Skirts", pic: PIC.burgundy, flat: G.skirt, level: 1 },
+};
+const LEVEL = ["", "Easy", "Intermediate", "Hard"];
+const KINDS = ["All", "Dresses", "Tops", "Trousers", "Skirts"];
+const KIND_PIC: Record<string, string> = { All: PIC.meadow, Dresses: PIC.green, Tops: PIC.corset, Trousers: PIC.hems, Skirts: PIC.rust };
+const ofKind = (k: string) => Object.keys(TPL).filter((t) => k === "All" || TPL[t].kind === k);
+const LINE: Record<Made["status"], string> = { Printed: "Printed on 9 A4 sheets", Fitting: "Ready to print", Draft: "Draft, not finished yet" };
+const MINE: Made[] = [
+  { id: 1, key: "wrap", name: "Wrap dress", status: "Printed" },
+  { id: 2, key: "aline", name: "A-line midi", status: "Fitting" },
+  { id: 3, key: "slip", name: "Slip dress", status: "Draft" },
 ];
-// what drafts in, in turn
-const NEXT = [
-  { name: "Cropped puffer", who: "Natalia", g: "jacket" },
-  { name: "Halter gown", who: "Amara", g: "dress" },
-  { name: "Pleated midi skirt", who: "Mei", g: "skirt" },
+// what drafts in, in turn (for the app's starting bodies)
+const UP: Up[] = [
+  { key: "tee", name: "Boxy tee", who: "Mum" },
+  { key: "wideleg", name: "Wide-leg trouser", who: "Natalia" },
+  { key: "shirt", name: "Shirt", who: "Tom" },
+  { key: "biasskirt", name: "Bias midi skirt", who: "Natalia" },
+  { key: "cami", name: "Cami", who: "Mum" },
 ];
+const DRAFT_EVERY = 5200;
+const DRAFT_MS = 2300; // the island's live activity, then the tray slides in
+const KIND_EVERY = 2600;
 
 function PhoneBird({ size = 16 }: { size?: number }) {
   const b = MARK_BOUNDS;
@@ -888,7 +948,7 @@ function Device({ children, className = "", live }: { children: ReactNode; class
         <span className="ftp__btn is-r1" />
       </span>
       <div className="ftp__glass">
-        <div className="ftp__screen">{children}</div>
+        <div className="ftp__screen is-app">{children}</div>
         <span className="ftp__sheen" />
         <span className={`ftp__island ${live ? "is-live" : ""}`}>{live}</span>
         <span className="ftp__camera" />
@@ -897,87 +957,297 @@ function Device({ children, className = "", live }: { children: ReactNode; class
   );
 }
 
-/** a phone behind: the same screen in blocks */
-function Ghost({ side }: { side: "l" | "r" }) {
+/* ---- the app's pieces, at its own size (fva-, features.css) ---- */
+const AppIcon = ({ d }: { d: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d={d} />
+  </svg>
+);
+const IC = {
+  search: "M11 4a7 7 0 1 0 0 14a7 7 0 0 0 0-14zM20 20l-4-4",
+  filter: "M4 7h10M18 7h2M4 17h4M12 17h8M14 4v6M8 14v6",
+  select: "M5 4h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zM7 10l2 2 4-4M20 8v11a1 1 0 0 1-1 1H8",
+  columns: "M4 6h4v12H4zM10 6h4v12h-4zM16 6h4v12h-4z",
+  grid: "M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z",
+  plus: "M12 5v14M5 12h14",
+};
+function AppStatus() {
   return (
-    <Device className={`is-back is-${side}`}>
-      <div className="ftp__ghost">
-        <div className="ftp__ghost-head">
-          <span className="is-dot" />
-          <span className="is-bar" />
-          <span className="is-dot" />
-        </div>
-        <span className="ftp__ghost-search" />
-        <ul>
-          {[52, 69, 56, 73, 60].map((w, i) => (
-            <li key={i}>
-              <span className="is-thumb" />
-              <span className="is-lines">
-                <span style={{ width: `${w}%` }} />
-                <span style={{ width: `${w + 14}%` }} />
+    <div className="fva-status">
+      <span>9:41</span>
+      <span className="fva-status__icons">
+        <svg viewBox="0 0 24 18" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+          <path d="M2 6.8a15 15 0 0 1 20 0M5 10.9a10 10 0 0 1 14 0M8.5 14.4a5 5 0 0 1 7 0M12 17.5h.01" />
+        </svg>
+        <span className="fva-battery">
+          <span />
+        </span>
+      </span>
+    </div>
+  );
+}
+function AppHead({ side }: { side: ReactNode }) {
+  return (
+    <div className="fva-head">
+      <span className="fva-h1">Pattern library</span>
+      <span className="fva-head__side">{side}</span>
+    </div>
+  );
+}
+const Tabs = ({ at }: { at: 0 | 1 }) => (
+  <div className="fva-tabs" style={{ "--t": at } as CSSProperties}>
+    {["Your patterns", "Patterns to make"].map((t, i) => (
+      <span key={t} className={i === at ? "is-on" : ""}>
+        {t}
+      </span>
+    ))}
+  </div>
+);
+const Rb = ({ d }: { d: string }) => (
+  <span className="fva-rb">
+    <AppIcon d={d} />
+  </span>
+);
+const Level = ({ n }: { n: number }) => (
+  <span className="fva-line">
+    <span className="fva-bars">
+      {[1, 2, 3].map((k) => (
+        <i key={k} className={k <= n ? "is-on" : ""} style={{ height: `calc(${4 + k * 3} * var(--u))` }} />
+      ))}
+    </span>
+    {LEVEL[n]}
+  </span>
+);
+function Tall({ p }: { p: Made }) {
+  const t = TPL[p.key];
+  return (
+    <span className="fva-tall">
+      <span className="fva-tall__pic">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={t.pic} alt="" draggable={false} loading="lazy" decoding="async" />
+      </span>
+      <span className="fva-tall__band">
+        <span className="fva-tile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" aria-hidden="true">
+            <path d={t.flat} />
+          </svg>
+        </span>
+        <span className="fva-tall__words">
+          <span className="fva-name">{p.name}</span>
+          <span className="fva-line">
+            <i className={`fva-dot is-${p.status.toLowerCase()}`} />
+            {LINE[p.status]}
+          </span>
+        </span>
+      </span>
+    </span>
+  );
+}
+function Frame({ k }: { k: string }) {
+  const t = TPL[k];
+  return (
+    <span className="fva-frame">
+      <span className="fva-frame__pic">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={t.pic} alt="" draggable={false} loading="lazy" decoding="async" />
+      </span>
+      <span className="fva-frame__name">{t.name}</span>
+      <Level n={t.level} />
+    </span>
+  );
+}
+
+/* ---- the three screens ---- */
+function EmptyScreen() {
+  return (
+    <div className="fva">
+      <AppStatus />
+      <div className="fva-page">
+        <AppHead side={null} />
+        <Tabs at={0} />
+        {/* the snow card, three looks rising over its top and sides */}
+        <div className="fva-first">
+          <div className="fva-fan">
+            {[PIC.rust, PIC.green, PIC.mauve].map((src, i) => (
+              <span key={src} className="fva-fan__look" style={{ "--i": i - 1 } as CSSProperties}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={src} alt="" draggable={false} loading="lazy" decoding="async" />
               </span>
-            </li>
-          ))}
-        </ul>
+            ))}
+          </div>
+          <div className="fva-first__words">
+            <p className="fva-first__title">
+              If you can imagine it,
+              <br />
+              you can wear it.
+            </p>
+            <p className="fva-first__lead">
+              A photo, a sketch or a few words,
+              <br />
+              drafted to your measurements.
+            </p>
+            <span className="fva-pill">Create a pattern</span>
+          </div>
+        </div>
       </div>
-    </Device>
+    </div>
+  );
+}
+function MineScreen({ mine, step }: { mine: Made[]; step: number }) {
+  return (
+    <div className="fva">
+      <AppStatus />
+      <div className="fva-page">
+        <AppHead
+          side={
+            <span className="fva-create">
+              <AppIcon d={IC.plus} />
+              Create
+            </span>
+          }
+        />
+        <Tabs at={0} />
+        <div className="fva-tools">
+          <span>
+            <Rb d={IC.search} />
+            <Rb d={IC.filter} />
+          </span>
+          <span>
+            <Rb d={IC.select} />
+            <span className="fva-view">
+              <span className="is-on">
+                <AppIcon d={IC.columns} />
+              </span>
+              <span>
+                <AppIcon d={IC.grid} />
+              </span>
+            </span>
+          </span>
+        </div>
+      </div>
+      {/* the tall trays; a new one slides in at the front */}
+      <div key={step} className={`fva-track ${step ? "is-shifting" : ""}`}>
+        {mine.map((p) => (
+          <Tall key={p.id} p={p} />
+        ))}
+      </div>
+    </div>
+  );
+}
+function MakeScreen({ kind }: { kind: number }) {
+  const k = KINDS[kind];
+  return (
+    <div className="fva">
+      <AppStatus />
+      <div className="fva-page">
+        <AppHead
+          side={
+            <>
+              <Rb d={IC.search} />
+              <Rb d={IC.filter} />
+            </>
+          }
+        />
+        <Tabs at={1} />
+        <div className="fva-kinds" style={{ "--k": kind } as CSSProperties}>
+          <span className="fva-kinds__on" />
+          {KINDS.map((x, i) => (
+            <span key={x} className={`fva-kind ${i === kind ? "is-on" : ""}`}>
+              <span className="fva-kind__pic">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={KIND_PIC[x]} alt="" draggable={false} loading="lazy" decoding="async" />
+              </span>
+              {x}
+            </span>
+          ))}
+        </div>
+        <div className="fva-sec">
+          <span className="fva-sec__title">{k === "All" ? "All patterns" : k}</span>
+          <span className="fva-sec__n">{ofKind(k).length}</span>
+          <span className="fva-sec__all">See all</span>
+        </div>
+      </div>
+      <div key={k} className="fva-row">
+        {ofKind(k)
+          .slice(0, 3)
+          .map((t) => (
+            <Frame key={t} k={t} />
+          ))}
+      </div>
+    </div>
   );
 }
 
 export function PhoneCard() {
   const root = useRef<HTMLDivElement>(null);
-  const [rows, setRows] = useState<Row[]>(SEED);
+  const [mine, setMine] = useState<Made[]>(MINE);
   const [step, setStep] = useState(0);
+  const [draft, setDraft] = useState<Up | null>(null);
+  const [kind, setKind] = useState(0);
   const next = useRef(0);
   const uid = useRef(100);
 
-  // while on screen: a new pattern drafts in every few seconds
+  // while on screen: a pattern drafts every few seconds (the island, then its
+  // tray), and the kinds on the right move along
   useEffect(() => {
     const el = root.current;
     if (!el) return;
-    let iv = 0;
+    let a = 0;
+    let b = 0;
     const timers: number[] = [];
     const tick = () => {
-      const n = NEXT[next.current++ % NEXT.length];
-      const id = uid.current++;
-      // the ones before move along: the last new one goes to fitting, the one fitting gets printed
-      const along = (r: Row, i: number): Row => (i === 0 ? { ...r, status: "Fitting" } : i === 1 && r.status === "Fitting" ? { ...r, status: "Printed" } : r);
-      setRows((l) => [{ id, ...n, status: "Draft" as const, drafting: true }, ...l.map(along)].slice(0, 6));
-      setStep((s) => s + 1);
-      timers.push(window.setTimeout(() => setRows((l) => l.map((r) => (r.id === id ? { ...r, drafting: false } : r))), 2200));
+      const n = UP[next.current++ % UP.length];
+      setDraft(n);
+      timers.push(
+        window.setTimeout(() => {
+          const id = uid.current++;
+          // the ones before move along: the newest goes to ready to print, the one ready gets printed
+          const along = (r: Made, i: number): Made => (i === 0 && r.status === "Draft" ? { ...r, status: "Fitting" } : i === 1 && r.status === "Fitting" ? { ...r, status: "Printed" } : r);
+          setDraft(null);
+          setMine((l) => [{ id, key: n.key, name: n.name, status: "Draft" as const }, ...l.map(along)].slice(0, 4));
+          setStep((s) => s + 1);
+        }, DRAFT_MS),
+      );
     };
     const io = new IntersectionObserver(([e]) => {
-      window.clearInterval(iv);
-      if (e.isIntersecting) iv = window.setInterval(tick, 4200);
+      window.clearInterval(a);
+      window.clearInterval(b);
+      if (!e.isIntersecting) return;
+      a = window.setInterval(tick, DRAFT_EVERY);
+      b = window.setInterval(() => setKind((k) => (k + 1) % KINDS.length), KIND_EVERY);
     });
     io.observe(el);
     return () => {
       io.disconnect();
-      window.clearInterval(iv);
+      window.clearInterval(a);
+      window.clearInterval(b);
       timers.forEach(clearTimeout);
     };
   }, []);
 
-  const drafting = rows.find((r) => r.drafting);
   return (
     <div ref={root} className="ftp-stage">
       <span className="ftp-dots" aria-hidden="true" />
       <span className="ftp-glow" aria-hidden="true" />
-      <Ghost side="l" />
-      <Ghost side="r" />
+      <Device className="is-back is-l">
+        <EmptyScreen />
+      </Device>
+      <Device className="is-back is-r">
+        <MakeScreen kind={kind} />
+      </Device>
       <Device
         className="is-front"
         live={
-          drafting && (
+          draft && (
             // what's drafting, in the island, for as long as it drafts
-            <span key={drafting.id} className="ftp__live">
+            <span key={draft.name} className="ftp__live">
               <span className="ftp__live-tile">
                 <PhoneBird size={13} />
               </span>
               <span className="ftp__live-text">
                 <b>Drafting</b>
                 <span>
-                  {drafting.name} · {drafting.who}
+                  {draft.name} · for {draft.who}
                 </span>
               </span>
               <span className="ftp__live-bar" />
@@ -985,59 +1255,7 @@ export function PhoneCard() {
           )
         }
       >
-        <div className="ftp__status">
-          <span>9:41</span>
-          <span className="ftp__status-icons" aria-hidden="true">
-            <svg width="15" height="11" viewBox="0 0 24 18" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
-              <path d="M2 6.8a15 15 0 0 1 20 0M5 10.9a10 10 0 0 1 14 0M8.5 14.4a5 5 0 0 1 7 0M12 17.5h.01" />
-            </svg>
-            <span className="ftp__battery">
-              <span />
-            </span>
-          </span>
-        </div>
-        <div className="ftp__head">
-          <span className="ftp__logo">
-            <PhoneBird size={15} />
-          </span>
-          <span className="ftp__title">Patterns</span>
-          <span className="ftp__plus" aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-          </span>
-        </div>
-        <div className="ftp__search">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="7" />
-            <path d="m20 20-4-4" />
-          </svg>
-          Search patterns
-        </div>
-        <div className="ftp__sub">
-          <span>Recent</span>
-          <span className="is-muted">Sort by · Latest</span>
-        </div>
-        <ul key={step} className={`ftp__list ${step ? "is-shifting" : ""}`}>
-          {rows.map((r, i) => (
-            <li key={r.id} className={`ftp__row ${r.drafting ? "is-drafting" : ""} ${i === 0 && step ? "is-new" : ""}`}>
-              <span className="ftp__thumb">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" aria-hidden="true">
-                  <path d={G[r.g]} />
-                </svg>
-              </span>
-              <span className="ftp__text">
-                <span className="ftp__name">{r.name}</span>
-                <span className="ftp__who">{r.drafting ? "Drafting for " + r.who + "…" : r.who}</span>
-                {r.drafting && <span className="ftp__bar" />}
-              </span>
-              <span className="ftp__state">
-                <span className={`ftp__dot is-${r.status.toLowerCase()}`} />
-                {r.drafting ? "" : r.status}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <MineScreen mine={mine} step={step} />
       </Device>
     </div>
   );
