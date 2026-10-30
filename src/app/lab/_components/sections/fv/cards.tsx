@@ -861,9 +861,10 @@ export function PrintCard() {
    screen), so it scales into each phone exactly.
    - left: Your patterns with none yet: the snow card, three looks rising
      over it, "If you can imagine it, you can wear it."
-   - front: Your patterns with some: the tall trays in a carousel. Every few
-     seconds a new one drafts: the island says so, then its tray slides in
-     at the front.
+   - front: Your patterns with some, as a grid by month (the app's other
+     view); click the phone and it switches to the tall trays in a carousel
+     and back, the knob in its view switch sliding over. Every few seconds a
+     new one drafts: the island says so, then it arrives at the front.
    - right: Patterns to make: the kinds as pressed photo tiles, the chosen
      one moving along, the row under them that kind's patterns.
    Photos: the app's stand-ins, as it uses them (LOOK, KIND_PIC). */
@@ -908,6 +909,8 @@ const KINDS = ["All", "Dresses", "Tops", "Trousers", "Skirts"];
 const KIND_PIC: Record<string, string> = { All: PIC.meadow, Dresses: PIC.green, Tops: PIC.corset, Trousers: PIC.hems, Skirts: PIC.rust };
 const ofKind = (k: string) => Object.keys(TPL).filter((t) => k === "All" || TPL[t].kind === k);
 const LINE: Record<Made["status"], string> = { Printed: "Printed on 9 A4 sheets", Fitting: "Ready to print", Draft: "Draft, not finished yet" };
+// the short line, on the small cards of the grid
+const SHORT: Record<Made["status"], string> = { Printed: "Printed", Fitting: "Ready to print", Draft: "Draft" };
 const MINE: Made[] = [
   { id: 1, key: "wrap", name: "Wrap dress", status: "Printed" },
   { id: 2, key: "aline", name: "A-line midi", status: "Fitting" },
@@ -938,9 +941,25 @@ function PhoneBird({ size = 16 }: { size?: number }) {
     bands and buttons, the black border round the screen, the island with
     the camera in it (open into a live activity when `live` is given), a
     sheen across the glass; the screen is its child */
-function Device({ children, className = "", live }: { children: ReactNode; className?: string; live?: ReactNode }) {
+function Device({ children, className = "", live, onPress, label }: { children: ReactNode; className?: string; live?: ReactNode; onPress?: () => void; label?: string }) {
   return (
-    <div className={`ftp ${className}`} aria-hidden={className.includes("is-back") || undefined}>
+    <div
+      className={`ftp ${className}`}
+      aria-hidden={className.includes("is-back") || undefined}
+      role={onPress ? "button" : undefined}
+      tabIndex={onPress ? 0 : undefined}
+      aria-label={label}
+      onClick={onPress}
+      onKeyDown={
+        onPress &&
+        ((e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onPress();
+          }
+        })
+      }
+    >
       <span className="ftp__btns">
         <span className="ftp__btn is-l1" />
         <span className="ftp__btn is-l2" />
@@ -1093,7 +1112,23 @@ function EmptyScreen() {
     </div>
   );
 }
-function MineScreen({ mine, step }: { mine: Made[]; step: number }) {
+function GridCard({ p }: { p: Made }) {
+  const t = TPL[p.key];
+  return (
+    <span className="fva-frame">
+      <span className="fva-frame__pic is-grid">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={t.pic} alt="" draggable={false} loading="lazy" decoding="async" />
+      </span>
+      <span className="fva-frame__name">{p.name}</span>
+      <span className="fva-line">
+        <i className={`fva-dot is-${p.status.toLowerCase()}`} />
+        {SHORT[p.status]}
+      </span>
+    </span>
+  );
+}
+function MineScreen({ mine, step, grid }: { mine: Made[]; step: number; grid: boolean }) {
   return (
     <div className="fva">
       <AppStatus />
@@ -1114,23 +1149,35 @@ function MineScreen({ mine, step }: { mine: Made[]; step: number }) {
           </span>
           <span>
             <Rb d={IC.select} />
-            <span className="fva-view">
-              <span className="is-on">
+            <span className="fva-view" style={{ "--g": grid ? 1 : 0 } as CSSProperties}>
+              <span className={grid ? "" : "is-on"}>
                 <AppIcon d={IC.columns} />
               </span>
-              <span>
+              <span className={grid ? "is-on" : ""}>
                 <AppIcon d={IC.grid} />
               </span>
             </span>
           </span>
         </div>
       </div>
-      {/* the tall trays; a new one slides in at the front */}
-      <div key={step} className={`fva-track ${step ? "is-shifting" : ""}`}>
-        {mine.map((p) => (
-          <Tall key={p.id} p={p} />
-        ))}
-      </div>
+      {grid ? (
+        // the grid by month; a new one pops in first
+        <div key={`g${step}`} className={`fva-bymonth ${step ? "is-new" : ""}`}>
+          <p className="fva-month">October</p>
+          <div className="fva-grid">
+            {mine.map((p) => (
+              <GridCard key={p.id} p={p} />
+            ))}
+          </div>
+        </div>
+      ) : (
+        // the tall trays; a new one slides in at the front
+        <div key={`c${step}`} className={`fva-track ${step ? "is-shifting" : ""}`}>
+          {mine.map((p) => (
+            <Tall key={p.id} p={p} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -1184,6 +1231,7 @@ export function PhoneCard() {
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<Up | null>(null);
   const [kind, setKind] = useState(0);
+  const [grid, setGrid] = useState(true);
   const next = useRef(0);
   const uid = useRef(100);
 
@@ -1237,6 +1285,8 @@ export function PhoneCard() {
       </Device>
       <Device
         className="is-front"
+        onPress={() => setGrid((g) => !g)}
+        label={grid ? "Show your patterns as a carousel" : "Show your patterns as a grid"}
         live={
           draft && (
             // what's drafting, in the island, for as long as it drafts
@@ -1255,7 +1305,7 @@ export function PhoneCard() {
           )
         }
       >
-        <MineScreen mine={mine} step={step} />
+        <MineScreen mine={mine} step={step} grid={grid} />
       </Device>
     </div>
   );
