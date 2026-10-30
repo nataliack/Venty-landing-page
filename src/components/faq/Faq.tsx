@@ -70,8 +70,6 @@ function Row({ n, q, a, open, onToggle }: { n: number; q: string; a: string; ope
           <p>{a}</p>
         </div>
       </div>
-      {/* the line under it */}
-      <span className="fq-line" aria-hidden="true" />
     </div>
   );
 }

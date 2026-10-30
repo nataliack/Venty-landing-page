@@ -79,33 +79,35 @@
 .fq-body { max-width: 24ch; margin-top: clamp(14px, 1.6vw, 24px); text-wrap: balance; }
 
 /* ---- the questions -----------------------------------------------------------
-   Two touches of the app's build (app.venty.au, globals.css: .pill-white,
-   .pill-primary), one light from the top, and nothing more: the questions on
-   one snow panel raised off the page, and the +/- a small raised button that
-   turns to the app's primary (periwinkle, its fine dot grid) when open. */
+   No panel round them: each question is its own surface pressed into the
+   page (the app's pressed build on cloud, app.venty.au: a shadow inside along
+   the top, a white lip along the bottom), one light from the top. In it, the
+   +/- is a small button raised out of the well (the app's white secondary,
+   round) that turns to the app's primary (periwinkle, its fine dot grid)
+   when open. */
 .fq-list {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   margin-left: clamp(20px, 2.4vw, 36px);
-  padding: 6px 0;
-  border-radius: 28px;
-  background: #f0f4fe;
-  box-shadow:
-    inset 0 0 0 1px rgb(19 21 35 / 0.06),
-    inset 0 1px 0 #fff,
-    inset 0 -1px 0 rgb(19 21 35 / 0.1),
-    inset 0 0 18px 2px rgb(255 255 255 / 0.75),
-    0 1px 2px rgb(19 21 35 / 0.1),
-    0 6px 14px -6px rgb(19 21 35 / 0.22),
-    0 32px 60px -28px rgb(56 76 101 / 0.55);
 }
-.fq-row { position: relative; padding: 0 clamp(14px, 1.8vw, 24px); }
+.fq-row {
+  position: relative;
+  padding: 0 clamp(14px, 1.8vw, 22px);
+  border-radius: 22px;
+  background: rgb(24 30 70 / 0.04);
+  box-shadow: inset 0 3px 7px rgb(24 30 70 / 0.13), inset 0 1px 1.5px rgb(24 30 70 / 0.12), inset 0 -1px 0 rgb(255 255 255 / 0.9), 0 1px 0 rgb(255 255 255 / 0.8);
+  transition: background-color 0.35s ease;
+}
+.fq-row.is-open { background: rgb(24 30 70 / 0.055); }
 .fq-q {
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr) auto;
   align-items: center;
   gap: 16px;
   width: 100%;
-  padding: 22px 0;
+  padding: 18px 0;
   text-align: left;
   cursor: pointer;
 }
@@ -113,7 +115,7 @@
 .fq-n { font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--steel); }
 /* the question: the body's navy, softer than ink */
 .fq-t { font-size: clamp(17px, 1.4vw, 20px); font-weight: 500; line-height: 1.25; letter-spacing: -0.025em; color: var(--navy); text-wrap: balance; }
-/* the button: raised out of the panel (the app's white secondary, round),
+/* the button: raised out of the well (the app's white secondary, round),
    a plus that turns to a minus; open, the app's primary */
 .fq-btn {
   position: relative;
@@ -143,17 +145,7 @@
 .fq-row.is-open .fq-a { grid-template-rows: 1fr; }
 .fq-a__in { min-height: 0; overflow: hidden; }
 /* the answer, under the question, in line with it */
-.fq-a p { max-width: 54ch; margin: 0 0 26px 60px; }
-/* the line between questions, across the panel */
-.fq-line {
-  position: absolute;
-  left: clamp(14px, 1.8vw, 24px);
-  right: clamp(14px, 1.8vw, 24px);
-  bottom: 0;
-  height: 1px;
-  background: repeating-linear-gradient(90deg, var(--mark) 0 14px, transparent 14px 19px, var(--mark) 19px 21px, transparent 21px 26px);
-}
-.fq-row:last-child .fq-line { display: none; }
+.fq-a p { max-width: 54ch; margin: 0 0 22px 60px; }
 
 @media (max-width: 899px) {
   .fq { --mid: 0px; }
@@ -162,5 +154,5 @@
   .fq-head { padding: 30px 0 0 28px; }
   .fq-list { margin-left: 0; }
   .fq-a p { margin-left: 50px; }
-  .fq-q { grid-template-columns: 38px minmax(0, 1fr) auto; gap: 12px; padding: 18px 0; }
+  .fq-q { grid-template-columns: 38px minmax(0, 1fr) auto; gap: 12px; padding: 16px 0; }
 }
