@@ -1168,3 +1168,74 @@
 .fvbd-names__new { font-size: 13px; color: rgb(157 172 205 / 0.7); }
 .fvbd-names__plus { display: grid; flex: none; place-items: center; width: 34px; height: 34px; border-radius: 10px; color: var(--peri); background: var(--b-floor); box-shadow: var(--b-press); }
 @media (max-width: 1099px) { .fvbd-names__words small { white-space: normal; } }
+
+
+/* ---- See it on your body: her frame back (pressed into the rim, as the
+   Mark up photo), the film inside it fading through its light-shaped mask
+   onto the frame's dark floor ---- */
+.fv .fvc-turn__stage {
+  overflow: hidden;
+  border-radius: 14px;
+  background: radial-gradient(70% 55% at 50% 46%, #161a2c, #0f1222 70%);
+}
+.fv .fvc-turn__stage::after { content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none; box-shadow: inset 0 3px 7px rgb(0 0 0 / 0.65), inset 0 1px 1.5px rgb(0 0 0 / 0.55), inset 0 -1px 0 rgb(255 255 255 / 0.07), 0 1px 0 rgb(255 255 255 / 0.07); }
+.fv .fvc-turn__hint { z-index: 3; bottom: 10px; }
+
+/* ---- Pattern library: only the card itself answers the pointer. The stage
+   reaches 140px above the card (for the front phone to rise into), and
+   hovering that empty room used to set the card off; now the stage lets
+   the pointer through, all but the front phone (it can be clicked) ---- */
+.fvb-card--lib .ftp-stage { pointer-events: none; }
+.fvb-card--lib .ftp.is-front { pointer-events: auto; }
+
+/* ---- the heading: one style throughout (the word "needs." as the rest) ---- */
+.fv-title em { font: inherit; font-style: normal; letter-spacing: inherit; color: inherit; }
+
+/* ---- Arrange and print: dragging the pieces never selects the words ---- */
+.fvb-card--print { -webkit-user-select: none; user-select: none; }
+
+/* ---- Refine: the chat playing ----
+   sent: the bubble springs up out of the composer from its corner, as a
+   message sent in iMessage; the answer pops in from Venty's side; the dots
+   bounce while it drafts; the tags follow one after another; then it all
+   floats away together, the newest last */
+.fv .fvc-chat__log { justify-content: flex-end; }
+.fv .fvc-bubble.is-me { transform-origin: 100% 100%; animation: fvc-send 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.25) both; }
+.fv .fvc-reply { animation: fvc-fade 0.25s ease both; }
+.fv .fvc-bubble.is-reply, .fv .fvc-dots { transform-origin: 0% 100%; animation: fvc-pop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.25) both; }
+@keyframes fvc-send {
+  0% { opacity: 0; transform: translate(4px, 26px) scale(0.5); }
+  55% { opacity: 1; transform: translate(0, -3px) scale(1.03); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes fvc-pop {
+  0% { opacity: 0; transform: translateY(8px) scale(0.6); }
+  60% { opacity: 1; transform: translateY(-2px) scale(1.03); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes fvc-fade { from { opacity: 0; } }
+.fv .fvc-diff span { animation: fvc-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.25) both; transform-origin: 0% 50%; }
+.fv .fvc-diff span:nth-child(1) { animation-delay: 0.32s; }
+.fv .fvc-diff span:nth-child(2) { animation-delay: 0.46s; }
+/* Venty drafting: three dots, rising in turn */
+.fv .fvc-dots { display: inline-flex; align-items: center; gap: 4px; padding: 11px 13px; }
+.fv .fvc-dots i { width: 6px; height: 6px; border-radius: 50%; background: rgb(239 244 255 / 0.55); animation: fvc-dot 1.1s ease-in-out infinite; }
+.fv .fvc-dots i:nth-child(2) { animation-delay: 0.16s; }
+.fv .fvc-dots i:nth-child(3) { animation-delay: 0.32s; }
+@keyframes fvc-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+/* floating away: everything in the log rises a little and goes, the newest last */
+.fv .fvc-chat.is-out .fvc-chat__log > * { animation: fvc-out 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.fv .fvc-chat.is-out .fvc-chat__log > :nth-child(2) { animation-delay: 0.08s; }
+@keyframes fvc-out { to { opacity: 0; transform: translateY(-14px) scale(0.97); } }
+/* the pattern's name and its version, changing with each chat */
+.fv .fvc-chat__file, .fv .fvc-tag.is-ticking { animation: fvc-fade 0.4s ease both; }
+/* the composer: your change typing in, the caret after it; sent, the arrow dips */
+.fv .fvc-compose__text { overflow: hidden; min-width: 0; white-space: nowrap; text-overflow: ellipsis; transition: color 0.2s; }
+.fv .fvc-compose.is-typing .fvc-compose__text { color: var(--cloud); }
+.fv .fvc-compose__caret { display: inline-block; width: 1.5px; height: 1.05em; margin-left: 1px; vertical-align: -0.15em; background: var(--corn); animation: fvc-caret 1s steps(1) infinite; }
+.fv .fvc-compose__send { flex: none; }
+.fv .fvc-compose__send.is-sent { animation: fvc-press 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.4) both; }
+@keyframes fvc-press { 40% { transform: scale(0.82); } 100% { transform: none; } }

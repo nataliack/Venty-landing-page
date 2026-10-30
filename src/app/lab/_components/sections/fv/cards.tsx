@@ -490,33 +490,124 @@ export function MarkCard() {
 }
 
 /* ---- Refine in plain words ------------------------------------------------
-   A chat: the pattern it's about at the top, your message, Venty's answer
-   with what it changed, and the composer. */
+   A chat that plays while it's on screen, round and round: your change
+   types into the composer and goes (the bubble springs up out of it, as a
+   message sent in iMessage); Venty's dots, then its answer pops in with
+   what it changed, one tag after another, and the version ticks on. A
+   moment to read it, then it all floats away and the next one starts.
+   Before it plays (and between loops) the first one shows, whole. */
+const CHATS = [
+  { file: "Slip dress", v: 2, me: "5 cm longer, wider straps.", reply: "Done. Four pieces redrafted.", diff: ["Hem +5 cm", "Straps 3 cm"] },
+  { file: "Wrap dress", v: 1, me: "Can the sleeves be a little fuller?", reply: "Done. Both sleeves redrafted.", diff: ["Sleeve cap +2 cm", "Gathered"] },
+  { file: "Wide-leg trouser", v: 3, me: "Raise the waist, and add pockets.", reply: "Done. Five pieces redrafted.", diff: ["Rise +3 cm", "Side pockets"] },
+];
+// where a chat is: 0 typing in the composer, 1 sent, 2 Venty's dots, 3 its answer, 4 floating away
+type ChatAt = { c: number; stage: 0 | 1 | 2 | 3 | 4; typed: number };
+const CHAR_MS = 42;
+const HOLD: Record<number, number> = { 1: 700, 2: 1300, 3: 3400, 4: 650 };
 export function RefineCard() {
+  const root = useRef<HTMLDivElement>(null);
+  const [s, setS] = useState<ChatAt>({ c: 0, stage: 3, typed: CHATS[0].me.length });
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    let t = 0;
+    let on = false;
+    // where the loop is (its own copy, so it can pick up where it left off)
+    let cur: ChatAt = { c: 0, stage: 3, typed: CHATS[0].me.length };
+    // one step of the loop, then the next after its hold
+    const step = (now: ChatAt) => {
+      if (!on) return;
+      let next: ChatAt;
+      let wait: number;
+      if (now.stage === 0 && now.typed < CHATS[now.c].me.length) {
+        next = { ...now, typed: now.typed + 1 };
+        wait = CHAR_MS;
+      } else if (now.stage === 4) {
+        next = { c: (now.c + 1) % CHATS.length, stage: 0, typed: 0 };
+        wait = 500;
+      } else {
+        next = { ...now, stage: (now.stage + 1) as ChatAt["stage"] };
+        wait = HOLD[next.stage] ?? 400;
+      }
+      cur = next;
+      setS(next);
+      t = window.setTimeout(() => step(next), wait);
+    };
+    const io = new IntersectionObserver(([e]) => {
+      window.clearTimeout(t);
+      on = e.isIntersecting;
+      if (!on) return;
+      // pick up from a whole chat: let it be read a moment, then float away
+      cur = { ...cur, stage: 3, typed: CHATS[cur.c].me.length };
+      setS(cur);
+      const from = cur;
+      t = window.setTimeout(() => step(from), 2200);
+    });
+    io.observe(el);
+    return () => {
+      on = false;
+      io.disconnect();
+      window.clearTimeout(t);
+    };
+  }, []);
+  const chat = CHATS[s.c];
+  const typing = s.stage === 0;
+  const done = s.stage >= 3;
   return (
-    <div className="fvc-chat">
+    <div ref={root} className={`fvc-chat ${s.stage === 4 ? "is-out" : ""}`}>
       <header className="fvc-chat__head">
-        <span className="fvc-chat__file">Slip dress</span>
-        <span className="fvc-tag">v2 → v3</span>
+        <span key={chat.file} className="fvc-chat__file">
+          {chat.file}
+        </span>
+        <span key={`${s.c}${done}`} className="fvc-tag is-ticking">
+          {done ? `v${chat.v} → v${chat.v + 1}` : `v${chat.v}`}
+        </span>
       </header>
       <div className="fvc-chat__log">
-        <p className="fvc-bubble is-me">5 cm longer, wider straps.</p>
-        <div className="fvc-reply">
-          <span className="fvc-avatar">
-            <Bird size={12} />
-          </span>
-          <div className="fvc-reply__body">
-            <p className="fvc-bubble">Done. Four pieces redrafted.</p>
-            <p className="fvc-diff">
-              <span>Hem +5 cm</span>
-              <span>Straps 3 cm</span>
-            </p>
+        {s.stage >= 1 && (
+          <p key={`me${s.c}`} className="fvc-bubble is-me">
+            {chat.me}
+          </p>
+        )}
+        {s.stage >= 2 && (
+          <div key={`re${s.c}`} className="fvc-reply">
+            <span className="fvc-avatar">
+              <Bird size={12} />
+            </span>
+            <div className="fvc-reply__body">
+              {done ? (
+                <>
+                  <p className="fvc-bubble is-reply">{chat.reply}</p>
+                  <p className="fvc-diff">
+                    {chat.diff.map((d) => (
+                      <span key={d}>{d}</span>
+                    ))}
+                  </p>
+                </>
+              ) : (
+                <p className="fvc-bubble fvc-dots" aria-label="Venty is typing">
+                  <i />
+                  <i />
+                  <i />
+                </p>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
-      <div className="fvc-compose">
-        <span>Ask for a change…</span>
-        <span className="fvc-compose__send" aria-hidden="true">
+      <div className={`fvc-compose ${typing && s.typed ? "is-typing" : ""}`}>
+        <span className="fvc-compose__text">
+          {typing && s.typed ? (
+            <>
+              {chat.me.slice(0, s.typed)}
+              <i className="fvc-compose__caret" />
+            </>
+          ) : (
+            "Ask for a change…"
+          )}
+        </span>
+        <span key={s.stage === 1 ? `sent${s.c}` : "idle"} className={`fvc-compose__send ${s.stage === 1 ? "is-sent" : ""}`} aria-hidden="true">
           <Icon d={SEND} size={14} weight={2} />
         </span>
       </div>
