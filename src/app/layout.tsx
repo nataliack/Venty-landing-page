@@ -52,7 +52,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: IPHONE_SAFARI }} />
       </head>
-      <body className="grain">
+      <body>
         {/* the page scrolls in here, never the window: see SmoothScroll */}
         <div id="scroller" className="scroller">
           <SmoothScroll>{children}</SmoothScroll>

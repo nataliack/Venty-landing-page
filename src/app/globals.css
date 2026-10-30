@@ -232,29 +232,6 @@ body {
   letter-spacing: -0.015em;
 }
 
-/* Grain overlay, one SVG noise tile, fixed, very quiet. It jitters by 3%,
-   so it only needs to overhang the screen a little: a layer the size of
-   four screens cost the compositor four times the blending, every frame. */
-.grain::after {
-  content: "";
-  position: fixed;
-  inset: -6%;
-  width: 112%;
-  height: 112%;
-  pointer-events: none;
-  z-index: 60;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  animation: grain 0.6s steps(3) infinite;
-  mix-blend-mode: overlay;
-}
-@keyframes grain {
-  0% { transform: translate(0, 0); }
-  33% { transform: translate(-2%, 3%); }
-  66% { transform: translate(3%, -2%); }
-  100% { transform: translate(0, 0); }
-}
-
 /* Glass pill */
 .glass {
   background: var(--glass);
@@ -269,7 +246,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .grain::after { animation: none; }
   .reveal { opacity: 1; }
 }
 
