@@ -34,9 +34,9 @@ import "./how.css";
    own snapping, on only within the steps.
 
    The hand-off (docs/motion.md): after the last step the scene holds for
-   3.4 more screens, so the valley is there to be seen. Inside it the
+   2.3 more screens, so the valley is there to be seen. Inside it the
    layers part: the meadow, the cards and the objects fly up and away, and
-   the valley rises slowly over the first 2.2 screens, easing to a stop
+   the valley rises slowly over the first 1.5 screens, easing to a stop
    with its peaks in view (no further than before, so the photo never runs
    out); it then holds, and over the last screen Features (night) rises
    over it all 1:1 with its dithered edge.
@@ -106,9 +106,9 @@ const VALLEY = { ratio: 1943 / 1792 };
    them); how far the meadow, cards and objects rise for each px scrolled;
    how far the valley rises in all (in screens) and over how many screens,
    easing out to a stop */
-const HAND = 3.4;
+const HAND = 2.3;
 const FLY = { fore: 0.9 };
-const VALLEY_RISE = { by: 0.715, over: 2.2, grow: 0.5 };
+const VALLEY_RISE = { by: 0.715, over: 1.5, grow: 0.5 };
 
 /* the cards' glass, edges and words: built once and never rendered again
    (the turn moves them directly), so a change of step only re-renders the
