@@ -468,7 +468,7 @@ export function MarkCard() {
         </div>
       </div>
       {/* the notes, by name: each pushes in to its detail */}
-      <div className="fvc-tabs" role="group" aria-label="Notes">
+      <div className="fvc-tabs fvk" role="group" aria-label="Notes" style={{ "--i": DETAILS.findIndex((x) => x.n === on), "--n": DETAILS.length } as CSSProperties}>
         {DETAILS.map((x) => (
           <button key={x.n} type="button" className={on === x.n ? "is-on" : ""} onClick={() => pick(x.n)} aria-pressed={on === x.n} aria-label={`${x.tab}: ${x.note}`}>
             <span className="fvc-tabs__n" aria-hidden="true">
@@ -566,7 +566,7 @@ export function TurnCard() {
       </div>
       <div className="fvc-turn__panel">
         <p className="fvc-label">View</p>
-        <div className="fvc-turn__views" role="group" aria-label="Views">
+        <div className="fvc-turn__views fvk" role="group" aria-label="Views" style={{ "--i": VIEWS.findIndex(([, v]) => near(v)), "--n": VIEWS.length } as CSSProperties}>
           {VIEWS.map(([k, v]) => (
             <button key={k} type="button" aria-pressed={near(v)} onClick={() => to(v)}>
               {k}
@@ -796,7 +796,7 @@ export function PrintCard() {
         </svg>
       </div>
       <div className="fvc-arrange__panel">
-        <div className="fvc-seg" role="group" aria-label="Paper">
+        <div className="fvc-seg fvk" role="group" aria-label="Paper" style={{ "--i": a0 ? 1 : 0, "--n": 2 } as CSSProperties}>
           <button type="button" aria-pressed={!a0} onClick={() => setA0(false)}>
             <b>A4</b> At home
           </button>

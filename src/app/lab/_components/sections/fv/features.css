@@ -754,3 +754,142 @@
   .fvc-turn { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
   .fvc-turn__deg { display: none; }
 }
+
+
+/* ==== the app's builds ==============================================================
+   The cards and everything in them in the app's skeuomorphic builds
+   (venty-app main: globals.css .pill-dark / .rb, .pill-primary, .pill-white,
+   .iconbadge, .ruler-track, .knob; library.tsx RIM, PRESS, TILE), so the
+   page and the app are one thing. One light, from above: what's raised
+   catches it along its top edge and casts a shadow; what's pressed in has
+   a shadow inside along its top and a lip of light along its foot.
+   - the card: the dark tray's rim (the card colour softly lit, a fine
+     rim, a bright top edge, a dark foot, a shadow onto the night)
+   - what's in it: pressed into the rim (a dark floor, the press)
+   - controls: raised (the dark secondary), the chosen one cornflower
+     (the primary's gradient); a choice of a few is a pressed track with a
+     knob that slides along it (the app's look switch)
+   - the main action: the primary (cornflower, its fine dot grid) */
+.fv {
+  --card: #1b1c26;
+  --b-rim: linear-gradient(180deg, rgb(255 255 255 / 0.035), rgb(255 255 255 / 0) 50%) var(--card);
+  --b-rim-sh: 0 18px 36px -16px rgb(0 0 0 / 0.8), 0 2px 4px rgb(0 0 0 / 0.35), inset 0 0 0 1px rgb(255 255 255 / 0.07), inset 0 1px 0 rgb(255 255 255 / 0.1), inset 0 -1px 0 rgb(0 0 0 / 0.35);
+  --b-floor: rgb(0 0 0 / 0.26);
+  --b-press: inset 0 3px 7px rgb(0 0 0 / 0.65), inset 0 1px 1.5px rgb(0 0 0 / 0.55), inset 0 -1px 0 rgb(255 255 255 / 0.06), 0 1px 0 rgb(255 255 255 / 0.07);
+  --b-track: linear-gradient(180deg, #121320 0%, #171823 100%);
+  --b-raise: linear-gradient(180deg, rgb(255 255 255 / 0.06), rgb(255 255 255 / 0) 60%) var(--card);
+  --b-raise-sh: inset 0 0 0 1px rgb(255 255 255 / 0.1), inset 0 1px 0 rgb(255 255 255 / 0.2), inset 0 -1px 0 rgb(0 0 0 / 0.35), inset 0 0 14px 1px rgb(255 255 255 / 0.04);
+  --b-knob: linear-gradient(180deg, #2e3040, #1e2030);
+  --b-knob-sh: 0 4px 10px rgb(0 0 0 / 0.55), 0 1px 2px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.22), inset 0 -1px 0 rgb(0 0 0 / 0.45), inset 0 0 0 1px rgb(255 255 255 / 0.07);
+  --b-corn: linear-gradient(180deg, #7387f6, #687ef5 55%, #6479f2);
+  --b-corn-sh: inset 0 1px 0 rgb(255 255 255 / 0.35), inset 0 0 0 1px rgb(255 255 255 / 0.18), 0 8px 18px -8px rgb(104 126 245 / 0.7);
+  --b-primary: radial-gradient(rgb(255 255 255 / 0.16) 0.8px, transparent 1.1px) 0 0 / 5px 5px, linear-gradient(180deg, #7387f6, #687ef5 55%, #6479f2);
+  --b-primary-sh: inset 0 0 0 1px rgb(255 255 255 / 0.3), inset 0 1px 0 rgb(255 255 255 / 0.6), inset 0 0 18px 3px rgb(206 214 255 / 0.55), 0 10px 30px -8px rgb(104 126 245 / 0.5);
+  --b-snow-sh: inset 0 0 0 1px rgb(19 21 35 / 0.06), inset 0 1px 0 #fff, inset 0 -1px 0 rgb(19 21 35 / 0.1), inset 0 0 12px 1px rgb(255 255 255 / 0.75), 0 1px 2px rgb(0 0 0 / 0.35), 0 6px 14px -6px rgb(0 0 0 / 0.6);
+  --spring: cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+/* ---- the card: a dark tray ---- */
+.fv .fvb-card { background: var(--b-rim); box-shadow: var(--b-rim-sh); }
+
+/* ---- pressed into it: the wells ---- */
+.fv .fvc-chat,
+.fv .fvc-turn__panel,
+.fv .fvc-arrange__canvas,
+.fv .fvc-measures,
+.fv .fvc-count,
+.fv .fvc-picked { background: var(--b-floor); box-shadow: var(--b-press); }
+/* the photo: the press drawn over it, so it reads sunk into the rim */
+.fvb-card--mark .fvc-mark__frame::before { content: ""; position: absolute; inset: 0; z-index: 4; border-radius: inherit; pointer-events: none; box-shadow: inset 0 3px 7px rgb(0 0 0 / 0.65), inset 0 1px 1.5px rgb(0 0 0 / 0.55), inset 0 -1px 0 rgb(255 255 255 / 0.07); }
+.fv .fvc-measures div + div { border-top-color: rgb(0 0 0 / 0.35); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03); }
+.fv .fvc-chat__head { border-bottom-color: rgb(0 0 0 / 0.35); box-shadow: 0 1px 0 rgb(255 255 255 / 0.04); }
+/* small things pressed in: the counts, the tags, the changes made */
+.fv .fvc-label span,
+.fv .fvc-tag,
+.fv .fvc-diff span { background: var(--b-floor); box-shadow: var(--b-press); }
+.fv .fvc-diff span { color: #b9c3ff; }
+/* an icon in a tile pressed in, never a circle (the app's one icon style) */
+.fv .fvc-avatar { border-radius: 7px; color: rgb(193 200 230 / 0.75); background: var(--b-floor); box-shadow: var(--b-press); }
+
+/* ---- a choice of a few: a pressed track, a knob sliding along it ----
+   --i: the chosen one (-1: none yet), --n: how many; the channel is 5px */
+.fvk { position: relative; isolation: isolate; gap: 0 !important; padding: 5px !important; background: var(--b-track) !important; box-shadow: var(--b-press) !important; }
+.fvk::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: calc(5px + max(var(--i), 0) * (100% - 10px) / var(--n));
+  width: calc((100% - 10px) / var(--n));
+  border-radius: var(--knob-r, 999px);
+  background: var(--b-knob);
+  box-shadow: var(--b-knob-sh);
+  opacity: clamp(0, calc(var(--i) + 1), 1);
+  transition: left 0.5s var(--spring), opacity 0.3s;
+}
+.fvk > button { position: relative; z-index: 1; background: transparent !important; box-shadow: none !important; }
+.fvc-tabs.fvk { --knob-r: 11px; border-radius: 16px; }
+.fvc-seg.fvk { --knob-r: 8px; border-radius: 13px; }
+.fvc-turn__views.fvk { border-radius: 999px; }
+.fvc-turn__views.fvk button[aria-pressed="true"],
+.fvc-seg.fvk button[aria-pressed="true"],
+.fvc-tabs.fvk button.is-on { color: var(--cloud); }
+.fvc-turn__views.fvk button { padding: 7px 0; }
+
+/* ---- raised: the dark secondary; chosen, cornflower ---- */
+.fv .fvc-mark__out,
+.fv .fvc-iconbtn,
+.fv .fvc-ghost:not(.is-primary),
+.fv .fvc-people button,
+.fv .fvc-turn__hint { background: var(--b-raise); box-shadow: var(--b-raise-sh); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.fv .fvc-mark__out, .fv .fvc-turn__hint { box-shadow: var(--b-raise-sh), 0 6px 14px -6px rgb(0 0 0 / 0.75), 0 1px 2px rgb(0 0 0 / 0.5); }
+.fv .fvc-people button, .fv .fvc-people__add { width: 32px; height: 32px; }
+.fv .fvc-people button[aria-pressed="true"] { color: #fff; background: var(--b-corn); box-shadow: var(--b-corn-sh); }
+/* a space for another body: pressed in, waiting */
+.fv .fvc-people__add { background: var(--b-floor); box-shadow: var(--b-press); }
+/* the main action: the primary */
+.fv .fvc-ghost.is-primary { color: #fff; font-weight: 500; background: var(--b-primary); box-shadow: var(--b-primary-sh); }
+/* hover lifts it a touch, a press dips it (the app's, kept plain) */
+.fv .fvc-mark__out, .fv .fvc-iconbtn, .fv .fvc-ghost, .fv .fvc-people button { transition: transform 0.35s var(--spring), filter 0.15s, opacity 0.2s; }
+@media (hover: hover) {
+  .fv .fvc-mark__out:hover, .fv .fvc-iconbtn:hover, .fv .fvc-ghost:not(.is-primary):not(:disabled):hover, .fv .fvc-people button:hover { background: var(--b-raise); filter: brightness(1.12); }
+  .fv .fvc-ghost.is-primary:hover { filter: brightness(1.06); }
+}
+.fv .fvc-mark__out:active, .fv .fvc-iconbtn:active, .fv .fvc-ghost:active, .fv .fvc-people button:active { transform: scale(0.965); transition-duration: 0.12s; }
+
+/* ---- Refine: the chat ---- */
+.fv .fvc-bubble { background: var(--b-raise); box-shadow: var(--b-raise-sh), 0 4px 10px -4px rgb(0 0 0 / 0.6); }
+.fv .fvc-bubble.is-me { background: var(--b-corn); box-shadow: var(--b-corn-sh); }
+.fv .fvc-compose { background: var(--b-track); box-shadow: var(--b-press); }
+.fv .fvc-compose__send { width: 28px; height: 28px; color: #fff; background: var(--b-corn); box-shadow: var(--b-corn-sh); }
+
+/* ---- Mark up: the pins raised in snow, cornflower when chosen; the comment a solid raised card ---- */
+.fv .fvc-pin { background: var(--cloud); box-shadow: var(--b-snow-sh); }
+.fv .fvc-pin.is-on { background: var(--b-corn); box-shadow: var(--b-corn-sh), 0 4px 10px rgb(0 0 0 / 0.45); }
+.fv .fvc-tabs__n { box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgb(19 21 35 / 0.14), 0 1px 2px rgb(0 0 0 / 0.45); }
+.fv .fvc-tabs button.is-on .fvc-tabs__n { background: var(--b-corn); box-shadow: var(--b-corn-sh); }
+@media (hover: hover) {
+  .fv .fvc-pin:not(.is-away):hover { background: var(--b-corn); box-shadow: var(--b-corn-sh), 0 10px 22px -6px rgb(0 0 0 / 0.65); }
+  .fv .fvc-tabs button:hover .fvc-tabs__n { background: var(--b-corn); box-shadow: var(--b-corn-sh); }
+  .fv .fvc-tabs.fvk button:not(.is-on):hover { color: var(--cloud); }
+}
+.fv .fvc-comment { background: var(--b-raise); box-shadow: var(--b-raise-sh), 0 18px 40px -16px rgb(0 0 0 / 0.8), 0 2px 4px rgb(0 0 0 / 0.4); -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* ---- See it on your body: the slider, a pressed channel with a raised
+   cornflower fill up to her angle and a raised snow knob ---- */
+.fv .fvc-slider {
+  height: 10px;
+  margin: 7px 0;
+  border-radius: 5px;
+  background: var(--b-corn) 0 0 / var(--v) 100% no-repeat, var(--b-track);
+  box-shadow: var(--b-press);
+}
+.fv .fvc-slider::-webkit-slider-thumb { width: 22px; height: 22px; border-radius: 50%; background: #f0f4fe; box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgb(19 21 35 / 0.14), 0 1px 2px rgb(0 0 0 / 0.5), 0 6px 14px -6px rgb(0 0 0 / 0.75); transition: transform 0.2s var(--spring); }
+.fv .fvc-slider::-moz-range-thumb { width: 22px; height: 22px; border: 0; border-radius: 50%; background: #f0f4fe; box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgb(19 21 35 / 0.14), 0 1px 2px rgb(0 0 0 / 0.5), 0 6px 14px -6px rgb(0 0 0 / 0.75); }
+.fv .fvc-slider:active::-webkit-slider-thumb { box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgb(19 21 35 / 0.14), 0 1px 2px rgb(0 0 0 / 0.5), 0 6px 14px -6px rgb(0 0 0 / 0.75); transform: scale(0.94); }
+
+/* small tablet: the notes two to a row, so no sliding knob: the chosen tab is the knob */
+@media (min-width: 641px) and (max-width: 899px) {
+  .fvc-tabs.fvk::before { display: none; }
+  .fvc-tabs.fvk button.is-on { border-radius: 11px; background: var(--b-knob) !important; box-shadow: var(--b-knob-sh) !important; }
+}
