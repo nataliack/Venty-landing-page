@@ -243,7 +243,7 @@ function Vote() {
     <section data-up className="fo-card fo-vote" aria-labelledby="fo-vote-title">
       <div className="fo-vote__label">
         {/* its bars run on up to the label's top edge */}
-        <QutMark reach={14} />
+        <QutMark reach={8} />
         <p>
           QUT Design Festival
           <span>People&apos;s Choice Award</span>
