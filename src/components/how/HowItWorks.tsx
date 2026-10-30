@@ -34,10 +34,12 @@ import "./how.css";
    own snapping, on only within the steps.
 
    The hand-off (docs/motion.md): after the last step the scene holds for
-   1.3 more screens. Inside it the layers part at their own speeds: the
-   meadow, the cards and the objects fly up and away, and the valley rises
-   more slowly, so its peaks come up into view; a third of a screen in,
-   Features (night) starts rising over it all 1:1 with its dithered edge.
+   3.4 more screens, so the valley is there to be seen. Inside it the
+   layers part: the meadow, the cards and the objects fly up and away, and
+   the valley rises slowly over the first 2.2 screens, easing to a stop
+   with its peaks in view (no further than before, so the photo never runs
+   out); it then holds, and over the last screen Features (night) rises
+   over it all 1:1 with its dithered edge.
 
    The meadow's frames only start downloading as the section comes near. */
 
@@ -101,9 +103,12 @@ const OBJECTS = [
 /* the valley behind (1792 x 1943, its sky cleared to the page's own pale) */
 const VALLEY = { ratio: 1943 / 1792 };
 /* the hand-off: how many screens it holds (Features rises over the last of
-   them), and how far each layer rises for each px scrolled */
-const HAND = 1.3;
-const FLY = { fore: 0.9, valley: 0.55 };
+   them); how far the meadow, cards and objects rise for each px scrolled;
+   how far the valley rises in all (in screens) and over how many screens,
+   easing out to a stop */
+const HAND = 3.4;
+const FLY = { fore: 0.9 };
+const VALLEY_RISE = { by: 0.715, over: 2.2, grow: 0.5 };
 
 /* the cards' glass, edges and words: built once and never rendered again
    (the turn moves them directly), so a change of step only re-renders the
@@ -491,7 +496,15 @@ export function HowItWorks() {
       if (d !== flown) {
         flown = d;
         fore.style.translate = `0 ${-d * FLY.fore}px`;
-        valley.style.translate = `-50% ${-d * FLY.valley}px`;
+        const r = Math.min(1, d / (VALLEY_RISE.over * box.clientHeight));
+        // never so far that the valley's foot comes up above the screen's (on a
+        // phone it is shorter: there the rise stops with its foot just below)
+        const most = Math.max(0, Math.min(VALLEY_RISE.by * box.clientHeight, valley.offsetTop + valley.offsetHeight - 1.1 * box.clientHeight));
+        const e = 1 - (1 - r) * (1 - r);
+        valley.style.translate = `-50% ${-Math.round(most * e)}px`;
+        // a phone's valley is shorter than its screen: it also grows a little
+        // from its foot as it rises, a slow push in until its mountains fill it
+        valley.style.scale = box.clientWidth < 700 ? `${1 + VALLEY_RISE.grow * e}` : "";
       }
       if (y < top - box.clientHeight || y > top + run + box.clientHeight) return; // well away: nothing to turn
       const p = Math.min(1, Math.max(0, (y - top) / Math.max(1, run)));

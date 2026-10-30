@@ -41,11 +41,12 @@
 
 /* ---- the held scene ------------------------------------------------------ */
 /* the stretch the scene holds: about 80% of a screen's scroll per step (half
-   a screen on phones, where a thumb flick should be enough), and 1.3 more
-   screens at the end for the hand-off, Features rising over the last of
-   them (its margin-top: -100svh). HAND in HowItWorks.tsx matches */
-.hw-pin { position: relative; height: 470svh; }
-@media (max-width: 699px) { .hw-pin { height: 380svh; } }
+   a screen on phones, where a thumb flick should be enough), and 3.4 more
+   screens at the end for the hand-off, the valley held to be seen and
+   Features rising over the last of them (its margin-top: -100svh). HAND in
+   HowItWorks.tsx matches */
+.hw-pin { position: relative; height: 680svh; }
+@media (max-width: 699px) { .hw-pin { height: 590svh; } }
 .hw-snap { position: absolute; left: 0; width: 1px; height: 1px; scroll-snap-align: start; pointer-events: none; }
 .hw-stage {
   position: sticky;
@@ -68,6 +69,8 @@
   pointer-events: none;
 }
 .hw-valley img { display: block; width: 100%; height: 100%; max-width: none; }
+/* (phones: in the hand-off it grows from its foot, see VALLEY_RISE) */
+.hw-valley { transform-origin: 50% 100%; }
 .hw-valley::before,
 .hw-valley::after { content: ""; position: absolute; left: 0; right: 0; }
 .hw-valley::before { top: 0; height: 24svh; background: linear-gradient(var(--cloud), rgb(238 242 253 / 0)); }
