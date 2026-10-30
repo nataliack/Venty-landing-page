@@ -328,8 +328,31 @@
 .fo-count b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: 26px; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--ink); }
 .fo-count small { font-size: 11px; letter-spacing: -0.01em; color: var(--steel); }
 .fo-vote__when { margin-top: 12px; font-size: 13px; letter-spacing: -0.01em; color: var(--navy); text-align: left; }
-.fo-vote__go { display: flex; gap: 8px; margin-top: auto; padding-top: 16px; list-style: none; }
+/* the links, and in their place, when one with no page yet is tapped
+   (VoteSoon.tsx, tablet and up), "Voting links coming soon": the links rise
+   out of the area and the words rise in, then they swap back. The area clips,
+   with room round it for the buttons' shadows. Leaving: EASE.in, quick;
+   arriving: EASE.out, base, a beat after. */
+.fo-vote__go-wrap { position: relative; margin: auto -16px -22px; padding: 16px 16px 22px; overflow: clip; }
+.fo-vote__go { display: flex; gap: 8px; list-style: none; transition: translate var(--dur-base) var(--ease-out-expo) 0.12s; }
 .fo-vote__go li { flex: 1; }
+.fo-vote__go-wrap[data-soon] .fo-vote__go { translate: 0 calc(-100% - 20px); transition: translate var(--dur-quick) var(--ease-in); }
+.fo-vote__soon {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 22px;
+  display: grid;
+  place-items: center;
+  height: 44px;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  pointer-events: none;
+  translate: 0 calc(100% + 24px);
+  transition: translate var(--dur-quick) var(--ease-in);
+}
+.fo-vote__go-wrap[data-soon] .fo-vote__soon { translate: 0 0; transition: translate var(--dur-base) var(--ease-out-expo) 0.12s; }
 /* the vote links: the app's primary button (a periwinkle core, light
    pooling at the edges, a fine dot grid) */
 .fo-go {

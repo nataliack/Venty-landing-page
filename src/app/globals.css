@@ -942,6 +942,145 @@ html[data-announce="off"] .announce {
   outline-offset: 2px;
 }
 
+/* A vote link with no page yet, tapped (VoteSoon.tsx), tablet and up: the
+   links rise out of their area and "Voting links coming soon" rises in, then
+   they swap back. The area clips, with room for the underline and the focus
+   ring. Leaving: EASE.in, quick; arriving: EASE.out, base, a beat after. */
+.vote__go {
+  position: relative;
+  align-self: stretch;
+  margin: -6px -8px;
+  padding: 6px 8px;
+  overflow: clip;
+}
+.vote__links { transition: translate var(--dur-base) var(--ease-out-expo) 0.12s; }
+.vote__go[data-soon] .vote__links {
+  translate: 0 calc(-100% - 8px);
+  transition: translate var(--dur-quick) var(--ease-in);
+}
+.vote__soon {
+  position: absolute;
+  inset: 6px 8px;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  line-height: 1.15;
+  color: var(--color-cloud);
+  pointer-events: none;
+  translate: 0 calc(100% + 8px);
+  transition: translate var(--dur-quick) var(--ease-in);
+}
+.vote__go[data-soon] .vote__soon {
+  translate: 0 0;
+  transition: translate var(--dur-base) var(--ease-out-expo) 0.12s;
+}
+
+/* The same on phones is a bottom sheet, built like the app's (Sheet in
+   app.venty.au's ui.tsx): the card colour, its surface drawn in SVG (45px
+   top corners, the handle in a cut in the top edge, a light rim along the
+   top), over a dark shade. It rises with EASE.out and drops with EASE.in. */
+.vsheet {
+  --vsheet-card: #1b1c26;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  visibility: hidden;
+  transition: visibility 0s linear var(--dur-quick);
+}
+.vsheet[data-open="true"] {
+  visibility: visible;
+  transition: none;
+}
+.vsheet__shade {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.5);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  touch-action: none;
+  transition: opacity var(--dur-quick) var(--ease-in);
+}
+.vsheet[data-open="true"] .vsheet__shade {
+  opacity: 1;
+  transition: opacity var(--dur-base) var(--ease-out-expo);
+}
+.vsheet__body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  isolation: isolate;
+  padding: 34px 24px calc(24px + env(safe-area-inset-bottom));
+  font-family: var(--font-sans);
+  color: #fff;
+  touch-action: none;
+  translate: 0 110%;
+  transition: translate var(--dur-quick) var(--ease-in);
+}
+.vsheet[data-open="true"] .vsheet__body {
+  translate: 0 0;
+  transition: translate var(--dur-base) var(--ease-out-expo);
+}
+.vsheet__surface {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 -20px 40px rgb(0 0 0 / 0.55));
+}
+/* the handle pressed or dragged: the app's periwinkle with a glow */
+.vsheet__handle-on {
+  opacity: 0;
+  transition: opacity 0.25s;
+  filter: drop-shadow(0 0 4px rgb(104 126 245 / 0.85)) drop-shadow(0 1px 3px rgb(104 126 245 / 0.6));
+}
+.vsheet__handle-on.is-on { opacity: 1; }
+.vsheet__kicker { font-size: 13px; letter-spacing: -0.01em; color: var(--color-periwinkle); }
+.vsheet__title {
+  margin-top: 8px;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.vsheet__text {
+  margin-top: 8px;
+  font-size: 16px;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: rgb(255 255 255 / 0.65);
+  text-wrap: pretty;
+}
+/* Got it: the app's white secondary (.pill-white): snow, lit from the top,
+   a soft drop shadow; a press dips it */
+.vsheet__ok {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 56px;
+  margin-top: 24px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-ink);
+  background: #f0f4fe;
+  box-shadow:
+    inset 0 0 0 1px rgb(19 21 35 / 0.06),
+    inset 0 1px 0 #fff,
+    inset 0 -1px 0 rgb(19 21 35 / 0.1),
+    inset 0 0 12px 1px rgb(255 255 255 / 0.75),
+    0 1px 2px rgb(19 21 35 / 0.1),
+    0 6px 14px -6px rgb(19 21 35 / 0.22);
+  cursor: pointer;
+  transition: scale 0.35s var(--ease-spring);
+}
+.vsheet__ok:active { scale: 0.965; transition-duration: 0.12s; }
+.vsheet__ok:focus-visible { outline: 2px solid var(--color-cornflower); outline-offset: 3px; }
+
 /* Section nav label swap */
 .section-nav__label {
   animation: nav-label-in 0.5s var(--ease-out-expo) both;

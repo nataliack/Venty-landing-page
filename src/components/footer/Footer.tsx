@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { DitherEdge } from "../DitherEdge";
 import { PrimaryButton } from "../PrimaryButton";
 import { QutMark } from "../VoteTab";
+import { SOON_TEXT, useVoteSoon } from "../VoteSoon";
 import { scrollToElement } from "../SmoothScroll";
 import { APP_URL, CTA_LABEL, FESTIVAL_AT, MAKER_URL, SOCIAL_LINKS, VOTE_LINKS } from "@/lib/site";
 import { FOOTER_IN, FOOTER_IN_NARROW, FOOTER_OUT, FOOTER_OUT_NARROW, MARK, MARK_BOUNDS, MARK_CENTRE, flightRoute, type Place } from "@/lib/markFlight";
@@ -231,6 +232,7 @@ function Maker() {
    per discipline (the app's primary button) */
 function Vote() {
   const left = useCountdown();
+  const vote = useVoteSoon();
   const parts: [string, number | undefined][] = [
     ["days", left?.d],
     ["hours", left?.h],
@@ -264,24 +266,32 @@ function Vote() {
           <p className="fo-vote__when">Wednesday 11 November, 6pm · Brisbane</p>
         </>
       )}
-      <ul className="fo-vote__go">
-        {VOTE_LINKS.map((l) => (
-          <li key={l.label}>
-            {l.href ? (
-              <a href={l.href} target="_blank" rel="noopener" className="fo-go">
-                Vote · {l.label}
-                <Arrow />
-              </a>
-            ) : (
-              // no voting page yet: looks like the link, goes nowhere
-              <a role="link" aria-disabled="true" tabIndex={0} title="Link coming soon" className="fo-go">
-                Vote · {l.label}
-                <Arrow />
-              </a>
-            )}
-          </li>
-        ))}
-      </ul>
+      {/* the links, or (a pending one tapped) the message rising in their place */}
+      <div className="fo-vote__go-wrap" data-soon={vote.soon || undefined}>
+        <ul className="fo-vote__go">
+          {VOTE_LINKS.map((l) => (
+            <li key={l.label}>
+              {l.href ? (
+                <a href={l.href} target="_blank" rel="noopener" className="fo-go">
+                  Vote · {l.label}
+                  <Arrow />
+                </a>
+              ) : (
+                // no voting page yet: looks like the link; tapped, it says so (VoteSoon)
+                <a role="link" aria-disabled="true" tabIndex={0} className="fo-go" {...vote.pending}>
+                  Vote · {l.label}
+                  <Arrow />
+                </a>
+              )}
+            </li>
+          ))}
+        </ul>
+        <p className="fo-vote__soon" aria-hidden="true">
+          {SOON_TEXT}
+        </p>
+        {vote.status}
+      </div>
+      {vote.sheet}
     </section>
   );
 }

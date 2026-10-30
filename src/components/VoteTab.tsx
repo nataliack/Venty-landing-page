@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { VOTE_LINKS } from "@/lib/site";
 import { DUR, EASE } from "@/lib/motion";
+import { useVoteSoon } from "./VoteSoon";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -114,6 +115,7 @@ export function VoteTab() {
   const ref = useRef<HTMLElement>(null);
   const tabRef = useRef<HTMLButtonElement>(null);
   const panelId = useId();
+  const vote = useVoteSoon();
 
   // close on a click elsewhere or Escape
   useEffect(() => {
@@ -311,37 +313,47 @@ export function VoteTab() {
             <span className="vote__title">QUT Design Festival</span>
             <span className="vote__sub">People&apos;s Choice Award</span>
           </p>
-          <ul className="vote__links">
-            {VOTE_LINKS.map((l) => (
-              <li key={l.label}>
-                {l.href ? (
-                  <a
-                    className="vote__link"
-                    href={l.href}
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <span className="vote__text">{l.label}</span>
-                    <Arrow />
-                  </a>
-                ) : (
-                  // no voting page yet: looks and moves like the link, goes nowhere
-                  <a
-                    className="vote__link"
-                    role="link"
-                    aria-disabled="true"
-                    tabIndex={0}
-                    title="Link coming soon"
-                  >
-                    <span className="vote__text">{l.label}</span>
-                    <Arrow />
-                  </a>
-                )}
-              </li>
-            ))}
-          </ul>
+          {/* the links, or (a pending one tapped) the message rising in their place */}
+          <div className="vote__go" data-soon={vote.soon || undefined}>
+            <ul className="vote__links">
+              {VOTE_LINKS.map((l) => (
+                <li key={l.label}>
+                  {l.href ? (
+                    <a
+                      className="vote__link"
+                      href={l.href}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <span className="vote__text">{l.label}</span>
+                      <Arrow />
+                    </a>
+                  ) : (
+                    // no voting page yet: looks and moves like the link; tapped, it says so (VoteSoon)
+                    <a
+                      className="vote__link"
+                      role="link"
+                      aria-disabled="true"
+                      tabIndex={0}
+                      {...vote.pending}
+                    >
+                      <span className="vote__text">{l.label}</span>
+                      <Arrow />
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+            <p className="vote__soon" aria-hidden="true">
+              Voting links
+              <br />
+              coming soon
+            </p>
+            {vote.status}
+          </div>
         </div>
       </div>
+      {vote.sheet}
     </aside>
   );
 }

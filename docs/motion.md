@@ -73,6 +73,8 @@ CSS uses to start the small pieces inside it (ink drawing, chat bubbles).
 | Vote for Venty tab | Pulls out 6px. The same swirl as the button. The QUT bars pull up and drop again (a replay always finishes; a hover during one is ignored) |
 | Section menu | Glass brightens, edge lightens, label to cloud, the chevrons ease apart. Press dips to 0.97 |
 | Links in panels | An underline draws in from the left; the arrow flies out right and a second follows in |
+| A vote link with no page yet, tapped (tablet and up) | The links rise out of their area (`EASE.in`, `--dur-quick`) and "Voting links coming soon" rises in behind the same clip (`EASE.out`, `--dur-base`, 0.12s after); after 2.6s they swap back the same way. The tab's panel and the footer card (`VoteSoon.tsx`) |
+| The same on a phone | A bottom sheet built like the app's (`Sheet` in app.venty.au): it rises with `EASE.out` (`--dur-base`) over a shade that fades in, and drops with `EASE.in` (`--dur-quick`). It follows a drag down and closes past 90px; its handle turns periwinkle while held. Got it presses like a pill (0.965, `--ease-spring`) |
 
 Every hover is gated with `@media (hover: hover)` so nothing sticks after a
 tap on a phone, and every animation respects `prefers-reduced-motion`.
