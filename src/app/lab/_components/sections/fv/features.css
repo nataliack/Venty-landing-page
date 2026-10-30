@@ -1364,3 +1364,83 @@
 .fvbd-card[data-pos="1"], .fvbd-card[data-pos="2"] { filter: none; }
 .fvbd-card::after { content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none; background: rgb(11 12 21 / 0.42); opacity: 0; transition: opacity 0.6s ease; }
 .fvbd-card[data-pos="1"]::after, .fvbd-card[data-pos="2"]::after { opacity: 1; }
+
+
+/* ---- the sides, anchored to the screen ----
+   The fade used to start at the grid's own edge, which is off the screen on
+   most laptops: what showed was its inner part, too short and not fully
+   dark at the edge, so it read as a shadow over the cards. Now it starts at
+   the screen's edge, fully night there and over any empty page beside the
+   grid, then fades out, long and eased (smoothstep), right up to where the
+   cards' words begin (never over them). --g: where the grid starts, from
+   the screen's edge (negative when it bleeds past it); --w: where the edge
+   cards' words start. */
+@media (min-width: 1100px) {
+  .fv .fvb-grid {
+    --g: calc(max(0px, (100vw - 1440px) / 2) + var(--fv-gutter, 16px) - var(--bleed));
+    --w: calc(var(--g) + var(--bleed) + 18px);
+    --s: max(var(--g), 4px);
+    --f: calc(var(--w) - var(--s));
+  }
+  .fv .fvb-grid::before,
+  .fv .fvb-grid::after {
+    width: var(--w);
+    background: linear-gradient(90deg,
+      var(--night) var(--s),
+      rgb(11 12 21 / 0.97) calc(var(--s) + var(--f) * 0.13),
+      rgb(11 12 21 / 0.88) calc(var(--s) + var(--f) * 0.27),
+      rgb(11 12 21 / 0.72) calc(var(--s) + var(--f) * 0.41),
+      rgb(11 12 21 / 0.52) calc(var(--s) + var(--f) * 0.55),
+      rgb(11 12 21 / 0.31) calc(var(--s) + var(--f) * 0.69),
+      rgb(11 12 21 / 0.13) calc(var(--s) + var(--f) * 0.83),
+      rgb(11 12 21 / 0.03) calc(var(--s) + var(--f) * 0.94),
+      transparent var(--w));
+  }
+  .fv .fvb-grid::before { left: calc(var(--g) * -1); }
+  .fv .fvb-grid::after { right: calc(var(--g) * -1); }
+}
+
+/* ---- the Pattern library: the phones never reach the card's rim (they
+   peeked through the 1px line along its foot and sides) ---- */
+.fvb-card--lib .ftp-stage { clip-path: inset(0 1px 1px 1px round 0 0 21px 21px); }
+
+/* ---- tablet: Mark up on the left with Refine and the Body library beside
+   it; the Pattern library across; See it on your body and Arrange and print
+   side by side, each laid out as on a phone (stacked) to suit its half ---- */
+@media (min-width: 641px) and (max-width: 1099px) {
+  .fv .fvb-grid { grid-auto-flow: row; grid-template-rows: 300px 300px 340px 440px; grid-auto-rows: auto; }
+  .fv .fvb-cell.fvb-card--mark { grid-column: 1 / span 3; grid-row: 1 / span 2; }
+  .fv .fvb-cell.fvb-card--refine { grid-column: 4 / span 3; grid-row: 1; }
+  .fv .fvb-cell.fvb-card--bodies { grid-column: 4 / span 3; grid-row: 2; }
+  .fv .fvb-cell.fvb-card--lib { grid-column: 1 / -1; grid-row: 3; }
+  .fv .fvb-cell.fvb-card--body { grid-column: 1 / span 3; grid-row: 4; height: auto; }
+  .fv .fvb-cell.fvb-card--print { grid-column: 4 / span 3; grid-row: 4; }
+  /* her: the square above, the panel under it, the degrees left out */
+  .fv .fvc-turn { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  .fv .fvc-turn__stage { justify-self: center; max-width: 100%; }
+  .fv .fvc-turn__deg { display: none; }
+  /* the sheet: its own shape on top, the controls under it */
+  .fvb-card--print .fvb-vis { position: relative; flex: 1; }
+  .fvc-arrange { position: absolute; inset: 0; grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; }
+  .fvc-arrange__canvas { padding: 8px; }
+  .fvc-arrange__panel { display: grid; grid-template-columns: auto 1fr; gap: 8px; }
+  .fvc-arrange__panel .fvc-seg, .fvc-arrange__panel > .fvc-ghost { grid-column: 1 / -1; }
+  .fvc-arrange__panel > .fvc-ghost { margin: 0; height: 38px; }
+  .fvc-count { padding: 8px 12px; }
+  /* the notes' tabs: four fit across the half again */
+  .fvc-tabs.fvk::before { display: block; }
+  .fvc-tabs { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .fvc-tabs.fvk button.is-on { background: transparent !important; box-shadow: none !important; }
+  .fv .fvc-tabs button { gap: 5px; padding: 9px 2px; font-size: 12px; }
+  .fv .fvc-tabs__n { width: 20px; height: 20px; font-size: 10.5px; }
+}
+@media (min-width: 641px) and (max-width: 1099px) {
+  /* the sheet held to its own box (as a grid item its drawing took its height from its width and ran under the controls) */
+  .fvc-arrange__canvas { position: relative; display: block; }
+  .fvc-arrange__canvas svg { position: absolute; inset: 8px; width: calc(100% - 16px); height: calc(100% - 16px); }
+}
+/* the fade over the library card's foot runs to its very bottom (it stopped
+   a pixel short, so the phones showed through the last row as a thin line),
+   and draws the card's own bottom rim (its fine light line over a dark one)
+   itself */
+.fvb-card--lib .fvb-vis::after { bottom: 0; border-radius: 0 0 22px 22px; box-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.07), inset 0 -1px 0 rgb(0 0 0 / 0.35); }
