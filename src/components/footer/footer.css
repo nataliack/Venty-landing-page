@@ -276,8 +276,9 @@
 .fo-made__photo::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 3px 6px rgb(24 30 70 / 0.35), inset 0 0 0 1px rgb(24 30 70 / 0.12); }
 .fo-made__who { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .fo-made__name { font-size: 28px; font-weight: 400; line-height: 1; letter-spacing: -0.045em; }
+/* the second word in the same type as the first (no serif here) */
 .fo-made__name em,
-.fo-vote__title em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; }
+.fo-vote__title em { font-style: normal; }
 .fo-made__rows { margin: 18px 0 18px; padding: 2px 14px; }
 .fo-made__rows div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; font-size: 14px; letter-spacing: -0.015em; }
 .fo-made__rows div + div { border-top: 1px solid rgb(24 30 70 / 0.08); }
@@ -285,18 +286,21 @@
 .fo-made__rows dd { margin: 0; text-align: right; }
 
 /* Vote for Venty: the award on a label pressed into the card */
+/* centred in the card; the QUT mark sits flush with the label's top edge
+   (its bars come down from it, no gap), with room to its left */
 .fo-vote__label {
   display: inline-flex;
-  align-self: flex-start;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 14px 6px 6px;
+  align-self: center;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 0 16px 0 12px;
+  overflow: hidden;
   border-radius: 14px;
   background: rgb(24 30 70 / 0.05);
   box-shadow: inset 0 2px 5px rgb(24 30 70 / 0.16), inset 0 1px 1.5px rgb(24 30 70 / 0.16), inset 0 -1px 0 rgb(255 255 255 / 0.9), 0 1px 0 rgb(255 255 255 / 0.9);
 }
-.fo-vote__label .vote__mark { width: 22px; height: auto; border-radius: 3px; }
-.fo-vote__label p { display: flex; flex-direction: column; gap: 2px; font-size: 11px; line-height: 13px; letter-spacing: -0.01em; text-transform: uppercase; color: var(--ink); }
+.fo-vote__label .vote__mark { flex: none; width: 22px; height: auto; border-radius: 0 0 3px 3px; }
+.fo-vote__label p { display: flex; flex-direction: column; gap: 2px; align-self: center; padding: 7px 0; font-size: 11px; line-height: 13px; letter-spacing: -0.01em; text-transform: uppercase; color: var(--ink); }
 .fo-vote__label p span { text-transform: none; color: var(--steel); }
 /* the QUT mark builds as it arrives: the bars grow down, left to right,
    then the square and the letters come in */
@@ -312,7 +316,7 @@
 .fo-vote [data-qut-bar]:nth-of-type(4) { transition-delay: 0.74s; }
 .fo-vote [data-square] { transition-delay: 0.8s; }
 .fo-vote [data-letter] { transition-delay: 0.95s; }
-.fo-vote__title { margin-top: 18px; font-weight: 400; font-size: clamp(2rem, 2.6vw, 2.5rem); line-height: 1; letter-spacing: -0.055em; text-align: left; }
+.fo-vote__title { margin-top: 18px; font-weight: 400; font-size: clamp(2rem, 2.6vw, 2.5rem); line-height: 1; letter-spacing: -0.055em; text-align: center; }
 /* the days to the festival, each number in a tile pressed into the card */
 .fo-count { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 16px; }
 .fo-count span {
@@ -327,16 +331,18 @@
 }
 .fo-count b { font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: 26px; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--ink); }
 .fo-count small { font-size: 11px; letter-spacing: -0.01em; color: var(--steel); }
-.fo-vote__when { margin-top: 12px; font-size: 13px; letter-spacing: -0.01em; color: var(--navy); text-align: left; }
+.fo-vote__when { margin-top: 12px; font-size: 13px; letter-spacing: -0.01em; color: var(--navy); text-align: center; }
 /* the links, and in their place, when one with no page yet is tapped
    (VoteSoon.tsx, tablet and up), "Voting links coming soon": the links rise
    out of the area and the words rise in, then they swap back. The area clips,
    with room round it for the buttons' shadows. Leaving: EASE.in, quick;
    arriving: EASE.out, base, a beat after. */
 .fo-vote__go-wrap { position: relative; margin: auto -16px -22px; padding: 16px 16px 22px; overflow: clip; }
-.fo-vote__go { display: flex; gap: 8px; list-style: none; transition: translate var(--dur-base) var(--ease-out-expo) 0.12s; }
+.fo-vote__go { display: flex; gap: 8px; list-style: none; }
 .fo-vote__go li { flex: 1; }
-.fo-vote__go-wrap[data-soon] .fo-vote__go { translate: 0 calc(-100% - 20px); transition: translate var(--dur-quick) var(--ease-in); }
+/* (far enough, and faded, that their glow leaves with them) */
+.fo-vote__go { transition: translate var(--dur-base) var(--ease-out-expo) 0.12s, opacity var(--dur-quick) var(--ease-out-expo) 0.12s; }
+.fo-vote__go-wrap[data-soon] .fo-vote__go { translate: 0 calc(-100% - 64px); opacity: 0; transition: translate var(--dur-quick) var(--ease-in), opacity var(--dur-quick) var(--ease-in); }
 .fo-vote__soon {
   position: absolute;
   left: 16px;

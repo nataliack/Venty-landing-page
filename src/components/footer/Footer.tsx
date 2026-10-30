@@ -35,7 +35,7 @@ const SECTIONS: L[] = [
   { label: "How it works", href: "#how" },
   { label: "Features", href: "#features" },
   { label: "What you can make", href: "#make" },
-  { label: "On the line", href: "#made" },
+  { label: "Made with Venty", href: "#made" },
   { label: "FAQ", href: "#faq" },
 ];
 
@@ -95,7 +95,7 @@ const ICONS: Record<(typeof SOCIAL_LINKS)[number]["icon"], React.ReactNode> = {
 
 function Socials() {
   return (
-    <ul data-up className="fo-social" aria-label="Natalia's socials">
+    <ul data-up className="fo-social" aria-label="My socials">
       {SOCIAL_LINKS.map((s) => (
         <li key={s.label}>
           {s.href ? (
@@ -242,7 +242,8 @@ function Vote() {
   return (
     <section data-up className="fo-card fo-vote" aria-labelledby="fo-vote-title">
       <div className="fo-vote__label">
-        <QutMark />
+        {/* its bars run on up to the label's top edge */}
+        <QutMark reach={14} />
         <p>
           QUT Design Festival
           <span>People&apos;s Choice Award</span>

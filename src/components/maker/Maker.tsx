@@ -101,13 +101,13 @@ const REACH: {
 type Side = "venty" | "natalia";
 const CARDS: Record<Side, { label: string; turn: string }> = {
   venty: {
-    label: "Natalia's Venty business card: Natalia Chamon, Founder, Venty",
+    label: "My Venty business card: Natalia Chamon, Founder, Venty",
     turn: "Turn the Venty card",
   },
   natalia: {
     label:
-      "Natalia's own business card: Natalia Chamon, UI/UX design and front-end",
-    turn: "Turn her card",
+      "My own business card: Natalia Chamon, UI/UX design and front-end",
+    turn: "Turn my card",
   },
 };
 
@@ -304,7 +304,7 @@ export function Maker() {
     <section
       ref={root}
       id="maker"
-      data-nav="The designer"
+      data-nav="About me"
       data-wing="spread"
       data-theme-zone="dark"
       data-theme-at="top 35%"
@@ -427,7 +427,7 @@ export function Maker() {
         </div>
 
         {/* turn either card over: the app's dark secondary in a track pressed into the page */}
-        <div className="mk-turns" role="group" aria-label="Her business cards">
+        <div className="mk-turns" role="group" aria-label="My business cards">
           {(["venty", "natalia"] as const).map((c) => (
             <button
               key={c}
@@ -479,7 +479,7 @@ export function Maker() {
             </div>
             <div className="mk-reach">
               <h3 data-up className="mk-reach__t">
-                Reach her
+                Reach me
               </h3>
               <ul data-up className="mk-reach__list">
                 {REACH.map((r) => (

@@ -19,7 +19,7 @@ gsap.registerPlugin(ScrollTrigger);
 
      Bars     cinematic focus bars slide in from the top and bottom as the
               scene starts, and leave as the film goes dark
-     Beat 1   Fig. 09 / The table: Paper on top. Cloth underneath.
+     Beat 1   Fig. 09 / Paper to cloth: Paper on top. Cloth underneath.
      Beat 2   Printed at 1:1: true size, pinned, drawn for one body
      Beat 3   One body. One pattern. Yours.
      Final    The dress in your head. On the body you have. And the button,
@@ -169,10 +169,10 @@ export function Closing() {
   }, []);
 
   return (
-    <section ref={root} id="table" data-nav="The table" data-wing="close" data-theme-zone="dark" className="cl" aria-labelledby="cl-title">
+    <section ref={root} id="table" data-nav="Paper to cloth" data-wing="close" data-theme-zone="dark" className="cl" aria-labelledby="cl-title">
       <div className="cl-stage">
         <h2 id="cl-title" className="sr-only">
-          The table
+          Paper to cloth
         </h2>
 
         {/* the film: the first frame as a poster until the player has drawn */}
@@ -188,7 +188,7 @@ export function Closing() {
         <span className="cl-bar is-top" aria-hidden="true" />
         <span className="cl-bar is-bottom" aria-hidden="true" />
 
-        <Beat cls="is-1" k="Fig. 09 / The table" lines={["Paper on top.", "Cloth underneath."]} />
+        <Beat cls="is-1" k="Fig. 09 / Paper to cloth" lines={["Paper on top.", "Cloth underneath."]} />
         <Beat cls="is-2" k="Printed at 1:1" lines={["Printed at true size.", "Pinned to the cloth.", "Every line drawn for one body."]} />
         <Beat cls="is-3" lines={["One body.", "One pattern.", "Yours."]} />
 
@@ -211,7 +211,7 @@ export function Closing() {
         </div>
 
         <p className="cl-cap" aria-hidden="true">
-          <span>Venty / The table</span>
+          <span>Venty / Paper to cloth</span>
           <span data-count>001 / {TABLE.frames}</span>
         </p>
       </div>

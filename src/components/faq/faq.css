@@ -78,51 +78,97 @@
 .fq-a p { font-size: clamp(15px, 1.15vw, 17px); line-height: 1.55; letter-spacing: -0.01em; color: var(--navy); text-wrap: pretty; }
 .fq-body { max-width: 24ch; margin-top: clamp(14px, 1.6vw, 24px); text-wrap: balance; }
 
-/* ---- the questions ----------------------------------------------------------- */
-.fq-list { position: relative; }
-.fq-row { position: relative; padding: 0 0 0 clamp(28px, 3vw, 44px); }
+/* ---- the questions -----------------------------------------------------------
+   Built like the app (app.venty.au, globals.css: .pill-white, the pressed
+   tiles, .pill-primary), one light from the top: the questions on one snow
+   panel raised off the page; each number in a tile pressed into it; the
+   +/- a small raised button that turns to the app's primary (periwinkle, its
+   fine dot grid) when open; the answer in a well pressed into the panel. */
+.fq-list {
+  position: relative;
+  margin-left: clamp(20px, 2.4vw, 36px);
+  padding: 6px 0;
+  border-radius: 28px;
+  background: #f0f4fe;
+  box-shadow:
+    inset 0 0 0 1px rgb(19 21 35 / 0.06),
+    inset 0 1px 0 #fff,
+    inset 0 -1px 0 rgb(19 21 35 / 0.1),
+    inset 0 0 18px 2px rgb(255 255 255 / 0.75),
+    0 1px 2px rgb(19 21 35 / 0.1),
+    0 6px 14px -6px rgb(19 21 35 / 0.22),
+    0 32px 60px -28px rgb(56 76 101 / 0.55);
+}
+.fq-row { position: relative; padding: 0 clamp(14px, 1.8vw, 24px); }
 .fq-q {
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) auto;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
   align-items: center;
   gap: 16px;
   width: 100%;
-  padding: 32px clamp(20px, 2.4vw, 32px) 32px 0;
+  padding: 22px 0;
   text-align: left;
   cursor: pointer;
 }
-/* the number: the page's eyebrow type */
-.fq-n { font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--steel); }
+/* the number, in a tile pressed into the panel (a shadow inside along the
+   top, a white lip along the bottom) */
+.fq-n {
+  display: grid;
+  place-items: center;
+  height: 32px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--steel);
+  background: rgb(24 30 70 / 0.05);
+  box-shadow: inset 0 3px 7px rgb(24 30 70 / 0.16), inset 0 1px 1.5px rgb(24 30 70 / 0.14), inset 0 -1px 0 rgb(255 255 255 / 0.9), 0 1px 0 rgb(255 255 255 / 0.7);
+}
 /* the question: the body's navy, softer than ink */
 .fq-t { font-size: clamp(17px, 1.4vw, 20px); font-weight: 500; line-height: 1.25; letter-spacing: -0.025em; color: var(--navy); text-wrap: balance; }
-/* the button: a small rounded square, a plus that turns to a minus */
+/* the button: raised out of the panel (the app's white secondary, round),
+   a plus that turns to a minus; open, the app's primary */
 .fq-btn {
   position: relative;
   width: 36px;
   height: 36px;
-  border-radius: 11px;
-  background: rgb(255 255 255 / 0.75);
-  box-shadow: inset 0 0 0 1px rgb(18 21 36 / 0.1), 0 2px 6px -3px rgb(56 76 101 / 0.25);
-  transition: background-color 0.35s ease;
+  border-radius: 999px;
+  background-color: #f0f4fe;
+  box-shadow: inset 0 0 0 1px rgb(19 21 35 / 0.06), inset 0 1px 0 #fff, inset 0 -1px 0 rgb(19 21 35 / 0.1), inset 0 0 12px 1px rgb(255 255 255 / 0.75), 0 1px 2px rgb(19 21 35 / 0.1), 0 6px 14px -6px rgb(19 21 35 / 0.22);
+  transition: background-color 0.35s ease, box-shadow 0.35s ease, scale 0.35s var(--ease-spring);
 }
 .fq-btn::before,
 .fq-btn::after { content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 1.6px; border-radius: 1px; background: var(--ink); translate: -50% -50%; transition: rotate 0.5s var(--expo), background-color 0.35s ease; }
 .fq-btn::after { rotate: 90deg; }
-.fq-row.is-open .fq-btn { background: var(--deep); }
+.fq-row.is-open .fq-btn {
+  background-color: #687ef5;
+  background-image: radial-gradient(rgb(255 255 255 / 0.16) 0.8px, transparent 1.1px), linear-gradient(180deg, #7387f6, #687ef5 55%, #6479f2);
+  background-size: 5px 5px, 100% 100%;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3), inset 0 1px 0 rgb(255 255 255 / 0.6), inset 0 0 12px 2px rgb(206 214 255 / 0.55), 0 6px 16px -6px rgb(104 126 245 / 0.6);
+}
 .fq-row.is-open .fq-btn::before,
 .fq-row.is-open .fq-btn::after { background: #fff; }
 .fq-row.is-open .fq-btn::after { rotate: 0deg; }
-@media (hover: hover) { .fq-q:hover .fq-btn { background: #fff; } .fq-row.is-open .fq-q:hover .fq-btn { background: var(--deep); } }
-.fq-q:focus-visible { outline: 2px solid var(--deep); outline-offset: 2px; border-radius: 8px; }
+@media (hover: hover) { .fq-q:hover .fq-btn { filter: brightness(1.03); } .fq-q:hover .fq-t { color: var(--ink); } }
+.fq-q:active .fq-btn { scale: 0.92; transition-duration: 0.12s; }
+.fq-q:focus-visible { outline: 2px solid var(--deep); outline-offset: 2px; border-radius: 12px; }
 .fq-a { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.6s var(--expo); }
 .fq-row.is-open .fq-a { grid-template-rows: 1fr; }
 .fq-a__in { min-height: 0; overflow: hidden; }
-.fq-a p { max-width: 54ch; padding: 0 clamp(20px, 2.4vw, 32px) 34px 56px; }
-/* the line under each question, across the column */
+/* the answer, in a well pressed into the panel, under the question */
+.fq-a p {
+  margin: 0 0 22px 60px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: rgb(24 30 70 / 0.05);
+  box-shadow: inset 0 3px 7px rgb(24 30 70 / 0.15), inset 0 1px 1.5px rgb(24 30 70 / 0.14), inset 0 -1px 0 rgb(255 255 255 / 0.9), 0 1px 0 rgb(255 255 255 / 0.7);
+}
+/* the line between questions, across the panel */
 .fq-line {
   position: absolute;
-  left: 0;
-  right: 0;
+  left: clamp(14px, 1.8vw, 24px);
+  right: clamp(14px, 1.8vw, 24px);
   bottom: 0;
   height: 1px;
   background: repeating-linear-gradient(90deg, var(--mark) 0 14px, transparent 14px 19px, var(--mark) 19px 21px, transparent 21px 26px);
@@ -134,6 +180,7 @@
   .fq-frame { grid-template-columns: 1fr; gap: 40px; }
   .fq-guide.is-l { display: none; }
   .fq-head { padding: 30px 0 0 28px; }
-  .fq-a p { padding-left: 20px; }
-  .fq-q { grid-template-columns: 34px minmax(0, 1fr) auto; padding: 26px 16px 26px 0; }
+  .fq-list { margin-left: 0; }
+  .fq-a p { margin-left: 0; }
+  .fq-q { grid-template-columns: 38px minmax(0, 1fr) auto; gap: 12px; padding: 18px 0; }
 }

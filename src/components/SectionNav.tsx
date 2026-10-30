@@ -18,10 +18,10 @@ const SECTIONS = [
   { id: "how", label: "How it works" },
   { id: "features", label: "Features" },
   { id: "make", label: "What you can make" },
-  ...(MAKES.length ? [{ id: "made", label: "On the line" }] : []),
+  ...(MAKES.length ? [{ id: "made", label: "Made with Venty" }] : []),
   { id: "faq", label: "FAQ" },
-  { id: "maker", label: "The designer" },
-  { id: "table", label: "The table" },
+  { id: "maker", label: "About me" },
+  { id: "table", label: "Paper to cloth" },
 ];
 
 export function SectionNav() {

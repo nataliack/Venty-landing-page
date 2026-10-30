@@ -209,6 +209,8 @@ export function MadeWith() {
     });
     ro.observe(ln);
     ro.observe(hd);
+    // the cards size with the screen's height too (made.css), which need not change the line's width
+    if (cards[0]) ro.observe(cards[0]);
     return () => {
       io.disconnect();
       ro.disconnect();
@@ -224,7 +226,7 @@ export function MadeWith() {
     <section
       ref={root}
       id="made"
-      data-nav="On the line"
+      data-nav="Made with Venty"
       data-wing="story"
       data-theme-zone="light"
       data-theme-at="top 35%"
@@ -238,7 +240,7 @@ export function MadeWith() {
           <p className="mw-eyebrow">
             <span className="line-mask inline-block">
               <span data-rise className="inline-block">
-                On the line
+                Made with Venty
               </span>
             </span>
           </p>
