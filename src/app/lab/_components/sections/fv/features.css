@@ -893,3 +893,94 @@
   .fvc-tabs.fvk::before { display: none; }
   .fvc-tabs.fvk button.is-on { border-radius: 11px; background: var(--b-knob) !important; box-shadow: var(--b-knob-sh) !important; }
 }
+
+
+/* ---- See it on your body: her film, a little bigger, its mask wider ----
+   Her frames are square (720 x 720, the lit backdrop right across them).
+   The mask used to be a circle fading from a quarter of the way out, which
+   cut her arms and left the room either side of her empty; now an oval
+   reaching the frame's left and right edges, fading only at the very edges.
+   The first frame (an <img>) sits under the canvas until the film draws
+   its own; the stage never selects text while you drag. */
+.fv .fvc-turn__stage { -webkit-user-select: none; user-select: none; }
+/* the backdrop carried on past the frame's sides: the frame's own colours
+   (sampled: rgb(76 85 118) in the light round her, rgb(38 47 72) further
+   out), as a wide oval behind it; the frame fades out just before its own
+   darker edge, the light goes on past it, and the room either side of her
+   is used */
+.fv .fvc-turn__glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  height: 130%;
+  aspect-ratio: 2.2;
+  translate: -50% -48%;
+  pointer-events: none;
+  background: radial-gradient(ellipse 50% 50% at 50% 46%, rgb(76 86 122) 0%, rgb(70 80 114 / 0.92) 22%, rgb(60 70 100 / 0.78) 40%, rgb(48 56 84 / 0.55) 58%, rgb(38 44 66 / 0.3) 75%, rgb(30 34 50 / 0.1) 90%, transparent 100%);
+}
+.fv .fvc-turn__stage .fvc-turn__film {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: auto;
+  height: 130%;
+  aspect-ratio: 1;
+  max-width: none;
+  translate: -50% -48%;
+  object-fit: cover;
+  user-select: none;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 46% 50% at 50% 46%, #000 54%, rgb(0 0 0 / 0.78) 68%, rgb(0 0 0 / 0.42) 81%, rgb(0 0 0 / 0.12) 92%, transparent 100%);
+  mask-image: radial-gradient(ellipse 46% 50% at 50% 46%, #000 54%, rgb(0 0 0 / 0.78) 68%, rgb(0 0 0 / 0.42) 81%, rgb(0 0 0 / 0.12) 92%, transparent 100%);
+}
+
+/* ---- Pattern library: the phones fade out at the foot through a mask
+   (they used to sink under a dark wash, which left a hard edge where it
+   started on the left). The stage reaches 140px above the card, so the
+   front phone can still rise out of it on hover; its contents are moved
+   down by as much, so nothing shifts. ---- */
+.fvb-card--lib .ftp-stage {
+  top: -140px;
+  clip-path: inset(0 0 0 0 round 0 0 22px 22px);
+  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 180px), rgb(0 0 0 / 0.78) calc(100% - 146px), rgb(0 0 0 / 0.45) calc(100% - 116px), rgb(0 0 0 / 0.17) calc(100% - 88px), rgb(0 0 0 / 0.04) calc(100% - 66px), transparent calc(100% - 50px));
+  mask-image: linear-gradient(180deg, #000 calc(100% - 180px), rgb(0 0 0 / 0.78) calc(100% - 146px), rgb(0 0 0 / 0.45) calc(100% - 116px), rgb(0 0 0 / 0.17) calc(100% - 88px), rgb(0 0 0 / 0.04) calc(100% - 66px), transparent calc(100% - 50px));
+}
+.fvb-card--lib .ftp-stage::after { display: none; }
+.fvb-card--lib .ftp { top: 156px; }
+.fvb-card--lib .ftp.is-back { top: 180px; }
+.fvb-card--lib .ftp-dots { top: 140px; }
+.fvb-card--lib .ftp-glow { top: 160px; }
+
+/* ---- the sides: the cards at the page's edges blend right into the night.
+   Fully gone over the outer fifth of the margin, then a long, eased fade
+   (smoothstep) to full just before the cards' words start. ---- */
+@media (min-width: 1100px) {
+  .fv .fvb-grid {
+    --e: linear-gradient(90deg,
+      transparent calc(var(--bleed) * 0.2),
+      rgb(0 0 0 / 0.03) calc(var(--bleed) * 0.34),
+      rgb(0 0 0 / 0.12) calc(var(--bleed) * 0.49),
+      rgb(0 0 0 / 0.3) calc(var(--bleed) * 0.63),
+      rgb(0 0 0 / 0.52) calc(var(--bleed) * 0.77),
+      rgb(0 0 0 / 0.75) calc(var(--bleed) * 0.91),
+      rgb(0 0 0 / 0.93) calc(var(--bleed) * 1.06),
+      #000 calc(var(--bleed) * 1.15),
+      #000 calc(100% - var(--bleed) * 1.15),
+      rgb(0 0 0 / 0.93) calc(100% - var(--bleed) * 1.06),
+      rgb(0 0 0 / 0.75) calc(100% - var(--bleed) * 0.91),
+      rgb(0 0 0 / 0.52) calc(100% - var(--bleed) * 0.77),
+      rgb(0 0 0 / 0.3) calc(100% - var(--bleed) * 0.63),
+      rgb(0 0 0 / 0.12) calc(100% - var(--bleed) * 0.49),
+      rgb(0 0 0 / 0.03) calc(100% - var(--bleed) * 0.34),
+      transparent calc(100% - var(--bleed) * 0.2));
+    -webkit-mask-image: var(--e);
+    mask-image: var(--e);
+  }
+}
+/* phones: the card's words take more lines, so the phones are gone a little higher */
+@media (max-width: 640px) {
+  .fvb-card--lib .ftp-stage {
+    -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 225px), rgb(0 0 0 / 0.78) calc(100% - 190px), rgb(0 0 0 / 0.45) calc(100% - 160px), rgb(0 0 0 / 0.17) calc(100% - 132px), rgb(0 0 0 / 0.04) calc(100% - 110px), transparent calc(100% - 94px));
+    mask-image: linear-gradient(180deg, #000 calc(100% - 225px), rgb(0 0 0 / 0.78) calc(100% - 190px), rgb(0 0 0 / 0.45) calc(100% - 160px), rgb(0 0 0 / 0.17) calc(100% - 132px), rgb(0 0 0 / 0.04) calc(100% - 110px), transparent calc(100% - 94px));
+  }
+}

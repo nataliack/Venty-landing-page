@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type CSSProperties, type PointerEvent as RPointerEvent, type ReactNode } from "react";
 import { MARK, MARK_BOUNDS } from "@/lib/markFlight";
-import { TURN, turnPosition } from "@/lib/turnSequence";
+import { TURN, turn, turnPosition } from "@/lib/turnSequence";
 import { FRAME, OUTLINES, type Outline as OutlineData } from "./outlines";
 
 /* Features: the bento's cards, each a small working piece of the app
@@ -23,44 +23,49 @@ function Icon({ d, size = 18, weight = 1.6 }: { d: string; size?: number; weight
   );
 }
 
-/* ---- her turn, as plain frames: fetched once, when the card comes near ---- */
-const frameSrc = (i: number) => `/features/turn/frames/${String(i + 1).padStart(4, "0")}.webp`;
-const FIRST_FRAME = frameSrc(0);
-let warmed = false;
-function warmTurn() {
-  if (warmed) return;
-  warmed = true;
-  for (let i = 0; i < TURN.frames; i++) {
-    const im = new Image();
-    im.src = frameSrc(i);
-  }
-}
-/** an <img> of the turn; set(deg) shows her at that angle. The frames load
-    when `near` (the card) comes within a screen of view */
+/* ---- her turn: drawn on a canvas by the site's image-sequence engine
+   (src/lib/sequence.ts, as the hero and How it works), not by swapping an
+   <img>'s src: swapping showed nothing for a moment whenever a frame wasn't
+   decoded yet (a dark flicker as you dragged). The engine decodes the
+   frames ahead of where you're going, always shows the nearest one it has,
+   and blends between two for the in-betweens. ---- */
+const FIRST_FRAME = `/features/turn/frames/0001.webp?v=${TURN.version}`;
+const PIN_EVERY = 6; // frames kept decoded right round, so a fast drag always has her close by
+/** a canvas of the turn; set(deg) shows her at that angle. It starts (and
+    the frames load) when `near` (the card) comes within a screen of view */
 function useTurn(near: React.RefObject<HTMLElement | null>) {
-  const img = useRef<HTMLImageElement>(null);
-  const last = useRef(-1);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const player = useRef<ReturnType<typeof turn.createPlayer> | null>(null);
+  const at = useRef(0);
   useEffect(() => {
     const el = near.current;
-    if (!el) return;
+    const cv = canvas.current;
+    if (!el || !cv) return;
     const io = new IntersectionObserver(
       ([e]) => {
-        if (!e.isIntersecting) return;
-        warmTurn();
+        if (!e.isIntersecting || player.current) return;
+        const p = turn.createPlayer(cv, undefined, { alpha: true, fit: "contain", skim: true });
+        const pins: number[] = [];
+        for (let i = 0; i < TURN.frames; i += PIN_EVERY) pins.push(i);
+        p.pin(pins);
+        p.setPosition(turnPosition(at.current));
+        player.current = p;
         io.disconnect();
       },
       { rootMargin: "100% 0px" },
     );
     io.observe(el);
-    return () => io.disconnect();
+    return () => {
+      io.disconnect();
+      player.current?.destroy();
+      player.current = null;
+    };
   }, [near]);
   const set = (deg: number) => {
-    const f = Math.round(turnPosition(deg));
-    if (f === last.current || !img.current) return;
-    last.current = f;
-    img.current.src = frameSrc(f);
+    at.current = deg;
+    player.current?.setPosition(turnPosition(deg));
   };
-  return [img, set] as const;
+  return [canvas, set] as const;
 }
 
 const SEND = "M12 19V5M5.5 11.5L12 5l6.5 6.5";
@@ -523,13 +528,14 @@ export function RefineCard() {
    there until you do, and keeps out of the way while you are. */
 export function TurnCard() {
   const box = useRef<HTMLDivElement>(null);
-  const [img, set] = useTurn(box);
+  const [film, set] = useTurn(box);
   const [deg, setDeg] = useState(0);
   const [dragging, setDragging] = useState(false);
   const drag = useRef<{ x: number; d: number } | null>(null);
+  // the exact angle to the film (so it glides between frames), whole degrees to the readout
   const to = (d: number) => {
-    const v = Math.round(((d % 360) + 360) % 360);
-    setDeg(v);
+    const v = ((d % 360) + 360) % 360;
+    setDeg(Math.round(v) % 360);
     set(v);
   };
   const end = () => {
@@ -558,8 +564,12 @@ export function TurnCard() {
         onPointerUp={end}
         onPointerCancel={end}
       >
+        {/* the backdrop's light carried on either side of her frame, into the room beside her */}
+        <span className="fvc-turn__glow" aria-hidden="true" />
+        {/* her first frame until the film has its own, then the film over it */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img ref={img} src={FIRST_FRAME} alt="The model in the garment; drag or use the slider to turn her" draggable={false} loading="lazy" decoding="async" />
+        <img className="fvc-turn__film" src={FIRST_FRAME} alt="" draggable={false} loading="lazy" decoding="async" />
+        <canvas ref={film} className="fvc-turn__film" role="img" aria-label="The model in the garment; drag or use the slider to turn her" />
         <span className="fvc-turn__hint" aria-hidden="true">
           Drag to turn
         </span>
