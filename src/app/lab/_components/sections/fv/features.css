@@ -899,7 +899,7 @@
    Her frames are square (720 x 720), so her box is too: as tall as the
    card's room and as wide, the panel beside her taking all the rest of the
    width. The film fades into the card through a mask made from its own
-   backdrop (public/lab/features/turn-light-mask.png, from the light behind
+   backdrop (public/features/turn-light-mask.png, from the light behind
    her across all 133 frames: a sweep wider than tall, streaked across like
    the light is, solid where she stands, easing out well before the edges).
    The first frame (an <img>) sits under the canvas until the film draws its
@@ -922,8 +922,8 @@
   object-fit: cover;
   user-select: none;
   pointer-events: none;
-  -webkit-mask: url("/lab/features/turn-light-mask.png") 0 0 / 100% 100% no-repeat;
-  mask: url("/lab/features/turn-light-mask.png") 0 0 / 100% 100% no-repeat;
+  -webkit-mask: url("/features/turn-light-mask.png") 0 0 / 100% 100% no-repeat;
+  mask: url("/features/turn-light-mask.png") 0 0 / 100% 100% no-repeat;
 }
 .fv .fvc-turn__hint { z-index: 3; bottom: 10px; }
 /* the panel: room to breathe now; the readout a size up */

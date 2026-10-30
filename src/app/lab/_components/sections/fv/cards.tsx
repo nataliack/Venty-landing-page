@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState, type CSSProperties, type PointerEve
 import { MARK, MARK_BOUNDS } from "@/lib/markFlight";
 import { TURN, turnPosition } from "@/lib/turnSequence";
 import { createSequence } from "@/lib/sequence";
-import TURN_512 from "../../../../../../public/lab/features/turn-512/manifest.json";
+import TURN_512 from "../../../../../../public/features/turn-512/manifest.json";
 import { FRAME, OUTLINES, type Outline as OutlineData } from "./outlines";
 
 /* Features: the bento's cards, each a small working piece of the app
@@ -33,8 +33,8 @@ function Icon({ d, size = 18, weight = 1.6 }: { d: string; size?: number; weight
    has. ---- */
 // her frames at 512 (the 720s downscaled: her box is about 250px wide, so
 // still sharp on a retina screen, at half the download)
-const turn = createSequence(TURN_512, "/lab/features/turn-512", { opening: 8 });
-const FIRST_FRAME = `/lab/features/turn-512/frames/0001.webp?v=${TURN_512.version}`;
+const turn = createSequence(TURN_512, "/features/turn-512", { opening: 8 });
+const FIRST_FRAME = `/features/turn-512/frames/0001.webp?v=${TURN_512.version}`;
 const PIN_EVERY = 12; // frames kept decoded right round (each 2 MB in memory), so a fast drag always has her close by
 /** a canvas of the turn; set(deg) shows her at that angle. It starts (and
     the frames load) when `near` (the card) comes within a screen of view */
@@ -103,7 +103,7 @@ function Bird({ size = 14 }: { size?: number }) {
    first, then pushes in to the next; tap the same again, or the arrow, to
    pull out.
 
-   A detail with a clip (public/lab/features/clips/<clip>-in.mp4) pushes in
+   A detail with a clip (public/features/markup/clips/<clip>-in.mp4) pushes in
    with it: the clip starts on this exact still and ends on the macro;
    <clip>-out.mp4 is the same reversed at twice the speed (every other
    frame), so moving on to another note is quick, and <clip>-end.webp
@@ -168,7 +168,7 @@ const DETAILS = [
 const OUT_MS = 560; // the pull-out on the still, before pushing in to another detail
 const TYPE_AFTER_MS = 750; // on the still, the comment starts typing once the push-in has landed
 const TYPE_MS = 24; // a character
-const clipSrc = (clip: string, part: string) => `/lab/features/clips/${clip}-${part}`;
+const clipSrc = (clip: string, part: string) => `/features/markup/clips/${clip}-${part}`;
 
 /* One detail's clip: in and out, two <video>s stacked. Either way starts
    from wherever the other has got to, so a change of mind mid-way turns
@@ -420,7 +420,7 @@ export function MarkCard() {
           style={{ "--fvc-z": still ? a.z : 1, "--fvc-on": still ? 1 : 0, "--ax": a.at[0], "--ay": a.at[1], "--cy": 0.4, transformOrigin: `${a.at[0] * 100}% ${a.at[1] * 100}%` } as CSSProperties}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/lab/features/ref-tweed.webp" alt="The reference: a cream tweed suit, marked up" draggable={false} loading="lazy" decoding="async" />
+          <img src="/features/markup/ref-tweed.webp" alt="The reference: a cream tweed suit, marked up" draggable={false} loading="lazy" decoding="async" />
           <svg viewBox="0 0 1493 2000" aria-hidden="true">
             {DETAILS.map((x) => x.sel && <g key={x.n} className={`fvc-sel ${still && on === x.n ? "is-on" : ""}`}>{x.sel}</g>)}
           </svg>
@@ -733,9 +733,9 @@ export function TurnCard() {
    The bodies are the app's own starting ones (Mum and Tom) and Natalia.
    It goes round by itself while on screen, until you choose. */
 const BODY_SET = [
-  { id: "natalia", name: "Natalia", pic: "/lab/features/app/female-1.webp", h: 168, m: [92, 74, 98], when: "Measured 12 Oct" },
-  { id: "mum", name: "Mum", pic: "/lab/features/app/female-2.webp", h: 162, m: [96, 82, 104], when: "Measured 3 Oct" },
-  { id: "tom", name: "Tom", pic: "/lab/features/app/male-1.webp", h: 181, m: [98, 84, 100], when: "Measured 28 Sep" },
+  { id: "natalia", name: "Natalia", pic: "/features/app/female-1.webp", h: 168, m: [92, 74, 98], when: "Measured 12 Oct" },
+  { id: "mum", name: "Mum", pic: "/features/app/female-2.webp", h: 162, m: [96, 82, 104], when: "Measured 3 Oct" },
+  { id: "tom", name: "Tom", pic: "/features/app/male-1.webp", h: 181, m: [98, 84, 100], when: "Measured 28 Sep" },
 ];
 const BODY_EVERY = 3600;
 // the deck with body i brought to the front, the rest in the order they were
@@ -998,7 +998,7 @@ const G: Record<string, string> = {
   trousers: "M7 3h10l1 18h-4l-2-11-2 11H6z",
   top: "M8 4l4 1 4-1 3 4-3 2v10H8V10L5 8z",
 };
-const APP = "/lab/features/app";
+const APP = "/features/app";
 const PIC = {
   green: `${APP}/look-street-green.webp`,
   mauve: `${APP}/look-limo-mauve.webp`,
