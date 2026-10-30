@@ -101,7 +101,7 @@ export function MadeWith() {
     const size = () => {
       W = ln.clientWidth;
       cw = cards[0]?.offsetWidth || 260;
-      pitch = cw + Math.max(18, Math.min(36, W * 0.024));
+      pitch = cw + Math.max(W < 700 ? 10 : 18, Math.min(36, W * 0.024));
       sag = W * SAG;
       // the line's box starts at the title's top (it lies over the title):
       // its middle hangs just under the title, its ends rise beside it

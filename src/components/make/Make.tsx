@@ -11,7 +11,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 /* 5. What you can make (dark). "Four kinds of garment, every one drafted
    from your body." Four tall panels side by side, the one in hand opened
-   wide: its photograph, its name, and its pattern drawn over it in light.
+   wide: its photograph, its name and its pieces.
 
    Desktop: the section pins and the scroll opens each garment in turn
    (click one to go to it). It then holds a screen, still, while Made with
@@ -31,30 +31,24 @@ const GARMENTS = [
     img: "/make/dresses.webp",
     pos: "50% 45%",
     pieces: "Dress front · Dress back · Neck facing",
-    // a halter dress front, in one piece: the halter straps, the V neck,
-    // the armholes, a fitted waist and a full hem
-    d: "M44 8 L52 8 Q57 30 60 40 Q63 30 68 8 L76 8 Q79 30 92 42 Q85 56 86 70 Q86 78 89 84 L106 168 Q60 176 14 168 L31 84 Q34 78 34 70 Q35 56 28 42 Q41 30 44 8 Z",
   },
   {
     name: "Tops",
     img: "/make/tops.webp",
     pos: "50% 30%",
     pieces: "Front · Back · Sleeve",
-    d: "M28 26 L48 14 Q60 22 72 14 L92 26 L104 58 L86 64 L82 46 L82 132 L38 132 L38 46 L34 64 L16 58 Z",
   },
   {
     name: "Trousers",
     img: "/make/trousers.webp",
     pos: "50% 50%",
     pieces: "Front leg · Back leg · Waistband",
-    d: "M30 12 L90 12 L98 170 L68 170 L60 66 L52 170 L22 170 Z",
   },
   {
     name: "Skirts",
     img: "/make/skirts.webp",
     pos: "50% 22%",
     pieces: "Front · Back · Waistband",
-    d: "M38 14 L82 14 L106 160 Q60 170 14 160 Z",
   },
 ];
 
@@ -125,7 +119,7 @@ export function Make() {
             </span>
             <span className="line-mask">
               <span data-rise className="block">
-                every one drafted <em>from your body.</em>
+                every one drafted from your body.
               </span>
             </span>
           </h2>
@@ -146,10 +140,6 @@ export function Make() {
                 <span className="wm-panel__n" aria-hidden="true">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <svg viewBox="0 0 120 184" className="wm-panel__draft" aria-hidden="true">
-                  <path d={g.d} className="wm-draft__cut" pathLength={1} />
-                  <path d={g.d} className="wm-draft__seam" transform="translate(60 92) scale(0.88) translate(-60 -92)" />
-                </svg>
                 <span className="wm-panel__side" aria-hidden="true">
                   {g.name}
                 </span>

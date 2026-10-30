@@ -96,16 +96,17 @@
   box-shadow: -1px 2px 3px rgb(18 21 36 / 0.25);
 }
 .mw-peg::after { content: ""; position: absolute; left: 3px; top: 13px; width: 3px; height: 3px; border-radius: 50%; background: var(--cloud); }
+@media (max-width: 699px) { .mw-peg { top: -6px; width: 6px; height: 20px; } .mw-peg::after { left: 2px; top: 9px; width: 2px; height: 2px; } }
 .mw-peg.is-l { left: 22%; translate: -50% 0; rotate: -3deg; }
 .mw-peg.is-r { left: 78%; translate: -50% 0; rotate: 4deg; }
 /* the site's glass: white, a 20px blur, a hairline, 28px corners */
 @media (max-width: 699px) {
-  .mw-card { width: clamp(140px, min(44vw, 26svh), 210px); }
+  .mw-card { width: clamp(104px, min(30vw, 17svh), 136px); }
 }
 .mw-card__glass {
   container-type: inline-size;
-  padding: clamp(8px, 4.6cqi, 12px) clamp(8px, 4.6cqi, 12px) clamp(12px, 7cqi, 18px);
-  border-radius: clamp(18px, 10.8cqi, 28px);
+  padding: clamp(5px, 4.6cqi, 12px) clamp(5px, 4.6cqi, 12px) clamp(8px, 7cqi, 18px);
+  border-radius: clamp(12px, 10.8cqi, 28px);
   background: rgb(255 255 255 / 0.62);
   border: 1px solid rgb(18 21 36 / 0.1);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
@@ -117,22 +118,22 @@
   width: 100%;
   aspect-ratio: 1 / 1.05;
   object-fit: cover;
-  border-radius: clamp(11px, 6.9cqi, 18px);
+  border-radius: clamp(8px, 6.9cqi, 18px);
   background: #dfe4f2;
   pointer-events: none;
 }
-.mw-card__g { margin-top: clamp(9px, 5.4cqi, 14px); padding: 0 clamp(3px, 2.3cqi, 6px); font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: clamp(15px, 8.5cqi, 22px); line-height: 1; letter-spacing: -0.01em; }
-.mw-card__who { margin-top: clamp(4px, 2.3cqi, 6px); padding: 0 clamp(3px, 2.3cqi, 6px); font-size: clamp(10.5px, 4.6cqi, 12px); letter-spacing: -0.01em; color: var(--steel); }
-.mw-card__q { margin-top: clamp(6px, 3.8cqi, 10px); padding: 0 clamp(3px, 2.3cqi, 6px); font-size: clamp(11.5px, 5.4cqi, 14px); line-height: 1.35; letter-spacing: -0.02em; color: var(--navy); }
+.mw-card__g { margin-top: clamp(6px, 5.4cqi, 14px); padding: 0 clamp(2px, 2.3cqi, 6px); font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: clamp(11px, 8.5cqi, 22px); line-height: 1; letter-spacing: -0.01em; }
+.mw-card__who { margin-top: clamp(3px, 2.3cqi, 6px); padding: 0 clamp(2px, 2.3cqi, 6px); font-size: clamp(8px, 4.6cqi, 12px); letter-spacing: -0.01em; color: var(--steel); }
+.mw-card__q { margin-top: clamp(4px, 3.8cqi, 10px); padding: 0 clamp(2px, 2.3cqi, 6px); font-size: clamp(8.5px, 5.4cqi, 14px); line-height: 1.35; letter-spacing: -0.02em; color: var(--navy); }
 .mw-card__body {
-  margin: clamp(8px, 4.6cqi, 12px) clamp(3px, 2.3cqi, 6px) 0;
-  padding-top: clamp(6px, 3.8cqi, 10px);
+  margin: clamp(5px, 4.6cqi, 12px) clamp(2px, 2.3cqi, 6px) 0;
+  padding-top: clamp(4px, 3.8cqi, 10px);
   border-top: 1px dashed rgb(56 76 101 / 0.3);
-  font-size: clamp(10px, 4.2cqi, 11px);
+  font-size: clamp(7.5px, 4.2cqi, 11px);
   letter-spacing: 0;
   color: var(--ink);
 }
-.mw-card__body span { display: block; margin-bottom: 2px; font-size: clamp(9px, 3.8cqi, 10px); letter-spacing: 0.04em; text-transform: uppercase; color: var(--steel); }
+.mw-card__body span { display: block; margin-bottom: 2px; font-size: clamp(7px, 3.8cqi, 10px); letter-spacing: 0.04em; text-transform: uppercase; color: var(--steel); }
 
 /* ---- the end --------------------------------------------------------- */
 /* over the line's shadow room (which runs on under it), so its button takes the pointer */

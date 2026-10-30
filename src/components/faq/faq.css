@@ -79,11 +79,10 @@
 .fq-body { max-width: 24ch; margin-top: clamp(14px, 1.6vw, 24px); text-wrap: balance; }
 
 /* ---- the questions -----------------------------------------------------------
-   Built like the app (app.venty.au, globals.css: .pill-white, the pressed
-   tiles, .pill-primary), one light from the top: the questions on one snow
-   panel raised off the page; each number in a tile pressed into it; the
-   +/- a small raised button that turns to the app's primary (periwinkle, its
-   fine dot grid) when open; the answer in a well pressed into the panel. */
+   Two touches of the app's build (app.venty.au, globals.css: .pill-white,
+   .pill-primary), one light from the top, and nothing more: the questions on
+   one snow panel raised off the page, and the +/- a small raised button that
+   turns to the app's primary (periwinkle, its fine dot grid) when open. */
 .fq-list {
   position: relative;
   margin-left: clamp(20px, 2.4vw, 36px);
@@ -110,21 +109,8 @@
   text-align: left;
   cursor: pointer;
 }
-/* the number, in a tile pressed into the panel (a shadow inside along the
-   top, a white lip along the bottom) */
-.fq-n {
-  display: grid;
-  place-items: center;
-  height: 32px;
-  border-radius: 10px;
-  font-size: 12px;
-  line-height: 1;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-  color: var(--steel);
-  background: rgb(24 30 70 / 0.05);
-  box-shadow: inset 0 3px 7px rgb(24 30 70 / 0.16), inset 0 1px 1.5px rgb(24 30 70 / 0.14), inset 0 -1px 0 rgb(255 255 255 / 0.9), 0 1px 0 rgb(255 255 255 / 0.7);
-}
+/* the number: the page's eyebrow type */
+.fq-n { font-size: 12px; line-height: 14px; letter-spacing: -0.02em; text-transform: uppercase; color: var(--steel); }
 /* the question: the body's navy, softer than ink */
 .fq-t { font-size: clamp(17px, 1.4vw, 20px); font-weight: 500; line-height: 1.25; letter-spacing: -0.025em; color: var(--navy); text-wrap: balance; }
 /* the button: raised out of the panel (the app's white secondary, round),
@@ -156,14 +142,8 @@
 .fq-a { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.6s var(--expo); }
 .fq-row.is-open .fq-a { grid-template-rows: 1fr; }
 .fq-a__in { min-height: 0; overflow: hidden; }
-/* the answer, in a well pressed into the panel, under the question */
-.fq-a p {
-  margin: 0 0 22px 60px;
-  padding: 14px 18px;
-  border-radius: 16px;
-  background: rgb(24 30 70 / 0.05);
-  box-shadow: inset 0 3px 7px rgb(24 30 70 / 0.15), inset 0 1px 1.5px rgb(24 30 70 / 0.14), inset 0 -1px 0 rgb(255 255 255 / 0.9), 0 1px 0 rgb(255 255 255 / 0.7);
-}
+/* the answer, under the question, in line with it */
+.fq-a p { max-width: 54ch; margin: 0 0 26px 60px; }
 /* the line between questions, across the panel */
 .fq-line {
   position: absolute;
@@ -181,6 +161,6 @@
   .fq-guide.is-l { display: none; }
   .fq-head { padding: 30px 0 0 28px; }
   .fq-list { margin-left: 0; }
-  .fq-a p { margin-left: 0; }
+  .fq-a p { margin-left: 50px; }
   .fq-q { grid-template-columns: 38px minmax(0, 1fr) auto; gap: 12px; padding: 18px 0; }
 }

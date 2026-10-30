@@ -62,7 +62,6 @@
   letter-spacing: -0.05em;
 }
 @media (min-width: 1024px) { .wm-title { max-width: none; } }
-.wm-title em { font-style: normal; font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; letter-spacing: -0.02em; color: var(--cloud); }
 .wm-count {
   display: none;
   position: absolute;
@@ -144,31 +143,6 @@
   transition: color 0.6s;
 }
 .wm-panel.is-on .wm-panel__n { color: var(--cloud); }
-
-/* the pattern, drawn over the photograph in light */
-.wm-panel__draft {
-  position: absolute;
-  top: 16%;
-  right: 8%;
-  z-index: 2;
-  width: min(30%, 190px);
-  overflow: visible;
-  opacity: 0;
-  transition: opacity 0.6s var(--expo);
-}
-.wm-panel.is-on .wm-panel__draft { opacity: 1; transition-delay: 0.35s; }
-.wm-draft__cut {
-  fill: rgb(239 244 255 / 0.06);
-  stroke: var(--cloud);
-  stroke-width: 1.2;
-  stroke-linejoin: round;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  filter: drop-shadow(0 0 6px rgb(104 126 245 / 0.9));
-  transition: stroke-dashoffset 1.6s var(--expo);
-}
-.wm-panel.is-on .wm-draft__cut { stroke-dashoffset: 0; transition-delay: 0.4s; }
-.wm-draft__seam { fill: none; stroke: var(--corn); stroke-width: 0.9; stroke-dasharray: 3 3; }
 
 /* closed (desktop): the name stands up the side */
 .wm-panel__side {
