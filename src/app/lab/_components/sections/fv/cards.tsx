@@ -27,8 +27,8 @@ function Icon({ d, size = 18, weight = 1.6 }: { d: string; size?: number; weight
    (src/lib/sequence.ts, as the hero and How it works), not by swapping an
    <img>'s src: swapping showed nothing for a moment whenever a frame wasn't
    decoded yet (a dark flicker as you dragged). The engine decodes the
-   frames ahead of where you're going, always shows the nearest one it has,
-   and blends between two for the in-betweens. ---- */
+   frames ahead of where you're going and always shows the nearest one it
+   has. ---- */
 const FIRST_FRAME = `/features/turn/frames/0001.webp?v=${TURN.version}`;
 const PIN_EVERY = 6; // frames kept decoded right round, so a fast drag always has her close by
 /** a canvas of the turn; set(deg) shows her at that angle. It starts (and
@@ -44,7 +44,9 @@ function useTurn(near: React.RefObject<HTMLElement | null>) {
     const io = new IntersectionObserver(
       ([e]) => {
         if (!e.isIntersecting || player.current) return;
-        const p = turn.createPlayer(cv, undefined, { alpha: true, fit: "contain", skim: true });
+        // one frame at a time, never two laid over each other (blending left a
+        // ghost of her last pose); her frames are close enough not to need it
+        const p = turn.createPlayer(cv, undefined, { alpha: true, fit: "cover", blend: false, skim: true });
         const pins: number[] = [];
         for (let i = 0; i < TURN.frames; i += PIN_EVERY) pins.push(i);
         p.pin(pins);
@@ -564,8 +566,6 @@ export function TurnCard() {
         onPointerUp={end}
         onPointerCancel={end}
       >
-        {/* the backdrop's light carried on either side of her frame, into the room beside her */}
-        <span className="fvc-turn__glow" aria-hidden="true" />
         {/* her first frame until the film has its own, then the film over it */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className="fvc-turn__film" src={FIRST_FRAME} alt="" draggable={false} loading="lazy" decoding="async" />

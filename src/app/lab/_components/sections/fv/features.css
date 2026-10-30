@@ -895,43 +895,46 @@
 }
 
 
-/* ---- See it on your body: her film, a little bigger, its mask wider ----
-   Her frames are square (720 x 720, the lit backdrop right across them).
-   The mask used to be a circle fading from a quarter of the way out, which
-   cut her arms and left the room either side of her empty; now an oval
-   reaching the frame's left and right edges, fading only at the very edges.
-   The first frame (an <img>) sits under the canvas until the film draws
-   its own; the stage never selects text while you drag. */
-.fv .fvc-turn__stage { -webkit-user-select: none; user-select: none; }
-/* the backdrop carried on past the frame's sides: the frame's own colours
-   (sampled: rgb(76 85 118) in the light round her, rgb(38 47 72) further
-   out), as a wide oval behind it; the frame fades out just before its own
-   darker edge, the light goes on past it, and the room either side of her
-   is used */
-.fv .fvc-turn__glow {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  height: 130%;
-  aspect-ratio: 2.2;
-  translate: -50% -48%;
-  pointer-events: none;
-  background: radial-gradient(ellipse 50% 50% at 50% 46%, rgb(76 86 122) 0%, rgb(70 80 114 / 0.92) 22%, rgb(60 70 100 / 0.78) 40%, rgb(48 56 84 / 0.55) 58%, rgb(38 44 66 / 0.3) 75%, rgb(30 34 50 / 0.1) 90%, transparent 100%);
+/* ---- See it on your body: her film in a square, the panel taking the rest ----
+   Her frames are square (720 x 720), so her box is too: as tall as the
+   card's room and as wide, the film filling it, pressed into the rim (as
+   the Mark up photo and the app's library cards), its corners rounded, no
+   fade. The panel beside her takes all the rest of the width. The first
+   frame (an <img>) sits under the canvas until the film draws its own; the
+   stage never selects text while you drag. */
+.fv .fvc-turn { grid-template-columns: auto minmax(0, 1fr); }
+.fv .fvc-turn__stage {
+  height: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #0f1222;
+  -webkit-user-select: none;
+  user-select: none;
 }
+.fv .fvc-turn__stage::after { content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none; box-shadow: inset 0 3px 7px rgb(0 0 0 / 0.65), inset 0 1px 1.5px rgb(0 0 0 / 0.55), inset 0 -1px 0 rgb(255 255 255 / 0.07), 0 1px 0 rgb(255 255 255 / 0.07); }
 .fv .fvc-turn__stage .fvc-turn__film {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: auto;
-  height: 130%;
-  aspect-ratio: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  translate: none;
+  aspect-ratio: auto;
   max-width: none;
-  translate: -50% -48%;
   object-fit: cover;
   user-select: none;
   pointer-events: none;
-  -webkit-mask-image: radial-gradient(ellipse 46% 50% at 50% 46%, #000 54%, rgb(0 0 0 / 0.78) 68%, rgb(0 0 0 / 0.42) 81%, rgb(0 0 0 / 0.12) 92%, transparent 100%);
-  mask-image: radial-gradient(ellipse 46% 50% at 50% 46%, #000 54%, rgb(0 0 0 / 0.78) 68%, rgb(0 0 0 / 0.42) 81%, rgb(0 0 0 / 0.12) 92%, transparent 100%);
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.fv .fvc-turn__hint { z-index: 3; bottom: 10px; }
+/* the panel: room to breathe now; the readout a size up */
+.fv .fvc-turn__panel { padding: 16px 18px; }
+.fv .fvc-turn__deg { font-size: clamp(48px, 4.4vw, 72px); }
+/* phone: her square centred, as tall as the room above the panel */
+@media (max-width: 640px) {
+  .fv .fvc-turn { grid-template-columns: minmax(0, 1fr); }
+  .fv .fvc-turn__stage { justify-self: center; max-width: 100%; }
 }
 
 /* ---- Pattern library: the phones fade out at the foot through a mask
