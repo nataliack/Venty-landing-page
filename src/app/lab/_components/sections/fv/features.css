@@ -1239,3 +1239,46 @@
 .fv .fvc-compose__send { flex: none; }
 .fv .fvc-compose__send.is-sent { animation: fvc-press 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.4) both; }
 @keyframes fvc-press { 40% { transform: scale(0.82); } 100% { transform: none; } }
+
+
+/* ---- See it on your body: the first frame gone once the film draws ---- */
+.fv .fvc-turn__film.is-gone { visibility: hidden; }
+
+/* ---- Refine: the chat, softer. Every move long and eased right out (no
+   snap, no overshoot), each bubble turning a few degrees as it travels
+   and settling straight; floating away, a slow rise with a slight turn and
+   a breath of blur ---- */
+.fv .fvc-bubble.is-me { animation: fvc-send2 1s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.fv .fvc-bubble.is-reply, .fv .fvc-dots { animation: fvc-pop2 0.95s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.fv .fvc-reply { animation: fvc-fade 0.5s ease both; }
+.fv .fvc-diff span { animation: fvc-tag2 0.85s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.fv .fvc-diff span:nth-child(1) { animation-delay: 0.38s; }
+.fv .fvc-diff span:nth-child(2) { animation-delay: 0.56s; }
+@keyframes fvc-send2 {
+  0% { opacity: 0; transform: translate(12px, 38px) rotate(7deg) scale(0.62); }
+  35% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes fvc-pop2 {
+  0% { opacity: 0; transform: translate(-8px, 16px) rotate(-6deg) scale(0.7); }
+  35% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes fvc-tag2 {
+  0% { opacity: 0; transform: translate(-6px, 10px) rotate(-5deg) scale(0.8); }
+  40% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+.fv .fvc-chat.is-out .fvc-chat__log > * { animation: fvc-out2 0.95s cubic-bezier(0.55, 0, 0.3, 1) forwards; }
+.fv .fvc-chat.is-out .fvc-chat__log > :nth-child(1) { --turn: 2deg; }
+.fv .fvc-chat.is-out .fvc-chat__log > :nth-child(2) { --turn: -2deg; animation-delay: 0.1s; }
+@keyframes fvc-out2 { to { opacity: 0; transform: translateY(-20px) rotate(var(--turn, 0deg)) scale(0.95); filter: blur(2px); } }
+/* the composer's arrow: a soft dip as it sends */
+.fv .fvc-compose__send.is-sent { animation: fvc-press2 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes fvc-press2 { 30% { transform: scale(0.84); } 100% { transform: none; } }
+
+/* ---- the words on Mark up, See it on your body and the Pattern library:
+   their lines balanced, so they break evenly (no lone word on the last) ---- */
+.fvb-card--mark .fvb-copy,
+.fvb-card--body .fvb-copy,
+.fvb-card--lib .fvb-copy { text-wrap: balance; }

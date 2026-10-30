@@ -37,6 +37,9 @@ function useTurn(near: React.RefObject<HTMLElement | null>) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const player = useRef<ReturnType<typeof turn.createPlayer> | null>(null);
   const at = useRef(0);
+  // the film is drawing: the first frame under it can go (seen through the
+  // mask's soft edge, it was a ghost of her first pose behind her)
+  const [ready, setReady] = useState(false);
   useEffect(() => {
     const el = near.current;
     const cv = canvas.current;
@@ -52,6 +55,7 @@ function useTurn(near: React.RefObject<HTMLElement | null>) {
         p.pin(pins);
         p.setPosition(turnPosition(at.current));
         player.current = p;
+        turn.preload().then(() => window.setTimeout(() => setReady(true), 300));
         io.disconnect();
       },
       { rootMargin: "100% 0px" },
@@ -67,7 +71,7 @@ function useTurn(near: React.RefObject<HTMLElement | null>) {
     at.current = deg;
     player.current?.setPosition(turnPosition(deg));
   };
-  return [canvas, set] as const;
+  return [canvas, set, ready] as const;
 }
 
 const SEND = "M12 19V5M5.5 11.5L12 5l6.5 6.5";
@@ -504,7 +508,7 @@ const CHATS = [
 // where a chat is: 0 typing in the composer, 1 sent, 2 Venty's dots, 3 its answer, 4 floating away
 type ChatAt = { c: number; stage: 0 | 1 | 2 | 3 | 4; typed: number };
 const CHAR_MS = 42;
-const HOLD: Record<number, number> = { 1: 700, 2: 1300, 3: 3400, 4: 650 };
+const HOLD: Record<number, number> = { 1: 900, 2: 1400, 3: 3400, 4: 1000 };
 export function RefineCard() {
   const root = useRef<HTMLDivElement>(null);
   const [s, setS] = useState<ChatAt>({ c: 0, stage: 3, typed: CHATS[0].me.length });
@@ -621,7 +625,7 @@ export function RefineCard() {
    there until you do, and keeps out of the way while you are. */
 export function TurnCard() {
   const box = useRef<HTMLDivElement>(null);
-  const [film, set] = useTurn(box);
+  const [film, set, ready] = useTurn(box);
   const [deg, setDeg] = useState(0);
   const [dragging, setDragging] = useState(false);
   const drag = useRef<{ x: number; d: number } | null>(null);
@@ -659,7 +663,7 @@ export function TurnCard() {
       >
         {/* her first frame until the film has its own, then the film over it */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="fvc-turn__film" src={FIRST_FRAME} alt="" draggable={false} loading="lazy" decoding="async" />
+        <img className={`fvc-turn__film ${ready ? "is-gone" : ""}`} src={FIRST_FRAME} alt="" draggable={false} loading="lazy" decoding="async" />
         <canvas ref={film} className="fvc-turn__film" role="img" aria-label="The model in the garment; drag or use the slider to turn her" />
         <span className="fvc-turn__hint" aria-hidden="true">
           Drag to turn
