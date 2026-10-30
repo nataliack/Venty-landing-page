@@ -494,7 +494,7 @@ export function Footer() {
         </div>
 
         <div className="fo-bottom">
-          <p>Venty is a concept for the QUT Design Festival 2026.</p>
+          <p>A QUT Design Festival 2026 concept.</p>
           <p>
             Made by{" "}
             <a href={MAKER_URL} target="_blank" rel="noopener noreferrer">
