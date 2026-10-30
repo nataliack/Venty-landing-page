@@ -2,7 +2,9 @@
 
 import { useEffect, useId, useRef, useState, type CSSProperties, type PointerEvent as RPointerEvent, type ReactNode } from "react";
 import { MARK, MARK_BOUNDS } from "@/lib/markFlight";
-import { TURN, turn, turnPosition } from "@/lib/turnSequence";
+import { TURN, turnPosition } from "@/lib/turnSequence";
+import { createSequence } from "@/lib/sequence";
+import TURN_512 from "../../../../../../public/lab/features/turn-512/manifest.json";
 import { FRAME, OUTLINES, type Outline as OutlineData } from "./outlines";
 
 /* Features: the bento's cards, each a small working piece of the app
@@ -29,8 +31,11 @@ function Icon({ d, size = 18, weight = 1.6 }: { d: string; size?: number; weight
    decoded yet (a dark flicker as you dragged). The engine decodes the
    frames ahead of where you're going and always shows the nearest one it
    has. ---- */
-const FIRST_FRAME = `/features/turn/frames/0001.webp?v=${TURN.version}`;
-const PIN_EVERY = 6; // frames kept decoded right round, so a fast drag always has her close by
+// her frames at 512 (the 720s downscaled: her box is about 250px wide, so
+// still sharp on a retina screen, at half the download)
+const turn = createSequence(TURN_512, "/lab/features/turn-512", { opening: 8 });
+const FIRST_FRAME = `/lab/features/turn-512/frames/0001.webp?v=${TURN_512.version}`;
+const PIN_EVERY = 12; // frames kept decoded right round (each 2 MB in memory), so a fast drag always has her close by
 /** a canvas of the turn; set(deg) shows her at that angle. It starts (and
     the frames load) when `near` (the card) comes within a screen of view */
 function useTurn(near: React.RefObject<HTMLElement | null>) {
@@ -175,16 +180,24 @@ class ClipPlayer {
   in: HTMLVideoElement | null = null;
   out: HTMLVideoElement | null = null;
   box: HTMLDivElement | null = null;
+  end: HTMLImageElement | null = null;
   failed = false;
   private token = 0;
   private on: HTMLVideoElement | null = null; // the one showing
-  warm() {
+  // the way in (and its sharp last frame): loaded when the clip may be wanted
+  warmIn() {
     const a = this.in;
-    const b = this.out;
-    if (!a || !b || a.preload === "auto") return;
+    if (this.end && !this.end.getAttribute("src")) this.end.src = this.end.dataset.src ?? "";
+    if (!a || a.preload === "auto") return;
     a.preload = "auto";
     a.load();
-    a.addEventListener("canplaythrough", () => b.preload !== "auto" && ((b.preload = "auto"), b.load()), { once: true });
+  }
+  // the way out: loaded while the way in plays, so pulling out never waits
+  warmOut() {
+    const b = this.out;
+    if (!b || b.preload === "auto") return;
+    b.preload = "auto";
+    b.load();
   }
   // how far in it is, as a share of the way in (0 out, 1 in)
   private at() {
@@ -219,6 +232,7 @@ class ClipPlayer {
     if (!(await this.ready(v))) return (this.failed = true), "error";
     if (token !== this.token) return "lost";
     const t = (dir === 1 ? from : 1 - from) * v.duration;
+    if (dir === 1) this.warmOut();
     if (Math.abs(v.currentTime - t) > 0.01) {
       v.currentTime = t;
       await new Promise((res) => v.addEventListener("seeked", res, { once: true }));
@@ -327,7 +341,8 @@ export function MarkCard() {
     const io = new IntersectionObserver(
       ([e]) => {
         if (!e.isIntersecting) return;
-        players.forEach((p) => p.warm());
+        // only the first note's clip comes with the card; the rest when it's reached for
+        players.get(DETAILS.find((x) => x.clip)?.n ?? 1)?.warmIn();
         io.disconnect();
       },
       { rootMargin: "100% 0px" },
@@ -390,6 +405,7 @@ export function MarkCard() {
     out();
     void go(n);
   };
+  const warmAll = () => players.forEach((p) => p.warmIn());
   const a = byN(on ?? aim ?? 1);
   const film = clipOf(on) !== null; // pushed in on a clip, not the still
   const still = on !== null && !film; // pushed in on the still
@@ -397,7 +413,7 @@ export function MarkCard() {
   const done = typed >= a.note.length;
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   return (
-    <div className="fvc-mark">
+    <div className="fvc-mark" onPointerEnter={warmAll} onTouchStart={warmAll} onFocus={warmAll}>
       <div ref={frame} className={`fvc-mark__frame ${on ? "is-in" : ""}`}>
         <div
           className="fvc-mark__fig"
@@ -455,7 +471,15 @@ export function MarkCard() {
                   disablePictureInPicture
                 />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="fvc-clip__end" src={clipSrc(x.clip, "end.webp")} alt="" loading="lazy" decoding="async" />
+                <img
+                  ref={(el) => {
+                    player(x.n).end = el;
+                  }}
+                  className="fvc-clip__end"
+                  data-src={clipSrc(x.clip, "end.webp")}
+                  alt=""
+                  decoding="async"
+                />
                 {OUTLINES[x.clip] && <Outline id={`${uid}-o${x.n}`} o={OUTLINES[x.clip]} on={landed === x.n} />}
               </div>
             ),

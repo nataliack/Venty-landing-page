@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import { Shell } from "../hc/parts";
 import { MarkCard, PhoneCard, PrintCard, RefineCard, TurnCard, BodiesCard } from "./cards";
 import "./features.css";
@@ -41,6 +41,15 @@ export function FeaturesSwap() {
 
 function Section() {
   const root = useRef<HTMLElement>(null);
+  // off screen, everything in it that loops is paused (data-away, features.css);
+  // the cards' own loops stop themselves the same way
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => el.toggleAttribute("data-away", !e.isIntersecting));
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   return (
     <section

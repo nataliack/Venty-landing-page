@@ -1098,7 +1098,7 @@
 
 /* patterns to make: the kinds as square photos pressed into the page, the chosen one on a snow card */
 .fva-kinds { --k: 0; position: relative; display: flex; gap: calc(6 * var(--u)); margin-top: calc(20 * var(--u)); }
-.fva-kinds__on { position: absolute; top: 0; bottom: 0; left: calc(var(--k) * 73 * var(--u)); width: calc(67 * var(--u)); border-radius: calc(20 * var(--u)); background: #f0f4fe; transition: left 0.55s cubic-bezier(0.2, 1.4, 0.4, 1); }
+.fva-kinds__on { position: absolute; top: 0; bottom: 0; left: 0; width: calc(67 * var(--u)); border-radius: calc(20 * var(--u)); background: #f0f4fe; transform: translateX(calc(var(--k) * 73 * var(--u))); transition: transform 0.55s cubic-bezier(0.2, 1.4, 0.4, 1); will-change: transform; }
 .fva-kind { position: relative; display: flex; flex: none; flex-direction: column; align-items: center; gap: calc(8 * var(--u)); width: calc(67 * var(--u)); padding: calc(5 * var(--u)) 0 calc(10 * var(--u)); font-size: calc(13 * var(--u)); line-height: 1; color: rgb(255 255 255 / 0.6); transition: color 0.3s; }
 .fva-kind.is-on { font-weight: 500; color: #131523; }
 .fva-kind__pic { width: calc(57 * var(--u)); height: calc(57 * var(--u)); border-radius: calc(15 * var(--u)); }
@@ -1272,7 +1272,7 @@
 .fv .fvc-chat.is-out .fvc-chat__log > * { animation: fvc-out2 0.95s cubic-bezier(0.55, 0, 0.3, 1) forwards; }
 .fv .fvc-chat.is-out .fvc-chat__log > :nth-child(1) { --turn: 2deg; }
 .fv .fvc-chat.is-out .fvc-chat__log > :nth-child(2) { --turn: -2deg; animation-delay: 0.1s; }
-@keyframes fvc-out2 { to { opacity: 0; transform: translateY(-20px) rotate(var(--turn, 0deg)) scale(0.95); filter: blur(2px); } }
+@keyframes fvc-out2 { to { opacity: 0; transform: translateY(-20px) rotate(var(--turn, 0deg)) scale(0.95); } }
 /* the composer's arrow: a soft dip as it sends */
 .fv .fvc-compose__send.is-sent { animation: fvc-press2 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
 @keyframes fvc-press2 { 30% { transform: scale(0.84); } 100% { transform: none; } }
@@ -1282,3 +1282,85 @@
 .fvb-card--mark .fvb-copy,
 .fvb-card--body .fvb-copy,
 .fvb-card--lib .fvb-copy { text-wrap: balance; }
+
+
+/* ==== speed ========================================================================
+   Measured (Chrome, the Pattern library hovered on and off): before, about
+   140 paints a second even at rest and frames of up to 130 ms on hover; the
+   phones were re-rasterised on every frame they moved. Now:
+   - each phone (and the light behind them) is its own GPU layer, so leaning
+     and rising only moves layers: nothing is drawn again
+   - the looks drifting on the left phone are layers too
+   - each phone's screen keeps its layout and paint to itself
+   - what loops stops when it can't be seen: the comment's caret while the
+     comment is hidden, everything once the section is off screen */
+.ftp { will-change: transform; }
+.ftp-glow { filter: none; will-change: transform; }
+.ftp__screen.is-app { contain: layout paint; }
+.fva-fan__look { will-change: transform; }
+.fvc-comment:not(.is-on) .fvc-comment__caret { animation: none; }
+.fv[data-away] *, .fv[data-away] *::before, .fv[data-away] *::after { animation-play-state: paused !important; }
+/* the body deck's cards are layers, so swapping them (moving, turning,
+   dimming) is the compositor's work; the chat's bubbles likewise */
+
+.fv .fvc-chat__log > * { will-change: transform, opacity; }
+
+/* ---- masks and filters, replaced by what costs nothing to move past ----
+   The long frames were the GPU re-blending big masks and filters whenever
+   anything inside them moved. The same looks, cheaply:
+   - the sides: no mask over the whole grid; the night laid over its edges
+     (the section is plain night), with the same eased stops
+   - the Pattern library: no mask on the phones' stage; the card's own
+     colour laid over its foot, so the phones still melt away into it
+   - the phones behind, and the bodies behind in the deck: dimmed by a tint
+     laid over them, not a filter */
+@media (min-width: 1100px) {
+  .fv .fvb-grid { -webkit-mask-image: none; mask-image: none; }
+  .fv .fvb-grid::before,
+  .fv .fvb-grid::after {
+    content: "";
+    position: absolute;
+    top: -40px;
+    bottom: -40px;
+    z-index: 8;
+    width: calc(var(--bleed) * 1.15);
+    pointer-events: none;
+    background: linear-gradient(90deg,
+      var(--night) 17.4%,
+      rgb(11 12 21 / 0.97) 29.6%,
+      rgb(11 12 21 / 0.88) 42.6%,
+      rgb(11 12 21 / 0.7) 54.8%,
+      rgb(11 12 21 / 0.48) 67%,
+      rgb(11 12 21 / 0.25) 79.1%,
+      rgb(11 12 21 / 0.07) 92.2%,
+      transparent 100%);
+  }
+  .fv .fvb-grid::before { left: 0; }
+  .fv .fvb-grid::after { right: 0; transform: scaleX(-1); }
+  .fv .fvb-grid { position: relative; }
+}
+.fvb-card--lib .ftp-stage { -webkit-mask-image: none; mask-image: none; }
+.fvb-card--lib .fvb-vis::after {
+  --c: 27 28 38; /* the card's colour, #1b1c26 */
+  content: "";
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  bottom: 1px;
+  z-index: 3;
+  height: 180px;
+  border-radius: 0 0 21px 21px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgb(var(--c) / 0) 0px, rgb(var(--c) / 0.22) 34px, rgb(var(--c) / 0.55) 64px, rgb(var(--c) / 0.83) 92px, rgb(var(--c) / 0.96) 114px, rgb(var(--c)) 130px);
+}
+.fvb-cell.is-l.fvb-card--lib .fvb-vis::after { left: 1px; }
+@media (max-width: 640px) {
+  .fvb-card--lib .ftp-stage { -webkit-mask-image: none; mask-image: none; }
+  .fvb-card--lib .fvb-vis::after { height: 225px; background: linear-gradient(180deg, rgb(var(--c) / 0) 0px, rgb(var(--c) / 0.22) 35px, rgb(var(--c) / 0.55) 65px, rgb(var(--c) / 0.83) 93px, rgb(var(--c) / 0.96) 115px, rgb(var(--c)) 131px); }
+}
+.ftp.is-back { filter: none; }
+.ftp.is-back .ftp__glass::before { content: ""; position: absolute; inset: 0; z-index: 6; border-radius: calc(var(--r) - var(--pad)); pointer-events: none; background: rgb(11 12 21 / 0.24); }
+.fvbd-card { will-change: transform; }
+.fvbd-card[data-pos="1"], .fvbd-card[data-pos="2"] { filter: none; }
+.fvbd-card::after { content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none; background: rgb(11 12 21 / 0.42); opacity: 0; transition: opacity 0.6s ease; }
+.fvbd-card[data-pos="1"]::after, .fvbd-card[data-pos="2"]::after { opacity: 1; }
