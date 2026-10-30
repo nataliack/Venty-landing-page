@@ -21,7 +21,7 @@ const SECTIONS = [
   ...(MAKES.length ? [{ id: "made", label: "Made with Venty" }] : []),
   { id: "faq", label: "FAQ" },
   { id: "maker", label: "About me" },
-  { id: "table", label: "Paper to cloth" },
+  { id: "table", label: "Get started" },
 ];
 
 export function SectionNav() {
