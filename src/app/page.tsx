@@ -14,6 +14,7 @@ import { Faq } from "@/components/faq/Faq";
 import { Maker } from "@/components/maker/Maker";
 import { Closing } from "@/components/closing/Closing";
 import { Footer } from "@/components/footer/Footer";
+import { SHOW_MAKER } from "@/lib/site";
 
 export default function Home() {
   return (
@@ -32,8 +33,8 @@ export default function Home() {
         <Make />
         <MadeWith />
         <Faq />
-        <Maker />
-        <Closing />
+        {SHOW_MAKER && <Maker />}
+        <Closing edge={!SHOW_MAKER} />
       </main>
       <Footer />
     </>

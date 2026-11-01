@@ -17,7 +17,8 @@
   z-index: 10;
   isolation: isolate;
   overflow: clip;
-  /* room at the end for the dark edge of Meet the maker to rise through */
+  /* room at the end for the dark edge of what follows (Meet the maker, or
+     Closing while it is hidden) to rise through */
   padding: clamp(96px, 16svh, 170px) var(--gutter) calc(42svh + 72px);
   color: var(--ink);
   background: var(--cloud);

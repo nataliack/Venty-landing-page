@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { MAKES } from "./made/MadeWith";
 import { scrollToElement } from "./SmoothScroll";
+import { SHOW_MAKER } from "@/lib/site";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -20,7 +21,7 @@ const SECTIONS = [
   { id: "make", label: "What you can make" },
   ...(MAKES.length ? [{ id: "made", label: "Made with Venty" }] : []),
   { id: "faq", label: "FAQ" },
-  { id: "maker", label: "About me" },
+  ...(SHOW_MAKER ? [{ id: "maker", label: "About me" }] : []),
   { id: "table", label: "Get started" },
 ];
 

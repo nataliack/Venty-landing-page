@@ -12,8 +12,9 @@ import "./faq.css";
    hero's grid, venty-app globals.css .light-mat), at half strength, mostly
    low down.
 
-   At the end, empty room for the dark edge of Meet the maker to rise
-   through (docs/motion.md, hand-offs).
+   At the end, empty room for the dark edge of what follows (Meet the
+   maker, or Closing while it is hidden) to rise through (docs/motion.md,
+   hand-offs).
 
    Every answer is something the page already says (How it works,
    Features); nothing new is promised. */

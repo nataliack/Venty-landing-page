@@ -32,3 +32,8 @@ export const SOCIAL_LINKS: { label: string; icon: "linkedin" | "email" | "phone"
   { label: "Email", icon: "email", href: `mailto:${MAKER_EMAIL}` },
   { label: "Phone", icon: "phone", href: "" },
 ];
+
+/* Meet the maker (components/maker) is hidden for now, as it is not finished:
+   left out of the page and the section menu, and Closing takes the dark edge
+   after the FAQ. true puts it back. */
+export const SHOW_MAKER = false;

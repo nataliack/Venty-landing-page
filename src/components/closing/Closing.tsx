@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { DitherEdge } from "../DitherEdge";
 import { PrimaryButton } from "../PrimaryButton";
 import { APP_URL, CTA_LABEL } from "@/lib/site";
 import { EASE, afterLoader } from "@/lib/motion";
@@ -66,7 +67,9 @@ function Beat({ k, lines, cls }: { k?: string; lines: string[]; cls: string }) {
   );
 }
 
-export function Closing() {
+/** edge: the dark dithered edge above it, for when it follows the FAQ
+ *  directly (Meet the maker hidden, SHOW_MAKER in lib/site.ts) */
+export function Closing({ edge = false }: { edge?: boolean }) {
   const root = useRef<HTMLElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
 
@@ -170,6 +173,7 @@ export function Closing() {
 
   return (
     <section ref={root} id="table" data-nav="Get started" data-wing="close" data-theme-zone="dark" className="cl" aria-labelledby="cl-title">
+      {edge && <DitherEdge color="#0b0c15" />}
       <div className="cl-stage">
         <h2 id="cl-title" className="sr-only">
           Get started
