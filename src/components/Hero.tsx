@@ -81,7 +81,8 @@ const at = (frame: number) => {
 
 /* The camera (which part of the frame a narrow screen sees): src/lib/heroCamera.ts */
 
-export function Hero() {
+/** blend: the player blends between frames (the site: on; the lab compares it off) */
+export function Hero({ blend = true }: { blend?: boolean } = {}) {
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -90,7 +91,7 @@ export function Hero() {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const canvas = el.querySelector<HTMLCanvasElement>("[data-seq]")!;
     const camera = cameraTrack(CAMERA);
-    let player = createHeroPlayer(canvas, camera);
+    let player = createHeroPlayer(canvas, camera, { blend });
     // a phone turned on its side (or back upright) needs the other frames
     // (the phone frames only cover a portrait screen): a new player, at the
     // same place in the film
@@ -101,7 +102,7 @@ export function Hero() {
       if (fits === phone) return;
       phone = fits;
       player.destroy();
-      player = createHeroPlayer(canvas, camera);
+      player = createHeroPlayer(canvas, camera, { blend });
       player.setPosition(shown);
     });
     reshape.observe(canvas);
@@ -219,7 +220,7 @@ export function Hero() {
       player.destroy();
       ctx.revert();
     };
-  }, []);
+  }, [blend]);
 
   return (
     <section ref={ref} id="top" data-wing="hero" data-nav="Introduction" data-theme-zone="dark" className="relative h-[800vh]">

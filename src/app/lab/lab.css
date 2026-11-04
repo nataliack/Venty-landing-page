@@ -265,3 +265,28 @@
 .lab-card:active {
   background: color-mix(in oklab, var(--cornflower) 22%, transparent);
 }
+
+/* hero-blend: the switch, fixed at the top in the middle, under the hero's
+   announcement bar (and clear of the lab's own pill at the bottom) */
+.lab-blend {
+  position: fixed;
+  left: 50%;
+  top: 52px;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 4px 4px 14px;
+  translate: -50% 0;
+  border-radius: 999px;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  color: var(--cloud);
+  background: rgb(18 21 36 / 0.82);
+  box-shadow: inset 0 0 0 1px rgb(239 244 255 / 0.12), 0 8px 24px -10px rgb(0 0 0 / 0.6);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+.lab-blend span { margin-right: 6px; color: var(--periwinkle); white-space: nowrap; }
+.lab-blend a { padding: 6px 14px; border-radius: 999px; color: var(--periwinkle); transition: background-color 0.25s, color 0.25s; }
+.lab-blend a.is-on { color: var(--night); background: var(--cloud); }
