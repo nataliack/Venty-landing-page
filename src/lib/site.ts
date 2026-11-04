@@ -13,11 +13,12 @@ export const FESTIVAL_AT = "2026-11-11T18:00:00+10:00";
 /* Natalia Chamon's site, from "Made by" in the announcement bar */
 export const MAKER_URL = "https://nataliachamon.com/";
 
-/* Vote for Venty: the People's Choice voting pages. Empty until the pages
-   exist; the links show and animate but go nowhere yet. */
+/* Vote for Venty: Venty's pages on the QUT Design Festival 2026 site, one
+   per discipline, where the People's Choice votes are cast. An empty one
+   shows and animates but goes nowhere (VoteSoon says so). */
 export const VOTE_LINKS: { label: string; href: string }[] = [
-  { label: "IxD", href: "" },
-  { label: "VisCom", href: "" },
+  { label: "IxD", href: "https://interaction.2026.qutdesignfestival.com.au/projects/venty/" },
+  { label: "VisCom", href: "https://visual-communication.2026.qutdesignfestival.com.au/projects/venty/" },
 ];
 
 /* Natalia's LinkedIn and email, as on her business cards and in the app's
