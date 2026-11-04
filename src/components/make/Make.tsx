@@ -52,7 +52,13 @@ const GARMENTS = [
   },
 ];
 
-const RUN = 2.4; // screens of scroll to open all four (desktop)
+/* desktop: where each garment opens, in screens of scroll after the section
+   pins. Dresses is open as it arrives, so the next one opens after a short
+   first push (a screen with nothing to change read as the page stuck), then
+   one every STEP; after Skirts, a short hold before Made with Venty rises */
+const STEP = 0.6;
+const OPEN = [0, 0.15, 0.15 + STEP, 0.15 + 2 * STEP];
+const RUN = OPEN[OPEN.length - 1] + 0.45; // screens of scroll to open all four (make.css: .wm's height)
 
 export function Make() {
   const root = useRef<HTMLElement>(null);
@@ -76,7 +82,12 @@ export function Make() {
       trigger: el,
       start: "top top",
       end: () => `+=${window.innerHeight * RUN}`,
-      onUpdate: (self) => setActive(Math.min(GARMENTS.length - 1, Math.floor(self.progress * GARMENTS.length))),
+      onUpdate: (self) => {
+        const at = self.progress * RUN;
+        let i = 0;
+        while (i + 1 < OPEN.length && at >= OPEN[i + 1]) i++;
+        setActive(i);
+      },
     });
     st.current = t;
     return () => {
@@ -88,7 +99,8 @@ export function Make() {
   const go = (i: number) => {
     const t = st.current;
     if (!t) return setActive(i);
-    scrollToY(t.start + ((i + 0.5) / GARMENTS.length) * (t.end - t.start));
+    // into its stretch (the first: where the section pins)
+    scrollToY(t.start + (i ? OPEN[i] + Math.min(0.25, (STEP - 0.15) / 2) : 0) * window.innerHeight);
   };
 
   return (

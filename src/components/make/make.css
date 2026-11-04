@@ -16,7 +16,7 @@
 /* desktop: the open run (RUN screens), a screen to stand in, and the
    screen Made with Venty rises over */
 @media (min-width: 1024px) {
-  .wm { height: calc(100svh * (1 + 2.4 + 1)); }
+  .wm { height: calc(100svh * (1 + 1.8 + 1)); } /* 1.8: RUN in Make.tsx */
 }
 
 .wm-stage {
