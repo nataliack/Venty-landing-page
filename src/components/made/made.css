@@ -129,7 +129,7 @@
    the card is wide enough for it; the "Drafted on" label left off on phones
    (the measurements say it) */
 .mw-card__g { margin-top: clamp(6px, 5.4cqi, 14px); padding: 0 clamp(2px, 2.3cqi, 6px); font-family: var(--font-bigilla), Georgia, serif; font-weight: 700; font-size: clamp(15px, 8.8cqi, 22px); line-height: 1.02; letter-spacing: -0.01em; text-wrap: balance; }
-.mw-card__who { margin-top: clamp(4px, 2.6cqi, 6px); padding: 0 clamp(2px, 2.3cqi, 6px); font-size: clamp(11px, 5.6cqi, 13px); line-height: 1.3; letter-spacing: -0.01em; color: var(--steel); }
+.mw-card__who { margin-top: clamp(4px, 2.6cqi, 6px); padding: 0 clamp(2px, 2.3cqi, 6px); font-size: clamp(11px, 5.6cqi, 13px); line-height: 1.3; letter-spacing: -0.01em; color: var(--steel); text-wrap: balance; }
 .mw-card__q { display: none; margin-top: clamp(6px, 3.8cqi, 10px); padding: 0 clamp(2px, 2.3cqi, 6px); font-size: clamp(13px, 6.2cqi, 15px); line-height: 1.35; letter-spacing: -0.02em; color: var(--navy); text-wrap: pretty; }
 @media (min-width: 1024px) { .mw-card__q { display: block; } }
 .mw-card__body {
