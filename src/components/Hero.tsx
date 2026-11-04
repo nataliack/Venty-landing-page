@@ -7,7 +7,8 @@ import { SplitText } from "gsap/SplitText";
 import { AnnounceBar } from "./AnnounceBar";
 import { PrimaryButton } from "./PrimaryButton";
 import { APP_URL, CTA_LABEL } from "@/lib/site";
-import { HERO, cameraTrack, createHeroPlayer, heroPosition, heroPoster } from "@/lib/heroSequence";
+import { HERO, cameraTrack, createHeroPlayer, heroPhoneFits, heroPosition, heroPoster } from "@/lib/heroSequence";
+import { CAMERA } from "@/lib/heroCamera";
 import { HIDDEN, padMasks } from "@/lib/reveal";
 import { DUR, EASE, afterLoader, drawLine, fadeDown, linesIn, textIn, wipeIn } from "@/lib/motion";
 
@@ -78,23 +79,7 @@ const at = (frame: number) => {
   return PLAY_END;
 };
 
-/* The camera, for screens narrower than the video (phones, mostly): which
-   part of the frame sits in the middle of the screen, 0 the left edge, 1 the
-   right, by master frame. Centred; a touch right while she stands; then it
-   glides left so her fingers and the drop are the main point of the
-   close-up, and back to centre. Wide screens see the whole frame, so the
-   track does nothing there. */
-const CAMERA = [
-  [0, 0.5],
-  [175, 0.5],
-  [200, 0.55], // she stands right of centre
-  [228, 0.53],
-  [255, 0.36], // her hand reaches out
-  [300, 0.34], // the drop lands on her fingers
-  [320, 0.32], // the finger close-up
-  [335, 0.42],
-  [355, 0.5], // back to centre
-] as const;
+/* The camera (which part of the frame a narrow screen sees): src/lib/heroCamera.ts */
 
 export function Hero() {
   const ref = useRef<HTMLElement>(null);
@@ -103,7 +88,23 @@ export function Hero() {
     const el = ref.current;
     if (!el) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const player = createHeroPlayer(el.querySelector<HTMLCanvasElement>("[data-seq]")!, cameraTrack(CAMERA));
+    const canvas = el.querySelector<HTMLCanvasElement>("[data-seq]")!;
+    const camera = cameraTrack(CAMERA);
+    let player = createHeroPlayer(canvas, camera);
+    // a phone turned on its side (or back upright) needs the other frames
+    // (the phone frames only cover a portrait screen): a new player, at the
+    // same place in the film
+    let phone = heroPhoneFits(canvas.clientWidth, canvas.clientHeight);
+    let shown = 0; // where in the film the player is (web frame)
+    const reshape = new ResizeObserver(() => {
+      const fits = heroPhoneFits(canvas.clientWidth, canvas.clientHeight);
+      if (fits === phone) return;
+      phone = fits;
+      player.destroy();
+      player = createHeroPlayer(canvas, camera);
+      player.setPosition(shown);
+    });
+    reshape.observe(canvas);
     // fixed, outside the hero: the section menu (the logo arrives with the loader)
     const nav = document.querySelector<HTMLElement>(".section-nav");
     let stopOpening = () => {};
@@ -175,7 +176,8 @@ export function Hero() {
           scrub: 0.8,
           onUpdate: (self) => {
             announce(self.progress);
-            player.setPosition(heroPosition(frameAt(self.progress)));
+            shown = heroPosition(frameAt(self.progress));
+            player.setPosition(shown);
           },
         },
       });
@@ -213,6 +215,7 @@ export function Hero() {
       barSize.disconnect();
       delete root.dataset.announce;
       root.style.removeProperty("--announce-bar");
+      reshape.disconnect();
       player.destroy();
       ctx.revert();
     };

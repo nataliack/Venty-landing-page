@@ -19,7 +19,11 @@
      node tools/hero/encode.mjs [--master path] [--quality 92] [--reuse]
 
    --reuse skips decoding when tools/hero/build/frames already holds the
-   frames of the same master. Needs ffmpeg and ffprobe on PATH. */
+   frames of the same master. Needs ffmpeg and ffprobe on PATH.
+
+   Then cut the phone frames from the same decode:
+     node tools/hero/encode-phone.mjs
+   (until then phones get these full frames: heroSequence.ts checks). */
 
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";

@@ -25,6 +25,11 @@ export type SequenceManifest = {
   width: number;
   height: number;
   sourceFrames: number[];
+  /** frames cut down to a band of the full frame (the hero's phone frames,
+      tools/hero/encode-phone.mjs): its width, and where each frame's band
+      starts in the full frame (px). Width and height above stay the full
+      frame's, so placing, the camera and project() work as for full frames */
+  crop?: { width: number; x: number[] };
 };
 
 /** A camera track: [master frame, focus] keys, focus 0 to 1 across the frame
@@ -195,7 +200,7 @@ export function createSequence(
       skim = false,
     }: { alpha?: boolean; fit?: "cover" | "contain"; blend?: boolean; skim?: boolean } = {},
   ) {
-    const { width: FW, height: FH } = manifest;
+    const { width: FW, height: FH, crop } = manifest;
     // where the frame sits in a box of this size: its scale and top left
     const place = (cw: number, ch: number) => {
       if (fit === "contain") {
@@ -259,13 +264,26 @@ export function createSequence(
       const p = place(canvas.width, canvas.height);
       const { s, y } = p;
       const x = Math.round(p.x);
+      // cut frames: each band is drawn where it sat in the full frame. The
+      // view stays inside the band of every frame drawn (a frame shown while
+      // its neighbours are still decoding was cut for its own place in the
+      // camera's glide, not the playhead's), so no edge of a band shows
+      let at = x;
+      if (crop) {
+        const cx = [crop.x[k], ...(over >= 0 ? [crop.x[over]] : [])];
+        const hi = Math.min(...cx.map((c) => -c * s));
+        const lo = Math.max(...cx.map((c) => canvas.width - (c + crop.width) * s));
+        at = Math.round(Math.min(hi, Math.max(lo, x)));
+      }
+      const bw = crop ? crop.width : FW;
+      const left = (i: number) => at + (crop ? crop.x[i] * s : 0);
       if (alpha) g.clearRect(0, 0, canvas.width, canvas.height);
       g.imageSmoothingEnabled = true;
       g.imageSmoothingQuality = "high";
-      g.drawImage(frames.get(k)!, x, y, FW * s, FH * s);
+      g.drawImage(frames.get(k)!, left(k), y, bw * s, FH * s);
       if (over >= 0) {
         g.globalAlpha = m;
-        g.drawImage(frames.get(over)!, x, y, FW * s, FH * s);
+        g.drawImage(frames.get(over)!, left(over), y, bw * s, FH * s);
         g.globalAlpha = 1;
       }
       if (drawn < 0) canvas.style.opacity = "1"; // the poster underneath until now
