@@ -75,6 +75,7 @@ CSS uses to start the small pieces inside it (ink drawing, chat bubbles).
 | Links in panels | An underline draws in from the left; the arrow flies out right and a second follows in |
 | A vote link with no page yet, tapped (tablet and up) | The links rise out of their area (`EASE.in`, `--dur-quick`) and "Voting links coming soon" rises in behind the same clip (`EASE.out`, `--dur-base`, 0.12s after); after 2.6s they swap back the same way. The tab's panel and the footer card (`VoteSoon.tsx`) |
 | The same on a phone | A bottom sheet built like the app's (`Sheet` in app.venty.au): it rises with `EASE.out` (`--dur-base`) over a shade that fades in, and drops with `EASE.in` (`--dur-quick`). It follows a drag down and closes past 90px; its handle turns periwinkle while held. Got it presses like a pill (0.965, `--ease-spring`) |
+| How it works, a wheel or a trackpad within the steps | A push (a wheel notch, a swipe of 24px or more) turns a whole step at once: the page glides to it in 0.8s with `EASE.out` (expo: off at once, a long soft landing), the wheel held off until it lands, and the cylinder follows the glide closely. A push kept up (a wheel still rolling) turns the next step after; a trackpad's momentum dying away does not. Phones keep their own snapping (`HowItWorks.tsx`) |
 
 Every hover is gated with `@media (hover: hover)` so nothing sticks after a
 tap on a phone, and every animation respects `prefers-reduced-motion`.

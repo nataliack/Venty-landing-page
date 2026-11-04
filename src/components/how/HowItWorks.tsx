@@ -3,7 +3,7 @@
 import { memo, useEffect, useRef, useState, type CSSProperties } from "react";
 import { createSequence } from "@/lib/sequence";
 import { useReveals } from "@/lib/useReveals";
-import { SCROLLER_ID, scrollToY } from "../SmoothScroll";
+import { SCROLLER_ID, glideToY, scrollToY, setWheelGate } from "../SmoothScroll";
 import islandFilm from "../../../public/how/orbit/island/manifest.json";
 import "./how.css";
 
@@ -352,7 +352,10 @@ export function HowItWorks() {
 
     const draw = () => {
       raf = 0;
-      rot += (target - rot) * 0.12;
+      // it follows the scroll: closely with a wheel or a trackpad, where the
+      // scroll itself already glides (a step a push, below); more softly on a
+      // touch screen, where it moves with the finger
+      rot += (target - rot) * (touch ? 0.12 : 0.5);
       if (Math.abs(target - rot) < 0.01) rot = target;
       rg.style.transform = `translateZ(${-BACK * R}px) rotateX(4deg) rotateY(${-rot}deg)`;
       player?.setPosition(filmAt(rot));
@@ -555,11 +558,86 @@ export function HowItWorks() {
       }, 140);
     };
 
+    // Wheels and trackpads, within the steps: a push turns a whole step at
+    // once, in a glide that sets off at once and lands softly (TURN), the
+    // wheel held off until it lands. A push that keeps going (a wheel still
+    // rolling, a swipe still pressing) turns the next step when that one
+    // lands, and one pushed on hard while a turn glides (QUEUE) carries
+    // straight on into the next; a trackpad's momentum dying away after a
+    // swipe does not. Up from the first step and down from the last, the page
+    // scrolls on as usual.
+    const TURN = 0.8; // s
+    const PUSH = 24; // px of wheel in one push that turns a step
+    const QUEUE = 240; // px of wheel pushed while a turn glides that turns the next one too
+    let queued = 0; // pushed while this turn glides
+    let turning = false;
+    let push = 0; // this push's wheel so far
+    let lastT = 0;
+    let lastMag = 0;
+    let lastDir = 0;
+    let landed = false; // a turn has landed during this push
+    const turnTo = (to: number) => {
+      const { top, run } = span();
+      turning = true;
+      at = to;
+      going = -1;
+      queued = 0;
+      glideToY(top + (to / (STEPS.length - 1)) * run, TURN, () => {
+        turning = false;
+        landed = true;
+        push = 0;
+        // pushed on hard while it turned: on to the next step that way
+        const on = Math.abs(queued) >= QUEUE ? Math.sign(queued) : 0;
+        queued = 0;
+        if (on && to + on >= 0 && to + on <= STEPS.length - 1) turnTo(to + on);
+      });
+    };
+    const wheel = (e: WheelEvent, dy: number) => {
+      if (touch) return false;
+      const { top, run } = span();
+      const y = box.scrollTop;
+      if (y < top - 2 || y > top + run + 2) return false; // outside the steps: the page's
+      const dir = Math.sign(dy);
+      if (!dir) return false;
+      const k = Math.min(1, Math.max(0, (y - top) / Math.max(1, run))) * (STEPS.length - 1);
+      const last = STEPS.length - 1;
+      if (!turning && ((dir < 0 && k < 0.002) || (dir > 0 && k > last - 0.002))) return false; // leaving
+      const t = e.timeStamp;
+      const mag = Math.abs(dy);
+      const fresh = t - lastT > 180 || dir !== lastDir; // a new push
+      if (fresh) {
+        push = 0;
+        landed = false;
+      }
+      // still pushing: a wheel's notches (the same size, again and again), a
+      // swipe gathering pace; once a turn has landed in this push, only a
+      // clearly harder press counts (a trackpad's momentum wavers as it dies)
+      const notch = mag >= 50 && Math.abs(mag - lastMag) < 1;
+      const pressing = fresh || notch || (landed ? mag > lastMag * 1.15 : mag >= lastMag * 0.9);
+      lastT = t;
+      lastMag = mag;
+      lastDir = dir;
+      if (turning) {
+        if (pressing) queued += dy;
+        return true;
+      }
+      if (!pressing) return true;
+      push += dy;
+      if (Math.abs(push) < PUSH) return true;
+      push = 0;
+      // the next step that way (from between two, the one it was going to)
+      const to = dir > 0 ? Math.floor(k + 0.002) + 1 : Math.ceil(k - 0.002) - 1;
+      turnTo(Math.min(last, Math.max(0, to)));
+      return true;
+    };
+    setWheelGate(wheel);
+
     // the step pill: tap a step to go to it
     goTo.current = (i: number) => {
+      if (!touch) return turnTo(i);
       const { top, run } = span();
       at = i;
-      going = touch ? -1 : i;
+      going = -1;
       scrollToY(top + (i / (STEPS.length - 1)) * run);
     };
 
@@ -590,6 +668,7 @@ export function HowItWorks() {
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(idle);
+      setWheelGate(null);
       near.disconnect();
       player?.destroy();
       box.style.removeProperty("scroll-snap-type");

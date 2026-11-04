@@ -34,6 +34,29 @@ export function scrollToY(y: number, immediate = false) {
   else document.getElementById(SCROLLER_ID)?.scrollTo({ top: y, behavior: immediate ? "auto" : "smooth" });
 }
 
+/** A glide to a position in px for a step that moves on at once (How it
+    works' turns): fast off the mark and a long soft landing (the motion
+    system's EASE.out, expo), the wheel held off until it lands. done: when
+    it has landed */
+export function glideToY(y: number, duration: number, done?: () => void) {
+  if (lenis) {
+    lenis.scrollTo(y, { duration, easing: (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t)), lock: true, onComplete: () => done?.() });
+    return;
+  }
+  document.getElementById(SCROLLER_ID)?.scrollTo({ top: y, behavior: "smooth" });
+  window.setTimeout(() => done?.(), duration * 1000);
+}
+
+/* A section can take the wheel over for a while (How it works, within its
+   steps, turns a whole step a push): it sees each wheel event first and
+   returns true when it has used it, and that event then neither smooths nor
+   scrolls the page. One at a time; null hands the wheel back. */
+type WheelGate = (event: WheelEvent, deltaY: number) => boolean;
+let wheelGate: WheelGate | null = null;
+export function setWheelGate(gate: WheelGate | null) {
+  wheelGate = gate;
+}
+
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
   const content = useRef<HTMLDivElement>(null);
 
@@ -69,6 +92,11 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       lerp: 0.09,
       wheelMultiplier: 0.9,
       smoothWheel: true,
+      virtualScroll: ({ deltaY, event }) => {
+        if (!wheelGate || event.type !== "wheel" || !wheelGate(event as WheelEvent, deltaY)) return true;
+        if (event.cancelable) event.preventDefault(); // used: not scrolled by the page either
+        return false;
+      },
     });
     lenis.on("scroll", ScrollTrigger.update);
     const tick = (t: number) => lenis?.raf(t * 1000);
