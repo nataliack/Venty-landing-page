@@ -56,6 +56,6 @@ export const heroPlayhead = (frame: number, dir: number) => current().setPlayhea
 export const preloadHero = (onProgress?: (done: number, total: number) => void) => current().preload(onProgress);
 /** A player for this canvas, with the frames for its shape. blend: between
     two frames, lay the next over the earlier by the scroll's exact position
-    (on, as the site has it; the lab's hero-blend page compares it off) */
-export const createHeroPlayer = (canvas: HTMLCanvasElement, camera?: (frame: number) => number, { blend = true }: { blend?: boolean } = {}) =>
+    (off, as the site has it; the lab's hero-blend page compares it on) */
+export const createHeroPlayer = (canvas: HTMLCanvasElement, camera?: (frame: number) => number, { blend = false }: { blend?: boolean } = {}) =>
   setFor(canvas.clientWidth, canvas.clientHeight).createPlayer(canvas, camera, { blend });

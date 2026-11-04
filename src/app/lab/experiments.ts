@@ -32,7 +32,7 @@ export const EXPERIMENTS: Experiment[] = [
     slug: "hero-blend",
     no: 59,
     title: "Hero · Blend on or off",
-    note: "The live hero on its own, with a switch at the top: On is the site as it is, each frame laid over the one before by exactly how far the scroll has gone between them; Off shows one whole frame at a time. Scroll slowly through the rise, the drop and the pull-back in each to judge whether the blend earns its cost (a second full draw on every screen frame). The site itself is unchanged.",
+    note: "The live hero on its own, with a switch at the top: On is how the site was, each frame laid over the one before by exactly how far the scroll has gone between them; Off shows one whole frame at a time, as the site now does. Scroll slowly through the rise, the drop and the pull-back in each to judge whether the blend earns its cost (a second full draw on every screen frame). Jose chose Off for the site (4 Nov).",
     tag: "Hero · Performance",
     date: "04 Nov",
     kind: "frame",

@@ -44,7 +44,9 @@ const down = (screens: number) => screens / RUN;
    plays at one even pace, close to the film's own speed at an easy scroll:
    the pull-back keeps moving under the line and on into the hand-off. (It
    used to crawl here, a frame for every 8% of a screen, which read as lag.)
-   The player blends between frames, so the slower parts glide too. */
+   One whole frame at a time: no blend between frames (it cost a second
+   full draw on every screen frame, and the lab's hero-blend page showed it
+   wasn't missed). */
 const PACE = [
   [0, 0],
   [down(0.32), 0], // 1.1 holds
@@ -81,8 +83,8 @@ const at = (frame: number) => {
 
 /* The camera (which part of the frame a narrow screen sees): src/lib/heroCamera.ts */
 
-/** blend: the player blends between frames (the site: on; the lab compares it off) */
-export function Hero({ blend = true }: { blend?: boolean } = {}) {
+/** blend: the player blends between frames (the site: off; the lab's hero-blend page compares it on) */
+export function Hero({ blend = false }: { blend?: boolean } = {}) {
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {

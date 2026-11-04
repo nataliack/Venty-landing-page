@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Hero } from "@/components/Hero";
 
-/* The live hero, with the player's blend between frames on (as the site has
+/* The live hero, with the player's blend between frames on (as the site had
    it) or off, to judge by eye whether a slow scroll needs it. Only the hero:
    no loader, so it opens at once. The switch reloads the page, so each mode
    starts fresh at the top. Embedded in the lab as an experiment (frame). */
