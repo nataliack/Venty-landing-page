@@ -91,7 +91,9 @@
   opacity: 0;
 }
 @media (min-width: 1024px) { .cl-cap { left: 48px; right: 48px; } }
-.cl-cap [data-count] { font-family: var(--font-bigilla), Georgia, serif; font-size: 14px; letter-spacing: 0; text-transform: none; color: var(--peri); }
+/* the frame count in the site's sans (Familjen Grotesk), its figures all one
+   width so the count doesn't shuffle as it runs */
+.cl-cap [data-count] { font-family: var(--font-sans); font-size: 14px; font-variant-numeric: tabular-nums; letter-spacing: 0; text-transform: none; color: var(--peri); }
 
 /* ---- the beats: captions low on the left, above the bottom bar --------- */
 .cl-beat {
