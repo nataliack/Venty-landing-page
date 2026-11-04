@@ -103,8 +103,10 @@
 @media (max-width: 699px) {
   .mw-card { width: clamp(128px, min(36vw, 19svh), 156px); }
 }
+/* everything in it centred across the card */
 .mw-card__glass {
   container-type: inline-size;
+  text-align: center;
   padding: clamp(5px, 4.6cqi, 12px) clamp(5px, 4.6cqi, 12px) clamp(8px, 7cqi, 18px);
   border-radius: clamp(12px, 10.8cqi, 28px);
   background: rgb(255 255 255 / 0.62);

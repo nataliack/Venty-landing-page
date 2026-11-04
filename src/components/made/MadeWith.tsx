@@ -24,20 +24,23 @@ import "./made.css";
    PLACEHOLDERS. Every entry below is a stand-in: swap in real makes (with
    the maker's permission) before this goes in front of people. Real makes
    only: invented makers or quotes would mislead (Australian Consumer Law).
+   So the maker ("Name · City") and their line are left empty until there
+   are real ones: an empty one is simply not shown on the card.
    IMAGES: /made/make-01.webp to make-06.webp (4:5 portrait, the maker
    wearing it). For now, the looks from the app's editorial shoot (Higgsfield
    and Gemini) not used elsewhere on the site, the garment names matched to
    them; swap in photos of real makes. */
 
+/** maker ("Name · City") and quote: the maker's own, or "" to leave them off the card */
 export type Make = { img: string; garment: string; maker: string; body: string; quote: string };
 
 export const MAKES: Make[] = [
-  { img: "/made/make-01.webp", garment: "Bias slip dress", maker: "Maker's name · City", body: "Bust 88 · Waist 70 · Hip 96", quote: "A line from the maker, in their own words." },
-  { img: "/made/make-02.webp", garment: "Crop top and maxi skirt", maker: "Maker's name · City", body: "Bust 101 · Waist 86 · Hip 108", quote: "What they made, and how it fits." },
-  { img: "/made/make-03.webp", garment: "Tweed jacket and skirt", maker: "Maker's name · City", body: "Waist 78 · Hip 104 · Inseam 79", quote: "A line from the maker, in their own words." },
-  { img: "/made/make-04.webp", garment: "Lace-up corset dress", maker: "Maker's name · City", body: "Waist 72 · Hip 99", quote: "What they made, and how it fits." },
-  { img: "/made/make-05.webp", garment: "Bow-cuff shirt", maker: "Maker's name · City", body: "Bust 94 · Waist 80 · Hip 102", quote: "A line from the maker, in their own words." },
-  { img: "/made/make-06.webp", garment: "Zip-front top", maker: "Maker's name · City", body: "Bust 86 · Waist 68", quote: "What they made, and how it fits." },
+  { img: "/made/make-01.webp", garment: "Bias slip dress", maker: "", body: "Bust 88 · Waist 70 · Hip 96", quote: "" },
+  { img: "/made/make-02.webp", garment: "Crop top and maxi skirt", maker: "", body: "Bust 101 · Waist 86 · Hip 108", quote: "" },
+  { img: "/made/make-03.webp", garment: "Tweed jacket and skirt", maker: "", body: "Waist 78 · Hip 104 · Inseam 79", quote: "" },
+  { img: "/made/make-04.webp", garment: "Lace-up corset dress", maker: "", body: "Waist 72 · Hip 99", quote: "" },
+  { img: "/made/make-05.webp", garment: "Bow-cuff shirt", maker: "", body: "Bust 94 · Waist 80 · Hip 102", quote: "" },
+  { img: "/made/make-06.webp", garment: "Zip-front top", maker: "", body: "Bust 86 · Waist 68", quote: "" },
 ];
 
 const SPEED = 55; // px per second along the line, right to left
@@ -60,8 +63,8 @@ function Card({ m, copy }: { m: Make; copy: boolean }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={m.img} alt="" loading="lazy" decoding="async" draggable={false} />
         <p className="mw-card__g">{m.garment}</p>
-        <p className="mw-card__who">{m.maker}</p>
-        <p className="mw-card__q">{m.quote}</p>
+        {m.maker && <p className="mw-card__who">{m.maker}</p>}
+        {m.quote && <p className="mw-card__q">{m.quote}</p>}
         <p className="mw-card__body">
           <span>Drafted on</span> {m.body}
         </p>
